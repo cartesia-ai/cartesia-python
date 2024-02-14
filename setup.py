@@ -41,9 +41,12 @@ def get_requirements(path):
 
 
 REQUIRED = get_requirements("requirements.txt")
+REQUIRED_DEV = get_requirements("requirements-dev.txt")
 
 # What packages are optional?
-EXTRAS = {}
+EXTRAS = {
+    "dev": REQUIRED_DEV,
+}
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
