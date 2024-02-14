@@ -7,7 +7,6 @@ import numpy as np
 import requests
 
 DEFAULT_MODEL_ID = "echo_tts_v0.0.6"
-
 DEFAULT_BASE_URL = "api.cartesia.ai"
 
 
@@ -23,6 +22,8 @@ class CartesiaTTS:
         """
         Args:
             api_key: The API key to use for authorization.
+                The api key is not currently enforced.
+                TODO: Set the API key.
         """
         self.model_id = model_id or DEFAULT_MODEL_ID
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
@@ -56,7 +57,8 @@ class CartesiaTTS:
         voice: str = None,
         stream: bool = False,
     ) -> AudioOutput:
-        """
+        """Generate audio from a transcript.
+
         Args:
             model_id: The model to use for generating audio.
             transcript: The text to generate audio for.
@@ -68,6 +70,11 @@ class CartesiaTTS:
             voice: The voice to use for generating audio.
             stream: Whether to stream the audio or not.
                 If ``True`` this function returns a generator.
+
+        Returns:
+            A dictionary containing:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
         """
         body = dict(
             transcript=transcript,
