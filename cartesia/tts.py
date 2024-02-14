@@ -1,7 +1,7 @@
 import base64
 import json
 import os
-from typing import List
+from typing import List, TypedDict
 
 import numpy as np
 import requests
@@ -9,6 +9,11 @@ import requests
 DEFAULT_MODEL_ID = "echo_tts_v0.0.6"
 
 DEFAULT_BASE_URL = "api.cartesia.ai"
+
+
+class AudioOutput(TypedDict):
+    audio: np.ndarray
+    sampling_rate: int
 
 
 class CartesiaTTS:
@@ -27,7 +32,11 @@ class CartesiaTTS:
         raise NotImplementedError()
 
     def voices(self, model_id: str = None) -> List[str]:
-        """Returns a list of voices for a given model."""
+        """Returns a list of voices for a given model.
+
+        Args:
+            model_id: The model to get voices for.
+        """
         model_id = model_id or self.model_id
         response = requests.get(f"{self._http_url()}/models/{model_id}/voices")
 
@@ -46,7 +55,20 @@ class CartesiaTTS:
         lookahead: int = None,
         voice: str = None,
         stream: bool = False,
-    ):
+    ) -> AudioOutput:
+        """
+        Args:
+            model_id: The model to use for generating audio.
+            transcript: The text to generate audio for.
+            duration: The maximum duration of the audio in seconds.
+            chunk_time: How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            lookahead: The number of seconds to look ahead for each chunk.
+                This should not need to be adjusted.
+            voice: The voice to use for generating audio.
+            stream: Whether to stream the audio or not.
+                If ``True`` this function returns a generator.
+        """
         body = dict(
             transcript=transcript,
             model_id=model_id or DEFAULT_MODEL_ID,
