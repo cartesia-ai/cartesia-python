@@ -14,24 +14,6 @@ count = True
 max-line-length = 100
 statistics = True
 ignore = E731,W503,E741,E203,E266,E501,W605
-per-file-ignores =
-    # ignore unused imports in __init__.py files
-    __init__.py:F401
-    # ignore long lines in registry.py
-    src/dataloaders/sources/registry.py:E501
-    # triton and ops files have a lot of unused imports
-    # TODO: Remove these flags and clean up
-    src/ops/triton/flashmamba.py:F401,F841
-    src/models/sequence/rnns/qrnn.py:F401,F841,F821
-    src/models/sequence/modules/ssd.py:F401,F841,F821
-    src/models/sequence/modules/s4nd.py:F401,F841,F821
-    src/models/sequence/modules/lssl.py:F401,F841,F821
-    src/models/sequence/modules/h3block.py:F401,F841,F821
-    src/models/sequence/kernels/hyena.py:F401,F811
-    src/models/sequence/attention/flash.py:F841
-    src/models/baselines/nonaka/xresnet.py:F401,F821
-    src/models/baselines/lipschitzrnn.py:F821
-    src/models/baselines/convnext_timm.py:F821
 exclude =
     setup.py
     tests/*
