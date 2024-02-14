@@ -1,0 +1,5 @@
+# These should be installed when running in development mode.
+pre-commit
+black==24.1.1
+isort==5.13.2
+flake8==7.0.0
