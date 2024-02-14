@@ -2,11 +2,11 @@ install:
 	pip install -e .
 
 autoformat:
-	black src/ tests/
-	isort --atomic src/ tests/
-	docformatter --in-place --recursive --black src
+	black cartesia/
+	isort --atomic cartesia/
+	docformatter --in-place --recursive --black cartesia/
 
 lint:
-	isort -c src/ tests/
-	black src/ tests/ --check
-	flake8 src/ tests/
+	isort -c cartesia/
+	black cartesia/ --check
+	flake8 cartesia/
