@@ -8,6 +8,7 @@ import requests
 
 DEFAULT_MODEL_ID = "echo_tts_v0.0.6"
 DEFAULT_BASE_URL = "api.cartesia.ai"
+DEFAULT_API_VERSION = "v0"
 
 
 class AudioOutput(TypedDict):
@@ -27,6 +28,9 @@ class CartesiaTTS:
         """
         self.model_id = model_id or DEFAULT_MODEL_ID
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
+        self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
+        self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
+        self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
 
     def models(self) -> List[str]:
         """Get a list of available models."""
@@ -39,10 +43,12 @@ class CartesiaTTS:
             model_id: The model to get voices for.
         """
         model_id = model_id or self.model_id
-        response = requests.get(f"{self._http_url()}/models/{model_id}/voices")
+        response = requests.get(
+            f"{self._http_url()}/models/{model_id}/voices", headers=self.headers
+        )
 
         if response.status_code != 200:
-            raise ValueError(f"Failed to get voices for model {model_id}. {response.text}")
+            raise ValueError(f"Failed to get voices for model {model_id}. Error: {response.text}")
 
         return json.loads(response.text)
 
@@ -92,7 +98,9 @@ class CartesiaTTS:
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
 
-        response = requests.post(f"{self._http_url()}/stream", stream=True, data=json.dumps(body))
+        response = requests.post(
+            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
+        )
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
 
@@ -132,4 +140,4 @@ class CartesiaTTS:
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
-        return f"{prefix}://{self.base_url}"
+        return f"{prefix}://{self.base_url}/{self.api_version}"
