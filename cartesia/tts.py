@@ -6,7 +6,7 @@ from typing import List, TypedDict
 import numpy as np
 import requests
 
-DEFAULT_MODEL_ID = "echo_tts_v0.0.6"
+DEFAULT_MODEL_ID = "genial-planet-1346"
 DEFAULT_BASE_URL = "api.cartesia.ai"
 DEFAULT_API_VERSION = "v0"
 
