@@ -104,27 +104,12 @@ class CartesiaTTS:
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
 
-        delimiter = b"}{"
-
         def generator():
-            accumulated_data = b""
-            for chunk in response.iter_content(chunk_size=None):
-                if not chunk:
-                    continue
-
-                accumulated_data += chunk
-
-                while delimiter in accumulated_data:
-                    partial_data, rest = accumulated_data.split(delimiter, 1)
-                    partial_data += b"}"
-
-                    data_dict = json.loads(partial_data.decode("utf-8"))
-                    data = base64.b64decode(data_dict["data"])
-                    audio = np.frombuffer(data, dtype=np.float32)
-
-                    yield {"audio": audio, "sampling_rate": data_dict["sampling_rate"]}
-
-                    accumulated_data = b"{" + rest
+            for chunk_bytes in response.iter_content(chunk_size=None):
+                chunk_json = json.loads(chunk_bytes.decode("utf-8"))
+                data = base64.b64decode(chunk_json["data"])
+                audio = np.frombuffer(data, dtype=np.float32)
+                yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
 
         if stream:
             return generator()
