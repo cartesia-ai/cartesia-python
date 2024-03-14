@@ -1,10 +1,9 @@
 import base64
 import json
 import os
-from typing import List, TypedDict
-
+from typing import List, TypedDict, Optional, Generator, Union, AsyncGenerator
 import numpy as np
-import requests
+import httpx
 
 DEFAULT_MODEL_ID = "genial-planet-1346"
 DEFAULT_BASE_URL = "api.cartesia.ai"
@@ -19,7 +18,7 @@ class AudioOutput(TypedDict):
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library."""
 
-    def __init__(self, *, model_id: str = None, api_key: str = None):
+    def __init__(self, *, model_id: Optional[str] = None, api_key: Optional[str] = None):
         """
         Args:
             api_key: The API key to use for authorization.
@@ -36,76 +35,64 @@ class CartesiaTTS:
         """Get a list of available models."""
         raise NotImplementedError()
 
-    def voices(self, model_id: str = None) -> List[str]:
+    async def voices(self, model_id: Optional[str] = None) -> List[str]:
         """Returns a list of voices for a given model.
 
         Args:
             model_id: The model to get voices for.
         """
         model_id = model_id or self.model_id
-        response = requests.get(
-            f"{self._http_url()}/models/{model_id}/voices", headers=self.headers
-        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{self._http_url()}/models/{model_id}/voices", headers=self.headers
+            )
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices for model {model_id}. Error: {response.text}")
 
         return json.loads(response.text)
 
-    def generate(
+    async def generate(
         self,
         *,
-        model_id: str = None,
+        model_id: Optional[str] = None,
         transcript: str,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: str = None,
+        duration: Optional[int] = None,
+        chunk_time: Optional[float] = None,
+        lookahead: Optional[int] = None,
+        voice: Optional[str] = None,
         stream: bool = False,
-    ) -> AudioOutput:
+    ) -> Union[AudioOutput, AsyncGenerator[AudioOutput, None]]:
         """Generate audio from a transcript.
-
-        Args:
-            model_id: The model to use for generating audio.
-            transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
-            stream: Whether to stream the audio or not.
-                If ``True`` this function returns a generator.
-
-        Returns:
-            A dictionary containing:
-                * "audio": The audio as a 1D numpy array.
-                * "sampling_rate": The sampling rate of the audio.
+        ...
         """
-        body = dict(
-            transcript=transcript,
-            model_id=model_id or DEFAULT_MODEL_ID,
-        )
+        body = {
+            "transcript": transcript,
+            "model_id": model_id or self.model_id,
+        }
 
-        if isinstance(voice, str):
-            voice = {"sources": [voice], "weights": [1.0]}
+        # Add the optional parameters to the body if they are not None
+        if duration is not None:
+            body["duration"] = duration
+        if chunk_time is not None:
+            body["chunk_time"] = chunk_time
+        if lookahead is not None:
+            body["lookahead"] = lookahead
+        if voice is not None:
+            body["voice"] = voice
 
-        optional_body = dict(
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
-        body.update({k: v for k, v in optional_body.items() if v is not None})
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self._http_url()}/stream",
+                json=body,
+                headers=self.headers
+            )
 
-        response = requests.post(
-            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
-        )
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
 
-        def generator():
-            for chunk_bytes in response.iter_content(chunk_size=None):
+        async def generator() -> AsyncGenerator[AudioOutput, None]:
+            async for chunk_bytes in response.aiter_bytes():
                 chunk_json = json.loads(chunk_bytes)
                 data = base64.b64decode(chunk_json["data"])
                 audio = np.frombuffer(data, dtype=np.float32)
@@ -116,13 +103,16 @@ class CartesiaTTS:
 
         chunks = []
         sampling_rate = None
-        for chunk in generator():
+        async for chunk in generator():
             if sampling_rate is None:
                 sampling_rate = chunk["sampling_rate"]
             chunks.append(chunk["audio"])
 
-        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+        return {
+            "audio": np.concatenate(chunks),
+            "sampling_rate": sampling_rate
+        }
 
-    def _http_url(self):
+    def _http_url(self) -> str:
         prefix = "http" if "localhost" in self.base_url else "https"
         return f"{prefix}://{self.base_url}/{self.api_version}"
