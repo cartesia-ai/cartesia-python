@@ -1,8 +1,10 @@
+import asyncio
 import base64
 import json
 import os
-from typing import Dict, List, TypedDict, Union
+from typing import Dict, Generator, List, TypedDict, Union
 
+import aiohttp
 import numpy as np
 import requests
 
@@ -123,6 +125,77 @@ class CartesiaTTS:
 
         return {"id": voice_id, "embedding": embedding}
 
+    async def async_generate(
+        self,
+        *,
+        model_id: str = None,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        lookahead: int = None,
+        voice: str = None,
+        stream: bool = False,
+    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
+        """Asynchronously generate audio from a transcript.
+
+        Args:
+            model_id: The model to use for generating audio.
+            transcript: The text to generate audio for.
+            duration: The maximum duration of the audio in seconds.
+            chunk_time: How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            lookahead: The number of seconds to look ahead for each chunk.
+                This should not need to be adjusted.
+            voice: The voice to use for generating audio.
+            stream: Whether to stream the audio or not.
+                If ``True`` this function returns a generator.
+
+        Returns:
+            Either a dictionary or a generator containing the following:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
+        """
+        body = dict(
+            transcript=transcript,
+            model_id=model_id or DEFAULT_MODEL_ID,
+        )
+
+        if isinstance(voice, str):
+            voice = {"sources": [voice], "weights": [1.0]}
+
+        optional_body = dict(
+            duration=duration,
+            chunk_time=chunk_time,
+            lookahead=lookahead,
+            voice=voice,
+        )
+        body.update({k: v for k, v in optional_body.items() if v is not None})
+
+        async with aiohttp.request(
+            "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
+        ) as response:
+            if response.status_code != 200:
+                raise ValueError(f"Failed to generate audio. {response.text}")
+
+            async def async_generator():
+                async for chunk_bytes in response.content.iter_content(chunk_size=None):
+                    chunk_json = json.loads(chunk_bytes.decode("utf-8"))
+                    data = base64.b64decode(chunk_json["data"])
+                    audio = np.frombuffer(data, dtype=np.float32)
+                    yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+
+            if stream:
+                return async_generator()
+
+            chunks = []
+            sampling_rate = None
+            async for chunk in async_generator():
+                if sampling_rate is None:
+                    sampling_rate = chunk["sampling_rate"]
+                chunks.append(chunk["audio"])
+
+            return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+
     def generate(
         self,
         *,
@@ -148,50 +221,35 @@ class CartesiaTTS:
                 If ``True`` this function returns a generator.
 
         Returns:
-            A dictionary containing:
+            Either a dictionary or a generator containing the following:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
-
         if isinstance(voice, str):
             voice = self._voices[voice]
 
-        optional_body = dict(
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(
+            self.async_generate(
+                model_id=DEFAULT_MODEL_ID,
+                transcript=transcript,
+                duration=duration,
+                chunk_time=chunk_time,
+                lookahead=lookahead,
+                voice=voice,
+                stream=stream,
+            )
         )
-        body.update({k: v for k, v in optional_body.items() if v is not None})
-
-        response = requests.post(
-            f"{self._http_url()}/audio/stream",
-            stream=True,
-            data=json.dumps(body),
-            headers=self.headers,
-        )
-        if response.status_code != 200:
-            raise ValueError(f"Failed to generate audio. {response.text}")
-
-        def generator():
-            for chunk_bytes in response.iter_content(chunk_size=None):
-                chunk_json = json.loads(chunk_bytes)
-                data = base64.b64decode(chunk_json["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
-                yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
 
         if stream:
-            return generator()
 
-        chunks = []
-        sampling_rate = None
-        for chunk in generator():
-            if sampling_rate is None:
-                sampling_rate = chunk["sampling_rate"]
-            chunks.append(chunk["audio"])
+            def sync_generator():
+                for chunk in loop.run_until_complete(result):
+                    yield chunk
 
-        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+            return sync_generator()
+
+        return result
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"

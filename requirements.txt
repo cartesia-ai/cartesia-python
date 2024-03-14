@@ -1,3 +1,4 @@
-websockets
-requests
+aiohttp==3.9.3
 numpy
+requests
+websockets
