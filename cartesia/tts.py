@@ -106,7 +106,7 @@ class CartesiaTTS:
 
         def generator():
             for chunk_bytes in response.iter_content(chunk_size=None):
-                chunk_json = json.loads(chunk_bytes.decode("utf-8"))
+                chunk_json = json.loads(chunk_bytes)
                 data = base64.b64decode(chunk_json["data"])
                 audio = np.frombuffer(data, dtype=np.float32)
                 yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
