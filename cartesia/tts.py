@@ -1,7 +1,7 @@
 import base64
 import json
 import os
-from typing import AsyncGenerator, Dict, Generator, List, TypedDict, Union
+from typing import AsyncGenerator, Dict, Generator, List, Optional, TypedDict
 import wave
 
 import aiohttp
@@ -21,6 +21,13 @@ class AudioOutput(TypedDict):
 class VoiceOutput(TypedDict):
     id: str
     embedding: List[float]
+
+class GenerateOptions(TypedDict):
+    chunk_time: Optional[float]
+    duration: Optional[int]
+    lookahead: Optional[int]
+    model_id: Optional[str]
+    voice: Optional[str]
 
 
 class CartesiaTTS:
@@ -125,14 +132,10 @@ class CartesiaTTS:
 
         return {"id": voice_id, "embedding": embedding}
 
-    def _stream_request_body(
+    def _generate_request_body(
         self,
         transcript: str,
-        model_id: str = None,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: str = None,
+        options: Optional[GenerateOptions] = None,
     ) -> dict:
         """
         Create the request body for a stream request.
@@ -140,57 +143,47 @@ class CartesiaTTS:
 
         body = dict(
             transcript=transcript,
-            model_id=model_id or self.model_id,
+            model_id=options.get("model_id") or self.model_id,
         )
 
-        if isinstance(voice, str):
-            voice = {"sources": [voice], "weights": [1.0]}
+        # Clone options
+        if options:
+            options = options.copy()
+            options.pop("model_id")
 
-        optional_body = dict(
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
-        body.update({k: v for k, v in optional_body.items() if v is not None})
+            if isinstance(options.get("voice"), str):
+                voice = self._voices.get(options["voice"])
+                body.update(voice)
+                options.pop("voice")
+            body.update(options)
 
         return body
 
     async def async_generate(
         self,
         *,
-        model_id: str = None,
         transcript: str,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: str = None,
+        options: Optional[GenerateOptions] = None,
     ) -> AudioOutput:
         """Asynchronously generate audio from a transcript.
 
         Args:
-            model_id: The model to use for generating audio.
             transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
+            options: The options to use for generating audio.
+                chunk_time: How long each audio segment should be in seconds.
+                    This should not need to be adjusted.
+                duration: The maximum duration of the audio in seconds.
+                lookahead: The number of seconds to look ahead for each chunk.
+                    This should not need to be adjusted.
+                model_id: The model to use for generating audio. If not provided, the default model is used.
+                voice: The voice to use for generating audio.
 
         Returns:
             A dictionary containing the following:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._stream_request_body(
-            transcript=transcript,
-            model_id=model_id,
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
+        body = self._generate_request_body(transcript, options)
 
         async with aiohttp.request(
             "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
@@ -214,44 +207,33 @@ class CartesiaTTS:
         self,
         *,
         session: aiohttp.ClientSession,
-        model_id: str = None,
         transcript: str,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: str = None,
+        options: Optional[GenerateOptions] = None,
     ) -> AsyncGenerator[AudioOutput, None]:
         """Asynchronously generate an async generator of audio from a transcript.
 
         Note that this pattern relies on the consumer for session and resource management.
         If the generator is not fully consumed, the resource may not be released unless the consumer
-        explicitly closes the generator.
+        explicitly closes the generator. This is mitigated by having the consumer provide the session.
 
         Args:
-            model_id: The model to use for generating audio.
-            transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
             session: The aiohttp session to use for the request.
-                This is useful for streams
+            transcript: The text to generate audio for.
+            options: The options to use for generating audio.
+                chunk_time: How long each audio segment should be in seconds.
+                    This should not need to be adjusted.
+                duration: The maximum duration of the audio in seconds.
+                lookahead: The number of seconds to look ahead for each chunk.
+                    This should not need to be adjusted.
+                model_id: The model to use for generating audio. If not provided, the default model is used.
+                voice: The voice to use for generating audio.
 
         Returns:
             An async generator containing dictionaries with the following:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._stream_request_body(
-            transcript=transcript,
-            model_id=model_id,
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
+        body = self._generate_request_body(transcript, options)
         response = await session.post(
             f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
         )
@@ -280,39 +262,28 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: Union[str, List[float]] = None,
+        options: Optional[GenerateOptions] = None,
     ) -> AudioOutput:
         """Generate audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
-                This can either be a voice id (string) or an embedding vector (List[float]).
+            options: The options to use for generating audio.
+                chunk_time: How long each audio segment should be in seconds.
+                    This should not need to be adjusted.
+                duration: The maximum duration of the audio in seconds.
+                lookahead: The number of seconds to look ahead for each chunk.
+                    This should not need to be adjusted.
+                model_id: The model to use for generating audio. If not provided, the default model is used.
+                voice: The voice to use for generating audio.
+                    This can either be a voice id (string) or an embedding vector (List[float]).
 
         Returns:
             A dictionary containing:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        if isinstance(voice, str):
-            voice = self._voices[voice]
-
-        body = self._stream_request_body(
-            transcript=transcript,
-            model_id=DEFAULT_MODEL_ID,
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
+        body = self._generate_request_body(transcript, options)
 
         response = requests.post(
             f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
@@ -335,38 +306,29 @@ class CartesiaTTS:
     def generate_stream(
         self,
         *,
-        model_id: str = None,
         transcript: str,
-        duration: int = None,
-        chunk_time: float = None,
-        lookahead: int = None,
-        voice: str = None,
+        options: Optional[GenerateOptions] = None,
     ) -> Generator[AudioOutput, None, None]:
         """Generate a generator of audio from a transcript.
 
         Args:
-            model_id: The model to use for generating audio.
             transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
+            options: The options to use for generating audio.
+                chunk_time: How long each audio segment should be in seconds.
+                    This should not need to be adjusted.
+                duration: The maximum duration of the audio in seconds.
+                lookahead: The number of seconds to look ahead for each chunk.
+                    This should not need to be adjusted.
+                model_id: The model to use for generating audio. If not provided, the default model is used.
+                voice: The voice to use for generating audio.
+                    This can either be a voice id (string) or an embedding vector (List[float]).
 
         Returns:
             A generator for dictionaries containing:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._stream_request_body(
-            transcript=transcript,
-            model_id=model_id,
-            duration=duration,
-            chunk_time=chunk_time,
-            lookahead=lookahead,
-            voice=voice,
-        )
+        body = self._generate_request_body(transcript, options)
 
         response = requests.post(
             f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
