@@ -3,6 +3,7 @@ import base64
 import json
 import os
 from typing import Dict, Generator, List, TypedDict, Union
+import wave
 
 import aiohttp
 import numpy as np
@@ -174,12 +175,12 @@ class CartesiaTTS:
         async with aiohttp.request(
             "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
         ) as response:
-            if response.status_code != 200:
+            if response.status != 200:
                 raise ValueError(f"Failed to generate audio. {response.text}")
 
             async def async_generator():
-                async for chunk_bytes in response.content.iter_content(chunk_size=None):
-                    chunk_json = json.loads(chunk_bytes.decode("utf-8"))
+                async for chunk_bytes in response.content.iter_any():
+                    chunk_json = json.loads(chunk_bytes)
                     data = base64.b64decode(chunk_json["data"])
                     audio = np.frombuffer(data, dtype=np.float32)
                     yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
@@ -254,3 +255,22 @@ class CartesiaTTS:
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
         return f"{prefix}://{self.base_url}/{self.api_version}"
+
+    # Primarily used for testing
+    def _pcm_to_wav(self, pcm_data, output_file, sample_rate=44100, sample_width=2, num_channels=1):
+        # Convert float32 PCM data to int16
+        pcm_data = (pcm_data * 32767).astype(np.int16)
+
+        # Open a new WAV file for writing
+        wav_file = wave.open(output_file, "wb")
+
+        # Set the WAV file parameters
+        wav_file.setnchannels(num_channels)
+        wav_file.setsampwidth(sample_width)  # 2 bytes for int16
+        wav_file.setframerate(sample_rate)
+
+        # Write the PCM data to the WAV file
+        wav_file.writeframes(pcm_data.tobytes())
+
+        # Close the WAV file
+        wav_file.close()
