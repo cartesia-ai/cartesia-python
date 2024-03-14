@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import json
 import os
@@ -126,39 +125,22 @@ class CartesiaTTS:
 
         return {"id": voice_id, "embedding": embedding}
 
-    async def async_generate(
+    def _stream_request_body(
         self,
-        *,
-        model_id: str = None,
         transcript: str,
+        model_id: str = None,
         duration: int = None,
         chunk_time: float = None,
         lookahead: int = None,
         voice: str = None,
-        stream: bool = False,
-    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
-        """Asynchronously generate audio from a transcript.
-
-        Args:
-            model_id: The model to use for generating audio.
-            transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
-                This should not need to be adjusted.
-            voice: The voice to use for generating audio.
-            stream: Whether to stream the audio or not.
-                If ``True`` this function returns a generator.
-
-        Returns:
-            Either a dictionary or a generator containing the following:
-                * "audio": The audio as a 1D numpy array.
-                * "sampling_rate": The sampling rate of the audio.
+    ) -> dict:
         """
+        Create the request body for a stream request.
+        """
+
         body = dict(
             transcript=transcript,
-            model_id=model_id or DEFAULT_MODEL_ID,
+            model_id=model_id or self.model_id,
         )
 
         if isinstance(voice, str):
@@ -172,30 +154,127 @@ class CartesiaTTS:
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
 
+        return body
+
+    async def async_generate(
+        self,
+        *,
+        model_id: str = None,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        lookahead: int = None,
+        voice: str = None,
+    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
+        """Asynchronously generate audio from a transcript.
+
+        Args:
+            model_id: The model to use for generating audio.
+            transcript: The text to generate audio for.
+            duration: The maximum duration of the audio in seconds.
+            chunk_time: How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            lookahead: The number of seconds to look ahead for each chunk.
+                This should not need to be adjusted.
+            voice: The voice to use for generating audio.
+
+        Returns:
+            A dictionary containing the following:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
+        """
+        body = self._stream_request_body(
+            transcript=transcript,
+            model_id=model_id,
+            duration=duration,
+            chunk_time=chunk_time,
+            lookahead=lookahead,
+            voice=voice,
+        )
+
         async with aiohttp.request(
             "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
         ) as response:
             if response.status != 200:
                 raise ValueError(f"Failed to generate audio. {response.text}")
 
-            async def async_generator():
-                async for chunk_bytes in response.content.iter_any():
-                    chunk_json = json.loads(chunk_bytes)
-                    data = base64.b64decode(chunk_json["data"])
-                    audio = np.frombuffer(data, dtype=np.float32)
-                    yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
-
-            if stream:
-                return async_generator()
-
             chunks = []
             sampling_rate = None
-            async for chunk in async_generator():
+            async for chunk_bytes in response.content.iter_any():
+                chunk_json = json.loads(chunk_bytes)
+                data = base64.b64decode(chunk_json["data"])
+                audio = np.frombuffer(data, dtype=np.float32)
                 if sampling_rate is None:
-                    sampling_rate = chunk["sampling_rate"]
-                chunks.append(chunk["audio"])
+                    sampling_rate = chunk_json.get("sampling_rate")
+                chunks.append(audio)
 
             return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+
+    async def async_generate_stream(
+        self,
+        *,
+        session: aiohttp.ClientSession,
+        model_id: str = None,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        lookahead: int = None,
+        voice: str = None,
+    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
+        """Asynchronously generate an async generator of audio from a transcript.
+
+        Note that this pattern relies on the consumer for session and resource management.
+        If the generator is not fully consumed, the resource may not be released unless the consumer
+        explicitly closes the generator.
+
+        Args:
+            model_id: The model to use for generating audio.
+            transcript: The text to generate audio for.
+            duration: The maximum duration of the audio in seconds.
+            chunk_time: How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            lookahead: The number of seconds to look ahead for each chunk.
+                This should not need to be adjusted.
+            voice: The voice to use for generating audio.
+            session: The aiohttp session to use for the request.
+                This is useful for streams
+
+        Returns:
+            An async generator containing dictionaries with the following:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
+        """
+        body = self._stream_request_body(
+            transcript=transcript,
+            model_id=model_id,
+            duration=duration,
+            chunk_time=chunk_time,
+            lookahead=lookahead,
+            voice=voice,
+        )
+        response = await session.post(
+            f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
+        )
+        try:
+            if response.status != 200:
+                raise ValueError(f"Failed to generate audio. {response.text}")
+
+            async def async_generator():
+                try:
+                    async for chunk_bytes in response.content.iter_any():
+                        chunk_json = json.loads(chunk_bytes)
+                        data = base64.b64decode(chunk_json["data"])
+                        audio = np.frombuffer(data, dtype=np.float32)
+                        yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                finally:
+                    if not response.closed:
+                        response.close()
+
+            return async_generator()
+        except Exception as e:
+            if not response.closed:
+                response.close()
+            raise e
 
     def generate(
         self,
@@ -205,7 +284,6 @@ class CartesiaTTS:
         chunk_time: float = None,
         lookahead: int = None,
         voice: Union[str, List[float]] = None,
-        stream: bool = False,
     ) -> AudioOutput:
         """Generate audio from a transcript.
 
@@ -218,39 +296,92 @@ class CartesiaTTS:
                 This should not need to be adjusted.
             voice: The voice to use for generating audio.
                 This can either be a voice id (string) or an embedding vector (List[float]).
-            stream: Whether to stream the audio or not.
-                If ``True`` this function returns a generator.
 
         Returns:
-            Either a dictionary or a generator containing the following:
+            A dictionary containing:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
         if isinstance(voice, str):
             voice = self._voices[voice]
 
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(
-            self.async_generate(
-                model_id=DEFAULT_MODEL_ID,
-                transcript=transcript,
-                duration=duration,
-                chunk_time=chunk_time,
-                lookahead=lookahead,
-                voice=voice,
-                stream=stream,
-            )
+        body = self._stream_request_body(
+            transcript=transcript,
+            model_id=DEFAULT_MODEL_ID,
+            duration=duration,
+            chunk_time=chunk_time,
+            lookahead=lookahead,
+            voice=voice,
         )
 
-        if stream:
+        response = requests.post(
+            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
+        )
+        if response.status_code != 200:
+            raise ValueError(f"Failed to generate audio. {response.text}")
 
-            def sync_generator():
-                for chunk in loop.run_until_complete(result):
-                    yield chunk
+        chunks = []
+        sampling_rate = None
+        for chunk_bytes in response.iter_content(chunk_size=None):
+            chunk_json = json.loads(chunk_bytes)
+            data = base64.b64decode(chunk_json["data"])
+            audio = np.frombuffer(data, dtype=np.float32)
+            if sampling_rate is None:
+                sampling_rate = chunk_json.get("sampling_rate")
+            chunks.append(audio)
 
-            return sync_generator()
+        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
 
-        return result
+    def generate_stream(
+        self,
+        *,
+        model_id: str = None,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        lookahead: int = None,
+        voice: str = None,
+    ) -> Generator[AudioOutput, None, None]:
+        """Generate a generator of audio from a transcript.
+
+        Args:
+            model_id: The model to use for generating audio.
+            transcript: The text to generate audio for.
+            duration: The maximum duration of the audio in seconds.
+            chunk_time: How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            lookahead: The number of seconds to look ahead for each chunk.
+                This should not need to be adjusted.
+            voice: The voice to use for generating audio.
+
+        Returns:
+            A generator for dictionaries containing:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
+        """
+        body = self._stream_request_body(
+            transcript=transcript,
+            model_id=model_id,
+            duration=duration,
+            chunk_time=chunk_time,
+            lookahead=lookahead,
+            voice=voice,
+        )
+
+        response = requests.post(
+            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
+        )
+        if response.status_code != 200:
+            raise ValueError(f"Failed to generate audio. {response.text}")
+
+        def generator():
+            for chunk_bytes in response.iter_content(chunk_size=None):
+                chunk_json = json.loads(chunk_bytes)
+                data = base64.b64decode(chunk_json["data"])
+                audio = np.frombuffer(data, dtype=np.float32)
+                yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+
+        return generator()
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
