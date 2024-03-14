@@ -1,7 +1,7 @@
 import base64
 import json
 import os
-from typing import Dict, Generator, List, TypedDict, Union
+from typing import AsyncGenerator, Dict, Generator, List, TypedDict, Union
 import wave
 
 import aiohttp
@@ -165,7 +165,7 @@ class CartesiaTTS:
         chunk_time: float = None,
         lookahead: int = None,
         voice: str = None,
-    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
+    ) -> AudioOutput:
         """Asynchronously generate audio from a transcript.
 
         Args:
@@ -220,7 +220,7 @@ class CartesiaTTS:
         chunk_time: float = None,
         lookahead: int = None,
         voice: str = None,
-    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
+    ) -> AsyncGenerator[AudioOutput, None]:
         """Asynchronously generate an async generator of audio from a transcript.
 
         Note that this pattern relies on the consumer for session and resource management.
