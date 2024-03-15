@@ -150,7 +150,7 @@ class CartesiaTTS:
         if options:
             if isinstance(options.get("voice"), str):
                 voice = self._voices.get(options["voice"])
-                body.update(voice)
+                body.update({"voice": voice})
 
             additional_options = {
                 k: v for k, v in options.items() if k not in ["model_id", "voice"]
@@ -193,13 +193,26 @@ class CartesiaTTS:
 
             chunks = []
             sampling_rate = None
+            buffer = ""
+
+            def extract_json(buffer):
+                try:
+                    obj, end = json.JSONDecoder().raw_decode(buffer)
+                    return obj, buffer[end:]
+                except json.JSONDecodeError:
+                    return {}, buffer
+
             async for chunk_bytes in response.content.iter_any():
-                chunk_json = json.loads(chunk_bytes)
-                data = base64.b64decode(chunk_json["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
-                if sampling_rate is None:
-                    sampling_rate = chunk_json.get("sampling_rate")
-                chunks.append(audio)
+                buffer += chunk_bytes.decode("utf-8")
+                try:
+                    chunk_json, buffer = extract_json(buffer)
+                    data = base64.b64decode(chunk_json["data"])
+                    audio = np.frombuffer(data, dtype=np.float32)
+                    if sampling_rate is None:
+                        sampling_rate = chunk_json.get("sampling_rate")
+                    chunks.append(audio)
+                except (json.JSONDecodeError, KeyError):
+                    continue
 
             return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
 
