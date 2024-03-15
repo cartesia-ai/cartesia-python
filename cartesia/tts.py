@@ -159,6 +159,13 @@ class CartesiaTTS:
 
         return body
 
+    def _extract_json_helper(self, buffer):
+        try:
+            obj, end = json.JSONDecoder().raw_decode(buffer)
+            return obj, buffer[end:]
+        except json.JSONDecodeError:
+            return {}, buffer
+
     async def async_generate(
         self,
         *,
@@ -195,17 +202,10 @@ class CartesiaTTS:
             sampling_rate = None
             buffer = ""
 
-            def extract_json(buffer):
-                try:
-                    obj, end = json.JSONDecoder().raw_decode(buffer)
-                    return obj, buffer[end:]
-                except json.JSONDecodeError:
-                    return {}, buffer
-
             async for chunk_bytes in response.content.iter_any():
                 buffer += chunk_bytes.decode("utf-8")
                 try:
-                    chunk_json, buffer = extract_json(buffer)
+                    chunk_json, buffer = self._extract_json_helper(buffer)
                     data = base64.b64decode(chunk_json["data"])
                     audio = np.frombuffer(data, dtype=np.float32)
                     if sampling_rate is None:
@@ -256,11 +256,16 @@ class CartesiaTTS:
 
             async def async_generator():
                 try:
+                    buffer = ""
                     async for chunk_bytes in response.content.iter_any():
-                        chunk_json = json.loads(chunk_bytes)
-                        data = base64.b64decode(chunk_json["data"])
-                        audio = np.frombuffer(data, dtype=np.float32)
-                        yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                        buffer += chunk_bytes.decode("utf-8")
+                        try:
+                            chunk_json, buffer = self._extract_json_helper(buffer)
+                            data = base64.b64decode(chunk_json["data"])
+                            audio = np.frombuffer(data, dtype=np.float32)
+                            yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                        except (json.JSONDecodeError, KeyError):
+                            continue
                 finally:
                     if not response.closed:
                         response.close()
