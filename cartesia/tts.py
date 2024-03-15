@@ -143,7 +143,7 @@ class CartesiaTTS:
 
         body = dict(
             transcript=transcript,
-            model_id=options.get("model_id") or self.model_id,
+            model_id=(options and options.get("model_id")) or self.model_id,
         )
 
         # Clone options
