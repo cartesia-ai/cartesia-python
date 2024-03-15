@@ -148,14 +148,14 @@ class CartesiaTTS:
 
         # Clone options
         if options:
-            options = options.copy()
-            options.pop("model_id")
-
             if isinstance(options.get("voice"), str):
                 voice = self._voices.get(options["voice"])
                 body.update(voice)
-                options.pop("voice")
-            body.update(options)
+
+            additional_options = {
+                k: v for k, v in options.items() if k not in ["model_id", "voice"]
+            }
+            body.update(additional_options)
 
         return body
 
