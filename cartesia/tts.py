@@ -1,8 +1,8 @@
 import base64
-from collections import defaultdict
 import json
 import os
-from typing import Any, Dict, List, TypedDict, Union
+from collections import defaultdict
+from typing import Dict, List, TypedDict, Union
 
 import numpy as np
 import requests
@@ -75,7 +75,7 @@ class CartesiaTTS:
             link: The url to get the audio from. Currently only supports youtube shared urls.
 
         Note:
-            Only one of `filepath` or `url` should be specified.
+            Only one of `filepath` or `link` should be specified.
 
         Note:
             This voice will not persist over different clients. If you would like to reuse
@@ -92,12 +92,13 @@ class CartesiaTTS:
 
         if filepath:
             url = f"{self._http_url()}/voices/clone/clip"
-            files = {"clip": open(filepath, "rb")}
-            response = requests.post(url, headers=self.headers, files=files)
+            params = {"clip": open(filepath, "rb")}
+            response = requests.post(url, headers=self.headers, params=params)
         else:
             url = f"{self._http_url()}/voices/clone/url"
-            body = {"link": link}
-            response = requests.post(url, headers=self.headers, body=json.dumps(body))
+            params = {"link": link}
+            print(f"params: {params}, url: {url}, headers: {self.headers}")
+            response = requests.post(url, headers=self.headers, params=params)
 
         if response.status_code != 200:
             raise ValueError(
