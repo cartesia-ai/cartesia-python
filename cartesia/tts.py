@@ -57,6 +57,7 @@ class CartesiaTTS:
         if model_id in self._voices:
             return self._voices[model_id]
 
+        # TODO: We're functionally ignoring `model_id` - fix this once it's migrated to Bifrost
         response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
 
         if response.status_code != 200:
