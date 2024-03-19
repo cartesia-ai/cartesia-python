@@ -1,7 +1,7 @@
 import base64
 import json
 import os
-from typing import AsyncGenerator, Dict, Generator, List, Optional, TypedDict
+from typing import AsyncGenerator, Dict, Generator, List, Optional, TypedDict, Union
 import wave
 
 import aiohttp
@@ -27,7 +27,7 @@ class GenerateOptions(TypedDict):
     duration: Optional[int]
     lookahead: Optional[int]
     model_id: Optional[str]
-    voice: Optional[str]
+    voice: Optional[Union[str, List[float]]]
 
 
 class CartesiaTTS:
@@ -141,9 +141,10 @@ class CartesiaTTS:
         Create the request body for a stream request.
         """
 
+        model_id = (options and options.get("model_id")) or self.model_id
         body = dict(
             transcript=transcript,
-            model_id=(options and options.get("model_id")) or self.model_id,
+            model_id=model_id,
         )
 
         # Clone options
