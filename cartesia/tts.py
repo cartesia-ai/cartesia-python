@@ -57,14 +57,12 @@ class CartesiaTTS:
         if model_id in self._voices:
             return self._voices[model_id]
 
-        response = requests.get(
-            f"{self._http_url()}/models/{model_id}/voices", headers=self.headers
-        )
+        response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices for model {model_id}. Error: {response.text}")
 
-        return json.loads(response.text)
+        return response.json()
 
     def clone_voice(self, voice_id: str, *, filepath: str = None, link: str = None) -> List[float]:
         """Clone a voice from a filepath or YouTube url.
@@ -97,7 +95,6 @@ class CartesiaTTS:
         else:
             url = f"{self._http_url()}/voices/clone/url"
             params = {"link": link}
-            print(f"params: {params}, url: {url}, headers: {self.headers}")
             response = requests.post(url, headers=self.headers, params=params)
 
         if response.status_code != 200:
