@@ -90,8 +90,11 @@ class CartesiaTTS:
 
         if filepath:
             url = f"{self._http_url()}/voices/clone/clip"
-            params = {"clip": open(filepath, "rb")}
-            response = requests.post(url, headers=self.headers, params=params)
+            files = {"clip": open(filepath, "rb")}
+            headers = self.headers.copy()
+            # The default content type of JSON is incorrect for file uploads
+            headers.pop("Content-Type")
+            response = requests.post(url, headers=headers, files=files)
         else:
             url = f"{self._http_url()}/voices/clone/url"
             params = {"link": link}
