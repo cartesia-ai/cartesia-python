@@ -38,6 +38,10 @@ class GenerateOptions(TypedDict):
     lookahead: Optional[int]
 
 
+DEFAULT_TIMEOUT = 60  # 60 seconds
+DEFAULT_NUM_CONNECTIONS = 10  # 10 connections
+
+
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library."""
 
@@ -56,6 +60,20 @@ class CartesiaTTS:
         # Mapping from id -> embedding
         self._voices: Dict[str, List[float]] = {}
         self._downloaded_voices = False
+
+        # Instantiate an AIOHTTP session
+        self.timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        self.connector = aiohttp.TCPConnector(limit=DEFAULT_NUM_CONNECTIONS)
+        self._session = None
+
+    # Allows users to use the CartesiaTTS object as an async context manager
+    async def __aenter__(self):
+        self._session = aiohttp.ClientSession(timeout=self.timeout, connector=self.connector)
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        if self._session is not None:
+            await self._session.close()
 
     def models(self) -> List[str]:
         """Get a list of available models."""
@@ -152,15 +170,14 @@ class CartesiaTTS:
 
         Note that anything that's not provided will use a default if available or be filtered out otherwise.
         """
-        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
+        if isinstance(voice, str):
+            voice = self._voices.get(options["voice"])
+
+        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID, voice=voice)
 
         # Clone options
         if options:
-            if isinstance(options.get("voice"), str):
-                voice = self._voices.get(options["voice"])
-                body.update({"voice": voice})
-
-            additional_options = {k: v for k, v in options.items() if k not in ["voice"]}
+            additional_options = {k: v for k, v in options.items()}
             body.update(additional_options)
 
         return body
@@ -192,9 +209,10 @@ class CartesiaTTS:
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
+        print(self.headers)
 
-        async with aiohttp.request(
-            "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
+        async with self._session.post(
+            f"{self._http_url()}/audio/stream", data=json.dumps(body), headers=self.headers
         ) as response:
             if response.status != 200:
                 raise ValueError(f"Failed to generate audio. {response.text}")
@@ -220,19 +238,13 @@ class CartesiaTTS:
     async def async_generate_stream(
         self,
         *,
-        session: aiohttp.ClientSession,
         transcript: str,
         voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> AsyncGenerator[AudioOutput, None]:
         """Asynchronously generate an async generator of audio from a transcript.
 
-        Note that this pattern relies on the consumer for session and resource management.
-        If the generator is not fully consumed, the resource may not be released unless the consumer
-        explicitly closes the generator. This is mitigated by having the consumer provide the session.
-
         Args:
-            session: The aiohttp session to use for the request.
             transcript: The text to generate audio for.
             voice: The voice to use for generating audio. This can be a voice id or an embedding.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
@@ -243,34 +255,25 @@ class CartesiaTTS:
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
-        response = await session.post(
-            f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
-        )
-        try:
-            if response.status != 200:
-                raise ValueError(f"Failed to generate audio. {response.text}")
 
-            async def async_generator():
-                try:
-                    buffer = ""
-                    async for chunk_bytes in response.content.iter_any():
-                        buffer += chunk_bytes.decode("utf-8")
-                        try:
-                            chunk_json, buffer = self._extract_json_helper(buffer)
-                            data = base64.b64decode(chunk_json["data"])
-                            audio = np.frombuffer(data, dtype=np.float32)
-                            yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
-                        except (json.JSONDecodeError, KeyError):
-                            continue
-                finally:
-                    if not response.closed:
-                        response.close()
+        async def async_generator(request_body: dict, headers: dict):
+            async with self._session.post(
+                f"{self._http_url()}/audio/stream", data=json.dumps(request_body), headers=headers
+            ) as response:
+                if response.status != 200:
+                    raise ValueError(f"Failed to generate audio. {response.text}")
+                buffer = ""
+                async for chunk_bytes in response.content.iter_any():
+                    buffer += chunk_bytes.decode("utf-8")
+                    try:
+                        chunk_json, buffer = self._extract_json_helper(buffer)
+                        data = base64.b64decode(chunk_json["data"])
+                        audio = np.frombuffer(data, dtype=np.float32)
+                        yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                    except (json.JSONDecodeError, KeyError):
+                        continue
 
-            return async_generator()
-        except Exception as e:
-            if not response.closed:
-                response.close()
-            raise e
+        return async_generator(request_body=body, headers=self.headers)
 
     def generate(
         self,
@@ -292,9 +295,13 @@ class CartesiaTTS:
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
+        print(body)
 
         response = requests.post(
-            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
+            f"{self._http_url()}/audio/stream",
+            stream=True,
+            data=json.dumps(body),
+            headers=self.headers,
         )
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
