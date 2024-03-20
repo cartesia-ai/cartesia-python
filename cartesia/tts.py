@@ -333,7 +333,10 @@ class CartesiaTTS:
         body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
 
         response = requests.post(
-            f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
+            f"{self._http_url()}/audio/stream",
+            stream=True,
+            data=json.dumps(body),
+            headers=self.headers,
         )
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
