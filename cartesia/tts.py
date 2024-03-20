@@ -16,6 +16,11 @@ class AudioOutput(TypedDict):
     sampling_rate: int
 
 
+class VoiceOutput(TypedDict):
+    id: str
+    embedding: List[float]
+
+
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library."""
 
@@ -67,7 +72,7 @@ class CartesiaTTS:
 
         return self._voices
 
-    def clone_voice(self, *, filepath: str = None, link: str = None) -> List[float]:
+    def clone_voice(self, *, filepath: str = None, link: str = None) -> VoiceOutput:
         """Clone a voice from a filepath or YouTube url.
 
         Args:
@@ -85,7 +90,9 @@ class CartesiaTTS:
             Voice cloning is only supported for the latest model.
 
         Returns:
-            Dict[str, Any]: The voice embedding.
+            A dictionary containing:
+                * "id": The id of the cloned voice.
+                * "embedding": The embedding of the cloned voice.
         """
         if filepath and link:
             raise ValueError("Only one of `filepath` or `url` should be specified.")
@@ -114,7 +121,7 @@ class CartesiaTTS:
         voice_id = out["id"]
         self._voices[voice_id] = embedding
 
-        return embedding
+        return {"id": voice_id, "embedding": embedding}
 
     def generate(
         self,
