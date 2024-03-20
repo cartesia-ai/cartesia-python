@@ -31,11 +31,10 @@ class CartesiaTTS:
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
-        self._downloaded_voices = False
-        self._voices = {}
 
-        # Mapping from model_id -> {voice_id: embedding}
-        self._voices: Dict[str, Dict[str, List[float]]] = defaultdict(defaultdict)
+        # Mapping from name -> embedding
+        self._voices: Dict[str, List[float]] = defaultdict(defaultdict)
+        self._downloaded_voices = False
 
     def models(self) -> List[str]:
         """Get a list of available models."""
