@@ -20,18 +20,19 @@ class AudioOutput(TypedDict):
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library."""
 
-    def __init__(self, *, model_id: str = None, api_key: str = None):
+    def __init__(self, *, api_key: str = None):
         """
         Args:
             api_key: The API key to use for authorization.
                 The api key is not currently enforced.
                 TODO: Set the API key.
         """
-        self.model_id = model_id or DEFAULT_MODEL_ID
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
+        self._downloaded_voices = False
+        self._voices = {}
 
         # Mapping from model_id -> {voice_id: embedding}
         self._voices: Dict[str, Dict[str, List[float]]] = defaultdict(defaultdict)
@@ -40,36 +41,42 @@ class CartesiaTTS:
         """Get a list of available models."""
         raise NotImplementedError()
 
-    def voices(self, model_id: str = None, *, refresh: bool = False) -> List[str]:
+    def voices(self, *, refresh: bool = False) -> List[str]:
         """Returns a list of voices for a given model.
 
         These voices can be used with :method:`CartesiaTTS.generate` to generate audio.
 
         Args:
-            model_id: The model to get voices for.
             refresh: If ``True``, the API will be pinged if the voices for the model
                 are not already cached. Otherwise, default to the cached voices.
 
         Returns:
             List[str]: The list of voice ids for the model.
         """
-        model_id = model_id or self.model_id
-        if model_id in self._voices:
-            return self._voices[model_id]
+        if self._downloaded_voices and not refresh:
+            return self._voices
 
-        # TODO: We're functionally ignoring `model_id` - fix this once it's migrated to Bifrost
+        # TODO: Remove later once the voices API works as intended for a user
+        if refresh:
+            self._voices = {}
+
         response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
 
         if response.status_code != 200:
-            raise ValueError(f"Failed to get voices for model {model_id}. Error: {response.text}")
+            raise ValueError(f"Failed to get voices. Error: {response.text}")
 
-        return response.json()
+        # Map from the table rows to a dict with key: "name" and value: "embedding"
+        downloaded_voices = {voice["name"]: eval(voice["embedding"]) for voice in response.json()}
+        self._voices.update(downloaded_voices)
+        self._downloaded_voices = True
 
-    def clone_voice(self, voice_id: str, *, filepath: str = None, link: str = None) -> List[float]:
+        return self._voices
+
+    def clone_voice(self, name: str, *, filepath: str = None, link: str = None) -> List[float]:
         """Clone a voice from a filepath or YouTube url.
 
         Args:
-            voice_id: The id to give to the voice.
+            name: The id to give to the voice.
             filepath: Path to audio file from which to get the audio.
             link: The url to get the audio from. Currently only supports youtube shared urls.
 
@@ -109,15 +116,13 @@ class CartesiaTTS:
 
         # Handle successful response
         out = response.json()
-        model_id = out["model_id"]
         embedding = out["embedding"]
-        self._voices[model_id][voice_id] = embedding
+        self._voices[name] = embedding
 
         return embedding
 
     def generate(
         self,
-        model_id: str = None,
         *,
         transcript: str,
         duration: int = None,
@@ -129,7 +134,6 @@ class CartesiaTTS:
         """Generate audio from a transcript.
 
         Args:
-            model_id: The model to use for generating audio.
             transcript: The text to generate audio for.
             duration: The maximum duration of the audio in seconds.
             chunk_time: How long each audio segment should be in seconds.
@@ -146,11 +150,10 @@ class CartesiaTTS:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        model_id = model_id or DEFAULT_MODEL_ID
-        body = dict(transcript=transcript, model_id=model_id)
+        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         if isinstance(voice, str):
-            voice = self._voices[model_id][voice]
+            voice = self._voices[voice]
 
         optional_body = dict(
             duration=duration,
