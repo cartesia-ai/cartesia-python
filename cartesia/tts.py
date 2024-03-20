@@ -21,6 +21,7 @@ class VoiceOutput(TypedDict):
     id: str
     embedding: List[float]
 
+
 class GenerateOptions(TypedDict):
     """
     Options for generating audio.
@@ -30,15 +31,11 @@ class GenerateOptions(TypedDict):
     duration: The maximum duration of the audio in seconds.
     lookahead: The number of seconds to look ahead for each chunk.
         This should not need to be adjusted.
-    model_id: The model to use for generating audio. If not provided, the default model is used.
-    voice: The voice to use for generating audio.
     """
 
     chunk_time: Optional[float]
     duration: Optional[int]
     lookahead: Optional[int]
-    model_id: Optional[str]
-    voice: Optional[Union[str, List[float]]]
 
 
 class CartesiaTTS:
@@ -145,7 +142,9 @@ class CartesiaTTS:
 
     def _generate_request_body(
         self,
+        *,
         transcript: str,
+        voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> Dict[str, Any]:
         """
@@ -153,12 +152,7 @@ class CartesiaTTS:
 
         Note that anything that's not provided will use a default if available or be filtered out otherwise.
         """
-
-        model_id = (options and options.get("model_id")) or self.model_id
-        body = dict(
-            transcript=transcript,
-            model_id=model_id,
-        )
+        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         # Clone options
         if options:
@@ -166,9 +160,7 @@ class CartesiaTTS:
                 voice = self._voices.get(options["voice"])
                 body.update({"voice": voice})
 
-            additional_options = {
-                k: v for k, v in options.items() if k not in ["model_id", "voice"]
-            }
+            additional_options = {k: v for k, v in options.items() if k not in ["voice"]}
             body.update(additional_options)
 
         return body
@@ -184,12 +176,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
+        voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> AudioOutput:
         """Asynchronously generate audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
+            voice: The voice to use for generating audio. This can be a voice id or an embedding.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -197,7 +191,7 @@ class CartesiaTTS:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._generate_request_body(transcript, options)
+        body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
 
         async with aiohttp.request(
             "POST", f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
@@ -228,6 +222,7 @@ class CartesiaTTS:
         *,
         session: aiohttp.ClientSession,
         transcript: str,
+        voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> AsyncGenerator[AudioOutput, None]:
         """Asynchronously generate an async generator of audio from a transcript.
@@ -239,6 +234,7 @@ class CartesiaTTS:
         Args:
             session: The aiohttp session to use for the request.
             transcript: The text to generate audio for.
+            voice: The voice to use for generating audio. This can be a voice id or an embedding.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -246,7 +242,7 @@ class CartesiaTTS:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._generate_request_body(transcript, options)
+        body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
         response = await session.post(
             f"{self._http_url()}/stream", data=json.dumps(body), headers=self.headers
         )
@@ -280,12 +276,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
+        voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> AudioOutput:
         """Generate audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
+            voice: The voice to use for generating audio. This can be a voice id or an embedding.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -293,7 +291,7 @@ class CartesiaTTS:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._generate_request_body(transcript, options)
+        body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
 
         response = requests.post(
             f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
@@ -317,12 +315,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
+        voice: Union[str, List[float]],
         options: Optional[GenerateOptions] = None,
     ) -> Generator[AudioOutput, None, None]:
         """Generate a generator of audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
+            voice: The voice to use for generating audio. This can be a voice id or an embedding.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -330,7 +330,7 @@ class CartesiaTTS:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        body = self._generate_request_body(transcript, options)
+        body = self._generate_request_body(transcript=transcript, voice=voice, options=options)
 
         response = requests.post(
             f"{self._http_url()}/stream", stream=True, data=json.dumps(body), headers=self.headers
