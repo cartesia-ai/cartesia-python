@@ -1,8 +1,7 @@
 import base64
 import json
 import os
-from typing import AsyncGenerator, Dict, Generator, List, Optional, TypedDict, Union
-import wave
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, TypedDict, Union
 
 import aiohttp
 import numpy as np
@@ -23,6 +22,18 @@ class VoiceOutput(TypedDict):
     embedding: List[float]
 
 class GenerateOptions(TypedDict):
+    """
+    Options for generating audio.
+
+    chunk_time: How long each audio segment should be in seconds.
+        This should not need to be adjusted.
+    duration: The maximum duration of the audio in seconds.
+    lookahead: The number of seconds to look ahead for each chunk.
+        This should not need to be adjusted.
+    model_id: The model to use for generating audio. If not provided, the default model is used.
+    voice: The voice to use for generating audio.
+    """
+
     chunk_time: Optional[float]
     duration: Optional[int]
     lookahead: Optional[int]
@@ -136,9 +147,11 @@ class CartesiaTTS:
         self,
         transcript: str,
         options: Optional[GenerateOptions] = None,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Create the request body for a stream request.
+
+        Note that anything that's not provided will use a default if available or be filtered out otherwise.
         """
 
         model_id = (options and options.get("model_id")) or self.model_id
@@ -177,14 +190,7 @@ class CartesiaTTS:
 
         Args:
             transcript: The text to generate audio for.
-            options: The options to use for generating audio.
-                chunk_time: How long each audio segment should be in seconds.
-                    This should not need to be adjusted.
-                duration: The maximum duration of the audio in seconds.
-                lookahead: The number of seconds to look ahead for each chunk.
-                    This should not need to be adjusted.
-                model_id: The model to use for generating audio. If not provided, the default model is used.
-                voice: The voice to use for generating audio.
+            options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
             A dictionary containing the following:
@@ -233,14 +239,7 @@ class CartesiaTTS:
         Args:
             session: The aiohttp session to use for the request.
             transcript: The text to generate audio for.
-            options: The options to use for generating audio.
-                chunk_time: How long each audio segment should be in seconds.
-                    This should not need to be adjusted.
-                duration: The maximum duration of the audio in seconds.
-                lookahead: The number of seconds to look ahead for each chunk.
-                    This should not need to be adjusted.
-                model_id: The model to use for generating audio. If not provided, the default model is used.
-                voice: The voice to use for generating audio.
+            options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
             An async generator containing dictionaries with the following:
@@ -287,15 +286,7 @@ class CartesiaTTS:
 
         Args:
             transcript: The text to generate audio for.
-            options: The options to use for generating audio.
-                chunk_time: How long each audio segment should be in seconds.
-                    This should not need to be adjusted.
-                duration: The maximum duration of the audio in seconds.
-                lookahead: The number of seconds to look ahead for each chunk.
-                    This should not need to be adjusted.
-                model_id: The model to use for generating audio. If not provided, the default model is used.
-                voice: The voice to use for generating audio.
-                    This can either be a voice id (string) or an embedding vector (List[float]).
+            options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
             A dictionary containing:
@@ -332,15 +323,7 @@ class CartesiaTTS:
 
         Args:
             transcript: The text to generate audio for.
-            options: The options to use for generating audio.
-                chunk_time: How long each audio segment should be in seconds.
-                    This should not need to be adjusted.
-                duration: The maximum duration of the audio in seconds.
-                lookahead: The number of seconds to look ahead for each chunk.
-                    This should not need to be adjusted.
-                model_id: The model to use for generating audio. If not provided, the default model is used.
-                voice: The voice to use for generating audio.
-                    This can either be a voice id (string) or an embedding vector (List[float]).
+            options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
             A generator for dictionaries containing:
@@ -367,22 +350,3 @@ class CartesiaTTS:
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
         return f"{prefix}://{self.base_url}/{self.api_version}"
-
-    # Primarily used for testing
-    def _pcm_to_wav(self, pcm_data, output_file, sample_rate=44100, sample_width=2, num_channels=1):
-        # Convert float32 PCM data to int16
-        pcm_data = (pcm_data * 32767).astype(np.int16)
-
-        # Open a new WAV file for writing
-        wav_file = wave.open(output_file, "wb")
-
-        # Set the WAV file parameters
-        wav_file.setnchannels(num_channels)
-        wav_file.setsampwidth(sample_width)  # 2 bytes for int16
-        wav_file.setframerate(sample_rate)
-
-        # Write the PCM data to the WAV file
-        wav_file.writeframes(pcm_data.tobytes())
-
-        # Close the WAV file
-        wav_file.close()
