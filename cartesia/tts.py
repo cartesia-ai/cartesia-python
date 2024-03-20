@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-from collections import defaultdict
 from typing import Dict, List, TypedDict, Union
 
 import numpy as np
@@ -32,8 +31,8 @@ class CartesiaTTS:
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
 
-        # Mapping from name -> embedding
-        self._voices: Dict[str, List[float]] = defaultdict(defaultdict)
+        # Mapping from id -> embedding
+        self._voices: Dict[str, List[float]] = {}
         self._downloaded_voices = False
 
     def models(self) -> List[str]:
@@ -55,27 +54,23 @@ class CartesiaTTS:
         if self._downloaded_voices and not refresh:
             return self._voices
 
-        # TODO: Remove later once the voices API works as intended for a user
-        if refresh:
-            self._voices = {}
-
         response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
 
-        # Map from the table rows to a dict with key: "name" and value: "embedding"
-        downloaded_voices = {voice["name"]: eval(voice["embedding"]) for voice in response.json()}
+        # Map from the table rows to a dict with key: "id" and value: "embedding"
+        # TODO: Remove the eval once the API returns a list of floats instead of a string
+        downloaded_voices = {voice["id"]: eval(voice["embedding"]) for voice in response.json()}
         self._voices.update(downloaded_voices)
         self._downloaded_voices = True
 
         return self._voices
 
-    def clone_voice(self, name: str, *, filepath: str = None, link: str = None) -> List[float]:
+    def clone_voice(self, *, filepath: str = None, link: str = None) -> List[float]:
         """Clone a voice from a filepath or YouTube url.
 
         Args:
-            name: The id to give to the voice.
             filepath: Path to audio file from which to get the audio.
             link: The url to get the audio from. Currently only supports youtube shared urls.
 
@@ -116,7 +111,8 @@ class CartesiaTTS:
         # Handle successful response
         out = response.json()
         embedding = out["embedding"]
-        self._voices[name] = embedding
+        voice_id = out["id"]
+        self._voices[voice_id] = embedding
 
         return embedding
 
