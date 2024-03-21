@@ -2,7 +2,7 @@ import base64
 import json
 import os
 import sys
-from typing import Dict, List, TypedDict, Union
+from typing import Dict, List, TypedDict
 
 import numpy as np
 import requests
@@ -34,14 +34,39 @@ class VoiceMetadata(TypedDict):
 
 
 class CartesiaTTS:
-    """The client for Cartesia's text-to-speech library."""
+    """The client for Cartesia's text-to-speech library.
+
+    This client contains methods to interact with the Cartesia text-to-speech API.
+    The API offers
+
+    Examples:
+
+        >>> client = CartesiaTTS()
+
+        # Load available voices and their metadata (excluding the embeddings).
+        # Embeddings are fetched with `get_voice_embedding`. This avoids preloading
+        # all of the embeddings, which can be expensive if there are a lot of voices.
+        >>> voices = client.get_voices()
+        >>> embedding = client.get_voice_embedding(voice_id=voices["Milo"]["id"])
+        >>> audio = client.generate(transcript="Hello world!", voice=embedding)
+
+        # Preload all available voices and their embeddings if you plan on reusing
+        # all of the embeddings often.
+        >>> voices = client.get_voices(skip_embeddings=False)
+        >>> embedding = voices["Milo"]["embedding"]
+        >>> audio = client.generate(transcript="Hello world!", voice=embedding)
+
+        # Generate audio stream
+        >>> for audio_chunk in client.generate(transcript="Hello world!", voice=embedding, stream=True):
+        ...     audio, sr = audio_chunk["audio"], audio_chunk["sampling_rate"]
+    """
 
     def __init__(self, *, api_key: str = None):
         """
         Args:
             api_key: The API key to use for authorization.
-                The api key is not currently enforced.
-                TODO: Set the API key.
+                If not specified, the API key will be read from the environment variable
+                `CARTESIA_API_KEY`.
         """
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
@@ -54,8 +79,9 @@ class CartesiaTTS:
         Args:
             skip_embeddings: Whether to skip returning the embeddings.
                 It is recommended to skip if you only want to see what
-                voices are available. You can then use ``get_voice_embedding``
-                to get the embeddings for the voices you are interested in.
+                voices are available, since loading embeddings for all your voices can be expensive.
+                You can then use ``get_voice_embedding`` to get the embeddings for the voices you are
+                interested in.
 
         Returns:
             A mapping from voice name -> voice metadata.
@@ -68,6 +94,12 @@ class CartesiaTTS:
         Usage:
             >>> client = CartesiaTTS()
             >>> voices = client.get_voices()
+            >>> voices
+                {
+                    "Jane": {
+                        "id": "c1d1d3a8-6f4e-4b3f-8b3e-2e1b3e1b3e1b",
+                        "name": "Jane",
+                }
             >>> embedding = client.get_voice_embedding(voice_id=voices["Jane"]["id"])
             >>> audio = client.generate(transcript="Hello world!", voice=embedding)
         """
@@ -93,10 +125,6 @@ class CartesiaTTS:
             voice_id: The voice id.
             filepath: Path to audio file from which to get the audio.
             link: The url to get the audio from. Currently only supports youtube shared urls.
-
-        Note:
-            The voice embedding will not be saved to the database. To save voices to the database
-            use the web client (play.cartesia.ai).
 
         Returns:
             The voice embedding.
