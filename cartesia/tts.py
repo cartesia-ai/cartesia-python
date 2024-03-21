@@ -18,6 +18,7 @@ class AudioOutput(TypedDict):
 
 class VoiceOutput(TypedDict):
     id: str
+    name: str
     embedding: List[float]
 
 
@@ -38,13 +39,13 @@ class CartesiaTTS:
 
         # Mapping from id -> embedding
         self._voices: Dict[str, List[float]] = {}
-        self._downloaded_voices = False
+        self._voices_name_to_id = {}
 
     def models(self) -> List[str]:
         """Get a list of available models."""
         raise NotImplementedError()
 
-    def voices(self, *, refresh: bool = False) -> List[str]:
+    def voices(self, *, refresh: bool = False) -> Dict[str, VoiceOutput]:
         """Returns a list of voices for a given model.
 
         These voices can be used with :method:`CartesiaTTS.generate` to generate audio.
@@ -56,23 +57,40 @@ class CartesiaTTS:
         Returns:
             List[str]: The list of voice ids for the model.
         """
-        if self._downloaded_voices and not refresh:
+        if self._voices and not refresh:
             return self._voices
 
         response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
-
-        # Map from the table rows to a dict with key: "id" and value: "embedding"
-        # TODO: Remove the eval once the API returns a list of floats instead of a string
-        downloaded_voices = {voice["id"]: eval(voice["embedding"]) for voice in response.json()}
-        self._voices.update(downloaded_voices)
-        self._downloaded_voices = True
-
+        
+        self._voices = {voice["id"]: voice for voice in response.json()}
+        self._voices_name_to_id = {voice["name"]: voice["id"] for voice in response.json()}
         return self._voices
 
-    def clone_voice(self, *, filepath: str = None, link: str = None) -> VoiceOutput:
+    def get_voice_id_from_name(self, name: str) -> str:
+        """Convert voice name to an id.
+
+        This is a utility function to convert a voice name to an id.
+        If you have multiple voices with the same name, functionality is not guaranteed
+        for which voice id will be returned.
+
+        Args:
+            name: The name of the voice.
+        
+        Returns:
+            The voice id.
+        
+        Raises:
+            KeyError: If the voice name is not found.
+        """
+        try:
+            return self._voices_name_to_id[name]
+        except KeyError:
+            raise KeyError(f"Voice name '{name}' not found.")
+
+    def clone_voice(self, *, filepath: str = None, link: str = None) -> List[float]:
         """Clone a voice from a filepath or YouTube url.
 
         Args:
@@ -80,19 +98,15 @@ class CartesiaTTS:
             link: The url to get the audio from. Currently only supports youtube shared urls.
 
         Note:
-            Only one of `filepath` or `link` should be specified.
-
-        Note:
-            This voice will not persist over different clients. If you would like to reuse
-            the voice, you will have to save the voice embedding.
-
-        Note:
-            Voice cloning is only supported for the latest model.
+            The voice will not be saved to the database. To save voices to the database
+            use the web client (play.cartesia.ai).
 
         Returns:
-            A dictionary containing:
-                * "id": The id of the cloned voice.
-                * "embedding": The embedding of the cloned voice.
+            List[float]: The embedding of the cloned voice.
+        
+        Raises:
+            ValueError: If more than one of `filepath` or `link` is specified.
+                Only one should be specified.
         """
         if filepath and link:
             raise ValueError("Only one of `filepath` or `url` should be specified.")
@@ -117,11 +131,7 @@ class CartesiaTTS:
 
         # Handle successful response
         out = response.json()
-        embedding = out["embedding"]
-        voice_id = out["id"]
-        self._voices[voice_id] = embedding
-
-        return {"id": voice_id, "embedding": embedding}
+        return out["embedding"]
 
     def generate(
         self,
