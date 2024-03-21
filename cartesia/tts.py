@@ -2,7 +2,7 @@ import base64
 import json
 import os
 import sys
-from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, TypedDict, Union
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, TypedDict
 
 import aiohttp
 import numpy as np
@@ -208,7 +208,7 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
-        voice: Union[str, List[float]],
+        voice: Embedding = None,
         options: Optional[GenerateOptions] = None,
     ) -> Dict[str, Any]:
         """
@@ -216,14 +216,11 @@ class CartesiaTTS:
 
         Note that anything that's not provided will use a default if available or be filtered out otherwise.
         """
-        if isinstance(voice, str):
-            voice = self._voices.get(options["voice"])
-
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID, voice=voice)
 
         # Clone options
         if options:
-            additional_options = {k: v for k, v in options.items()}
+            additional_options = {k: v for k, v in options.items() if v is not None}
             body.update(additional_options)
 
         return body
@@ -239,14 +236,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
-        voice: Union[str, List[float]],
+        voice: Embedding = None,
         options: Optional[GenerateOptions] = None,
     ) -> AudioOutput:
         """Asynchronously generate audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
-            voice: The voice to use for generating audio. This can be a voice id or an embedding.
+            voice: The embedding to use for generating audio.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -285,14 +282,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
-        voice: Union[str, List[float]],
+        voice: Embedding = None,
         options: Optional[GenerateOptions] = None,
     ) -> AsyncGenerator[AudioOutput, None]:
         """Asynchronously generate an async generator of audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
-            voice: The voice to use for generating audio. This can be a voice id or an embedding.
+            voice: The embedding to use for generating audio.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -332,7 +329,7 @@ class CartesiaTTS:
 
         Args:
             transcript: The text to generate audio for.
-            voice: The voice to use for generating audio. This can be a voice id or an embedding.
+            voice: The embedding to use for generating audio.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
@@ -368,14 +365,14 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
-        voice: Union[str, List[float]],
+        voice: Embedding = None,
         options: Optional[GenerateOptions] = None,
     ) -> Generator[AudioOutput, None, None]:
         """Generate a generator of audio from a transcript.
 
         Args:
             transcript: The text to generate audio for.
-            voice: The voice to use for generating audio. This can be a voice id or an embedding.
+            voice: The embedding to use for generating audio.
             options: The options to use for generating audio. See :class:`GenerateOptions`.
 
         Returns:
