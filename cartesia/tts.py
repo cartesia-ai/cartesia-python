@@ -64,7 +64,7 @@ class CartesiaTTS:
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
-        
+
         self._voices = {voice["id"]: voice for voice in response.json()}
         self._voices_name_to_id = {voice["name"]: voice["id"] for voice in response.json()}
         return self._voices
@@ -78,10 +78,10 @@ class CartesiaTTS:
 
         Args:
             name: The name of the voice.
-        
+
         Returns:
             The voice id.
-        
+
         Raises:
             KeyError: If the voice name is not found.
         """
@@ -103,7 +103,7 @@ class CartesiaTTS:
 
         Returns:
             List[float]: The embedding of the cloned voice.
-        
+
         Raises:
             ValueError: If more than one of `filepath` or `link` is specified.
                 Only one should be specified.
