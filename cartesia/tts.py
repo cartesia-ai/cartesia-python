@@ -1,10 +1,17 @@
 import base64
 import json
 import os
+import sys
 from typing import Dict, List, TypedDict, Union
 
 import numpy as np
 import requests
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired
+else:
+    from typing import NotRequired
+
 
 DEFAULT_MODEL_ID = "genial-planet-1346"
 DEFAULT_BASE_URL = "api.cartesia.ai"
@@ -16,10 +23,14 @@ class AudioOutput(TypedDict):
     sampling_rate: int
 
 
-class VoiceOutput(TypedDict):
+Embedding = List[float]
+
+
+class VoiceMetadata(TypedDict):
     id: str
     name: str
-    embedding: List[float]
+    description: str
+    embedding: NotRequired[Embedding]
 
 
 class CartesiaTTS:
@@ -37,88 +48,77 @@ class CartesiaTTS:
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
 
-        # Mapping from id -> embedding
-        self._voices: Dict[str, List[float]] = {}
-        self._voices_name_to_id = {}
-
-    def models(self) -> List[str]:
-        """Get a list of available models."""
-        raise NotImplementedError()
-
-    def voices(self, *, refresh: bool = False) -> Dict[str, VoiceOutput]:
-        """Returns a list of voices for a given model.
-
-        These voices can be used with :method:`CartesiaTTS.generate` to generate audio.
+    def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
+        """Returns a mapping from voice name -> voice metadata.
 
         Args:
-            refresh: If ``True``, the API will be pinged if the voices for the model
-                are not already cached. Otherwise, default to the cached voices.
+            skip_embeddings: Whether to skip returning the embeddings.
+                It is recommended to skip if you only want to see what
+                voices are available. You can then use ``get_voice_embedding``
+                to get the embeddings for the voices you are interested in.
 
         Returns:
-            List[str]: The list of voice ids for the model.
-        """
-        if self._voices and not refresh:
-            return self._voices
+            A mapping from voice name -> voice metadata.
 
-        response = requests.get(f"{self._http_url()}/voices", headers=self.headers)
+        Note:
+            If the voice name is not unique, there is undefined behavior as to which
+            voice will correspond to the name. To be more thorough, look at the web
+            client to find the `voice_id` for the voice you are looking for.
+
+        Usage:
+            >>> client = CartesiaTTS()
+            >>> voices = client.get_voices()
+            >>> embedding = client.get_voice_embedding(voice_id=voices["Jane"]["id"])
+            >>> audio = client.generate(transcript="Hello world!", voice=embedding)
+        """
+        params = {"select": "id, name, description"} if skip_embeddings else None
+        response = requests.get(f"{self._http_url()}/voices", headers=self.headers, params=params)
 
         if response.status_code != 200:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
 
-        self._voices = {voice["id"]: voice for voice in response.json()}
-        self._voices_name_to_id = {voice["name"]: voice["id"] for voice in response.json()}
-        return self._voices
+        voices = response.json()
+        # TODO: Update the API to return the embedding as a list of floats rather than string.
+        if not skip_embeddings:
+            for voice in voices:
+                voice["embedding"] = json.loads(voice["embedding"])
+        return {voice["name"]: voice for voice in voices}
 
-    def get_voice_id_from_name(self, name: str) -> str:
-        """Convert voice name to an id.
-
-        This is a utility function to convert a voice name to an id.
-        If you have multiple voices with the same name, functionality is not guaranteed
-        for which voice id will be returned.
-
-        Args:
-            name: The name of the voice.
-
-        Returns:
-            The voice id.
-
-        Raises:
-            KeyError: If the voice name is not found.
-        """
-        try:
-            return self._voices_name_to_id[name]
-        except KeyError:
-            raise KeyError(f"Voice name '{name}' not found.")
-
-    def clone_voice(self, *, filepath: str = None, link: str = None) -> List[float]:
-        """Clone a voice from a filepath or YouTube url.
+    def get_voice_embedding(
+        self, *, voice_id: str = None, filepath: str = None, link: str = None
+    ) -> Embedding:
+        """Get a voice embedding from voice_id, a filepath or YouTube url.
 
         Args:
+            voice_id: The voice id.
             filepath: Path to audio file from which to get the audio.
             link: The url to get the audio from. Currently only supports youtube shared urls.
 
         Note:
-            The voice will not be saved to the database. To save voices to the database
+            The voice embedding will not be saved to the database. To save voices to the database
             use the web client (play.cartesia.ai).
 
         Returns:
-            List[float]: The embedding of the cloned voice.
+            The voice embedding.
 
         Raises:
-            ValueError: If more than one of `filepath` or `link` is specified.
+            ValueError: If more than one of `voice_id`, `filepath` or `link` is specified.
                 Only one should be specified.
         """
-        if filepath and link:
-            raise ValueError("Only one of `filepath` or `url` should be specified.")
+        if sum(bool(x) for x in (voice_id, filepath, link)) != 1:
+            raise ValueError("Exactly one of `voice_id`, `filepath` or `url` should be specified.")
 
-        if filepath:
+        if voice_id:
+            url = f"{self._http_url()}/voices/embedding/{voice_id}"
+            response = requests.get(url, headers=self.headers)
+        elif filepath:
             url = f"{self._http_url()}/voices/clone/clip"
             files = {"clip": open(filepath, "rb")}
             headers = self.headers.copy()
             # The default content type of JSON is incorrect for file uploads
             headers.pop("Content-Type")
             response = requests.post(url, headers=headers, files=files)
-        else:
+        elif link:
             url = f"{self._http_url()}/voices/clone/url"
             params = {"link": link}
             response = requests.post(url, headers=self.headers, params=params)
@@ -131,7 +131,7 @@ class CartesiaTTS:
 
         # Handle successful response
         out = response.json()
-        return out["embedding"]
+        return json.loads(out["embedding"])
 
     def generate(
         self,
@@ -140,7 +140,7 @@ class CartesiaTTS:
         duration: int = None,
         chunk_time: float = None,
         lookahead: int = None,
-        voice: Union[str, List[float]] = None,
+        voice: Embedding = None,
         stream: bool = False,
     ) -> AudioOutput:
         """Generate audio from a transcript.
