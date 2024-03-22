@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import uuid
-from typing import Any, Dict, List, TypedDict
+from typing import Any, Dict, Generator, List, TypedDict, Union
 
 import numpy as np
 import requests
@@ -203,7 +203,7 @@ class CartesiaTTS:
         voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
-    ) -> AudioOutput:
+    ) -> Union[AudioOutput, Generator[AudioOutput]]:
         """Generate audio from a transcript.
 
         Args:
@@ -223,7 +223,8 @@ class CartesiaTTS:
                 Make sure to refresh the connection `self.refresh_websocket()` as needed.
 
         Returns:
-            A dictionary containing:
+            A generator if `stream` is True, otherwise a dictionary.
+            Dictionary from both generator and non-generator return types have the following keys:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
