@@ -183,7 +183,7 @@ class CartesiaTTS:
         duration: int = None,
         chunk_time: float = None,
         lookahead: int = None,
-        voice: Embedding = None,
+        voice: Union[str, Embedding] = None,
         stream: bool = False,
         websocket: bool = True,
     ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
@@ -212,7 +212,7 @@ class CartesiaTTS:
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         if isinstance(voice, str):
-            voice = self._voices[voice]
+            voice = self.get_voice_embedding(voice_id = voice)
 
         optional_body = dict(
             duration=duration,
