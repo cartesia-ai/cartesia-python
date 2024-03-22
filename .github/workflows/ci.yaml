@@ -41,7 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # if we test it against too many versions, we are making unnecessary
+        # requests to the production server.
+        python-version: ["3.7", "3.10"]
 
     steps:
       - uses: actions/checkout@v4
