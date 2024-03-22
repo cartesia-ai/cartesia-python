@@ -47,6 +47,7 @@ REQUIRED_DEV = get_requirements("requirements-dev.txt")
 EXTRAS = {
     "dev": REQUIRED_DEV,
 }
+EXTRAS["all"] = [pkg for group in EXTRAS.values() for pkg in group]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -74,9 +75,7 @@ else:
 
 
 class UploadCommand(Command):
-    """Support setup.py upload.
-    Adapted from https://github.com/HazyResearch/meerkat.
-    """
+    """Support setup.py upload."""
 
     description = "Build and publish the package."
     user_options = []
