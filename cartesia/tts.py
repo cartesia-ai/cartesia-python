@@ -4,7 +4,6 @@ import os
 import uuid
 from typing import Any, Dict, Generator, List, Optional, TypedDict, Union
 
-import numpy as np
 import requests
 from websockets.sync.client import connect
 
@@ -14,7 +13,7 @@ DEFAULT_API_VERSION = "v0"
 
 
 class AudioOutput(TypedDict):
-    audio: np.ndarray
+    audio: bytes 
     sampling_rate: int
 
 
@@ -234,7 +233,7 @@ class CartesiaTTS:
                 sampling_rate = chunk["sampling_rate"]
             chunks.append(chunk["audio"])
 
-        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+        return {"audio": b"".join(chunks), "sampling_rate": sampling_rate}
 
     def _generate_http(self, body: Dict[str, Any]):
         response = requests.post(
