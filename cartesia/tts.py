@@ -255,8 +255,7 @@ class CartesiaTTS:
                 if start_index != -1 and end_index != -1:
                     try:
                         chunk_json = json.loads(buffer[start_index : end_index + 1])
-                        data = base64.b64decode(chunk_json["data"])
-                        audio = np.frombuffer(data, dtype=np.float32)
+                        audio = base64.b64decode(chunk_json["data"])
                         yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
                         buffer = buffer[end_index + 1 :]
                     except json.JSONDecodeError:
@@ -265,8 +264,7 @@ class CartesiaTTS:
         if buffer:
             try:
                 chunk_json = json.loads(buffer)
-                data = base64.b64decode(chunk_json["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
+                audio = base64.b64decode(chunk_json["data"])
                 yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
             except json.JSONDecodeError:
                 pass
@@ -279,8 +277,7 @@ class CartesiaTTS:
         try:
             response = json.loads(self.websocket.recv())
             while not response["done"]:
-                data = base64.b64decode(response["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
+                audio = base64.b64decode(response["data"])
                 # print("timing", time.perf_counter() - start)
                 yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
 
