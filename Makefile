@@ -2,7 +2,8 @@ install:
 	pip install -e .
 
 install-dev:
-	pip install -e .[dev]
+	pip install -e .
+	pip install pytest pytest-cov
 
 
 autoformat:
