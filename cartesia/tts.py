@@ -205,7 +205,7 @@ class CartesiaTTS:
         Returns:
             A generator if `stream` is True, otherwise a dictionary.
             Dictionary from both generator and non-generator return types have the following keys:
-                * "audio": The audio as a 1D numpy array.
+                * "audio": The audio as a bytes buffer.
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)

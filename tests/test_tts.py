@@ -8,7 +8,6 @@ but rather for general correctness.
 import os
 from typing import Dict, Generator
 
-import numpy as np
 import pytest
 
 from cartesia.tts import CartesiaTTS, VoiceMetadata
