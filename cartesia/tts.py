@@ -35,19 +35,6 @@ class VoiceMetadata(TypedDict):
     embedding: NotRequired[Embedding]
 
 
-packet = json.dumps(
-    {
-        "context_id": "happy-james",
-        "data": {
-            "transcript": "To be or not to be, that is the question.",
-            "chunk_time": 0.1,
-            "model_id": "genial-planet-1346",
-            "voice": [1.0] * 192,
-        },
-    }
-)
-
-
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library.
 
@@ -181,7 +168,8 @@ class CartesiaTTS:
     def refresh_websocket(self):
         """Refresh the websocket connection.
 
-        The connection is synchronous. This method is helpful to pre-load the connection.
+        Note:
+            The connection is synchronous.
         """
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
@@ -203,7 +191,7 @@ class CartesiaTTS:
         voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
-    ) -> Union[AudioOutput, Generator[AudioOutput]]:
+    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
         """Generate audio from a transcript.
 
         Args:
@@ -218,9 +206,7 @@ class CartesiaTTS:
             stream: Whether to stream the audio or not.
                 If ``True`` this function returns a generator.
             websocket: Whether to use a websocket for streaming audio.
-                Note using the websocket reduces latency by pre-poning the handshake.
-                However, a websocket with a persistent connection can have unintended consequences.
-                Make sure to refresh the connection `self.refresh_websocket()` as needed.
+                Using the websocket reduces latency by pre-poning the handshake.
 
         Returns:
             A generator if `stream` is True, otherwise a dictionary.
