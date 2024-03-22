@@ -47,7 +47,7 @@ p.terminate()
 
 If you are using Jupyter Notebook or JupyterLab, you can use IPython.display.Audio to play the generated audio directly in the notebook. Here's an example:
 
-```
+```python
 from cartesia.tts import CartesiaTTS
 from IPython.display import Audio
 import io
