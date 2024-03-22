@@ -25,9 +25,9 @@ with open(ver_path) as ver_file:
 NAME = "cartesia"
 DESCRIPTION = "The official Python library for the Cartesia API."
 URL = ""
-EMAIL = "arjun@cartesia.ai"
+EMAIL = "support@cartesia.ai"
 AUTHOR = "Cartesia, Inc."
-REQUIRES_PYTHON = ">=3.9.0"
+REQUIRES_PYTHON = ">=3.8.0"
 VERSION = main_ns["__version__"]
 
 
@@ -47,6 +47,7 @@ REQUIRED_DEV = get_requirements("requirements-dev.txt")
 EXTRAS = {
     "dev": REQUIRED_DEV,
 }
+EXTRAS["all"] = [pkg for group in EXTRAS.values() for pkg in group]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -74,9 +75,7 @@ else:
 
 
 class UploadCommand(Command):
-    """Support setup.py upload.
-    Adapted from https://github.com/HazyResearch/meerkat.
-    """
+    """Support setup.py upload."""
 
     description = "Build and publish the package."
     user_options = []

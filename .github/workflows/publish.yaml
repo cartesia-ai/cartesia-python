@@ -1,0 +1,71 @@
+name: Publish Python 🐍 distributions 📦 to PyPI
+
+on:
+  push:
+    branches: [ main ]
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  publish:
+    # Only run publishing when the commit message contains [bumpversion]
+    # Auto-generated branches will be [bB]umpversion/<version>, so we also check for that.
+    if: |
+      contains(github.event.head_commit.message, '[bumpversion]') ||
+      contains(github.event.head_commit.message, 'bumpversion/') ||
+      contains(github.event.head_commit.message, 'Bumpversion/')
+    runs-on: ubuntu-latest
+    environment: 
+      name: pypi
+      url: https://pypi.org/p/cartesia
+    # TODO: Make permissions more restrictive
+    permissions: write-all
+    env:
+      commitmsg: ${{ github.event.head_commit.message }}
+  
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+      
+      - name: Print commit message
+        run: echo "Commit MSG = ${commitmsg}"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[all]"
+
+      - name: Build PyPI
+        run: |
+          python setup.py upload --skip-upload
+          twine check dist/*
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true
+
+      - name: Get version
+        run: |
+          export CARTESIA_PYTHON_VERSION=$(grep -o '".*"' cartesia/version.py | sed 's/"//g')
+          echo "CARTESIA_PYTHON_VERSION=${CARTESIA_PYTHON_VERSION}" >> $GITHUB_ENV
+
+      - name: Verify version
+        run: echo ${{ env.CARTESIA_PYTHON_VERSION }}
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ env.CARTESIA_PYTHON_VERSION }}

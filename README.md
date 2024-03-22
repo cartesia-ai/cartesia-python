@@ -1,16 +1,26 @@
-# cartesia-python
-The official Python library for the Cartesia API.
+# Cartesia Python API Library
+The official Cartesia Python library which provides convenient access to the Cartesia REST and Websocket API from any Python 3.8+ application.
+
+**Note:** This API is still in alpha. Please expect breaking changes and report any issues you encounter.
+
+## Installation
+```bash
+pip install cartesia
+
+# pip install in editable mode w/ dev dependencies
+pip install -e '.[dev]'
+```
 
 ## Usage
 ```python
 from cartesia.tts import CartesiaTTS
 from IPython.display import Audio
 
-client = CartesiaTTS(api_key="your-api-key")
-transcript = "Hello! How are you doing?"
+client = CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
 
 voices = client.get_voices()
 embedding = voices["Milo"]["embedding"]
+transcript = "Hello! Welcome to Cartesia"
 
 # No streaming
 output = client.generate(transcript=transcript, voice=embedding)
@@ -22,14 +32,4 @@ for output in client.generate(transcript=transcript, voice=embedding, stream=Tru
     rate = output["sampling_rate"]
 ```
 
-
-## Development
-If you are developing, make sure to install the development dependencies.
-
-```python
-# active your conda environment
-
-# pip install in editable mode
-pip install -e '.[dev]'
-```
-
+We recommend using [`python-dotenv`](https://pypi.org/project/python-dotenv/) to add `CARTESIA_API_KEY="my-api-key"` to your .env file so that your API Key is not stored in the source code.
