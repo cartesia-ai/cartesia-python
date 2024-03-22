@@ -212,7 +212,7 @@ class CartesiaTTS:
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         if isinstance(voice, str):
-            voice = self.get_voice_embedding(voice_id = voice)
+            voice = self.get_voice_embedding(voice_id=voice)
 
         optional_body = dict(
             duration=duration,
