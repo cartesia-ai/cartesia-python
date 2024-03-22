@@ -2,7 +2,6 @@ install:
 	pip install -e .
 
 install-dev:
-	if [ ! -e gypsum ]; then ln -s src gypsum; fi
 	pip install -e .[dev]
 
 
