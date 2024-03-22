@@ -183,7 +183,7 @@ class CartesiaTTS:
         duration: int = None,
         chunk_time: float = None,
         lookahead: int = None,
-        voice: Union[str, Embedding] = None,
+        voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
     ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
@@ -210,9 +210,6 @@ class CartesiaTTS:
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
-
-        if isinstance(voice, str):
-            voice = self.get_voice_embedding(voice_id=voice)
 
         optional_body = dict(
             duration=duration,

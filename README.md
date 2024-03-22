@@ -17,29 +17,21 @@ from cartesia.tts import CartesiaTTS
 import pyaudio
 import os
 
-DEFAULT_RATE = 44100
-
 client = CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
 voices = client.get_voices()
-voice = voices["Graham"]["id"]
+voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
 transcript = "Hello! Welcome to Cartesia"
 
 p = pyaudio.PyAudio()
 
-# Open a stream for playing audio
-stream = p.open(format=pyaudio.paFloat32,
-                channels=1,
-                rate=DEFAULT_RATE,
-                output=True)
+stream = None
 
 # Generate and stream audio
 for output in client.generate(transcript=transcript, voice=voice, stream=True):
     arr = output["audio"]  # a numpy array
     rate = output["sampling_rate"]
 
-    # Set the stream's sample rate if different
-    if stream._rate != rate:
-        stream.close()
+    if not stream:
         stream = p.open(format=pyaudio.paFloat32,
                         channels=1,
                         rate=rate,
