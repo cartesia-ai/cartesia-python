@@ -5,13 +5,16 @@ will lead to different results. Therefore, we cannot test for complete correctne
 but rather for general correctness.
 """
 
-import pytest
-from cartesia.tts import CartesiaTTS, VoiceMetadata
 import os
-from typing import Generator, Dict
+from typing import Dict, Generator
 
 import numpy as np
+import pytest
+
+from cartesia.tts import CartesiaTTS, VoiceMetadata
+
 SAMPLE_VOICE = "Milo"
+
 
 class _Resources:
     def __init__(self, *, client: CartesiaTTS, voices: Dict[str, VoiceMetadata]):
@@ -73,6 +76,7 @@ def test_generate(resources: _Resources, websocket: bool):
     assert output["audio"].dtype == np.float32
     assert isinstance(output["sampling_rate"], int)
 
+
 @pytest.mark.parametrize("websocket", [True, False])
 def test_generate_stream(resources: _Resources, websocket: bool):
     client = resources.client
@@ -80,7 +84,9 @@ def test_generate_stream(resources: _Resources, websocket: bool):
     embedding = voices[SAMPLE_VOICE]["embedding"]
     transcript = "Hello, world!"
 
-    generator = client.generate(transcript=transcript, voice=embedding, websocket=websocket, stream=True)
+    generator = client.generate(
+        transcript=transcript, voice=embedding, websocket=websocket, stream=True
+    )
     assert isinstance(generator, Generator)
 
     for output in generator:
