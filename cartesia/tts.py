@@ -1,19 +1,12 @@
 import base64
 import json
 import os
-import sys
 import uuid
-from typing import Any, Dict, Generator, List, TypedDict, Union
+from typing import Any, Dict, Generator, List, Optional, TypedDict, Union
 
 import numpy as np
 import requests
 from websockets.sync.client import connect
-
-if sys.version_info < (3, 11):
-    from typing_extensions import NotRequired
-else:
-    from typing import NotRequired
-
 
 DEFAULT_MODEL_ID = "genial-planet-1346"
 DEFAULT_BASE_URL = "api.cartesia.ai"
@@ -32,7 +25,7 @@ class VoiceMetadata(TypedDict):
     id: str
     name: str
     description: str
-    embedding: NotRequired[Embedding]
+    embedding: Optional[Embedding]
 
 
 class CartesiaTTS:
