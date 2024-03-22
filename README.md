@@ -28,7 +28,7 @@ stream = None
 
 # Generate and stream audio
 for output in client.generate(transcript=transcript, voice=voice, stream=True):
-    arr = output["audio"]  # a numpy array
+    buffer = output["audio"]
     rate = output["sampling_rate"]
 
     if not stream:
@@ -38,7 +38,7 @@ for output in client.generate(transcript=transcript, voice=voice, stream=True):
                         output=True)
 
     # Write the audio data to the stream
-    stream.write(arr.tobytes())
+    stream.write(buffer)
 
 stream.stop_stream()
 stream.close()
@@ -63,8 +63,8 @@ audio_data = io.BytesIO()
 
 # Generate and stream audio
 for output in client.generate(transcript=transcript, voice=voice, stream=True):
-    arr = output["audio"]  # a numpy array
-    audio_data.write(arr.tobytes())
+    buffer = output["audio"]
+    audio_data.write(buffer)
 
 # Set the cursor position to the beginning of the BytesIO object
 audio_data.seek(0)

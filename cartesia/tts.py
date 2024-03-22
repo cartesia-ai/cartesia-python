@@ -4,7 +4,6 @@ import os
 import uuid
 from typing import Any, Dict, Generator, List, Optional, TypedDict, Union
 
-import numpy as np
 import requests
 from websockets.sync.client import connect
 
@@ -14,7 +13,7 @@ DEFAULT_API_VERSION = "v0"
 
 
 class AudioOutput(TypedDict):
-    audio: np.ndarray
+    audio: bytes
     sampling_rate: int
 
 
@@ -206,7 +205,7 @@ class CartesiaTTS:
         Returns:
             A generator if `stream` is True, otherwise a dictionary.
             Dictionary from both generator and non-generator return types have the following keys:
-                * "audio": The audio as a 1D numpy array.
+                * "audio": The audio as a bytes buffer.
                 * "sampling_rate": The sampling rate of the audio.
         """
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
@@ -234,7 +233,7 @@ class CartesiaTTS:
                 sampling_rate = chunk["sampling_rate"]
             chunks.append(chunk["audio"])
 
-        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+        return {"audio": b"".join(chunks), "sampling_rate": sampling_rate}
 
     def _generate_http(self, body: Dict[str, Any]):
         response = requests.post(
@@ -255,8 +254,7 @@ class CartesiaTTS:
                 if start_index != -1 and end_index != -1:
                     try:
                         chunk_json = json.loads(buffer[start_index : end_index + 1])
-                        data = base64.b64decode(chunk_json["data"])
-                        audio = np.frombuffer(data, dtype=np.float32)
+                        audio = base64.b64decode(chunk_json["data"])
                         yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
                         buffer = buffer[end_index + 1 :]
                     except json.JSONDecodeError:
@@ -265,8 +263,7 @@ class CartesiaTTS:
         if buffer:
             try:
                 chunk_json = json.loads(buffer)
-                data = base64.b64decode(chunk_json["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
+                audio = base64.b64decode(chunk_json["data"])
                 yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
             except json.JSONDecodeError:
                 pass
@@ -279,8 +276,7 @@ class CartesiaTTS:
         try:
             response = json.loads(self.websocket.recv())
             while not response["done"]:
-                data = base64.b64decode(response["data"])
-                audio = np.frombuffer(data, dtype=np.float32)
+                audio = base64.b64decode(response["data"])
                 # print("timing", time.perf_counter() - start)
                 yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
 

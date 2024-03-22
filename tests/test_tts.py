@@ -8,7 +8,6 @@ but rather for general correctness.
 import os
 from typing import Dict, Generator
 
-import numpy as np
 import pytest
 
 from cartesia.tts import CartesiaTTS, VoiceMetadata
@@ -72,8 +71,7 @@ def test_generate(resources: _Resources, websocket: bool):
 
     output = client.generate(transcript=transcript, voice=embedding, websocket=websocket)
     assert output.keys() == {"audio", "sampling_rate"}
-    assert isinstance(output["audio"], np.ndarray)
-    assert output["audio"].dtype == np.float32
+    assert isinstance(output["audio"], bytes)
     assert isinstance(output["sampling_rate"], int)
 
 
@@ -91,6 +89,5 @@ def test_generate_stream(resources: _Resources, websocket: bool):
 
     for output in generator:
         assert output.keys() == {"audio", "sampling_rate"}
-        assert isinstance(output["audio"], np.ndarray)
-        assert output["audio"].dtype == np.float32
+        assert isinstance(output["audio"], bytes)
         assert isinstance(output["sampling_rate"], int)
