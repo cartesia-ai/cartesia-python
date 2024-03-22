@@ -2,10 +2,12 @@ import base64
 import json
 import os
 import sys
-from typing import Dict, List, TypedDict
+import uuid
+from typing import Any, Dict, Generator, List, TypedDict, Union
 
 import numpy as np
 import requests
+from websockets.sync.client import connect
 
 if sys.version_info < (3, 11):
     from typing_extensions import NotRequired
@@ -72,6 +74,8 @@ class CartesiaTTS:
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
+        self.websocket = None
+        self.refresh_websocket()
 
     def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
         """Returns a mapping from voice name -> voice metadata.
@@ -161,6 +165,22 @@ class CartesiaTTS:
         out = response.json()
         return json.loads(out["embedding"])
 
+    def refresh_websocket(self):
+        """Refresh the websocket connection.
+
+        Note:
+            The connection is synchronous.
+        """
+        if self.websocket and not self._is_websocket_closed():
+            self.websocket.close()
+        self.websocket = connect(
+            f"{self._ws_url()}/audio/websocket?api_key={self.api_key}",
+            close_timeout=None,
+        )
+
+    def _is_websocket_closed(self):
+        return self.websocket.socket.fileno() == -1
+
     def generate(
         self,
         *,
@@ -170,7 +190,8 @@ class CartesiaTTS:
         lookahead: int = None,
         voice: Embedding = None,
         stream: bool = False,
-    ) -> AudioOutput:
+        websocket: bool = True,
+    ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
         """Generate audio from a transcript.
 
         Args:
@@ -184,9 +205,12 @@ class CartesiaTTS:
                 This can either be a voice id (string) or an embedding vector (List[float]).
             stream: Whether to stream the audio or not.
                 If ``True`` this function returns a generator.
+            websocket: Whether to use a websocket for streaming audio.
+                Using the websocket reduces latency by pre-poning the handshake.
 
         Returns:
-            A dictionary containing:
+            A generator if `stream` is True, otherwise a dictionary.
+            Dictionary from both generator and non-generator return types have the following keys:
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
@@ -203,6 +227,24 @@ class CartesiaTTS:
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
 
+        if websocket:
+            generator = self._generate_ws(body)
+        else:
+            generator = self._generate_http(body)
+
+        if stream:
+            return generator
+
+        chunks = []
+        sampling_rate = None
+        for chunk in generator:
+            if sampling_rate is None:
+                sampling_rate = chunk["sampling_rate"]
+            chunks.append(chunk["audio"])
+
+        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+
+    def _generate_http(self, body: Dict[str, Any]):
         response = requests.post(
             f"{self._http_url()}/audio/stream",
             stream=True,
@@ -212,44 +254,56 @@ class CartesiaTTS:
         if response.status_code != 200:
             raise ValueError(f"Failed to generate audio. {response.text}")
 
-        def generator():
-            buffer = ""
-            for chunk_bytes in response.iter_content(chunk_size=None):
-                buffer += chunk_bytes.decode("utf-8")
-                while "{" in buffer and "}" in buffer:
-                    start_index = buffer.find("{")
-                    end_index = buffer.find("}", start_index)
-                    if start_index != -1 and end_index != -1:
-                        try:
-                            chunk_json = json.loads(buffer[start_index : end_index + 1])
-                            data = base64.b64decode(chunk_json["data"])
-                            audio = np.frombuffer(data, dtype=np.float32)
-                            yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
-                            buffer = buffer[end_index + 1 :]
-                        except json.JSONDecodeError:
-                            break
+        buffer = ""
+        for chunk_bytes in response.iter_content(chunk_size=None):
+            buffer += chunk_bytes.decode("utf-8")
+            while "{" in buffer and "}" in buffer:
+                start_index = buffer.find("{")
+                end_index = buffer.find("}", start_index)
+                if start_index != -1 and end_index != -1:
+                    try:
+                        chunk_json = json.loads(buffer[start_index : end_index + 1])
+                        data = base64.b64decode(chunk_json["data"])
+                        audio = np.frombuffer(data, dtype=np.float32)
+                        yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                        buffer = buffer[end_index + 1 :]
+                    except json.JSONDecodeError:
+                        break
 
-            if buffer:
-                try:
-                    chunk_json = json.loads(buffer)
-                    data = base64.b64decode(chunk_json["data"])
-                    audio = np.frombuffer(data, dtype=np.float32)
-                    yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
-                except json.JSONDecodeError:
-                    pass
+        if buffer:
+            try:
+                chunk_json = json.loads(buffer)
+                data = base64.b64decode(chunk_json["data"])
+                audio = np.frombuffer(data, dtype=np.float32)
+                yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+            except json.JSONDecodeError:
+                pass
 
-        if stream:
-            return generator()
+    def _generate_ws(self, body: Dict[str, Any]):
+        if not self.websocket or self._is_websocket_closed():
+            self.refresh_websocket()
 
-        chunks = []
-        sampling_rate = None
-        for chunk in generator():
-            if sampling_rate is None:
-                sampling_rate = chunk["sampling_rate"]
-            chunks.append(chunk["audio"])
+        self.websocket.send(json.dumps({"data": body, "context_id": uuid.uuid4().hex}))
+        try:
+            response = json.loads(self.websocket.recv())
+            while not response["done"]:
+                data = base64.b64decode(response["data"])
+                audio = np.frombuffer(data, dtype=np.float32)
+                # print("timing", time.perf_counter() - start)
+                yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
 
-        return {"audio": np.concatenate(chunks), "sampling_rate": sampling_rate}
+                response = json.loads(self.websocket.recv())
+        except Exception:
+            raise RuntimeError(f"Failed to generate audio. {response}")
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
         return f"{prefix}://{self.base_url}/{self.api_version}"
+
+    def _ws_url(self):
+        prefix = "ws" if "localhost" in self.base_url else "wss"
+        return f"{prefix}://{self.base_url}/{self.api_version}"
+
+    def __del__(self):
+        if self.websocket.socket.fileno() > -1:
+            self.websocket.close()
