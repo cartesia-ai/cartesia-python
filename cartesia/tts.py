@@ -193,7 +193,6 @@ class CartesiaTTS:
         transcript: str,
         max_duration: int = None,
         chunk_time: float = None,
-        lookahead: int = None,
         voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
@@ -225,7 +224,6 @@ class CartesiaTTS:
         optional_body = dict(
             duration=max_duration,
             chunk_time=chunk_time,
-            lookahead=lookahead,
             voice=voice,
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
