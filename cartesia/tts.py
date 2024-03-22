@@ -211,9 +211,6 @@ class CartesiaTTS:
         """
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
-        if isinstance(voice, str):
-            voice = self._voices[voice]
-
         optional_body = dict(
             duration=duration,
             chunk_time=chunk_time,
