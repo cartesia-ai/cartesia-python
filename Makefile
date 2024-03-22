@@ -17,4 +17,4 @@ lint:
 	flake8 .
 
 test:
-	pytest -ra tests/ --ignore=tests/integration --cov=src/
+	pytest -ra tests/ --cov=cartesia/
