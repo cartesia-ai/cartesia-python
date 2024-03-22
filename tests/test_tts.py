@@ -95,12 +95,14 @@ def test_generate_stream(resources: _Resources, websocket: bool):
 
 @pytest.mark.parametrize("chunk_time", [0.05, 0.6])
 def test_check_inputs_invalid_chunk_time(chunk_time):
+    client = resources.client
     with pytest.raises(ValueError, match="chunk_time must be between 0.1 and 0.5"):
         client._check_inputs("Test", None, chunk_time)
 
 
 @pytest.mark.parametrize("chunk_time", [0.1, 0.3, 0.5])
 def test_check_inputs_valid_chunk_time(chunk_time):
+    client = resources.client
     try:
         client._check_inputs("Test", None, chunk_time)
     except ValueError:
@@ -108,12 +110,14 @@ def test_check_inputs_valid_chunk_time(chunk_time):
 
 
 def test_check_inputs_duration_less_than_chunk_time():
+    client = resources.client
     with pytest.raises(ValueError, match="duration must be greater than chunk_time"):
         client._check_inputs("Test", 0.2, 0.3)
 
 
 @pytest.mark.parametrize("max_duration,chunk_time", [(0.5, 0.2), (1.0, 0.5), (2.0, 0.1)])
 def test_check_inputs_valid_duration_and_chunk_time(max_duration, chunk_time):
+    client = resources.client
     try:
         client._check_inputs("Test", max_duration, chunk_time)
     except ValueError:
@@ -121,12 +125,14 @@ def test_check_inputs_valid_duration_and_chunk_time(max_duration, chunk_time):
 
 
 def test_check_inputs_empty_transcript():
+    client = resources.client
     with pytest.raises(ValueError, match="Transcript must be non empty"):
         client._check_inputs("", None, None)
 
 
 @pytest.mark.parametrize("transcript", ["Hello", "Test transcript", "Lorem ipsum dolor sit amet"])
 def test_check_inputs_valid_transcript(transcript):
+    client = resources.client
     try:
         client._check_inputs(transcript, None, None)
     except ValueError:
