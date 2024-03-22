@@ -13,7 +13,7 @@ DEFAULT_API_VERSION = "v0"
 
 
 class AudioOutput(TypedDict):
-    audio: bytes 
+    audio: bytes
     sampling_rate: int
 
 
