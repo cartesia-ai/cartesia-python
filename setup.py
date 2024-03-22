@@ -27,7 +27,7 @@ DESCRIPTION = "The official Python library for the Cartesia API."
 URL = ""
 EMAIL = "support@cartesia.ai"
 AUTHOR = "Cartesia, Inc."
-REQUIRES_PYTHON = ">=3.7.0"
+REQUIRES_PYTHON = ">=3.8.0"
 VERSION = main_ns["__version__"]
 
 
