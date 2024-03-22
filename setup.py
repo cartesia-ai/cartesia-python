@@ -25,7 +25,7 @@ with open(ver_path) as ver_file:
 NAME = "cartesia"
 DESCRIPTION = "The official Python library for the Cartesia API."
 URL = ""
-EMAIL = "arjun@cartesia.ai"
+EMAIL = "support@cartesia.ai"
 AUTHOR = "Cartesia, Inc."
 REQUIRES_PYTHON = ">=3.9.0"
 VERSION = main_ns["__version__"]

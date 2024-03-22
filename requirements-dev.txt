@@ -1,5 +1,12 @@
-# These should be installed when running in development mode.
+# Development
+# Anchor versions to avoid changes in formatting with new releases.
+# NOTE: These versions should match those in .pre-commit-config.yaml
 pre-commit
+docformatter
 black==24.1.1
 isort==5.13.2
 flake8==7.0.0
+flake8-bugbear==24.2.6
+
+pytest>=8.0.2
+pytest-cov>=4.1.0

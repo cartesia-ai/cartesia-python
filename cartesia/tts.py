@@ -163,7 +163,9 @@ class CartesiaTTS:
 
         # Handle successful response
         out = response.json()
-        return json.loads(out["embedding"])
+        if isinstance(out["embedding"], str):
+            out["embedding"] = json.loads(out["embedding"])
+        return out["embedding"]
 
     def refresh_websocket(self):
         """Refresh the websocket connection.
