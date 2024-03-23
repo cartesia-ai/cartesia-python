@@ -175,23 +175,25 @@ class CartesiaTTS:
     def _is_websocket_closed(self):
         return self.websocket.socket.fileno() == -1
 
-    def _check_inputs(self, transcript, max_duration, chunk_time):
+    def _check_inputs(
+        self, transcript: str, duration: Optional[float], chunk_time: Optional[float]
+    ):
         if chunk_time is not None:
             if chunk_time < 0.1 or chunk_time > 0.5:
-                raise ValueError("chunk_time must be between 0.1 and 0.5")
+                raise ValueError("`chunk_time` must be between 0.1 and 0.5")
 
-        if chunk_time is not None and max_duration is not None:
-            if max_duration < chunk_time:
-                raise ValueError("duration must be greater than chunk_time")
+        if chunk_time is not None and duration is not None:
+            if duration < chunk_time:
+                raise ValueError("`duration` must be greater than chunk_time")
 
-        if transcript == "":
-            raise ValueError("Transcript must be non empty")
+        if transcript.strip() == "":
+            raise ValueError("`transcript` must be non empty")
 
     def generate(
         self,
         *,
         transcript: str,
-        max_duration: int = None,
+        duration: int = None,
         chunk_time: float = None,
         voice: Embedding = None,
         stream: bool = False,
@@ -201,7 +203,7 @@ class CartesiaTTS:
 
         Args:
             transcript: The text to generate audio for.
-            max_duration: The maximum duration of the audio in seconds.
+            duration: The maximum duration of the audio in seconds.
             chunk_time: How long each audio segment should be in seconds.
                 This should not need to be adjusted.
             voice: The voice to use for generating audio.
@@ -217,12 +219,12 @@ class CartesiaTTS:
                 * "audio": The audio as a bytes buffer.
                 * "sampling_rate": The sampling rate of the audio.
         """
-        self._check_inputs(transcript, max_duration, chunk_time)
+        self._check_inputs(transcript, duration, chunk_time)
 
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         optional_body = dict(
-            duration=max_duration,
+            duration=duration,
             chunk_time=chunk_time,
             voice=voice,
         )
