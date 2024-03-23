@@ -175,13 +175,26 @@ class CartesiaTTS:
     def _is_websocket_closed(self):
         return self.websocket.socket.fileno() == -1
 
+    def _check_inputs(
+        self, transcript: str, duration: Optional[float], chunk_time: Optional[float]
+    ):
+        if chunk_time is not None:
+            if chunk_time < 0.1 or chunk_time > 0.5:
+                raise ValueError("`chunk_time` must be between 0.1 and 0.5")
+
+        if chunk_time is not None and duration is not None:
+            if duration < chunk_time:
+                raise ValueError("`duration` must be greater than chunk_time")
+
+        if transcript.strip() == "":
+            raise ValueError("`transcript` must be non empty")
+
     def generate(
         self,
         *,
         transcript: str,
         duration: int = None,
         chunk_time: float = None,
-        lookahead: int = None,
         voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
@@ -192,8 +205,6 @@ class CartesiaTTS:
             transcript: The text to generate audio for.
             duration: The maximum duration of the audio in seconds.
             chunk_time: How long each audio segment should be in seconds.
-                This should not need to be adjusted.
-            lookahead: The number of seconds to look ahead for each chunk.
                 This should not need to be adjusted.
             voice: The voice to use for generating audio.
                 This can either be a voice id (string) or an embedding vector (List[float]).
@@ -208,12 +219,13 @@ class CartesiaTTS:
                 * "audio": The audio as a bytes buffer.
                 * "sampling_rate": The sampling rate of the audio.
         """
+        self._check_inputs(transcript, duration, chunk_time)
+
         body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
 
         optional_body = dict(
             duration=duration,
             chunk_time=chunk_time,
-            lookahead=lookahead,
             voice=voice,
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
