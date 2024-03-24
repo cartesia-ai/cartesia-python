@@ -31,7 +31,11 @@ class CartesiaTTS:
     """The client for Cartesia's text-to-speech library.
 
     This client contains methods to interact with the Cartesia text-to-speech API.
-    The API offers
+    The client can be used to retrieve available voices, compute new voice embeddings,
+    and generate speech from text.
+
+    The client also supports generating audio using a websocket for lower latency.
+    To enable interrupt handling along the websocket, set `experimental_ws_handle_interrupts=True`.
 
     Examples:
 
@@ -55,18 +59,22 @@ class CartesiaTTS:
         ...     audio, sr = audio_chunk["audio"], audio_chunk["sampling_rate"]
     """
 
-    def __init__(self, *, api_key: str = None):
+    def __init__(self, *, api_key: str = None, experimental_ws_handle_interrupts: bool = False):
         """
         Args:
             api_key: The API key to use for authorization.
                 If not specified, the API key will be read from the environment variable
                 `CARTESIA_API_KEY`.
+            experimental_ws_handle_interrupts: Whether to handle interrupts when generating
+                audio using the websocket. This is an experimental feature and may have bugs
+                or be deprecated in the future.
         """
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
         self.websocket = None
+        self.experimental_ws_handle_interrupts = experimental_ws_handle_interrupts
         self.refresh_websocket()
 
     def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
@@ -167,8 +175,11 @@ class CartesiaTTS:
         """
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
+        route = "audio/websocket"
+        if self.experimental_ws_handle_interrupts:
+            route = f"experimental/{route}"
         self.websocket = connect(
-            f"{self._ws_url()}/audio/websocket?api_key={self.api_key}",
+            f"{self._ws_url()}/{route}?api_key={self.api_key}",
             close_timeout=None,
         )
 
@@ -280,21 +291,50 @@ class CartesiaTTS:
             except json.JSONDecodeError:
                 pass
 
-    def _generate_ws(self, body: Dict[str, Any]):
+    def _generate_ws(self, body: Dict[str, Any], *, context_id: str = None):
+        """Generate audio using the websocket connection.
+
+        Args:
+            body: The request body.
+            context_id: The context id for the request.
+                The context id must be globally unique for the duration this client exists.
+                If this is provided, the context id that is in the response will
+                also be returned as part of the dict. This is helpful for testing.
+        """
         if not self.websocket or self._is_websocket_closed():
             self.refresh_websocket()
 
-        self.websocket.send(json.dumps({"data": body, "context_id": uuid.uuid4().hex}))
+        include_context_id = bool(context_id)
+        if context_id is None:
+            context_id = uuid.uuid4().hex
+        self.websocket.send(json.dumps({"data": body, "context_id": context_id}))
         try:
-            response = json.loads(self.websocket.recv())
-            while not response["done"]:
-                audio = base64.b64decode(response["data"])
-                # print("timing", time.perf_counter() - start)
-                yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
-
+            while True:
                 response = json.loads(self.websocket.recv())
-        except Exception:
-            raise RuntimeError(f"Failed to generate audio. {response}")
+                if response["done"]:
+                    break
+                audio = base64.b64decode(response["data"])
+
+                optional_kwargs = {}
+                if include_context_id:
+                    optional_kwargs["context_id"] = response["context_id"]
+
+                yield {
+                    "audio": audio,
+                    "sampling_rate": response["sampling_rate"],
+                    **optional_kwargs,
+                }
+
+                if self.experimental_ws_handle_interrupts:
+                    self.websocket.send(json.dumps({"context_id": context_id}))
+        except GeneratorExit:
+            # The exit is only called when the generator is garbage collected.
+            # It may not be called directly after a break statement.
+            # However, the generator will be automatically cancelled on the next request.
+            if self.experimental_ws_handle_interrupts:
+                self.websocket.send(json.dumps({"context_id": context_id, "action": "cancel"}))
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate audio. {response}") from e
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
