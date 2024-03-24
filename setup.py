@@ -214,7 +214,7 @@ class BumpVersionCommand(Command):
 
         # Commit the file with a message '[bumpversion] v<version>'.
         self.status(f"Commit with message '[bumpversion] v{self.version}'")
-        err_code = os.system("git commit -m '[bumpversion] v{}'".format(current_version))
+        err_code = os.system("git commit -m '[bumpversion] v{}'".format(self.version))
         if err_code != 0:
             self._undo()
             raise RuntimeError("Failed to commit file to git.")
