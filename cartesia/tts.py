@@ -31,7 +31,11 @@ class CartesiaTTS:
     """The client for Cartesia's text-to-speech library.
 
     This client contains methods to interact with the Cartesia text-to-speech API.
-    The API offers
+    The client can be used to retrieve available voices, compute new voice embeddings,
+    and generate speech from text.
+
+    The client also supports generating audio using a websocket for lower latency.
+    To enable interrupt handling along the websocket, set `experimental_ws_handle_interrupts=True`.
 
     Examples:
 
@@ -61,6 +65,9 @@ class CartesiaTTS:
             api_key: The API key to use for authorization.
                 If not specified, the API key will be read from the environment variable
                 `CARTESIA_API_KEY`.
+            experimental_ws_handle_interrupts: Whether to handle interrupts when generating
+                audio using the websocket. This is an experimental feature and may have bugs
+                or be deprecated in the future.
         """
         self.base_url = os.environ.get("CARTESIA_BASE_URL", DEFAULT_BASE_URL)
         self.api_key = api_key or os.environ.get("CARTESIA_API_KEY")
@@ -300,6 +307,9 @@ class CartesiaTTS:
                 if self.experimental_ws_handle_interrupts:
                     self.websocket.send(json.dumps({"context_id": _uuid}))
         except GeneratorExit:
+            # The exit is only called when the generator is garbage collected.
+            # It may not be called directly after a break statement.
+            # However, the generator will be automatically cancelled on the next request.
             if self.experimental_ws_handle_interrupts:
                 self.websocket.send(json.dumps({"context_id": _uuid, "action": "cancel"}))
         except Exception as e:
