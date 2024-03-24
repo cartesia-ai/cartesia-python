@@ -76,4 +76,4 @@ audio = Audio(audio_data, rate=output["sampling_rate"])
 display(audio)
 ```
 
-We recommend using [`python-dotenv`](https://pypi.org/project/python-dotenv/) to add `CARTESIA_API_KEY="my-api-key"` to your .env file so that your API Key is not stored in the source code.
+We recommend using [`python-dotenv`](https://pypi.org/project/python-dotenv/) to add `CARTESIA_API_KEY="my-api-key"` to your .env file. You can also use the cliet's enviornment variable. Do not store your API Key in the source code.
