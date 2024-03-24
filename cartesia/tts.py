@@ -300,7 +300,8 @@ class CartesiaTTS:
                 if self.experimental_ws_handle_interrupts:
                     self.websocket.send(json.dumps({"context_id": _uuid}))
         except GeneratorExit:
-            self.websocket.send(json.dumps({"context_id": _uuid, "action": "cancel"}))
+            if self.experimental_ws_handle_interrupts:
+                self.websocket.send(json.dumps({"context_id": _uuid, "action": "cancel"}))
         except Exception as e:
             raise RuntimeError(f"Failed to generate audio. {response}") from e
 
