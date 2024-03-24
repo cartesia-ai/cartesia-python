@@ -78,7 +78,8 @@ class UploadCommand(Command):
     """Support setup.py upload."""
 
     description = "Build and publish the package."
-    user_options = []
+    user_options = [("skip-upload", "u", "skip git tagging and pypi upload")]
+    boolean_options = ["skip-upload"]
 
     @staticmethod
     def status(s):
@@ -86,20 +87,25 @@ class UploadCommand(Command):
         print("\033[1m{0}\033[0m".format(s))
 
     def initialize_options(self):
-        pass
+        self.skip_upload = False
 
     def finalize_options(self):
-        pass
+        self.skip_upload = bool(self.skip_upload)
 
     def run(self):
         try:
             self.status("Removing previous builds…")
             rmtree(os.path.join(here, "dist"))
+            rmtree(os.path.join(here, "build"))
         except OSError:
             pass
 
         self.status("Building Source and Wheel (universal) distribution…")
         os.system("{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
+
+        if self.skip_upload:
+            self.status("Skipping git tagging and pypi upload")
+            sys.exit()
 
         self.status("Uploading the package to PyPI via Twine…")
         os.system("twine upload dist/*")
@@ -116,6 +122,9 @@ class BumpVersionCommand(Command):
     To use: python setup.py bumpversion -v <version>
 
     This command will push the new version directly and tag it.
+
+    Usage:
+        python setup.py bumpversion --version=1.0.1
     """
 
     description = "Installs the foo."
@@ -130,6 +139,11 @@ class BumpVersionCommand(Command):
 
     def initialize_options(self):
         self.version = None
+        self.base_branch = None
+        self.version_branch = None
+        self.updated_files = [
+            "cartesia/version.py",
+        ]
 
     def finalize_options(self):
         # This package cannot be imported at top level because it
@@ -147,14 +161,18 @@ class BumpVersionCommand(Command):
             )
 
     def _undo(self):
-        os.system(f"git restore --staged {PACKAGE_DIR}/__init__.py")
-        os.system(f"git checkout -- {PACKAGE_DIR}/__init__.py")
+        os.system(f"git restore --staged {' '.join(self.updated_files)}")
+        os.system(f"git checkout -- {' '.join(self.updated_files)}")
+
+        # Return to the original branch
+        os.system(f"git checkout {self.base_branch}")
+        os.system(f"git branch -D {self.version_branch}")
 
     def run(self):
         current_version = about["__version__"]
 
         self.status("Checking current branch is 'main'")
-        current_branch = get_git_branch()
+        self.base_branch = current_branch = get_git_branch()
         if current_branch != "main":
             raise RuntimeError(
                 "You can only bump the version from the 'main' branch. "
@@ -174,18 +192,25 @@ class BumpVersionCommand(Command):
 
         # TODO: Add check to see if all tests are passing on main.
 
+        # Checkout new branch
+        self.version_branch = f"bumpversion/v{self.version}"
+        self.status(f"Create branch '{self.version_branch}'")
+        err_code = os.system(f"git checkout -b {self.version_branch}")
+        if err_code != 0:
+            raise RuntimeError("Failed to create branch.")
+
         # Change the version in __init__.py
         self.status(f"Updating version {current_version} -> {self.version}")
         update_version(self.version)
-        if current_version != self.version:
-            self._undo()
-            raise RuntimeError("Failed to update version.")
+        # if current_version != self.version:
+        #     self._undo()
+        #     raise RuntimeError("Failed to update version.")
 
-        self.status(f"Adding {PACKAGE_DIR}/__init__.py to git")
-        err_code = os.system(f"git add {PACKAGE_DIR}/__init__.py")
+        self.status(f"Adding {', '.join(self.updated_files)} to git")
+        err_code = os.system(f"git add {' '.join(self.updated_files)}")
         if err_code != 0:
             self._undo()
-            raise RuntimeError("Failed to add file to git.")
+            raise RuntimeError("Failed to add files to git.")
 
         # Commit the file with a message '[bumpversion] v<version>'.
         self.status(f"Commit with message '[bumpversion] v{self.version}'")
@@ -195,12 +220,15 @@ class BumpVersionCommand(Command):
             raise RuntimeError("Failed to commit file to git.")
 
         # Push the commit to origin.
-        # self.status("Pushing commit to origin")
-        # err_code = os.system("git push")
-        # if err_code != 0:
-        #     # TODO: undo the commit automatically.
-        #     raise RuntimeError("Failed to push commit to origin.")
+        self.status(f"Pushing commit to origin/{self.version_branch}")
+        err_code = os.system(f"git push --force --set-upstream origin {self.version_branch}")
+        if err_code != 0:
+            # TODO: undo the commit automatically.
+            self._undo()
+            raise RuntimeError("Failed to push commit to origin.")
 
+        os.system(f"git checkout {self.base_branch}")
+        os.system(f"git branch -D {self.version_branch}")
         sys.exit()
 
 
