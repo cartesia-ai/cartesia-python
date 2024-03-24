@@ -78,4 +78,4 @@ display(audio)
 
 To avoid storing your API key in the source code, we recommend doing one of the following:
 1. Use [`python-dotenv`](https://pypi.org/project/python-dotenv/) to add `CARTESIA_API_KEY="my-api-key"` to your .env file. 
-1. Set the `CARTESIA_API_KEY` environment variable, preferably to a secure shell init file (e..g `~/.zshrc`, `~/.bashrc`) j
+1. Set the `CARTESIA_API_KEY` environment variable, preferably to a secure shell init file (e.g. `~/.zshrc`, `~/.bashrc`)
