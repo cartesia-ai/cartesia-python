@@ -55,7 +55,7 @@ class CartesiaTTS:
         ...     audio, sr = audio_chunk["audio"], audio_chunk["sampling_rate"]
     """
 
-    def __init__(self, *, api_key: str = None):
+    def __init__(self, *, api_key: str = None, experimental_ws_handle_interrupts: bool = False):
         """
         Args:
             api_key: The API key to use for authorization.
@@ -67,6 +67,7 @@ class CartesiaTTS:
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
         self.websocket = None
+        self.experimental_ws_handle_interrupts = experimental_ws_handle_interrupts
         self.refresh_websocket()
 
     def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
@@ -167,8 +168,11 @@ class CartesiaTTS:
         """
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
+        route = "audio/websocket"
+        if self.experimental_ws_handle_interrupts:
+            route = f"experimental/{route}"
         self.websocket = connect(
-            f"{self._ws_url()}/audio/websocket?api_key={self.api_key}",
+            f"{self._ws_url()}/{route}?api_key={self.api_key}",
             close_timeout=None,
         )
 
@@ -284,17 +288,21 @@ class CartesiaTTS:
         if not self.websocket or self._is_websocket_closed():
             self.refresh_websocket()
 
-        self.websocket.send(json.dumps({"data": body, "context_id": uuid.uuid4().hex}))
+        _uuid = uuid.uuid4().hex
+        self.websocket.send(json.dumps({"data": body, "context_id": _uuid}))
         try:
-            response = json.loads(self.websocket.recv())
-            while not response["done"]:
-                audio = base64.b64decode(response["data"])
-                # print("timing", time.perf_counter() - start)
-                yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
-
+            while True:
                 response = json.loads(self.websocket.recv())
-        except Exception:
-            raise RuntimeError(f"Failed to generate audio. {response}")
+                if response["done"]:
+                    break
+                audio = base64.b64decode(response["data"])
+                yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
+                if self.experimental_ws_handle_interrupts:
+                    self.websocket.send(json.dumps({"context_id": _uuid}))
+        except GeneratorExit:
+            self.websocket.send(json.dumps({"context_id": _uuid, "action": "cancel"}))
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate audio. {response}") from e
 
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
