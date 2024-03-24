@@ -291,27 +291,48 @@ class CartesiaTTS:
             except json.JSONDecodeError:
                 pass
 
-    def _generate_ws(self, body: Dict[str, Any]):
+    def _generate_ws(self, body: Dict[str, Any], *, context_id: str = None):
+        """Generate audio using the websocket connection.
+
+        Args:
+            body: The request body.
+            context_id: The context id for the request.
+                The context id must be globally unique for the duration this client exists.
+                If this is provided, the context id that is in the response will
+                also be returned as part of the dict. This is helpful for testing.
+        """
         if not self.websocket or self._is_websocket_closed():
             self.refresh_websocket()
 
-        _uuid = uuid.uuid4().hex
-        self.websocket.send(json.dumps({"data": body, "context_id": _uuid}))
+        include_context_id = bool(context_id)
+        if context_id is None:
+            context_id = uuid.uuid4().hex
+        self.websocket.send(json.dumps({"data": body, "context_id": context_id}))
         try:
             while True:
                 response = json.loads(self.websocket.recv())
                 if response["done"]:
                     break
                 audio = base64.b64decode(response["data"])
-                yield {"audio": audio, "sampling_rate": response["sampling_rate"]}
+
+                optional_kwargs = {}
+                if include_context_id:
+                    optional_kwargs["context_id"] = response["context_id"]
+
+                yield {
+                    "audio": audio,
+                    "sampling_rate": response["sampling_rate"],
+                    **optional_kwargs,
+                }
+
                 if self.experimental_ws_handle_interrupts:
-                    self.websocket.send(json.dumps({"context_id": _uuid}))
+                    self.websocket.send(json.dumps({"context_id": context_id}))
         except GeneratorExit:
             # The exit is only called when the generator is garbage collected.
             # It may not be called directly after a break statement.
             # However, the generator will be automatically cancelled on the next request.
             if self.experimental_ws_handle_interrupts:
-                self.websocket.send(json.dumps({"context_id": _uuid, "action": "cancel"}))
+                self.websocket.send(json.dumps({"context_id": context_id, "action": "cancel"}))
         except Exception as e:
             raise RuntimeError(f"Failed to generate audio. {response}") from e
 

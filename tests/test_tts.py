@@ -6,11 +6,12 @@ but rather for general correctness.
 """
 
 import os
-from typing import Dict, Generator
+import uuid
+from typing import Dict, Generator, List
 
 import pytest
 
-from cartesia.tts import CartesiaTTS, VoiceMetadata
+from cartesia.tts import DEFAULT_MODEL_ID, CartesiaTTS, VoiceMetadata
 
 SAMPLE_VOICE = "Milo"
 
@@ -24,6 +25,13 @@ class _Resources:
 @pytest.fixture(scope="session")
 def client():
     return CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+
+@pytest.fixture(scope="session")
+def client_with_ws_interrupt():
+    return CartesiaTTS(
+        api_key=os.environ.get("CARTESIA_API_KEY"), experimental_ws_handle_interrupts=True
+    )
 
 
 @pytest.fixture(scope="session")
@@ -91,6 +99,45 @@ def test_generate_stream(resources: _Resources, websocket: bool):
         assert output.keys() == {"audio", "sampling_rate"}
         assert isinstance(output["audio"], bytes)
         assert isinstance(output["sampling_rate"], int)
+
+
+@pytest.mark.parametrize(
+    "actions",
+    [
+        ["cancel-5", None],
+        ["cancel-5", "cancel-1", None],
+        [None, "cancel-3", None],
+        [None, "cancel-1", "cancel-2"],
+    ],
+)
+def test_generate_stream_interrupt(
+    client_with_ws_interrupt: CartesiaTTS, resources: _Resources, actions: List[str]
+):
+    client = client_with_ws_interrupt
+    voices = resources.voices
+    embedding = voices[SAMPLE_VOICE]["embedding"]
+    transcript = "Hello, world!"
+
+    context_ids = [f"test-{uuid.uuid4().hex[:6]}" for _ in range(len(actions))]
+
+    for context_id, action in zip(context_ids, actions):
+        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID, voice=embedding)
+
+        # Parse actions to see what we should expect.
+        if action is None:
+            num_turns = None
+        elif "cancel" in action:
+            num_turns = int(action.split("-")[1])
+
+        generator = client._generate_ws(body, context_id=context_id)
+        for idx, response in enumerate(generator):
+            assert response.keys() == {"audio", "sampling_rate", "context_id"}
+            assert response["context_id"] == context_id, (
+                f"Context ID from response ({response['context_id']}) does not match "
+                f"the expected context ID ({context_id})"
+            )
+            if idx + 1 == num_turns:
+                break
 
 
 @pytest.mark.parametrize("chunk_time", [0.05, 0.6])
