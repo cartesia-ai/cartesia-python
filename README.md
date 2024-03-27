@@ -70,7 +70,37 @@ for output in client.generate(transcript=transcript, voice=voice, stream=True):
 audio_data.seek(0)
 
 # Create an Audio object from the BytesIO data
-audio = Audio(audio_data, rate=output["sampling_rate"])
+audio = Audio(np.frombuffer(audio_data.read(), dtype=np.float32), rate=output["sampling_rate"])
+
+# Display the Audio object
+display(audio)
+```
+
+You can also use the async client if you want to make asynchronous API calls. The usage is very similar:
+```python
+from cartesia.tts import AsyncCartesiaTTS
+from IPython.display import Audio
+import io
+import os
+
+client = AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+voices = client.get_voices()
+voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+transcript = "Hello! Welcome to Cartesia"
+
+# Create a BytesIO object to store the audio data
+audio_data = io.BytesIO()
+
+# Generate and stream audio
+async for output in client.generate(transcript=transcript, voice=voice, stream=True):
+    buffer = output["audio"]
+    audio_data.write(buffer)
+
+# Set the cursor position to the beginning of the BytesIO object
+audio_data.seek(0)
+
+# Create an Audio object from the BytesIO data
+audio = Audio(np.frombuffer(audio_data.read(), dtype=np.float32), rate=output["sampling_rate"])
 
 # Display the Audio object
 display(audio)

@@ -6,12 +6,14 @@ but rather for general correctness.
 """
 
 import os
+import sys
 import uuid
-from typing import Dict, Generator, List
+from typing import AsyncGenerator, Dict, Generator, List
 
 import pytest
 
-from cartesia.tts import DEFAULT_MODEL_ID, CartesiaTTS, VoiceMetadata
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from cartesia.tts import DEFAULT_MODEL_ID, AsyncCartesiaTTS, CartesiaTTS, VoiceMetadata
 
 SAMPLE_VOICE = "Milo"
 
@@ -22,9 +24,17 @@ class _Resources:
         self.voices = voices
 
 
+def create_client():
+    return CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+
+def create_async_client():
+    return AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+
 @pytest.fixture(scope="session")
 def client():
-    return CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+    return create_client()
 
 
 @pytest.fixture(scope="session")
@@ -96,6 +106,41 @@ def test_generate_stream(resources: _Resources, websocket: bool):
     assert isinstance(generator, Generator)
 
     for output in generator:
+        assert output.keys() == {"audio", "sampling_rate"}
+        assert isinstance(output["audio"], bytes)
+        assert isinstance(output["sampling_rate"], int)
+
+
+@pytest.mark.parametrize("websocket", [True, False])
+@pytest.mark.asyncio
+async def test_async_generate(resources: _Resources, websocket: bool):
+    voices = resources.voices
+    embedding = voices[SAMPLE_VOICE]["embedding"]
+    transcript = "Hello, world!"
+
+    async_client = create_async_client()
+    output = await async_client.generate(
+        transcript=transcript, voice=embedding, websocket=websocket
+    )
+
+    assert output.keys() == {"audio", "sampling_rate"}
+    assert isinstance(output["audio"], bytes)
+    assert isinstance(output["sampling_rate"], int)
+
+
+@pytest.mark.parametrize("websocket", [True, False])
+@pytest.mark.asyncio
+async def test_async_generate_stream(resources: _Resources, websocket: bool):
+    voices = resources.voices
+    embedding = voices[SAMPLE_VOICE]["embedding"]
+    transcript = "Hello, world!"
+
+    async_client = create_async_client()
+
+    generator = await async_client.generate(transcript=transcript, voice=embedding, stream=True)
+    assert isinstance(generator, AsyncGenerator)
+
+    async for output in generator:
         assert output.keys() == {"audio", "sampling_rate"}
         assert isinstance(output["audio"], bytes)
         assert isinstance(output["sampling_rate"], int)

@@ -1,15 +1,19 @@
+import asyncio
 import base64
 import json
 import os
 import uuid
-from typing import Any, Dict, Generator, List, Optional, TypedDict, Union
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
+import aiohttp
 import requests
 from websockets.sync.client import connect
 
 DEFAULT_MODEL_ID = "genial-planet-1346"
 DEFAULT_BASE_URL = "api.cartesia.ai"
 DEFAULT_API_VERSION = "v0"
+DEFAULT_TIMEOUT = 60  # seconds
+DEFAULT_NUM_CONNECTIONS = 10  # connections per client
 
 
 class AudioOutput(TypedDict):
@@ -25,6 +29,37 @@ class VoiceMetadata(TypedDict):
     name: str
     description: str
     embedding: Optional[Embedding]
+
+
+def update_buffer(buffer: str, chunk_bytes: bytes) -> Tuple[str, List[Dict[str, Any]]]:
+    buffer += chunk_bytes.decode("utf-8")
+    outputs = []
+    while "{" in buffer and "}" in buffer:
+        start_index = buffer.find("{")
+        end_index = buffer.find("}", start_index)
+        if start_index != -1 and end_index != -1:
+            try:
+                chunk_json = json.loads(buffer[start_index : end_index + 1])
+                audio = base64.b64decode(chunk_json["data"])
+                outputs.append({"audio": audio, "sampling_rate": chunk_json["sampling_rate"]})
+                buffer = buffer[end_index + 1 :]
+            except json.JSONDecodeError:
+                break
+    return buffer, outputs
+
+
+def convert_response(response: Dict[str, any], include_context_id: bool) -> Dict[str, Any]:
+    audio = base64.b64decode(response["data"])
+
+    optional_kwargs = {}
+    if include_context_id:
+        optional_kwargs["context_id"] = response["context_id"]
+
+    return {
+        "audio": audio,
+        "sampling_rate": response["sampling_rate"],
+        **optional_kwargs,
+    }
 
 
 class CartesiaTTS:
@@ -110,7 +145,7 @@ class CartesiaTTS:
         params = {"select": "id, name, description"} if skip_embeddings else None
         response = requests.get(f"{self._http_url()}/voices", headers=self.headers, params=params)
 
-        if response.status_code != 200:
+        if not response.is_success:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
 
         voices = response.json()
@@ -155,7 +190,7 @@ class CartesiaTTS:
             params = {"link": link}
             response = requests.post(url, headers=self.headers, params=params)
 
-        if response.status_code != 200:
+        if not response.is_success:
             raise ValueError(
                 f"Failed to clone voice. Status Code: {response.status_code}\n"
                 f"Error: {response.text}"
@@ -200,6 +235,29 @@ class CartesiaTTS:
         if transcript.strip() == "":
             raise ValueError("`transcript` must be non empty")
 
+    def _generate_request_body(
+        self,
+        *,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        voice: Embedding = None,
+    ) -> Dict[str, Any]:
+        """
+        Create the request body for a stream request.
+        Note that anything that's not provided will use a default if available or be filtered out otherwise.
+        """
+        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID, voice=voice)
+
+        optional_body = dict(
+            duration=duration,
+            chunk_time=chunk_time,
+            voice=voice,
+        )
+        body.update({k: v for k, v in optional_body.items() if v is not None})
+
+        return body
+
     def generate(
         self,
         *,
@@ -232,14 +290,9 @@ class CartesiaTTS:
         """
         self._check_inputs(transcript, duration, chunk_time)
 
-        body = dict(transcript=transcript, model_id=DEFAULT_MODEL_ID)
-
-        optional_body = dict(
-            duration=duration,
-            chunk_time=chunk_time,
-            voice=voice,
+        body = self._generate_request_body(
+            transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
         )
-        body.update({k: v for k, v in optional_body.items() if v is not None})
 
         if websocket:
             generator = self._generate_ws(body)
@@ -265,23 +318,14 @@ class CartesiaTTS:
             data=json.dumps(body),
             headers=self.headers,
         )
-        if response.status_code != 200:
+        if not response.ok:
             raise ValueError(f"Failed to generate audio. {response.text}")
 
         buffer = ""
         for chunk_bytes in response.iter_content(chunk_size=None):
-            buffer += chunk_bytes.decode("utf-8")
-            while "{" in buffer and "}" in buffer:
-                start_index = buffer.find("{")
-                end_index = buffer.find("}", start_index)
-                if start_index != -1 and end_index != -1:
-                    try:
-                        chunk_json = json.loads(buffer[start_index : end_index + 1])
-                        audio = base64.b64decode(chunk_json["data"])
-                        yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
-                        buffer = buffer[end_index + 1 :]
-                    except json.JSONDecodeError:
-                        break
+            buffer, outputs = update_buffer(buffer, chunk_bytes)
+            for output in outputs:
+                yield output
 
         if buffer:
             try:
@@ -313,17 +357,8 @@ class CartesiaTTS:
                 response = json.loads(self.websocket.recv())
                 if response["done"]:
                     break
-                audio = base64.b64decode(response["data"])
 
-                optional_kwargs = {}
-                if include_context_id:
-                    optional_kwargs["context_id"] = response["context_id"]
-
-                yield {
-                    "audio": audio,
-                    "sampling_rate": response["sampling_rate"],
-                    **optional_kwargs,
-                }
+                yield convert_response(response, include_context_id)
 
                 if self.experimental_ws_handle_interrupts:
                     self.websocket.send(json.dumps({"context_id": context_id}))
@@ -347,3 +382,143 @@ class CartesiaTTS:
     def __del__(self):
         if self.websocket.socket.fileno() > -1:
             self.websocket.close()
+
+
+class AsyncCartesiaTTS(CartesiaTTS):
+    def __init__(self, *, api_key: str = None, experimental_ws_handle_interrupts: bool = False):
+        self.timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+        self.connector = aiohttp.TCPConnector(limit=DEFAULT_NUM_CONNECTIONS)
+        self._session = aiohttp.ClientSession(timeout=self.timeout, connector=self.connector)
+        super().__init__(
+            api_key=api_key, experimental_ws_handle_interrupts=experimental_ws_handle_interrupts
+        )
+
+    def refresh_websocket(self):
+        pass  # do not load the websocket for the client until asynchronously when it is needed
+
+    async def _async_refresh_websocket(self):
+        """Refresh the websocket connection."""
+        if self.websocket and not self._is_websocket_closed():
+            self.websocket.close()
+        route = "audio/websocket"
+        if self.experimental_ws_handle_interrupts:
+            route = f"experimental/{route}"
+        self.websocket = await self._session.ws_connect(
+            f"{self._ws_url()}/{route}?api_key={self.api_key}"
+        )
+
+    async def generate(
+        self,
+        *,
+        transcript: str,
+        duration: int = None,
+        chunk_time: float = None,
+        voice: Embedding = None,
+        stream: bool = False,
+        websocket: bool = True,
+    ) -> Union[AudioOutput, AsyncGenerator[AudioOutput, None]]:
+        """Asynchronously generate audio from a transcript.
+        NOTE: This overrides the non-asynchronous generate method from the base class.
+        Args:
+            transcript: The text to generate audio for.
+            voice: The embedding to use for generating audio.
+            options: The options to use for generating audio. See :class:`GenerateOptions`.
+        Returns:
+            A dictionary containing the following:
+                * "audio": The audio as a 1D numpy array.
+                * "sampling_rate": The sampling rate of the audio.
+        """
+        body = self._generate_request_body(
+            transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
+        )
+
+        if websocket:
+            generator = self._generate_ws(body)
+        else:
+            generator = self._generate_http(body)
+
+        if stream:
+            return generator
+
+        chunks = []
+        sampling_rate = None
+        async for chunk in generator:
+            if sampling_rate is None:
+                sampling_rate = chunk["sampling_rate"]
+            chunks.append(chunk["audio"])
+
+        return {"audio": b"".join(chunks), "sampling_rate": sampling_rate}
+
+    async def _generate_http(self, body: Dict[str, Any]):
+        async with self._session.post(
+            f"{self._http_url()}/audio/stream", data=json.dumps(body), headers=self.headers
+        ) as response:
+            if response.status < 200 or response.status >= 300:
+                raise ValueError(f"Failed to generate audio. {response.text}")
+
+            buffer = ""
+            async for chunk_bytes in response.content.iter_any():
+                buffer, outputs = update_buffer(buffer, chunk_bytes)
+                for output in outputs:
+                    yield output
+
+            if buffer:
+                try:
+                    chunk_json = json.loads(buffer)
+                    audio = base64.b64decode(chunk_json["data"])
+                    yield {"audio": audio, "sampling_rate": chunk_json["sampling_rate"]}
+                except json.JSONDecodeError:
+                    pass
+
+    async def _generate_ws(self, body: Dict[str, Any], *, context_id: str = None):
+        include_context_id = bool(context_id)
+        route = "audio/websocket"
+        if self.experimental_ws_handle_interrupts:
+            route = f"experimental/{route}"
+
+        if not self.websocket or self._is_websocket_closed():
+            await self._async_refresh_websocket()
+
+        ws = self.websocket
+        if context_id is None:
+            context_id = uuid.uuid4().hex
+        await ws.send_json({"data": body, "context_id": context_id})
+        try:
+            response = None
+            while True:
+                response = await ws.receive_json()
+                if response["done"]:
+                    break
+
+                yield convert_response(response, include_context_id)
+
+                if self.experimental_ws_handle_interrupts:
+                    await ws.send_json({"context_id": context_id})
+        except GeneratorExit:
+            # The exit is only called when the generator is garbage collected.
+            # It may not be called directly after a break statement.
+            # However, the generator will be automatically cancelled on the next request.
+            if self.experimental_ws_handle_interrupts:
+                await ws.send_json({"context_id": context_id, "action": "cancel"})
+        except Exception as e:
+            raise RuntimeError(f"Failed to generate audio. {response}") from e
+
+    def _is_websocket_closed(self):
+        return self.websocket.closed
+
+    async def cleanup(self):
+        if self.websocket is not None and not self._is_websocket_closed():
+            await self.websocket.close()
+        if not self._session.closed:
+            await self._session.close()
+
+    def __del__(self):
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop is None:
+            asyncio.run(self.cleanup())
+        else:
+            loop.create_task(self.cleanup())

@@ -1,2 +1,5 @@
-websockets
+aiohttp
+httpx
+pytest-asyncio
 requests
+websockets
