@@ -6,6 +6,7 @@ import uuid
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
 import aiohttp
+import httpx
 import requests
 from websockets.sync.client import connect
 
@@ -143,7 +144,7 @@ class CartesiaTTS:
             >>> audio = client.generate(transcript="Hello world!", voice=embedding)
         """
         params = {"select": "id, name, description"} if skip_embeddings else None
-        response = requests.get(f"{self._http_url()}/voices", headers=self.headers, params=params)
+        response = httpx.get(f"{self._http_url()}/voices", headers=self.headers, params=params)
 
         if not response.is_success:
             raise ValueError(f"Failed to get voices. Error: {response.text}")
@@ -177,18 +178,18 @@ class CartesiaTTS:
 
         if voice_id:
             url = f"{self._http_url()}/voices/embedding/{voice_id}"
-            response = requests.get(url, headers=self.headers)
+            response = httpx.get(url, headers=self.headers)
         elif filepath:
             url = f"{self._http_url()}/voices/clone/clip"
             files = {"clip": open(filepath, "rb")}
             headers = self.headers.copy()
             # The default content type of JSON is incorrect for file uploads
             headers.pop("Content-Type")
-            response = requests.post(url, headers=headers, files=files)
+            response = httpx.post(url, headers=headers, files=files)
         elif link:
             url = f"{self._http_url()}/voices/clone/url"
             params = {"link": link}
-            response = requests.post(url, headers=self.headers, params=params)
+            response = httpx.post(url, headers=self.headers, params=params)
 
         if not response.is_success:
             raise ValueError(
