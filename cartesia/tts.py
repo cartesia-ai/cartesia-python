@@ -111,7 +111,6 @@ class CartesiaTTS:
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
         self.websocket = None
         self.experimental_ws_handle_interrupts = experimental_ws_handle_interrupts
-        self.refresh_websocket()
 
     def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
         """Returns a mapping from voice name -> voice metadata.
@@ -214,10 +213,7 @@ class CartesiaTTS:
         route = "audio/websocket"
         if self.experimental_ws_handle_interrupts:
             route = f"experimental/{route}"
-        self.websocket = connect(
-            f"{self._ws_url()}/{route}?api_key={self.api_key}",
-            close_timeout=None,
-        )
+        self.websocket = connect(f"{self._ws_url()}/{route}?api_key={self.api_key}")
 
     def _is_websocket_closed(self):
         return self.websocket.socket.fileno() == -1
@@ -381,7 +377,7 @@ class CartesiaTTS:
         return f"{prefix}://{self.base_url}/{self.api_version}"
 
     def __del__(self):
-        if self.websocket.socket.fileno() > -1:
+        if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
 
 
@@ -394,10 +390,7 @@ class AsyncCartesiaTTS(CartesiaTTS):
             api_key=api_key, experimental_ws_handle_interrupts=experimental_ws_handle_interrupts
         )
 
-    def refresh_websocket(self):
-        pass  # do not load the websocket for the client until asynchronously when it is needed
-
-    async def _async_refresh_websocket(self):
+    async def refresh_websocket(self):
         """Refresh the websocket connection."""
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
@@ -478,7 +471,7 @@ class AsyncCartesiaTTS(CartesiaTTS):
             route = f"experimental/{route}"
 
         if not self.websocket or self._is_websocket_closed():
-            await self._async_refresh_websocket()
+            await self.refresh_websocket()
 
         ws = self.websocket
         if context_id is None:
