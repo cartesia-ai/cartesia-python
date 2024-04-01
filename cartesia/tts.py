@@ -3,6 +3,7 @@ import base64
 import json
 import os
 import uuid
+from types import TracebackType
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
 import aiohttp
@@ -402,9 +403,24 @@ class CartesiaTTS:
         prefix = "ws" if "localhost" in self.base_url else "wss"
         return f"{prefix}://{self.base_url}/{self.api_version}"
 
-    def __del__(self):
+    def close(self):
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
+
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        self.refresh_websocket()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ):
+        self.close()
 
 
 class AsyncCartesiaTTS(CartesiaTTS):
@@ -448,6 +464,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
+        self._check_inputs(transcript, duration, chunk_time)
+
         body = self._generate_request_body(
             transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
         )
@@ -540,7 +558,7 @@ class AsyncCartesiaTTS(CartesiaTTS):
     def _is_websocket_closed(self):
         return self.websocket.closed
 
-    async def cleanup(self):
+    async def close(self):
         if self.websocket is not None and not self._is_websocket_closed():
             await self.websocket.close()
         if not self._session.closed:
@@ -553,6 +571,18 @@ class AsyncCartesiaTTS(CartesiaTTS):
             loop = None
 
         if loop is None:
-            asyncio.run(self.cleanup())
+            asyncio.run(self.close())
         else:
-            loop.create_task(self.cleanup())
+            loop.create_task(self.close())
+
+    async def __aenter__(self):
+        await self.refresh_websocket()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        exc_tb: TracebackType | None,
+    ):
+        await self.close()

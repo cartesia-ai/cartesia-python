@@ -45,26 +45,67 @@ stream.close()
 p.terminate()
 ```
 
-If you are using Jupyter Notebook or JupyterLab, you can use IPython.display.Audio to play the generated audio directly in the notebook. Here's an example:
+You can also use the async client if you want to make asynchronous API calls:
+```python
+from cartesia.tts import AsyncCartesiaTTS
+import asyncio
+import pyaudio
+import os
+
+async def write_stream():
+    client = AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
+    voices = client.get_voices()
+    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    transcript = "Hello! Welcome to Cartesia"
+
+    p = pyaudio.PyAudio()
+
+    stream = None
+
+    # Generate and stream audio
+    async for output in await client.generate(transcript=transcript, voice=voice, stream=True):
+        buffer = output["audio"]
+        rate = output["sampling_rate"]
+
+        if not stream:
+            stream = p.open(format=pyaudio.paFloat32,
+                            channels=1,
+                            rate=rate,
+                            output=True)
+
+        # Write the audio data to the stream
+        stream.write(buffer)
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+asyncio.run(write_stream())
+```
+
+If you are using Jupyter Notebook or JupyterLab, you can use IPython.display.Audio to play the generated audio directly in the notebook.
+Additionally, in these notebook examples we show how to use the client as a context manager (though this is not required).
 
 ```python
-from cartesia.tts import CartesiaTTS
 from IPython.display import Audio
 import io
 import os
+import numpy as np
 
-client = CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
-voices = client.get_voices()
-voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
-transcript = "Hello! Welcome to Cartesia"
+from cartesia.tts import CartesiaTTS
 
-# Create a BytesIO object to store the audio data
-audio_data = io.BytesIO()
+with CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY")) as client:
+    voices = client.get_voices()
+    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    transcript = "Hello! Welcome to Cartesia"
 
-# Generate and stream audio
-for output in client.generate(transcript=transcript, voice=voice, stream=True):
-    buffer = output["audio"]
-    audio_data.write(buffer)
+    # Create a BytesIO object to store the audio data
+    audio_data = io.BytesIO()
+
+    # Generate and stream audio
+    for output in client.generate(transcript=transcript, voice=voice, stream=True):
+        buffer = output["audio"]
+        audio_data.write(buffer)
 
 # Set the cursor position to the beginning of the BytesIO object
 audio_data.seek(0)
@@ -76,25 +117,27 @@ audio = Audio(np.frombuffer(audio_data.read(), dtype=np.float32), rate=output["s
 display(audio)
 ```
 
-You can also use the async client if you want to make asynchronous API calls. The usage is very similar:
+Below is the same example using the async client:
 ```python
-from cartesia.tts import AsyncCartesiaTTS
 from IPython.display import Audio
 import io
 import os
+import numpy as np
 
-client = AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
-voices = client.get_voices()
-voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
-transcript = "Hello! Welcome to Cartesia"
+from cartesia.tts import AsyncCartesiaTTS
 
-# Create a BytesIO object to store the audio data
-audio_data = io.BytesIO()
+async with AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY")) as client:
+    voices = client.get_voices()
+    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    transcript = "Hello! Welcome to Cartesia"
 
-# Generate and stream audio
-async for output in client.generate(transcript=transcript, voice=voice, stream=True):
-    buffer = output["audio"]
-    audio_data.write(buffer)
+    # Create a BytesIO object to store the audio data
+    audio_data = io.BytesIO()
+
+    # Generate and stream audio
+    async for output in await client.generate(transcript=transcript, voice=voice, stream=True):
+        buffer = output["audio"]
+        audio_data.write(buffer)
 
 # Set the cursor position to the beginning of the BytesIO object
 audio_data.seek(0)
