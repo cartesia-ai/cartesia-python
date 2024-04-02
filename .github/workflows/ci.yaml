@@ -39,6 +39,8 @@ jobs:
 
   Build:
     runs-on: ubuntu-latest
+# There is an issue with infinitely running tests when something fails due to failure to close the websocket, so we set a timeout
+    timeout-minutes: 5
     strategy:
       matrix:
         # if we test it against too many versions, we are making unnecessary

@@ -12,7 +12,8 @@ from typing import AsyncGenerator, Dict, Generator, List
 
 import pytest
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+THISDIR = os.path.dirname(__file__)
+sys.path.insert(0, os.path.dirname(THISDIR))
 from cartesia.tts import DEFAULT_MODEL_ID, AsyncCartesiaTTS, CartesiaTTS, VoiceMetadata
 
 SAMPLE_VOICE = "Milo"
@@ -77,7 +78,7 @@ def test_get_voice_embedding_from_id(client: CartesiaTTS):
 
 def test_get_voice_embedding_from_url(client: CartesiaTTS):
     url = "https://youtu.be/g2Z7Ddd573M?si=P8BM_hBqt5P8Ft6I&t=69"
-    _ = client.get_voice_embedding(link=url)
+    client.get_voice_embedding(link=url)
 
 
 @pytest.mark.parametrize("websocket", [True, False])
@@ -183,6 +184,19 @@ def test_generate_stream_interrupt(
             )
             if idx + 1 == num_turns:
                 break
+
+
+def test_transcribe(resources: _Resources):
+    client = resources.client
+    text = client.transcribe(os.path.join(THISDIR, "mock_data/sample_speech.wav"))
+    assert text == "It is a great day to be alive when all of the trees are green."
+
+
+@pytest.mark.asyncio
+async def test_async_transcribe():
+    async_client = create_async_client()
+    text = await async_client.transcribe(os.path.join(THISDIR, "mock_data/sample_speech.wav"))
+    assert text == "It is a great day to be alive when all of the trees are green."
 
 
 @pytest.mark.parametrize("chunk_time", [0.05, 0.6])

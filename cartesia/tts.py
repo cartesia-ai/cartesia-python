@@ -368,6 +368,32 @@ class CartesiaTTS:
         except Exception as e:
             raise RuntimeError(f"Failed to generate audio. {response}") from e
 
+    def transcribe(self, raw_audio: Union[bytes, str]) -> str:
+        raw_audio_bytes, headers = self.prepare_audio_and_headers(raw_audio)
+        response = httpx.post(
+            f"{self._http_url()}/audio/transcriptions",
+            headers=headers,
+            files={"clip": ("input.wav", raw_audio_bytes)},
+        )
+
+        if not response.is_success:
+            raise ValueError(f"Failed to transcribe audio. Error: {response.text()}")
+
+        transcript = response.json()
+        return transcript["text"]
+
+    def prepare_audio_and_headers(
+        self, raw_audio: Union[bytes, str]
+    ) -> Tuple[bytes, Dict[str, Any]]:
+        if isinstance(raw_audio, str):
+            with open(raw_audio, "rb") as f:
+                raw_audio_bytes = f.read()
+        else:
+            raw_audio_bytes = raw_audio
+        # application/json is not the right content type for this request
+        headers = {k: v for k, v in self.headers.items() if k != "Content-Type"}
+        return raw_audio_bytes, headers
+
     def _http_url(self):
         prefix = "http" if "localhost" in self.base_url else "https"
         return f"{prefix}://{self.base_url}/{self.api_version}"
@@ -447,8 +473,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
         async with self._session.post(
             f"{self._http_url()}/audio/stream", data=json.dumps(body), headers=self.headers
         ) as response:
-            if response.status < 200 or response.status >= 300:
-                raise ValueError(f"Failed to generate audio. {response.text}")
+            if not response.ok:
+                raise ValueError(f"Failed to generate audio. {await response.text()}")
 
             buffer = ""
             async for chunk_bytes in response.content.iter_any():
@@ -495,7 +521,21 @@ class AsyncCartesiaTTS(CartesiaTTS):
             if self.experimental_ws_handle_interrupts:
                 await ws.send_json({"context_id": context_id, "action": "cancel"})
         except Exception as e:
-            raise RuntimeError(f"Failed to generate audio. {response}") from e
+            raise RuntimeError(f"Failed to generate audio. {await response.text()}") from e
+
+    async def transcribe(self, raw_audio: Union[bytes, str]) -> str:
+        raw_audio_bytes, headers = self.prepare_audio_and_headers(raw_audio)
+        data = aiohttp.FormData()
+        data.add_field("clip", raw_audio_bytes, filename="input.wav", content_type="audio/wav")
+
+        async with self._session.post(
+            f"{self._http_url()}/audio/transcriptions", headers=headers, data=data
+        ) as response:
+            if not response.ok:
+                raise ValueError(f"Failed to transcribe audio. Error: {await response.text()}")
+
+            transcript = await response.json()
+            return transcript["text"]
 
     def _is_websocket_closed(self):
         return self.websocket.closed
