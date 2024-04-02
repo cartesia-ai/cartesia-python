@@ -2,4 +2,5 @@ aiohttp
 httpx
 pytest-asyncio
 requests
+tenacity
 websockets

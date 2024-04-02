@@ -8,6 +8,7 @@ from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Tuple, 
 import aiohttp
 import httpx
 import requests
+from tenacity import retry, stop_after_attempt, wait_fixed
 from websockets.sync.client import connect
 
 DEFAULT_MODEL_ID = "genial-planet-1346"
@@ -63,6 +64,18 @@ def convert_response(response: Dict[str, any], include_context_id: bool) -> Dict
     }
 
 
+def retry_decoration(func):
+    def _retry_decoration_inner(self, *args, **kwargs):
+        retry_decorator = retry(
+            stop=stop_after_attempt(self.num_retries),
+            wait=wait_fixed(self.retry_delay_sec),
+            after=self.log_attempt_number,
+        )
+        return retry_decorator(func)(self, *args, **kwargs)
+
+    return _retry_decoration_inner
+
+
 class CartesiaTTS:
     """The client for Cartesia's text-to-speech library.
 
@@ -95,7 +108,14 @@ class CartesiaTTS:
         ...     audio, sr = audio_chunk["audio"], audio_chunk["sampling_rate"]
     """
 
-    def __init__(self, *, api_key: str = None, experimental_ws_handle_interrupts: bool = False):
+    def __init__(
+        self,
+        *,
+        api_key: str = None,
+        num_retries: int = 5,
+        retry_delay_ms: float = 100,
+        experimental_ws_handle_interrupts: bool = False,
+    ):
         """
         Args:
             api_key: The API key to use for authorization.
@@ -110,8 +130,14 @@ class CartesiaTTS:
         self.api_version = os.environ.get("CARTESIA_API_VERSION", DEFAULT_API_VERSION)
         self.headers = {"X-API-Key": self.api_key, "Content-Type": "application/json"}
         self.websocket = None
+        self.num_retries = num_retries
+        self.retry_delay_sec = retry_delay_ms / 1000
         self.experimental_ws_handle_interrupts = experimental_ws_handle_interrupts
 
+    def log_attempt_number(self, retry_state):
+        print(f"Retrying: attempt {retry_state.attempt_number}")
+
+    @retry_decoration
     def get_voices(self, skip_embeddings: bool = True) -> Dict[str, VoiceMetadata]:
         """Returns a mapping from voice name -> voice metadata.
 
@@ -155,6 +181,7 @@ class CartesiaTTS:
                 voice["embedding"] = json.loads(voice["embedding"])
         return {voice["name"]: voice for voice in voices}
 
+    @retry_decoration
     def get_voice_embedding(
         self, *, voice_id: str = None, filepath: str = None, link: str = None
     ) -> Embedding:
@@ -255,6 +282,7 @@ class CartesiaTTS:
 
         return body
 
+    @retry_decoration
     def generate(
         self,
         *,
@@ -382,13 +410,11 @@ class CartesiaTTS:
 
 
 class AsyncCartesiaTTS(CartesiaTTS):
-    def __init__(self, *, api_key: str = None, experimental_ws_handle_interrupts: bool = False):
+    def __init__(self, **kwargs):
         self.timeout = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
         self.connector = aiohttp.TCPConnector(limit=DEFAULT_NUM_CONNECTIONS)
         self._session = aiohttp.ClientSession(timeout=self.timeout, connector=self.connector)
-        super().__init__(
-            api_key=api_key, experimental_ws_handle_interrupts=experimental_ws_handle_interrupts
-        )
+        super().__init__(**kwargs)
 
     async def refresh_websocket(self):
         """Refresh the websocket connection."""
@@ -401,6 +427,7 @@ class AsyncCartesiaTTS(CartesiaTTS):
             f"{self._ws_url()}/{route}?api_key={self.api_key}"
         )
 
+    @retry_decoration
     async def generate(
         self,
         *,

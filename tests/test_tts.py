@@ -12,7 +12,7 @@ from typing import AsyncGenerator, Dict, Generator, List
 
 import pytest
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from cartesia.tts import DEFAULT_MODEL_ID, AsyncCartesiaTTS, CartesiaTTS, VoiceMetadata
 
 SAMPLE_VOICE = "Milo"
