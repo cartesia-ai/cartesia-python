@@ -209,12 +209,11 @@ class CartesiaTTS:
         Note:
             The connection is synchronous.
         """
-        if self.websocket and not self._is_websocket_closed():
-            self.websocket.close()
-        route = "audio/websocket"
-        if self.experimental_ws_handle_interrupts:
-            route = f"experimental/{route}"
-        self.websocket = connect(f"{self._ws_url()}/{route}?api_key={self.api_key}")
+        if self.websocket is None or self._is_websocket_closed():
+            route = "audio/websocket"
+            if self.experimental_ws_handle_interrupts:
+                route = f"experimental/{route}"
+            self.websocket = connect(f"{self._ws_url()}/{route}?api_key={self.api_key}")
 
     def _is_websocket_closed(self):
         return self.websocket.socket.fileno() == -1
@@ -416,9 +415,9 @@ class CartesiaTTS:
 
     def __exit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc_type: Union[type, None],
+        exc: Union[BaseException, None],
+        exc_tb: Union[TracebackType, None],
     ):
         self.close()
 
@@ -434,14 +433,13 @@ class AsyncCartesiaTTS(CartesiaTTS):
 
     async def refresh_websocket(self):
         """Refresh the websocket connection."""
-        if self.websocket and not self._is_websocket_closed():
-            self.websocket.close()
-        route = "audio/websocket"
-        if self.experimental_ws_handle_interrupts:
-            route = f"experimental/{route}"
-        self.websocket = await self._session.ws_connect(
-            f"{self._ws_url()}/{route}?api_key={self.api_key}"
-        )
+        if self.websocket is None or self._is_websocket_closed():
+            route = "audio/websocket"
+            if self.experimental_ws_handle_interrupts:
+                route = f"experimental/{route}"
+            self.websocket = await self._session.ws_connect(
+                f"{self._ws_url()}/{route}?api_key={self.api_key}"
+            )
 
     async def generate(
         self,
@@ -581,8 +579,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
 
     async def __aexit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc_type: Union[type, None],
+        exc: Union[BaseException, None],
+        exc_tb: Union[TracebackType, None],
     ):
         await self.close()
