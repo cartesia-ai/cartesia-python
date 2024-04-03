@@ -113,6 +113,41 @@ def test_generate_stream(resources: _Resources, websocket: bool):
 
 
 @pytest.mark.parametrize("websocket", [True, False])
+def test_generate_stream_context_manager(resources: _Resources, websocket: bool):
+    voices = resources.voices
+    embedding = voices[SAMPLE_VOICE]["embedding"]
+    transcript = "Hello, world!"
+
+    with create_client() as client:
+        generator = client.generate(
+            transcript=transcript, voice=embedding, websocket=websocket, stream=True
+        )
+        assert isinstance(generator, Generator)
+
+        for output in generator:
+            assert output.keys() == {"audio", "sampling_rate"}
+            assert isinstance(output["audio"], bytes)
+            assert isinstance(output["sampling_rate"], int)
+
+
+def test_generate_context_manager_with_err():
+    websocket = None
+    websocket_was_opened = False
+    try:
+        with create_client() as client:
+            client.refresh_websocket()
+            websocket = client.websocket
+            websocket_was_opened = websocket.socket.fileno() != -1
+            client.generate(transcript=None, websocket=True)  # should throw because transcript None
+        raise RuntimeError("Expected AttributeError to be thrown")
+    except AttributeError:
+        pass
+
+    assert websocket_was_opened
+    assert websocket.socket.fileno() == -1  # check socket is now closed
+
+
+@pytest.mark.parametrize("websocket", [True, False])
 @pytest.mark.asyncio
 async def test_async_generate(resources: _Resources, websocket: bool):
     voices = resources.voices
@@ -145,6 +180,42 @@ async def test_async_generate_stream(resources: _Resources, websocket: bool):
         assert output.keys() == {"audio", "sampling_rate"}
         assert isinstance(output["audio"], bytes)
         assert isinstance(output["sampling_rate"], int)
+
+
+@pytest.mark.parametrize("websocket", [True, False])
+@pytest.mark.asyncio
+async def test_async_generate_stream_context_manager(resources: _Resources, websocket: bool):
+    voices = resources.voices
+    embedding = voices[SAMPLE_VOICE]["embedding"]
+    transcript = "Hello, world!"
+
+    async with create_async_client() as async_client:
+        generator = await async_client.generate(transcript=transcript, voice=embedding, stream=True)
+        assert isinstance(generator, AsyncGenerator)
+
+        async for output in generator:
+            assert output.keys() == {"audio", "sampling_rate"}
+            assert isinstance(output["audio"], bytes)
+            assert isinstance(output["sampling_rate"], int)
+
+
+@pytest.mark.asyncio
+async def test_generate_async_context_manager_with_err():
+    websocket = None
+    websocket_was_opened = False
+    try:
+        async with create_async_client() as async_client:
+            await async_client.refresh_websocket()
+            websocket = async_client.websocket
+            websocket_was_opened = not websocket.closed
+            # below should throw because transcript None
+            await async_client.generate(transcript=None, websocket=True)
+        raise RuntimeError("Expected AttributeError to be thrown")
+    except AttributeError:
+        pass
+
+    assert websocket_was_opened
+    assert websocket.closed  # check websocket is now closed
 
 
 @pytest.mark.parametrize(

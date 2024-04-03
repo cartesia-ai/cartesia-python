@@ -3,6 +3,7 @@ import base64
 import json
 import os
 import uuid
+from types import TracebackType
 from typing import Any, AsyncGenerator, Dict, Generator, List, Optional, Tuple, TypedDict, Union
 
 import aiohttp
@@ -208,12 +209,11 @@ class CartesiaTTS:
         Note:
             The connection is synchronous.
         """
-        if self.websocket and not self._is_websocket_closed():
-            self.websocket.close()
-        route = "audio/websocket"
-        if self.experimental_ws_handle_interrupts:
-            route = f"experimental/{route}"
-        self.websocket = connect(f"{self._ws_url()}/{route}?api_key={self.api_key}")
+        if self.websocket is None or self._is_websocket_closed():
+            route = "audio/websocket"
+            if self.experimental_ws_handle_interrupts:
+                route = f"experimental/{route}"
+            self.websocket = connect(f"{self._ws_url()}/{route}?api_key={self.api_key}")
 
     def _is_websocket_closed(self):
         return self.websocket.socket.fileno() == -1
@@ -402,9 +402,24 @@ class CartesiaTTS:
         prefix = "ws" if "localhost" in self.base_url else "wss"
         return f"{prefix}://{self.base_url}/{self.api_version}"
 
-    def __del__(self):
+    def close(self):
         if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
+
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        self.refresh_websocket()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Union[type, None],
+        exc: Union[BaseException, None],
+        exc_tb: Union[TracebackType, None],
+    ):
+        self.close()
 
 
 class AsyncCartesiaTTS(CartesiaTTS):
@@ -418,14 +433,13 @@ class AsyncCartesiaTTS(CartesiaTTS):
 
     async def refresh_websocket(self):
         """Refresh the websocket connection."""
-        if self.websocket and not self._is_websocket_closed():
-            self.websocket.close()
-        route = "audio/websocket"
-        if self.experimental_ws_handle_interrupts:
-            route = f"experimental/{route}"
-        self.websocket = await self._session.ws_connect(
-            f"{self._ws_url()}/{route}?api_key={self.api_key}"
-        )
+        if self.websocket is None or self._is_websocket_closed():
+            route = "audio/websocket"
+            if self.experimental_ws_handle_interrupts:
+                route = f"experimental/{route}"
+            self.websocket = await self._session.ws_connect(
+                f"{self._ws_url()}/{route}?api_key={self.api_key}"
+            )
 
     async def generate(
         self,
@@ -448,6 +462,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
                 * "audio": The audio as a 1D numpy array.
                 * "sampling_rate": The sampling rate of the audio.
         """
+        self._check_inputs(transcript, duration, chunk_time)
+
         body = self._generate_request_body(
             transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
         )
@@ -540,7 +556,7 @@ class AsyncCartesiaTTS(CartesiaTTS):
     def _is_websocket_closed(self):
         return self.websocket.closed
 
-    async def cleanup(self):
+    async def close(self):
         if self.websocket is not None and not self._is_websocket_closed():
             await self.websocket.close()
         if not self._session.closed:
@@ -553,6 +569,18 @@ class AsyncCartesiaTTS(CartesiaTTS):
             loop = None
 
         if loop is None:
-            asyncio.run(self.cleanup())
+            asyncio.run(self.close())
         else:
-            loop.create_task(self.cleanup())
+            loop.create_task(self.close())
+
+    async def __aenter__(self):
+        await self.refresh_websocket()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Union[type, None],
+        exc: Union[BaseException, None],
+        exc_tb: Union[TracebackType, None],
+    ):
+        await self.close()
