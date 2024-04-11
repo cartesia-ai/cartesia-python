@@ -549,6 +549,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
             if self.experimental_ws_handle_interrupts:
                 await ws.send_json({"context_id": context_id, "action": "cancel"})
         except Exception as e:
+            print(f"Context ID: {context_id}, Response: {response}")
+            print(f"Error: {e}")
             raise RuntimeError(f"Failed to generate audio. {await response.text()}") from e
 
     async def transcribe(self, raw_audio: Union[bytes, str]) -> str:
