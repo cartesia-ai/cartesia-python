@@ -241,9 +241,9 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
+        voice: Embedding,
         duration: int = None,
         chunk_time: float = None,
-        voice: Embedding = None,
     ) -> Dict[str, Any]:
         """
         Create the request body for a stream request.
@@ -254,7 +254,6 @@ class CartesiaTTS:
         optional_body = dict(
             duration=duration,
             chunk_time=chunk_time,
-            voice=voice,
         )
         body.update({k: v for k, v in optional_body.items() if v is not None})
 
@@ -264,25 +263,24 @@ class CartesiaTTS:
         self,
         *,
         transcript: str,
+        voice: Embedding,
         duration: int = None,
         chunk_time: float = None,
-        voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
     ) -> Union[AudioOutput, Generator[AudioOutput, None, None]]:
         """Generate audio from a transcript.
 
         Args:
-            transcript: The text to generate audio for.
-            duration: The maximum duration of the audio in seconds.
-            chunk_time: How long each audio segment should be in seconds.
+            transcript (str): The text to generate audio for.
+            voice (Embedding (List[float])): The voice to use for generating audio.
+            duration (int, optional): The maximum duration of the audio in seconds.
+            chunk_time (float, optional): How long each audio segment should be in seconds.
                 This should not need to be adjusted.
-            voice: The voice to use for generating audio.
-                This can either be a voice id (string) or an embedding vector (List[float]).
-            stream: Whether to stream the audio or not.
-                If ``True`` this function returns a generator.
-            websocket: Whether to use a websocket for streaming audio.
-                Using the websocket reduces latency by pre-poning the handshake.
+            stream (bool, optional): Whether to stream the audio or not.
+                If True this function returns a generator. False by default.
+            websocket (bool, optional): Whether to use a websocket for streaming audio.
+                Using the websocket reduces latency by pre-poning the handshake. True by default.
 
         Returns:
             A generator if `stream` is True, otherwise a dictionary.
@@ -293,7 +291,7 @@ class CartesiaTTS:
         self._check_inputs(transcript, duration, chunk_time)
 
         body = self._generate_request_body(
-            transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
+            transcript=transcript, voice=voice, duration=duration, chunk_time=chunk_time
         )
 
         if websocket:
@@ -451,27 +449,35 @@ class AsyncCartesiaTTS(CartesiaTTS):
         self,
         *,
         transcript: str,
+        voice: Embedding,
         duration: int = None,
         chunk_time: float = None,
-        voice: Embedding = None,
         stream: bool = False,
         websocket: bool = True,
     ) -> Union[AudioOutput, AsyncGenerator[AudioOutput, None]]:
         """Asynchronously generate audio from a transcript.
         NOTE: This overrides the non-asynchronous generate method from the base class.
         Args:
-            transcript: The text to generate audio for.
-            voice: The embedding to use for generating audio.
-            options: The options to use for generating audio. See :class:`GenerateOptions`.
+            transcript (str): The text to generate audio for.
+            voice (Embedding (List[float])): The voice to use for generating audio.
+            duration (int, optional): The maximum duration of the audio in seconds.
+            chunk_time (float, optional): How long each audio segment should be in seconds.
+                This should not need to be adjusted.
+            stream (bool, optional): Whether to stream the audio or not.
+                If True this function returns a generator. False by default.
+            websocket (bool, optional): Whether to use a websocket for streaming audio.
+                Using the websocket reduces latency by pre-poning the handshake. True by default.
+
         Returns:
-            A dictionary containing the following:
-                * "audio": The audio as a 1D numpy array.
+            A generator if `stream` is True, otherwise a dictionary.
+            Dictionary from both generator and non-generator return types have the following keys:
+                * "audio": The audio as a bytes buffer.
                 * "sampling_rate": The sampling rate of the audio.
         """
         self._check_inputs(transcript, duration, chunk_time)
 
         body = self._generate_request_body(
-            transcript=transcript, duration=duration, chunk_time=chunk_time, voice=voice
+            transcript=transcript, voice=voice, duration=duration, chunk_time=chunk_time
         )
 
         if websocket:
