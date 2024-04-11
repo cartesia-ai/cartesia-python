@@ -138,7 +138,9 @@ def test_generate_context_manager_with_err():
             client.refresh_websocket()
             websocket = client.websocket
             websocket_was_opened = websocket.socket.fileno() != -1
-            client.generate(transcript=None, websocket=True)  # should throw because transcript None
+            client.generate(
+                transcript=None, voice=None, websocket=True
+            )  # should throw because transcript None
         raise RuntimeError("Expected AttributeError to be thrown")
     except AttributeError:
         pass
@@ -209,7 +211,7 @@ async def test_generate_async_context_manager_with_err():
             websocket = async_client.websocket
             websocket_was_opened = not websocket.closed
             # below should throw because transcript None
-            await async_client.generate(transcript=None, websocket=True)
+            await async_client.generate(transcript=None, voice=None, websocket=True)
         raise RuntimeError("Expected AttributeError to be thrown")
     except AttributeError:
         pass
