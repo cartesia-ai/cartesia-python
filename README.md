@@ -19,7 +19,7 @@ import os
 
 client = CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
 voices = client.get_voices()
-voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+voice = client.get_voice_embedding(voice_id=voices["Ted"]["id"])
 transcript = "Hello! Welcome to Cartesia"
 model_id = "genial-planet-1346" # (Optional) We'll specify a default if you don't have a specific model in mind
 
@@ -56,7 +56,7 @@ import os
 async def write_stream():
     client = AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY"))
     voices = client.get_voices()
-    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    voice = client.get_voice_embedding(voice_id=voices["Ted"]["id"])
     transcript = "Hello! Welcome to Cartesia"
     model_id = "genial-planet-1346" # (Optional) We'll specify a default if you don't have a specific model in mind
 
@@ -98,7 +98,7 @@ from cartesia.tts import CartesiaTTS
 
 with CartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY")) as client:
     voices = client.get_voices()
-    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    voice = client.get_voice_embedding(voice_id=voices["Ted"]["id"])
     transcript = "Hello! Welcome to Cartesia"
 
     # Create a BytesIO object to store the audio data
@@ -130,7 +130,7 @@ from cartesia.tts import AsyncCartesiaTTS
 
 async with AsyncCartesiaTTS(api_key=os.environ.get("CARTESIA_API_KEY")) as client:
     voices = client.get_voices()
-    voice = client.get_voice_embedding(voice_id=voices["Graham"]["id"])
+    voice = client.get_voice_embedding(voice_id=voices["Ted"]["id"])
     transcript = "Hello! Welcome to Cartesia"
 
     # Create a BytesIO object to store the audio data
