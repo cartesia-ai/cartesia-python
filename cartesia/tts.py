@@ -671,7 +671,8 @@ class AsyncCartesiaTTS(CartesiaTTS):
         except Exception as e:
             if self.websocket and not self._is_websocket_closed():
                 await self.websocket.close()
-            raise RuntimeError(f"Failed to generate audio. {await response.text()}") from e
+            error_msg_end = "" if response is None else f": {await response.text()}"
+            raise RuntimeError(f"Failed to generate audio{error_msg_end}") from e
         finally:
             # Ensure the websocket is ultimately closed.
             if self.websocket and not self._is_websocket_closed():
