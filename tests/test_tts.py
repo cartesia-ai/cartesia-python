@@ -354,9 +354,41 @@ def test_websocket_send_multilingual(resources: _Resources, stream: bool, langua
     
     ws.close()
     
+    
+def chunk_generator(transcripts):
+    for transcript in transcripts:
+        if transcript.endswith(" "):
+            yield transcript
+        else:
+            yield transcript + " "
+            
+def test_sync_continuation_websocket_context_send():
+    logger.info("Testing sync continuation WebSocket context send")
+    client = create_client()
+    ws = client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    try:
+        ctx = ws.context(context_id)
+        transcripts = ["Hello, world!", "I'\''m generating audio on Cartesia."]
+        output_generate = ctx.send(
+            model_id=DEFAULT_MODEL_ID,
+            transcript=chunk_generator(transcripts),
+            voice_id=SAMPLE_VOICE_ID,
+            output_format={
+                "container": "raw",
+                "encoding": "pcm_f32le",
+                "sample_rate": 44100
+            },
+        )
+        for out in output_generate:
+            assert out.keys() == {"audio", "context_id"}
+            assert isinstance(out["audio"], bytes)
+    finally:
+        ws.close()
+    
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send():
-    logger.info("Testing continuation WebSocket context send")
+    logger.info("Testing async continuation WebSocket context send")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -387,7 +419,7 @@ async def test_continuation_websocket_context_send():
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send_incorrect_transcript():
-    logger.info("Testing continuation WebSocket context send with incorrect transcript")
+    logger.info("Testing async continuation WebSocket context send with incorrect transcript")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -421,7 +453,7 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send_incorrect_voice_id():
-    logger.info("Testing continuation WebSocket context send with incorrect voice_id")
+    logger.info("Testing async continuation WebSocket context send with incorrect voice_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -454,7 +486,7 @@ async def test_continuation_websocket_context_send_incorrect_voice_id():
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send_incorrect_output_format():
-    logger.info("Testing continuation WebSocket context send with incorrect output_format")
+    logger.info("Testing async continuation WebSocket context send with incorrect output_format")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -487,7 +519,7 @@ async def test_continuation_websocket_context_send_incorrect_output_format():
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send_incorrect_model_id():
-    logger.info("Testing continuation WebSocket context send with incorrect model_id")
+    logger.info("Testing async continuation WebSocket context send with incorrect model_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:
@@ -516,7 +548,7 @@ async def test_continuation_websocket_context_send_incorrect_model_id():
     
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send_incorrect_context_id():
-    logger.info("Testing continuation WebSocket context send with incorrect context_id")
+    logger.info("Testing async continuation WebSocket context send with incorrect context_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:
@@ -549,7 +581,7 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_twice_on_same_context():
-    logger.info("Testing continuation WebSocket context twice on same context")
+    logger.info("Testing async continuation WebSocket context twice on same context")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -622,7 +654,7 @@ async def context_runner(ws, transcripts):
         
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_three_contexts_parallel():
-    logger.info("Testing continuation WebSocket context three contexts parallel")
+    logger.info("Testing async continuation WebSocket context three contexts parallel")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:

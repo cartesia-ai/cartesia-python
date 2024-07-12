@@ -7,6 +7,7 @@ from types import TracebackType
 from typing import (
     Any,
     AsyncGenerator,
+    Iterator,
     Dict,
     Generator,
     List,
@@ -14,6 +15,7 @@ from typing import (
     Tuple,
     Union,
     Callable,
+    Set,
 )
 
 import aiohttp
@@ -21,6 +23,7 @@ import httpx
 import logging
 import requests
 from websockets.sync.client import connect
+from iterators import TimeoutIterator
 
 from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
 from cartesia._types import (
@@ -260,6 +263,165 @@ class Voices(Resource):
         return response.json()
 
 
+class _TTSContext:
+    """Manage a single context over a WebSocket.
+
+    This class can be used to stream inputs, as they become available, to a specific `context_id`. See README for usage.
+
+    See :class:`_AsyncTTSContext` for asynchronous use cases.
+
+    Each TTSContext will close automatically when a done message is received for that context. It also closes if there is an error.
+    """
+
+    def __init__(self, context_id: str, websocket: "_WebSocket"):
+        self._context_id = context_id
+        self._websocket = websocket
+        self._error = None
+
+    def __del__(self):
+        self._close()
+
+    @property
+    def context_id(self) -> str:
+        return self._context_id
+
+    def send(
+        self,
+        model_id: str,
+        transcript: Iterator[str],
+        output_format: OutputFormat,
+        voice_id: Optional[str] = None,
+        voice_embedding: Optional[List[float]] = None,
+        context_id: Optional[str] = None,
+        duration: Optional[int] = None,
+        language: Optional[str] = None,
+    ) -> Generator[bytes, None, None]:
+        """Send audio generation requests to the WebSocket and yield responses.
+
+        Args:
+            model_id: The ID of the model to use for generating audio.
+            transcript: Iterator over text chunks with <1s latency.
+            output_format: A dictionary containing the details of the output format.
+            voice_id: The ID of the voice to use for generating audio.
+            voice_embedding: The embedding of the voice to use for generating audio.
+            context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
+            duration: The duration of the audio in seconds.
+            language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
+
+        Yields:
+            Dictionary containing the following key(s):
+            - audio: The audio as bytes.
+            - context_id: The context ID for the request.
+
+        Raises:
+            ValueError: If provided context_id doesn't match the current context.
+            RuntimeError: If there's an error generating audio.
+        """
+        if context_id is not None and context_id != self._context_id:
+            raise ValueError("Context ID does not match the context ID of the current context.")
+
+        self._websocket.connect()
+
+        voice = self._websocket._validate_and_construct_voice(voice_id, voice_embedding)
+
+        # Create the initial request body
+        request_body = {
+            "model_id": model_id,
+            "voice": voice,
+            "output_format": {
+                "container": output_format["container"],
+                "encoding": output_format["encoding"],
+                "sample_rate": output_format["sample_rate"],
+            },
+            "context_id": self._context_id,
+            "language": language,
+        }
+
+        if duration is not None:
+            request_body["duration"] = duration
+
+        try:
+            # Create an iterator with a timeout to get text chunks
+            text_iterator = TimeoutIterator(
+                transcript, timeout=0.001
+            )  # 1ms timeout for nearly non-blocking receive
+            next_chunk = next(text_iterator, None)
+
+            while True:
+                # Send the next text chunk to the WebSocket if available
+                if next_chunk is not None and next_chunk != text_iterator.get_sentinel():
+                    request_body["transcript"] = next_chunk
+                    request_body["continue"] = True
+                    self._websocket.websocket.send(json.dumps(request_body))
+                    next_chunk = next(text_iterator, None)
+
+                try:
+                    # Receive responses from the WebSocket with a small timeout
+                    response = json.loads(
+                        self._websocket.websocket.recv(timeout=0.001)
+                    )  # 1ms timeout for nearly non-blocking receive
+                    if response["context_id"] != self._context_id:
+                        pass
+                    if "error" in response:
+                        raise RuntimeError(f"Error generating audio:\n{response['error']}")
+                    if response["done"]:
+                        break
+                    if response["data"]:
+                        yield self._websocket._convert_response(
+                            response=response, include_context_id=True
+                        )
+                except TimeoutError:
+                    pass
+
+                # Continuously receive from WebSocket until the next text chunk is available
+                while next_chunk == text_iterator.get_sentinel():
+                    try:
+                        response = json.loads(self._websocket.websocket.recv(timeout=0.001))
+                        if response["context_id"] != self._context_id:
+                            continue
+                        if "error" in response:
+                            raise RuntimeError(f"Error generating audio:\n{response['error']}")
+                        if response["done"]:
+                            break
+                        if response["data"]:
+                            yield self._websocket._convert_response(
+                                response=response, include_context_id=True
+                            )
+                    except TimeoutError:
+                        pass
+                    next_chunk = next(text_iterator, None)
+
+                # Send final message if all input text chunks are exhausted
+                if next_chunk is None:
+                    request_body["transcript"] = ""
+                    request_body["continue"] = False
+                    self._websocket.websocket.send(json.dumps(request_body))
+                    break
+
+            # Receive remaining messages from the WebSocket until "done" is received
+            while True:
+                response = json.loads(self._websocket.websocket.recv())
+                if response["context_id"] != self._context_id:
+                    continue
+                if "error" in response:
+                    raise RuntimeError(f"Error generating audio:\n{response['error']}")
+                if response["done"]:
+                    break
+                yield self._websocket._convert_response(response=response, include_context_id=True)
+
+        except Exception as e:
+            self._websocket.close()
+            raise RuntimeError(f"Failed to generate audio. {e}")
+
+    def _close(self):
+        """Closes the context. Automatically called when a done message is received for this context."""
+        self._websocket._remove_context(self._context_id)
+
+    def is_closed(self):
+        """Check if the context is closed or not. Returns True if closed."""
+        return self._context_id not in self._websocket._contexts
+
+
 class _WebSocket:
     """This class contains methods to generate audio using WebSocket. Ideal for low-latency audio generation.
 
@@ -283,6 +445,13 @@ class _WebSocket:
         self.api_key = api_key
         self.cartesia_version = cartesia_version
         self.websocket = None
+        self._contexts: Set[str] = set()
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception as e:
+            raise RuntimeError("Failed to close WebSocket: ", e)
 
     def connect(self):
         """This method connects to the WebSocket if it is not already connected.
@@ -304,8 +473,11 @@ class _WebSocket:
 
     def close(self):
         """This method closes the WebSocket connection. *Highly* recommended to call this method when done using the WebSocket."""
-        if self.websocket is not None and not self._is_websocket_closed():
+        if self.websocket and not self._is_websocket_closed():
             self.websocket.close()
+
+        if self._contexts:
+            self._contexts.clear()
 
     def _convert_response(
         self, response: Dict[str, any], include_context_id: bool
@@ -426,9 +598,21 @@ class _WebSocket:
                 yield self._convert_response(response=response, include_context_id=True)
         except Exception as e:
             # Close the websocket connection if an error occurs.
-            if self.websocket and not self._is_websocket_closed():
-                self.websocket.close()
+            self.close()
             raise RuntimeError(f"Failed to generate audio. {response}") from e
+
+    def _remove_context(self, context_id: str):
+        if context_id in self._contexts:
+            self._contexts.remove(context_id)
+
+    def context(self, context_id: Optional[str] = None) -> _TTSContext:
+        if context_id in self._contexts:
+            raise ValueError(f"Context for context ID {context_id} already exists.")
+        if context_id is None:
+            context_id = str(uuid.uuid4())
+        if context_id not in self._contexts:
+            self._contexts.add(context_id)
+        return _TTSContext(context_id, self)
 
 
 class _SSE:
@@ -826,7 +1010,7 @@ class _AsyncSSE(_SSE):
 
 
 class _AsyncTTSContext:
-    """Manage a single context over a WebSocket.
+    """Manage a single context over an AsyncWebSocket.
 
     This class separates sending requests and receiving responses into two separate methods.
     This can be used for sending multiple requests without awaiting the response.
@@ -944,6 +1128,10 @@ class _AsyncTTSContext:
     def _close(self) -> None:
         """Closes the context. Automatically called when a done message is received for this context."""
         self._websocket._remove_context(self._context_id)
+
+    def is_closed(self):
+        """Check if the context is closed or not. Returns True if closed."""
+        return self._context_id not in self._websocket._context_queues
 
     async def __aenter__(self):
         return self
