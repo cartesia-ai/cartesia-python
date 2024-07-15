@@ -10,7 +10,7 @@ import os
 import sys
 from cartesia import AsyncCartesia, Cartesia
 from cartesia.client import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
-from cartesia._types import VoiceMetadata
+from cartesia._types import VoiceControls, VoiceMetadata
 from typing import AsyncGenerator, Generator, List
 import numpy as np
 import pytest
@@ -23,6 +23,7 @@ RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
 SAMPLE_VOICE = "Newsman"
 SAMPLE_VOICE_ID = "d46abd1d-2d02-43e8-819f-51fb652c1c61"
+EXPERIMENTAL_VOICE_CONTROLS = {"emotion": ["anger:high", "positivity:low"], "speed": "fastest"}
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,8 @@ def test_create_voice(client: Cartesia):
     assert voice in voices
 
 @pytest.mark.parametrize("stream", [True, False])
-def test_sse_send(resources: _Resources, stream: bool):
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+def test_sse_send(resources: _Resources, stream: bool, _experimental_voice_controls: VoiceControls):
     logger.info("Testing SSE send")
     client = resources.client
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
@@ -111,7 +113,7 @@ def test_sse_send(resources: _Resources, stream: bool):
         "container": "raw",
         "encoding": "pcm_f32le",
         "sample_rate": 44100
-    }, stream=stream, model_id=DEFAULT_MODEL_ID)
+    }, stream=stream, model_id=DEFAULT_MODEL_ID, _experimental_voice_controls=_experimental_voice_controls)
     
     if not stream:
         output_generate = [output_generate]
@@ -138,7 +140,8 @@ def test_sse_send_with_model_id(resources: _Resources, stream: bool):
         assert isinstance(out["audio"], bytes)
         
 @pytest.mark.parametrize("stream", [True, False])
-def test_websocket_send(resources: _Resources, stream: bool):
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+def test_websocket_send(resources: _Resources, stream: bool, _experimental_voice_controls: VoiceControls):
     logger.info("Testing WebSocket send")
     client = resources.client
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
@@ -149,7 +152,7 @@ def test_websocket_send(resources: _Resources, stream: bool):
         "container": "raw",
         "encoding": "pcm_f32le",
         "sample_rate": 44100
-    }, stream=stream, model_id=DEFAULT_MODEL_ID, context_id=context_id)
+    }, stream=stream, model_id=DEFAULT_MODEL_ID, context_id=context_id, _experimental_voice_controls=_experimental_voice_controls)
     
     if not stream:
         output_generate = [output_generate]
@@ -187,7 +190,8 @@ def test_websocket_send_timestamps(resources: _Resources, stream: bool):
     ws.close()
 
         
-def test_sse_send_context_manager(resources: _Resources):
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+def test_sse_send_context_manager(resources: _Resources, _experimental_voice_controls: VoiceControls):
     logger.info("Testing SSE send context manager")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
 
@@ -196,7 +200,7 @@ def test_sse_send_context_manager(resources: _Resources):
             "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100
-        }, stream=True, model_id=DEFAULT_MODEL_ID)
+        }, stream=True, model_id=DEFAULT_MODEL_ID, _experimental_voice_controls=_experimental_voice_controls)
         assert isinstance(output_generate, Generator)
         
         for out in output_generate:
@@ -217,7 +221,7 @@ def test_sse_send_context_manager_with_err():
         raise RuntimeError("Expected error to be thrown")
     except Exception:
         pass
-    
+
 def test_websocket_send_context_manager(resources: _Resources):
     logger.info("Testing WebSocket send context manager")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
@@ -250,9 +254,10 @@ def test_websocket_send_context_manage_err(resources: _Resources):
         raise RuntimeError("Expected error to be thrown")
     except Exception:
         pass
-    
+
 @pytest.mark.asyncio
-async def test_async_sse_send(resources: _Resources):
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+async def test_async_sse_send( resources: _Resources, _experimental_voice_controls: VoiceControls):
     logger.info("Testing async SSE send")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
 
@@ -262,7 +267,7 @@ async def test_async_sse_send(resources: _Resources):
             "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100
-        }, stream=True, model_id=DEFAULT_MODEL_ID)
+        }, stream=True, model_id=DEFAULT_MODEL_ID, _experimental_voice_controls=_experimental_voice_controls)
             
         async for out in output:
             assert out.keys() == {"audio"}
@@ -272,7 +277,8 @@ async def test_async_sse_send(resources: _Resources):
         await async_client.close()
         
 @pytest.mark.asyncio
-async def test_async_websocket_send(resources: _Resources):
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+async def test_async_websocket_send(resources: _Resources,  _experimental_voice_controls: VoiceControls):
     logger.info("Testing async WebSocket send")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
 
@@ -284,7 +290,7 @@ async def test_async_websocket_send(resources: _Resources):
             "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100,
-        }, stream=True, model_id=DEFAULT_MODEL_ID, context_id=context_id)
+        }, stream=True, model_id=DEFAULT_MODEL_ID, context_id=context_id, _experimental_voice_controls=_experimental_voice_controls)
         
         async for out in output:
             assert out.keys() == {"audio", "context_id"}

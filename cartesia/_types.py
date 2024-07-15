@@ -70,6 +70,24 @@ class VoiceMetadata(TypedDict):
     language: str
 
 
+class VoiceControls(TypedDict):
+    """Defines different voice control parameters for voice synthesis.
+
+    For a complete list of supported parameters, refer to the Cartesia API documentation.
+    https://docs.cartesia.ai/getting-started/welcome
+
+    Examples:
+        >>> {"speed": "fastest"}
+        >>> {"speed": "slow", "emotion": "anger:high, positivity:low"}
+        >>> {"emotion": "surprise:high, positivity:high"}
+
+    Note:
+        This is an experimental class and is subject to rapid change in future versions.
+    """
+    speed: str = ""
+    emotion: str = ""
+
+
 class OutputFormat(TypedDict):
     container: str
     encoding: str

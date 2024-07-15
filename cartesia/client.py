@@ -32,6 +32,7 @@ from cartesia._types import (
     OutputFormat,
     OutputFormatMapping,
     DeprecatedOutputFormatMapping,
+    VoiceControls,
     VoiceMetadata,
 )
 
@@ -297,6 +298,7 @@ class _TTSContext:
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -309,6 +311,8 @@ class _TTSContext:
             context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
+            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
+                Note: This is an experimental feature and may change rapidly in future releases.
 
         Yields:
             Dictionary containing the following key(s):
@@ -324,7 +328,7 @@ class _TTSContext:
 
         self._websocket.connect()
 
-        voice = self._websocket._validate_and_construct_voice(voice_id, voice_embedding)
+        voice = _validate_and_construct_voice(voice_id, voice_embedding=voice_embedding, experimental_voice_controls = _experimental_voice_controls)
 
         # Create the initial request body
         request_body = {
@@ -495,32 +499,6 @@ class _WebSocket:
 
         return out
 
-    def _validate_and_construct_voice(
-        self, voice_id: Optional[str] = None, voice_embedding: Optional[List[float]] = None
-    ) -> dict:
-        """Validate and construct the voice dictionary for the request.
-
-        Args:
-            voice_id: The ID of the voice to use for generating audio.
-            voice_embedding: The embedding of the voice to use for generating audio.
-
-        Returns:
-            A dictionary representing the voice configuration.
-
-        Raises:
-            ValueError: If neither or both voice_id and voice_embedding are specified.
-        """
-        if voice_id is None and voice_embedding is None:
-            raise ValueError("Either voice_id or voice_embedding must be specified.")
-
-        if voice_id is not None and voice_embedding is not None:
-            raise ValueError("Only one of voice_id or voice_embedding should be specified.")
-
-        if voice_id:
-            return {"mode": "id", "id": voice_id}
-
-        return {"mode": "embedding", "embedding": voice_embedding}
-
     def send(
         self,
         model_id: str,
@@ -533,6 +511,7 @@ class _WebSocket:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Union[bytes, Generator[bytes, None, None]]:
         """Send a request to the WebSocket to generate audio.
 
@@ -547,6 +526,8 @@ class _WebSocket:
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
             stream: Whether to stream the audio or not.
             add_timestamps: Whether to return word-level timestamps.
+            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
+                Note: This is an experimental feature and may change rapidly in future releases.
 
         Returns:
             If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
@@ -560,7 +541,7 @@ class _WebSocket:
         if context_id is None:
             context_id = str(uuid.uuid4())
 
-        voice = self._validate_and_construct_voice(voice_id, voice_embedding)
+        voice = _validate_and_construct_voice(voice_id, voice_embedding=voice_embedding, experimental_voice_controls = _experimental_voice_controls)
 
         request_body = {
             "model_id": model_id,
@@ -668,32 +649,6 @@ class _SSE:
                     break
         return buffer, outputs
 
-    def _validate_and_construct_voice(
-        self, voice_id: Optional[str] = None, voice_embedding: Optional[List[float]] = None
-    ) -> dict:
-        """Validate and construct the voice dictionary for the request.
-
-        Args:
-            voice_id: The ID of the voice to use for generating audio.
-            voice_embedding: The embedding of the voice to use for generating audio.
-
-        Returns:
-            A dictionary representing the voice configuration.
-
-        Raises:
-            ValueError: If neither or both voice_id and voice_embedding are specified.
-        """
-        if voice_id is None and voice_embedding is None:
-            raise ValueError("Either voice_id or voice_embedding must be specified.")
-
-        if voice_id is not None and voice_embedding is not None:
-            raise ValueError("Only one of voice_id or voice_embedding should be specified.")
-
-        if voice_id:
-            return {"mode": "id", "id": voice_id}
-
-        return {"mode": "embedding", "embedding": voice_embedding}
-
     def send(
         self,
         model_id: str,
@@ -704,6 +659,7 @@ class _SSE:
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Union[bytes, Generator[bytes, None, None]]:
         """Send a request to the server to generate audio using Server-Sent Events.
 
@@ -716,6 +672,8 @@ class _SSE:
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
             stream: Whether to stream the audio or not.
+            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
+                Note: This is an experimental feature and may change rapidly in future releases.
 
         Returns:
             If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
@@ -723,8 +681,7 @@ class _SSE:
             Both the generator and the dictionary contain the following key(s):
             - audio: The audio as bytes.
         """
-        voice = self._validate_and_construct_voice(voice_id, voice_embedding)
-
+        voice = _validate_and_construct_voice(voice_id, voice_embedding=voice_embedding, experimental_voice_controls=_experimental_voice_controls)
         request_body = {
             "model_id": model_id,
             "transcript": transcript,
@@ -958,8 +915,9 @@ class _AsyncSSE(_SSE):
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Union[bytes, AsyncGenerator[bytes, None]]:
-        voice = self._validate_and_construct_voice(voice_id, voice_embedding)
+        voice = _validate_and_construct_voice(voice_id, voice_embedding=voice_embedding,experimental_voice_controls=_experimental_voice_controls)
 
         request_body = {
             "model_id": model_id,
@@ -1056,6 +1014,7 @@ class _AsyncTTSContext:
         duration: Optional[int] = None,
         language: Optional[str] = None,
         add_timestamps: bool = False,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> None:
         """Send audio generation requests to the WebSocket. The response can be received using the `receive` method.
 
@@ -1070,6 +1029,8 @@ class _AsyncTTSContext:
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`.
             add_timestamps: Whether to return word-level timestamps.
+            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
+                Note: This is an experimental feature and may change rapidly in future releases.
 
         Returns:
             None.
@@ -1081,7 +1042,7 @@ class _AsyncTTSContext:
 
         await self._websocket.connect()
 
-        voice = self._websocket._validate_and_construct_voice(voice_id, voice_embedding)
+        voice = _validate_and_construct_voice(voice_id, voice_embedding, experimental_voice_controls=_experimental_voice_controls)
 
         request_body = {
             "model_id": model_id,
@@ -1249,7 +1210,8 @@ class _AsyncWebSocket(_WebSocket):
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
-        add_timestamps: bool = False
+        add_timestamps: bool = False,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Union[bytes, AsyncGenerator[bytes, None]]:
         """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
@@ -1268,6 +1230,7 @@ class _AsyncWebSocket(_WebSocket):
             language=language,
             continue_=False,
             add_timestamps = add_timestamps,
+            _experimental_voice_controls=_experimental_voice_controls,
         )
 
         generator = ctx.receive()
@@ -1336,3 +1299,35 @@ class AsyncTTS(TTS):
         )
         await ws.connect()
         return ws
+
+
+def _validate_and_construct_voice(
+    voice_id: Optional[str] = None, voice_embedding: Optional[List[float]] = None, experimental_voice_controls: Optional[VoiceControls] = None
+) -> dict:
+    """Validate and construct the voice dictionary for the request.
+
+    Args:
+        voice_id: The ID of the voice to use for generating audio.
+        voice_embedding: The embedding of the voice to use for generating audio.
+        experimental_voice_controls: Voice controls for emotion and speed.
+            Note: This is an experimental feature and may rapidly change in the future.
+
+    Returns:
+        A dictionary representing the voice configuration.
+
+    Raises:
+        ValueError: If neither or both voice_id and voice_embedding are specified.
+    """
+    if voice_id is None and voice_embedding is None:
+        raise ValueError("Either voice_id or voice_embedding must be specified.")
+
+    if voice_id is not None and voice_embedding is not None:
+        raise ValueError("Only one of voice_id or voice_embedding should be specified.")
+
+    if voice_id:
+        voice = {"mode": "id", "id": voice_id}
+    else:
+        voice = {"mode": "embedding", "embedding": voice_embedding}
+    if experimental_voice_controls is not None:
+        voice["__experimental_controls"] = experimental_voice_controls
+    return voice
