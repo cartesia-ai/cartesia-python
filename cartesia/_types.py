@@ -45,7 +45,7 @@ class DeprecatedOutputFormatMapping:
         "mulaw_8000": {"container": "raw", "encoding": "pcm_mulaw", "sample_rate": 8000},
         "alaw_8000": {"container": "raw", "encoding": "pcm_alaw", "sample_rate": 8000},
     }
-    
+
     @classmethod
     @deprecated(
         vdeprecated="1.0.1",
@@ -74,18 +74,19 @@ class VoiceControls(TypedDict):
     """Defines different voice control parameters for voice synthesis.
 
     For a complete list of supported parameters, refer to the Cartesia API documentation.
-    https://docs.cartesia.ai/getting-started/welcome
+    https://docs.cartesia.ai/api-reference
 
     Examples:
         >>> {"speed": "fastest"}
-        >>> {"speed": "slow", "emotion": "anger:high, positivity:low"}
-        >>> {"emotion": "surprise:high, positivity:high"}
+        >>> {"speed": "slow", "emotion": ["sadness:high"]}
+        >>> {"emotion": ["surprise:highest", "curiosity"]}
 
     Note:
         This is an experimental class and is subject to rapid change in future versions.
     """
+
     speed: str = ""
-    emotion: str = ""
+    emotion: List[str] = []
 
 
 class OutputFormat(TypedDict):

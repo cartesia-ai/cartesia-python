@@ -384,6 +384,34 @@ p.terminate()
 ws.close()  # Close the websocket connection
 ```
 
+### Generating timestamps using WebSocket
+
+The WebSocket endpoint supports timestamps, allowing you to get detailed timing information for each word in the transcript. To enable this feature, pass an `add_timestamps` boolean flag to the `send` method. The results are returned in the `word_timestamps` object, which contains three keys:
+- words (list): The individual words in the transcript.
+- start (list): The starting timestamp for each word (in seconds).
+- end (list): The ending timestamp for each word (in seconds).
+
+```python
+response = ws.send(
+    model_id=model_id,
+    transcript=transcript,
+    voice_id=voice_id,
+    output_format=output_format,
+    stream=False,
+    add_timestamps=True
+)
+
+# Accessing the word_timestamps object
+word_timestamps = response['word_timestamps']
+
+words = word_timestamps['words']
+start_times = word_timestamps['start']
+end_times = word_timestamps['end']
+
+for word, start, end in zip(words, start_times, end_times):
+    print(f"Word: {word}, Start: {start}, End: {end}")
+```
+
 ### Multilingual Text-to-Speech [Alpha]
 
 You can use our `sonic-multilingual` model to generate audio in multiple languages. The languages supported are available at [docs.cartesia.ai](https://docs.cartesia.ai/getting-started/available-models).
@@ -436,6 +464,31 @@ stream.stop_stream()
 stream.close()
 p.terminate()
 ```
+
+### Speed and Emotion Control [Experimental]
+
+You can enhance the voice output by adjusting the `speed` and `emotion` parameters. To do this, pass a `_experimental_voice_controls` dictionary with the desired `speed` and `emotion` values to any `send` method.
+
+Speed Options:
+- `slowest`, `slow`, `normal`, `fast`, `fastest`
+
+Emotion Options:
+Use a list of tags in the format `emotion_name:level` where:
+- Emotion Names: `anger`, `positivity`, `surprise`, `sadness`, `curiosity`
+- Levels: `lowest`, `low`, (omit for medium level), `high`, `highest`
+The emotion tag levels add the specified emotion to the voice at the indicated intensity, with the omission of a level tag resulting in a medium intensity.
+
+```python
+ws.send(
+    model_id=model_id,
+    transcript=transcript,
+    voice_id=voice_id,
+    output_format=output_format,
+    _experimental_voice_controls={"speed": "fast", "emotion": ["positivity:high"]},
+)
+```
+
+### Jupyter Notebook Usage
 
 If you are using Jupyter Notebook or JupyterLab, you can use IPython.display.Audio to play the generated audio directly in the notebook.
 Additionally, in these notebook examples we show how to use the client as a context manager (though this is not required).
