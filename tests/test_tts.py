@@ -19,6 +19,7 @@ import asyncio
 
 THISDIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.dirname(THISDIR))
+RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
 SAMPLE_VOICE = "Newsman"
 SAMPLE_VOICE_ID = "d46abd1d-2d02-43e8-819f-51fb652c1c61"
@@ -84,7 +85,12 @@ def test_get_voice_from_id(client: Cartesia):
 #     cloned_voice_embedding = client.voices.clone(link=url)
 #     assert isinstance(cloned_voice_embedding, list)
 #     assert len(cloned_voice_embedding) == 192
-    
+
+def test_clone_voice_with_file(client: Cartesia):
+    logger.info("Testing voices.clone with file")
+    output = client.voices.clone(filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"))
+    assert isinstance(output, list)
+
 def test_create_voice(client: Cartesia):
     logger.info("Testing voices.create")
     embedding = np.ones(192).tolist()
