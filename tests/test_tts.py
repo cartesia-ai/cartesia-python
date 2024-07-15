@@ -158,6 +158,34 @@ def test_websocket_send(resources: _Resources, stream: bool):
         assert isinstance(out["audio"], bytes)
     
     ws.close()
+
+
+@pytest.mark.parametrize("stream", [True, False])
+def test_websocket_send_timestamps(resources: _Resources, stream: bool):
+    logger.info("Testing WebSocket send")
+    client = resources.client
+    transcript = "Hello, world! I'\''m generating audio on Cartesia."
+
+    ws = client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    output_generate = ws.send(transcript=transcript, voice_id=SAMPLE_VOICE_ID, output_format={
+        "container": "raw",
+        "encoding": "pcm_f32le",
+        "sample_rate": 44100
+    }, stream=stream, model_id=DEFAULT_MODEL_ID, context_id=context_id, add_timestamps=True)
+    
+    if not stream:
+        output_generate = [output_generate]
+
+    has_wordtimestamps = False
+    for out in output_generate:
+        has_wordtimestamps |= "word_timestamps" in out
+        _validate_schema(out)
+
+    assert has_wordtimestamps, "No word timestamps found"
+    
+    ws.close()
+
         
 def test_sse_send_context_manager(resources: _Resources):
     logger.info("Testing SSE send context manager")
@@ -265,7 +293,37 @@ async def test_async_websocket_send(resources: _Resources):
         # Close the websocket
         await ws.close()
         await async_client.close()
+
+
+@pytest.mark.asyncio
+async def test_async_websocket_send_timestamps(resources: _Resources):
+    logger.info("Testing async WebSocket send with timestamps")
+    transcript = "Hello, world! I'\''m generating audio on Cartesia."
+
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    try:
+        output = await ws.send(transcript=transcript, voice_id=SAMPLE_VOICE_ID, output_format={
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        }, stream=True, model_id=DEFAULT_MODEL_ID, context_id=context_id, add_timestamps=True)
         
+        has_wordtimestamps = False
+        async for out in output:
+            assert "context_id" in out
+            has_wordtimestamps |= "word_timestamps" in out
+            _validate_schema(out)
+        
+        assert has_wordtimestamps, "No word timestamps found"
+
+    finally:
+        # Close the websocket
+        await ws.close()
+        await async_client.close()
+
+
 @pytest.mark.asyncio
 async def test_async_sse_send_context_manager(resources: _Resources):
     logger.info("Testing async SSE send context manager")
@@ -772,3 +830,16 @@ def test_websocket_send_with_incorrect_url():
             ws.close()
     except Exception as e:
         logger.info("Unexpected error occured: ", e)
+
+
+def _validate_schema(out):
+    if "audio" in out:
+        assert isinstance(out["audio"], bytes)
+    if "word_timestamps" in out:
+        assert isinstance(out["word_timestamps"], dict)
+        word_timestamps = out["word_timestamps"]
+
+        assert word_timestamps.keys() == {"words", "start", "end"}
+        assert isinstance(word_timestamps["words"], list) and all(isinstance(word, str) for word in word_timestamps["words"])
+        assert isinstance(word_timestamps["start"], list) and all(isinstance(start, (int, float)) for start in word_timestamps["start"])
+        assert isinstance(word_timestamps["end"], list) and all(isinstance(end, (int, float)) for end in word_timestamps["end"])

@@ -74,3 +74,9 @@ class OutputFormat(TypedDict):
     container: str
     encoding: str
     sample_rate: int
+
+
+class EventType:
+    NULL = ""
+    AUDIO = "chunk"
+    TIMESTAMPS = "timestamps"

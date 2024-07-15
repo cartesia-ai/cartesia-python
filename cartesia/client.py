@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from collections import defaultdict
 import json
 import os
 import uuid
@@ -27,6 +28,7 @@ from iterators import TimeoutIterator
 
 from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
 from cartesia._types import (
+    EventType,
     OutputFormat,
     OutputFormatMapping,
     DeprecatedOutputFormatMapping,
@@ -482,16 +484,16 @@ class _WebSocket:
     def _convert_response(
         self, response: Dict[str, any], include_context_id: bool
     ) -> Dict[str, Any]:
-        audio = base64.b64decode(response["data"])
-
-        optional_kwargs = {}
+        out = {}
+        if response["type"] == EventType.AUDIO:
+            out["audio"] = base64.b64decode(response["data"])
+        elif response["type"] == EventType.TIMESTAMPS:
+            out["word_timestamps"] = response["word_timestamps"]
+        
         if include_context_id:
-            optional_kwargs["context_id"] = response["context_id"]
+            out["context_id"] = response["context_id"]
 
-        return {
-            "audio": audio,
-            **optional_kwargs,
-        }
+        return out
 
     def _validate_and_construct_voice(
         self, voice_id: Optional[str] = None, voice_embedding: Optional[List[float]] = None
@@ -530,6 +532,7 @@ class _WebSocket:
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
+        add_timestamps: bool = False,
     ) -> Union[bytes, Generator[bytes, None, None]]:
         """Send a request to the WebSocket to generate audio.
 
@@ -543,6 +546,7 @@ class _WebSocket:
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
             stream: Whether to stream the audio or not.
+            add_timestamps: Whether to return word-level timestamps.
 
         Returns:
             If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
@@ -569,6 +573,7 @@ class _WebSocket:
             },
             "context_id": context_id,
             "language": language,
+            "add_timestamps": add_timestamps,
         }
 
         if duration is not None:
@@ -580,10 +585,17 @@ class _WebSocket:
             return generator
 
         chunks = []
+        word_timestamps = defaultdict(list)
         for chunk in generator:
-            chunks.append(chunk["audio"])
-
-        return {"audio": b"".join(chunks), "context_id": context_id}
+            if "audio" in chunk:
+                chunks.append(chunk["audio"])
+            if add_timestamps and "word_timestamps" in chunk:
+                for k, v in chunk["word_timestamps"].items():
+                    word_timestamps[k].extend(v)
+        out = {"audio": b"".join(chunks), "context_id": context_id}
+        if add_timestamps:
+            out["word_timestamps"] = word_timestamps
+        return out
 
     def _websocket_generator(self, request_body: Dict[str, Any]):
         self.websocket.send(json.dumps(request_body))
@@ -1043,6 +1055,7 @@ class _AsyncTTSContext:
         continue_: bool = False,
         duration: Optional[int] = None,
         language: Optional[str] = None,
+        add_timestamps: bool = False,
     ) -> None:
         """Send audio generation requests to the WebSocket. The response can be received using the `receive` method.
 
@@ -1055,7 +1068,8 @@ class _AsyncTTSContext:
             context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
             continue_: Whether to continue the audio generation from the previous transcript or not.
             duration: The duration of the audio in seconds.
-            language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
+            language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`.
+            add_timestamps: Whether to return word-level timestamps.
 
         Returns:
             None.
@@ -1081,6 +1095,7 @@ class _AsyncTTSContext:
             "context_id": self._context_id,
             "continue": continue_,
             "language": language,
+            "add_timestamps": add_timestamps,
         }
 
         if duration is not None:
@@ -1234,7 +1249,9 @@ class _AsyncWebSocket(_WebSocket):
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
+        add_timestamps: bool = False
     ) -> Union[bytes, AsyncGenerator[bytes, None]]:
+        """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
             context_id = str(uuid.uuid4())
 
@@ -1250,6 +1267,7 @@ class _AsyncWebSocket(_WebSocket):
             duration=duration,
             language=language,
             continue_=False,
+            add_timestamps = add_timestamps,
         )
 
         generator = ctx.receive()
@@ -1258,10 +1276,17 @@ class _AsyncWebSocket(_WebSocket):
             return generator
 
         chunks = []
+        word_timestamps = defaultdict(list)
         async for chunk in generator:
-            chunks.append(chunk["audio"])
-
-        return {"audio": b"".join(chunks), "context_id": context_id}
+            if "audio" in chunk:
+                chunks.append(chunk["audio"])
+            if add_timestamps and "word_timestamps" in chunk:
+                for k, v in chunk["word_timestamps"].items():
+                    word_timestamps[k].extend(v)
+        out = {"audio": b"".join(chunks), "context_id": context_id}
+        if add_timestamps:
+            out["word_timestamps"] = word_timestamps
+        return out
 
     async def _process_responses(self):
         try:
