@@ -8,6 +8,22 @@ The official Cartesia Python library which provides convenient access to the Car
 > [!IMPORTANT]
 > The client library introduces breaking changes in v1.0.0, which was released on June 24th 2024. See the [release notes](https://github.com/cartesia-ai/cartesia-python/releases/tag/v1.0.0) and [migration guide](https://github.com/cartesia-ai/cartesia-python/discussions/44). Reach out to us on [Discord](https://discord.gg/ZVxavqHB9X) for any support requests!
 
+- [Cartesia Python API Library](#cartesia-python-api-library)
+  - [Documentation](#documentation)
+  - [Installation](#installation)
+  - [Voices](#voices)
+  - [Text-to-Speech](#text-to-speech)
+    - [Server-Sent Events (SSE)](#server-sent-events-sse)
+    - [WebSocket](#websocket)
+      - [Conditioning speech on previous generations using WebSocket](#conditioning-speech-on-previous-generations-using-websocket)
+    - [Generating timestamps using WebSocket](#generating-timestamps-using-websocket)
+    - [Multilingual Text-to-Speech \[Alpha\]](#multilingual-text-to-speech-alpha)
+    - [Speed and Emotion Control \[Experimental\]](#speed-and-emotion-control-experimental)
+    - [Jupyter Notebook Usage](#jupyter-notebook-usage)
+    - [Utility methods](#utility-methods)
+      - [Output Formats](#output-formats)
+
+
 ## Documentation
 
 Our complete API documentation can be found [on docs.cartesia.ai](https://docs.cartesia.ai).
@@ -233,7 +249,7 @@ async def send_transcripts(ctx):
 
     # You can check out our models at https://docs.cartesia.ai/getting-started/available-models
     model_id = "sonic-english"
-    
+
     # You can find the supported `output_format`s at https://docs.cartesia.ai/api-reference/endpoints/stream-speech-server-sent-events
     output_format = {
         "container": "raw",
@@ -249,7 +265,7 @@ async def send_transcripts(ctx):
         "As they near Eggman's lair, our heroes charge their abilities for an epic boss battle. ",
         "Get ready to spin, jump, and sound-blast your way to victory in this high-octane crossover!"
     ]
-    
+
     for transcript in transcripts:
         # Send text inputs as they become available
         await ctx.send(
@@ -261,7 +277,7 @@ async def send_transcripts(ctx):
         )
 
     # Indicate that no more inputs will be sent. Otherwise, the context will close after 5 seconds of inactivity.
-    await ctx.no_more_inputs() 
+    await ctx.no_more_inputs()
 
 async def receive_and_play_audio(ctx):
     p = pyaudio.PyAudio()
@@ -367,7 +383,7 @@ output_stream = ctx.send(
     voice_id=voice_id,
     output_format=output_format,
 )
-    
+
 for output in output_stream:
     buffer = output["audio"]
 
