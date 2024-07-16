@@ -79,14 +79,6 @@ def test_get_voice_from_id(client: Cartesia):
     voices = client.voices.list()
     assert voice in voices
 
-# Does not work currently, LB issue
-# def test_clone_voice_with_link(client: Cartesia):
-#     url = "https://youtu.be/g2Z7Ddd573M?si=P8BM_hBqt5P8Ft6I&t=69"
-#     logger.info("Testing voices.clone with link")
-#     cloned_voice_embedding = client.voices.clone(link=url)
-#     assert isinstance(cloned_voice_embedding, list)
-#     assert len(cloned_voice_embedding) == 192
-
 def test_clone_voice_with_file(client: Cartesia):
     logger.info("Testing voices.clone with file")
     output = client.voices.clone(filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"))

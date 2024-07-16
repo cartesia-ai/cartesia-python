@@ -208,37 +208,25 @@ class Voices(Resource):
         return response.json()
 
     def clone(self, filepath: Optional[str] = None, link: Optional[str] = None) -> List[float]:
-        """Clone a voice from a clip or a URL.
+        """Clone a voice from a clip.
 
         Args:
             filepath: The path to the clip file.
-            link: The URL to the clip
 
         Returns:
             The embedding of the cloned voice as a list of floats.
         """
         # TODO: Python has a bytes object, use that instead of a filepath
-        if not filepath and not link:
-            raise ValueError("At least one of 'filepath' or 'link' must be specified.")
-        if filepath and link:
-            raise ValueError("Only one of 'filepath' or 'link' should be specified.")
-        if filepath:
-            url = f"{self._http_url()}/voices/clone/clip"
-            with open(filepath, "rb") as file:
-                files = {"clip": file}
-                headers = self.headers.copy()
-                headers.pop("Content-Type", None)
-                response = httpx.post(url, headers=headers, files=files, timeout=self.timeout)
-                if not response.is_success:
-                    raise ValueError(f"Failed to clone voice from clip. Error: {response.text}")
-        elif link:
-            url = f"{self._http_url()}/voices/clone/url"
-            params = {"link": link}
+        if not filepath:
+            raise ValueError("Filepath must be specified.")
+        url = f"{self._http_url()}/voices/clone/clip"
+        with open(filepath, "rb") as file:
+            files = {"clip": file}
             headers = self.headers.copy()
-            headers.pop("Content-Type")  # The content type header is not required for URLs
-            response = httpx.post(url, headers=self.headers, params=params, timeout=self.timeout)
+            headers.pop("Content-Type", None)
+            response = httpx.post(url, headers=headers, files=files, timeout=self.timeout)
             if not response.is_success:
-                raise ValueError(f"Failed to clone voice from URL. Error: {response.text}")
+                raise ValueError(f"Failed to clone voice from clip. Error: {response.text}")
 
         return response.json()["embedding"]
 
