@@ -23,7 +23,12 @@ import aiohttp
 import httpx
 import logging
 import requests
-from websockets.sync.client import connect
+try:
+    from websockets.sync.client import connect
+    IS_WEBSOCKET_SYNC_AVAILABLE = True
+except ImportError:
+    IS_WEBSOCKET_SYNC_AVAILABLE = False
+
 from iterators import TimeoutIterator
 
 from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
@@ -457,6 +462,10 @@ class _WebSocket:
         Raises:
             RuntimeError: If the connection to the WebSocket fails.
         """
+        if not IS_WEBSOCKET_SYNC_AVAILABLE:
+            raise ImportError(
+                "The synchronous WebSocket client is not available. Please ensure that you have 'websockets>=12.0' or compatible version installed."
+            )
         if self.websocket is None or self._is_websocket_closed():
             route = "tts/websocket"
             try:
