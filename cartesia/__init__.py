@@ -1,3 +1,3 @@
-from cartesia.client import Cartesia, AsyncCartesia
+from cartesia.client import AsyncCartesia, Cartesia
 
 __all__ = ["Cartesia", "AsyncCartesia"]

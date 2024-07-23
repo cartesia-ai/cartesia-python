@@ -1,9 +1,9 @@
-import time
-
-from aiohttp.client_exceptions import ServerDisconnectedError
 import asyncio
+import time
 from functools import wraps
 from http.client import RemoteDisconnected
+
+from aiohttp.client_exceptions import ServerDisconnectedError
 from httpx import TimeoutException
 from requests.exceptions import ConnectionError
 

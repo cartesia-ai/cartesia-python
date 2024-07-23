@@ -5,17 +5,19 @@ different results. Therefore, we cannot test for complete correctness but rather
 general correctness.
 """
 
+import asyncio
 import logging
 import os
 import sys
-from cartesia import AsyncCartesia, Cartesia
-from cartesia.client import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
-from cartesia._types import VoiceControls, VoiceMetadata
+import uuid
 from typing import AsyncGenerator, Generator, List
+
 import numpy as np
 import pytest
-import uuid
-import asyncio
+
+from cartesia import AsyncCartesia, Cartesia
+from cartesia._types import VoiceControls, VoiceMetadata
+from cartesia.client import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
 
 THISDIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.dirname(THISDIR))

@@ -1,4 +1,5 @@
 from typing import List, TypedDict
+
 from cartesia.utils.deprecated import deprecated
 
 

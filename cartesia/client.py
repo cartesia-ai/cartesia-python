@@ -1,46 +1,48 @@
 import asyncio
 import base64
-from collections import defaultdict
 import json
+import logging
 import os
 import uuid
+from collections import defaultdict
 from types import TracebackType
 from typing import (
     Any,
     AsyncGenerator,
-    Iterator,
+    Callable,
     Dict,
     Generator,
+    Iterator,
     List,
     Optional,
+    Set,
     Tuple,
     Union,
-    Callable,
-    Set,
 )
 
 import aiohttp
 import httpx
-import logging
 import requests
+
 try:
     from websockets.sync.client import connect
+
     IS_WEBSOCKET_SYNC_AVAILABLE = True
 except ImportError:
     IS_WEBSOCKET_SYNC_AVAILABLE = False
 
 from iterators import TimeoutIterator
+from websockets.sync.client import connect
 
-from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
 from cartesia._types import (
+    DeprecatedOutputFormatMapping,
     EventType,
     OutputFormat,
     OutputFormatMapping,
-    DeprecatedOutputFormatMapping,
     VoiceControls,
     VoiceMetadata,
 )
-
+from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
 
 DEFAULT_MODEL_ID = "sonic-english"  # latest default model
 MULTILINGUAL_MODEL_ID = "sonic-multilingual"  # latest multilingual model
