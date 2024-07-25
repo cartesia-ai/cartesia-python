@@ -14,7 +14,6 @@ from typing import AsyncGenerator, Generator, List
 
 import numpy as np
 import pytest
-
 from cartesia import AsyncCartesia, Cartesia
 from cartesia._types import VoiceControls, VoiceMetadata
 from cartesia.client import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
