@@ -214,21 +214,22 @@ class Voices(Resource):
 
         return response.json()
 
-    def clone(self, filepath: Optional[str] = None, link: Optional[str] = None) -> List[float]:
+    def clone(self, filepath: Optional[str] = None, enhance: str = True) -> List[float]:
         """Clone a voice from a clip.
 
         Args:
             filepath: The path to the clip file.
+            enhance: Whether to enhance the clip before cloning the voice (highly recommended). Defaults to True.
 
         Returns:
             The embedding of the cloned voice as a list of floats.
         """
-        # TODO: Python has a bytes object, use that instead of a filepath
         if not filepath:
             raise ValueError("Filepath must be specified.")
         url = f"{self._http_url()}/voices/clone/clip"
         with open(filepath, "rb") as file:
             files = {"clip": file}
+            files["enhance"] = str(enhance).lower()
             headers = self.headers.copy()
             headers.pop("Content-Type", None)
             response = httpx.post(url, headers=headers, files=files, timeout=self.timeout)

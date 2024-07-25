@@ -86,6 +86,12 @@ def test_clone_voice_with_file(client: Cartesia):
     output = client.voices.clone(filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"))
     assert isinstance(output, list)
 
+@pytest.mark.parametrize("enhance", [True, False])
+def test_clone_voice_with_file_enhance(client: Cartesia, enhance: bool):
+    logger.info("Testing voices.clone with file")
+    output = client.voices.clone(filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"), enhance=enhance)
+    assert isinstance(output, list)
+
 def test_create_voice(client: Cartesia):
     logger.info("Testing voices.create")
     embedding = np.ones(192).tolist()
