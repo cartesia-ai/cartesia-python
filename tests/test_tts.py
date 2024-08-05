@@ -14,6 +14,7 @@ from typing import AsyncGenerator, Generator, List
 
 import numpy as np
 import pytest
+
 from cartesia import AsyncCartesia, Cartesia
 from cartesia._types import VoiceControls, VoiceMetadata
 from cartesia.client import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
@@ -25,6 +26,7 @@ RESOURCES_DIR = os.path.join(THISDIR, "resources")
 SAMPLE_VOICE = "Newsman"
 SAMPLE_VOICE_ID = "d46abd1d-2d02-43e8-819f-51fb652c1c61"
 EXPERIMENTAL_VOICE_CONTROLS = {"emotion": ["anger:high", "positivity:low"], "speed": "fastest"}
+EXPERIMENTAL_VOICE_CONTROLS_2 = {"speed": 0.4}
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +104,7 @@ def test_create_voice(client: Cartesia):
     assert voice in voices
 
 @pytest.mark.parametrize("stream", [True, False])
-@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 def test_sse_send(resources: _Resources, stream: bool, _experimental_voice_controls: VoiceControls):
     logger.info("Testing SSE send")
     client = resources.client
@@ -139,7 +141,7 @@ def test_sse_send_with_model_id(resources: _Resources, stream: bool):
         assert isinstance(out["audio"], bytes)
         
 @pytest.mark.parametrize("stream", [True, False])
-@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 def test_websocket_send(resources: _Resources, stream: bool, _experimental_voice_controls: VoiceControls):
     logger.info("Testing WebSocket send")
     client = resources.client
@@ -189,7 +191,7 @@ def test_websocket_send_timestamps(resources: _Resources, stream: bool):
     ws.close()
 
         
-@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 def test_sse_send_context_manager(resources: _Resources, _experimental_voice_controls: VoiceControls):
     logger.info("Testing SSE send context manager")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
@@ -255,7 +257,7 @@ def test_websocket_send_context_manage_err(resources: _Resources):
         pass
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 async def test_async_sse_send( resources: _Resources, _experimental_voice_controls: VoiceControls):
     logger.info("Testing async SSE send")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."
@@ -276,7 +278,7 @@ async def test_async_sse_send( resources: _Resources, _experimental_voice_contro
         await async_client.close()
         
 @pytest.mark.asyncio
-@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS])
+@pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 async def test_async_websocket_send(resources: _Resources,  _experimental_voice_controls: VoiceControls):
     logger.info("Testing async WebSocket send")
     transcript = "Hello, world! I'\''m generating audio on Cartesia."

@@ -1,7 +1,8 @@
+from packaging.version import Version
+
 import cartesia as Cartesia
 import cartesia.version as version
 from cartesia.utils.deprecated import _DEPRECATED_FUNCTION_STATS
-from packaging.version import Version
 
 
 def test_deprecated_to_remove_by_version():

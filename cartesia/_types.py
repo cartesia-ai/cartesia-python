@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import List, TypedDict, Union
 
 from cartesia.utils.deprecated import deprecated
 
@@ -86,7 +86,7 @@ class VoiceControls(TypedDict):
         This is an experimental class and is subject to rapid change in future versions.
     """
 
-    speed: str = ""
+    speed: Union[str, float] = ""
     emotion: List[str] = []
 
 

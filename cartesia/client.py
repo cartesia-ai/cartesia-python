@@ -31,6 +31,9 @@ try:
 except ImportError:
     IS_WEBSOCKET_SYNC_AVAILABLE = False
 
+from iterators import TimeoutIterator
+from websockets.sync.client import connect
+
 from cartesia._types import (
     DeprecatedOutputFormatMapping,
     EventType,
@@ -40,8 +43,6 @@ from cartesia._types import (
     VoiceMetadata,
 )
 from cartesia.utils.retry import retry_on_connection_error, retry_on_connection_error_async
-from iterators import TimeoutIterator
-from websockets.sync.client import connect
 
 DEFAULT_MODEL_ID = "sonic-english"  # latest default model
 MULTILINGUAL_MODEL_ID = "sonic-multilingual"  # latest multilingual model
