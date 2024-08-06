@@ -1,6 +1,5 @@
 from packaging.version import Version
 
-import cartesia as Cartesia
 import cartesia.version as version
 from cartesia.utils.deprecated import _DEPRECATED_FUNCTION_STATS
 
