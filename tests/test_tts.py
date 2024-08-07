@@ -190,7 +190,6 @@ def test_websocket_send_timestamps(resources: _Resources, stream: bool):
     
     ws.close()
 
-        
 @pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
 def test_sse_send_context_manager(resources: _Resources, _experimental_voice_controls: VoiceControls):
     logger.info("Testing SSE send context manager")
@@ -456,6 +455,28 @@ def test_sync_continuation_websocket_context_send():
             assert isinstance(out["audio"], bytes)
     finally:
         ws.close()
+        
+def test_sync_context_send_timestamps(resources: _Resources):
+    logger.info("Testing WebSocket send")
+    client = resources.client
+    transcripts = ["Hello, world!", "I'\''m generating audio on Cartesia."]
+
+    ws = client.tts.websocket()
+    ctx = ws.context()
+    output_generate = ctx.send(transcript=chunk_generator(transcripts), voice_id=SAMPLE_VOICE_ID, output_format={
+        "container": "raw",
+        "encoding": "pcm_f32le",
+        "sample_rate": 44100
+    }, model_id=DEFAULT_MODEL_ID, add_timestamps=True)
+
+    has_wordtimestamps = False
+    for out in output_generate:
+        has_wordtimestamps |= "word_timestamps" in out
+        _validate_schema(out)
+
+    assert has_wordtimestamps, "No word timestamps found"
+    
+    ws.close()
     
 @pytest.mark.asyncio
 async def test_continuation_websocket_context_send():

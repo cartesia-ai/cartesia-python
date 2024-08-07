@@ -294,6 +294,7 @@ class _TTSContext:
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
+        add_timestamps: bool = False,
         _experimental_voice_controls: Optional[VoiceControls] = None,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
@@ -307,6 +308,7 @@ class _TTSContext:
             context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
+            add_timestamps: Whether to return word-level timestamps.
             _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
                 Note: This is an experimental feature and may change rapidly in future releases.
 
@@ -341,6 +343,7 @@ class _TTSContext:
             },
             "context_id": self._context_id,
             "language": language,
+            "add_timestamps": add_timestamps,
         }
 
         if duration is not None:
