@@ -261,6 +261,40 @@ class Voices(Resource):
 
         return response.json()
 
+    def mix(self, voices: List[Dict[str, Union[str, float]]]) -> List[float]:
+        """Mix multiple voices together.
+
+        Args:
+            voices: A list of dictionaries, each containing either:
+                        - 'id': The ID of an existing voice
+                        - 'embedding': A voice embedding
+                    AND
+                        - 'weight': The weight of the voice in the mix (0.0 to 1.0)
+
+        Returns:
+            The embedding of the mixed voice as a list of floats.
+
+        Raises:
+            ValueError: If the request fails or if the input is invalid.
+        """
+        url = f"{self._http_url()}/voices/mix"
+
+        if not voices or not isinstance(voices, list):
+            raise ValueError("voices must be a non-empty list")
+
+        response = httpx.post(
+            url,
+            headers=self.headers,
+            json={"voices": voices},
+            timeout=self.timeout,
+        )
+
+        if not response.is_success:
+            raise ValueError(f"Failed to mix voices. Error: {response.text}")
+
+        result = response.json()
+        return result["embedding"]
+
 
 class _TTSContext:
     """Manage a single context over a WebSocket.
@@ -861,9 +895,9 @@ class TTS(Resource):
             raise ValueError("Only one of voice_id or voice_embedding should be specified.")
 
         if voice_id:
-            voice = {"mode": "id", "id": voice_id}
+            voice = {"id": voice_id}
         else:
-            voice = {"mode": "embedding", "embedding": voice_embedding}
+            voice = {"embedding": voice_embedding}
         if experimental_voice_controls is not None:
             voice["__experimental_controls"] = experimental_voice_controls
         return voice

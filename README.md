@@ -56,6 +56,11 @@ print("The embedding for", voice["name"], "is", voice["embedding"])
 # Clone a voice using filepath
 cloned_voice_embedding = client.voices.clone(filepath="path/to/voice")
 
+# Mix voices together
+mixed_voice_embedding = client.voices.mix(
+    [{ "id": "voice_id_1", "weight": 0.5 }, { "id": "voice_id_2", "weight": 0.25 }, { "id": "voice_id_3", "weight": 0.25 }]
+)
+
 # Create a new voice
 new_voice = client.voices.create(
     name="New Voice",
@@ -487,6 +492,7 @@ You can enhance the voice output by adjusting the `speed` and `emotion` paramete
 
 Speed Options:
 - `slowest`, `slow`, `normal`, `fast`, `fastest`
+- Float values between -1.0 and 1.0, where -1.0 is the slowest speed and 1.0 is the fastest speed.
 
 Emotion Options:
 Use a list of tags in the format `emotion_name:level` where:

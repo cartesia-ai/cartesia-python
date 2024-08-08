@@ -102,6 +102,11 @@ def test_create_voice(client: Cartesia):
     assert voice["is_public"] is False
     voices = client.voices.list()
     assert voice in voices
+    
+def test_mix_voice(client: Cartesia):
+    logger.info("Testing voices.mix")
+    output = client.voices.mix(voices = [{"id": SAMPLE_VOICE_ID, "weight": 0.1}, {"id": SAMPLE_VOICE_ID, "weight": 0.9}])
+    assert isinstance(output, list)
 
 @pytest.mark.parametrize("stream", [True, False])
 @pytest.mark.parametrize("_experimental_voice_controls", [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2])
