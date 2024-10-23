@@ -1,4 +1,4 @@
-from typing import List, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
 from cartesia.utils.deprecated import deprecated
 
@@ -91,10 +91,40 @@ class VoiceControls(TypedDict):
     emotion: List[str] = []
 
 
-class OutputFormat(TypedDict):
-    container: str
+class MP3Format(TypedDict):
+    container: Literal["mp3"]
+    bit_rate: int
+    sample_rate: int
+
+class WAVFormat(TypedDict):
+    container: Literal["wav"]
     encoding: str
     sample_rate: int
+    bit_rate: int
+
+class RawFormat(TypedDict):
+    container: Literal["raw"]
+    encoding: str
+    sample_rate: int
+
+StrictOutputFormat = Union[MP3Format, WAVFormat, RawFormat]
+
+class OutputFormat():
+    def __new__(cls, **kwargs):
+        if kwargs["container"] == "mp3":
+            if {"bit_rate", "sample_rate"} != kwargs.keys():
+                raise ValueError("mp3 container requires bit_rate and sample_rate")
+            return MP3Format(**kwargs)
+        elif kwargs["container"] == "wav":
+            if {"encoding", "sample_rate", "bit_rate"} != kwargs.keys():
+                raise ValueError("wav container requires encoding, sample_rate, and bit_rate")
+            return WAVFormat(**kwargs)
+        elif kwargs["container"] == "raw":
+            if {"encoding", "sample_rate"} != kwargs.keys():
+                raise ValueError("raw container requires encoding and sample_rate")
+            return RawFormat(**kwargs)
+        else:
+            raise ValueError(f"Unsupported container: '{kwargs['container']}'")
 
 
 class EventType:
