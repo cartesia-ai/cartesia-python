@@ -14,7 +14,7 @@ except ImportError:
 from iterators import TimeoutIterator
 
 from cartesia._types import EventType, OutputFormat, VoiceControls
-from cartesia.utils.tts import _validate_and_construct_voice
+from cartesia.utils.tts import _validate_and_construct_voice, _construct_tts_request
 
 
 class _TTSContext:
@@ -88,21 +88,13 @@ class _TTSContext:
         )
 
         # Create the initial request body
-        request_body = {
-            "model_id": model_id,
-            "voice": voice,
-            "output_format": {
-                "container": output_format["container"],
-                "encoding": output_format["encoding"],
-                "sample_rate": output_format["sample_rate"],
-            },
-            "context_id": self._context_id,
-            "language": language,
-            "add_timestamps": add_timestamps,
-        }
-
-        if duration is not None:
-            request_body["duration"] = duration
+        request_body = _construct_tts_request(
+            model_id,
+            transcript,
+            output_format,
+            voice_id,
+            voice_embedding,
+        )
 
         try:
             # Create an iterator with a timeout to get text chunks
@@ -303,28 +295,18 @@ class _WebSocket:
         if context_id is None:
             context_id = str(uuid.uuid4())
 
-        voice = _validate_and_construct_voice(
-            voice_id,
+        request_body = _construct_tts_request(
+            model_id=model_id,
+            transcript=transcript,
+            output_format=output_format,
+            voice_id=voice_id,
             voice_embedding=voice_embedding,
-            experimental_voice_controls=_experimental_voice_controls,
+            context_id=context_id,
+            duration=duration,
+            language=language,
+            add_timestamps=add_timestamps,
+            _experimental_voice_controls=_experimental_voice_controls,
         )
-
-        request_body = {
-            "model_id": model_id,
-            "transcript": transcript,
-            "voice": voice,
-            "output_format": {
-                "container": output_format["container"],
-                "encoding": output_format["encoding"],
-                "sample_rate": output_format["sample_rate"],
-            },
-            "context_id": context_id,
-            "language": language,
-            "add_timestamps": add_timestamps,
-        }
-
-        if duration is not None:
-            request_body["duration"] = duration
 
         generator = self._websocket_generator(request_body)
 
