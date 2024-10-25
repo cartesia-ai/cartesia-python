@@ -7,4 +7,4 @@ lint:
 	uvx ruff format --check .
 
 test:
-	uvx pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
+	uv run pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
