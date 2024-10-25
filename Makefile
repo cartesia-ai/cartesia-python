@@ -1,11 +1,10 @@
 format:
-	isort --atomic .
-	ruff format .
+	uvx ruff check --fix .
+	uvx ruff format .
 
 lint:
-	isort -c .
-	ruff check .
-	ruff format --check .
+	uvx ruff check .
+	uvx ruff format --check .
 
 test:
-	pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
+	uvx pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
