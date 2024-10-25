@@ -192,12 +192,11 @@ class _AsyncWebSocket(_WebSocket):
         if self.websocket is None or self._is_websocket_closed():
             route = "tts/websocket"
             session = await self._get_session()
+            url = f"{self.ws_url}/{route}?api_key={self.api_key}&cartesia_version={self.cartesia_version}"
             try:
-                self.websocket = await session.ws_connect(
-                    f"{self.ws_url}/{route}?api_key={self.api_key}&cartesia_version={self.cartesia_version}"
-                )
+                self.websocket = await session.ws_connect(url)
             except Exception as e:
-                raise RuntimeError(f"Failed to connect to WebSocket. {e}")
+                raise RuntimeError(f"Failed to connect to WebSocket at {url}. {e}")
 
     def _is_websocket_closed(self):
         return self.websocket.closed

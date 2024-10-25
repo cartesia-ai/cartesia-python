@@ -14,7 +14,7 @@ except ImportError:
 from iterators import TimeoutIterator
 
 from cartesia._types import EventType, OutputFormat, VoiceControls
-from cartesia.utils.tts import _validate_and_construct_voice, _construct_tts_request
+from cartesia.utils.tts import _construct_tts_request
 
 
 class _TTSContext:
@@ -83,11 +83,11 @@ class _TTSContext:
 
         # Create the initial request body
         request_body = _construct_tts_request(
-            model_id,
-            transcript,
-            output_format,
-            voice_id,
-            voice_embedding,
+            model_id=model_id,
+            output_format=output_format,
+            transcript=transcript,
+            voice_id=voice_id,
+            voice_embedding=voice_embedding,
         )
 
         try:
