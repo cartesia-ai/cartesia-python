@@ -8,7 +8,7 @@ from cartesia._constants import BACKOFF_FACTOR, MAX_RETRIES
 from cartesia._logger import logger
 from cartesia._types import OutputFormat, VoiceControls
 from cartesia.utils.retry import retry_on_connection_error
-from cartesia.utils.tts import _validate_and_construct_voice
+from cartesia.utils.tts import _construct_tts_request, _validate_and_construct_voice
 
 
 class _SSE:
@@ -90,10 +90,8 @@ class _SSE:
             output_format=output_format,
             voice_id=voice_id,
             voice_embedding=voice_embedding,
-            context_id=context_id,
             duration=duration,
             language=language,
-            add_timestamps=add_timestamps,
             _experimental_voice_controls=_experimental_voice_controls,
         )
 

@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from cartesia._types import VoiceControls
+from cartesia._types import OutputFormat, VoiceControls
 
 
 def _validate_and_construct_voice(
@@ -27,8 +27,8 @@ def _validate_and_construct_voice(
 
 def _construct_tts_request(
     model_id: str,
-    transcript: Optional[str] = None,
     output_format: OutputFormat,
+    transcript: Optional[str] = None,
     voice_id: Optional[str] = None,
     voice_embedding: Optional[List[float]] = None,
     context_id: Optional[str] = None,
@@ -49,8 +49,10 @@ def _construct_tts_request(
             "encoding": output_format["encoding"],
             "sample_rate": output_format["sample_rate"],
         },
-        "language": language,
     }
+
+    if language is not None:
+        tts_request["language"] = language
 
     if transcript is not None:
         tts_request["transcript"] = transcript

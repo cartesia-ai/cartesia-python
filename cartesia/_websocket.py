@@ -81,12 +81,6 @@ class _TTSContext:
 
         self._websocket.connect()
 
-        voice = _validate_and_construct_voice(
-            voice_id,
-            voice_embedding=voice_embedding,
-            experimental_voice_controls=_experimental_voice_controls,
-        )
-
         # Create the initial request body
         request_body = _construct_tts_request(
             model_id,

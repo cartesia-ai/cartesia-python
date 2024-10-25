@@ -1,4 +1,6 @@
-from typing import List, Optional
+from typing import Iterator, List, Optional
+
+import httpx
 
 from cartesia._sse import _SSE
 from cartesia._types import (
@@ -9,7 +11,7 @@ from cartesia._types import (
 )
 from cartesia._websocket import _WebSocket
 from cartesia.resource import Resource
-from cartesia.utils.tts import _validate_and_construct_voice
+from cartesia.utils.tts import _construct_tts_request, _validate_and_construct_voice
 
 
 class TTS(Resource):
@@ -33,7 +35,6 @@ class TTS(Resource):
         ws = _WebSocket(self._ws_url(), self.api_key, self.cartesia_version)
         ws.connect()
         return ws
-    
 
     def bytes(
         self,
@@ -68,7 +69,6 @@ class TTS(Resource):
             raise ValueError(f"Failed to generate audio. Error: {response.text}")
 
         return response.content
-
 
     @staticmethod
     def get_output_format(output_format_name: str) -> OutputFormat:

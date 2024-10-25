@@ -8,8 +8,8 @@ from cartesia._constants import BACKOFF_FACTOR, MAX_RETRIES
 from cartesia._logger import logger
 from cartesia._sse import _SSE
 from cartesia._types import OutputFormat, VoiceControls
-from cartesia.tts import TTS
 from cartesia.utils.retry import retry_on_connection_error_async
+from cartesia.utils.tts import _construct_tts_request
 
 
 class _AsyncSSE(_SSE):
@@ -43,10 +43,8 @@ class _AsyncSSE(_SSE):
             output_format=output_format,
             voice_id=voice_id,
             voice_embedding=voice_embedding,
-            context_id=context_id,
             duration=duration,
             language=language,
-            add_timestamps=add_timestamps,
             _experimental_voice_controls=_experimental_voice_controls,
         )
 

@@ -1,6 +1,11 @@
+from typing import Iterator, List, Optional
+
+import httpx
 from cartesia._async_sse import _AsyncSSE
 from cartesia._async_websocket import _AsyncWebSocket
+from cartesia._types import OutputFormat, VoiceControls
 from cartesia.tts import TTS
+from cartesia.utils.tts import _construct_tts_request
 
 
 class AsyncTTS(TTS):
@@ -20,7 +25,7 @@ class AsyncTTS(TTS):
         )
         await ws.connect()
         return ws
-    
+
     async def bytes(
         self,
         model_id: str,

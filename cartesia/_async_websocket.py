@@ -10,6 +10,7 @@ from cartesia._constants import DEFAULT_MODEL_ID, DEFAULT_VOICE_EMBEDDING
 from cartesia._types import OutputFormat, VoiceControls
 from cartesia._websocket import _WebSocket
 from cartesia.tts import TTS
+from cartesia.utils.tts import _construct_tts_request
 
 
 class _AsyncTTSContext:
@@ -74,12 +75,6 @@ class _AsyncTTSContext:
             raise ValueError("Transcript cannot be empty when continue_ is True.")
 
         await self._websocket.connect()
-
-        voice = TTS._validate_and_construct_voice(
-            voice_id,
-            voice_embedding,
-            experimental_voice_controls=_experimental_voice_controls,
-        )
 
         request_body = _construct_tts_request(
             model_id=model_id,
