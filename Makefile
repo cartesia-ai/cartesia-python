@@ -14,7 +14,7 @@ bump:
 		echo "Error: Please specify a valid bump type (major|minor|patch|pre_l|pre_n)"; \
 		exit 1; \
 	fi
-	uvx bump-my-version bump $(filter major minor patch pre_l pre_n,$(MAKECMDGOALS))
+	uvx bump-my-version bump $(filter major minor patch pre_l pre_n,$(MAKECMDGOALS)) cartesia/version.py pyproject.toml
 
 major minor patch pre_l pre_n:
 	@:
