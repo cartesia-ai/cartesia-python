@@ -78,6 +78,7 @@ def test_get_voices(client: Cartesia):
     assert len(ids) == len(set(ids)), "All ids must be unique"
 
 
+@pytest.mark.skip(reason="Enable after api_status flag is stable and deployed")
 def test_get_voice_from_id(client: Cartesia):
     logger.info("Testing voices.get")
     voice = client.voices.get(SAMPLE_VOICE_ID)
