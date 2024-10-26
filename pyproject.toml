@@ -1,6 +1,6 @@
 [project]
 name = "cartesia"
-version = "0.1.0"
+version = "1.0.14"
 description = "The official Python library for the Cartesia API."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -23,6 +23,7 @@ dev-dependencies = [
     "setuptools>=75.2.0",
     "twine>=5.1.1",
     "wheel>=0.44.0",
+    "tomlkit>=0.13.2",
 ]
 
 [tool.ruff]

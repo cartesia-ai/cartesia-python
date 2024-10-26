@@ -8,3 +8,6 @@ lint:
 
 test:
 	uv run pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
+
+bump:  # Use as `make bump version=<version>`
+	uv run -m bumpversion $(version)
