@@ -10,7 +10,6 @@ from cartesia._constants import DEFAULT_MODEL_ID, DEFAULT_VOICE_EMBEDDING
 from cartesia._types import OutputFormat, VoiceControls
 from cartesia._websocket import _WebSocket
 from cartesia.tts import TTS
-from cartesia.utils.tts import _construct_tts_request
 
 
 class _AsyncTTSContext:
@@ -76,19 +75,29 @@ class _AsyncTTSContext:
 
         await self._websocket.connect()
 
-        request_body = _construct_tts_request(
-            model_id=model_id,
-            transcript=transcript,
-            output_format=output_format,
-            voice_id=voice_id,
-            voice_embedding=voice_embedding,
-            duration=duration,
-            language=language,
-            context_id=self._context_id,
-            add_timestamps=add_timestamps,
-            continue_=continue_,
-            _experimental_voice_controls=_experimental_voice_controls,
+        voice = TTS._validate_and_construct_voice(
+            voice_id,
+            voice_embedding,
+            experimental_voice_controls=_experimental_voice_controls,
         )
+
+        request_body = {
+            "model_id": model_id,
+            "transcript": transcript,
+            "voice": voice,
+            "output_format": {
+                "container": output_format["container"],
+                "encoding": output_format["encoding"],
+                "sample_rate": output_format["sample_rate"],
+            },
+            "context_id": self._context_id,
+            "continue": continue_,
+            "language": language,
+            "add_timestamps": add_timestamps,
+        }
+
+        if duration is not None:
+            request_body["duration"] = duration
 
         await self._websocket.websocket.send_json(request_body)
 
@@ -193,11 +202,12 @@ class _AsyncWebSocket(_WebSocket):
         if self.websocket is None or self._is_websocket_closed():
             route = "tts/websocket"
             session = await self._get_session()
-            url = f"{self.ws_url}/{route}?api_key={self.api_key}&cartesia_version={self.cartesia_version}"
             try:
-                self.websocket = await session.ws_connect(url)
+                self.websocket = await session.ws_connect(
+                    f"{self.ws_url}/{route}?api_key={self.api_key}&cartesia_version={self.cartesia_version}"
+                )
             except Exception as e:
-                raise RuntimeError(f"Failed to connect to WebSocket at {url}. {e}")
+                raise RuntimeError(f"Failed to connect to WebSocket. {e}")
 
     def _is_websocket_closed(self):
         return self.websocket.closed

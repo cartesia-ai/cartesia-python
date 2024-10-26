@@ -1,10 +1,18 @@
-format:
-	uvx ruff check --fix .
-	uvx ruff format .
+install:
+	pip install -e .
+
+install-dev:
+	pip install -e '.[dev]'
+	pip install pytest pytest-cov
+
+autoformat:
+	isort --atomic .
+	ruff format .
 
 lint:
-	uvx ruff check .
-	uvx ruff format --check .
+	isort -c .
+	ruff check .
+	ruff format --check .
 
 test:
-	uv run pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO
+	pytest -ra tests/ -sv --cov=cartesia/ --log-cli-level=INFO

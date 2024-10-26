@@ -8,7 +8,7 @@ from cartesia._constants import BACKOFF_FACTOR, MAX_RETRIES
 from cartesia._logger import logger
 from cartesia._types import OutputFormat, VoiceControls
 from cartesia.utils.retry import retry_on_connection_error
-from cartesia.utils.tts import _construct_tts_request, _validate_and_construct_voice
+from cartesia.utils.tts import _validate_and_construct_voice
 
 
 class _SSE:
@@ -84,16 +84,25 @@ class _SSE:
             Both the generator and the dictionary contain the following key(s):
             - audio: The audio as bytes.
         """
-        request_body = _construct_tts_request(
-            model_id=model_id,
-            transcript=transcript,
-            output_format=output_format,
-            voice_id=voice_id,
+        voice = _validate_and_construct_voice(
+            voice_id,
             voice_embedding=voice_embedding,
-            duration=duration,
-            language=language,
-            _experimental_voice_controls=_experimental_voice_controls,
+            experimental_voice_controls=_experimental_voice_controls,
         )
+        request_body = {
+            "model_id": model_id,
+            "transcript": transcript,
+            "voice": voice,
+            "output_format": {
+                "container": output_format["container"],
+                "encoding": output_format["encoding"],
+                "sample_rate": output_format["sample_rate"],
+            },
+            "language": language,
+        }
+
+        if duration is not None:
+            request_body["duration"] = duration
 
         generator = self._sse_generator_wrapper(request_body)
 

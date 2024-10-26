@@ -31,7 +31,6 @@ EXPERIMENTAL_VOICE_CONTROLS = {
     "speed": "fastest",
 }
 EXPERIMENTAL_VOICE_CONTROLS_2 = {"speed": 0.4}
-SAMPLE_TRANSCRIPT = "Hello, world! I'm generating audio on Cartesia."
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,6 @@ def test_get_voices(client: Cartesia):
     assert len(ids) == len(set(ids)), "All ids must be unique"
 
 
-@pytest.mark.skip(reason="Enable after api_status flag is stable and deployed")
 def test_get_voice_from_id(client: Cartesia):
     logger.info("Testing voices.get")
     voice = client.voices.get(SAMPLE_VOICE_ID)
@@ -160,7 +158,7 @@ def test_sse_send(
 ):
     logger.info("Testing SSE send")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     output_generate = client.tts.sse(
         transcript=transcript,
@@ -186,7 +184,7 @@ def test_sse_send(
 def test_sse_send_with_model_id(resources: _Resources, stream: bool):
     logger.info("Testing SSE send with model_id")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     output_generate = client.tts.sse(
         transcript=transcript,
@@ -253,7 +251,7 @@ async def test_sse_send_concurrent():
 
 def test_sse_send_with_voice_id_and_embedding(resources: _Resources):
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
     voice = client.voices.get(SAMPLE_VOICE_ID)
     embedding = voice["embedding"]
 
@@ -284,7 +282,7 @@ def test_websocket_send(
 ):
     logger.info("Testing WebSocket send")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     ws = client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -315,7 +313,7 @@ def test_websocket_send(
 def test_websocket_send_timestamps(resources: _Resources, stream: bool):
     logger.info("Testing WebSocket send")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     ws = client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -354,7 +352,7 @@ def test_sse_send_context_manager(
     resources: _Resources, _experimental_voice_controls: VoiceControls
 ):
     logger.info("Testing SSE send context manager")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     with create_client() as client:
         output_generate = client.tts.sse(
@@ -378,7 +376,7 @@ def test_sse_send_context_manager(
 
 def test_sse_send_context_manager_with_err():
     logger.info("Testing SSE send context manager with error")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     try:
         with create_client() as client:
@@ -400,7 +398,7 @@ def test_sse_send_context_manager_with_err():
 
 def test_websocket_send_context_manager(resources: _Resources):
     logger.info("Testing WebSocket send context manager")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     with create_client() as client:
         ws = client.tts.websocket()
@@ -424,7 +422,7 @@ def test_websocket_send_context_manager(resources: _Resources):
 
 def test_websocket_send_context_manage_err(resources: _Resources):
     logger.info("Testing WebSocket send context manager")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     try:
         with create_client() as client:
@@ -454,7 +452,7 @@ async def test_async_sse_send(
     resources: _Resources, _experimental_voice_controls: VoiceControls
 ):
     logger.info("Testing async SSE send")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     async_client = create_async_client()
     try:
@@ -488,7 +486,7 @@ async def test_async_websocket_send(
     resources: _Resources, _experimental_voice_controls: VoiceControls
 ):
     logger.info("Testing async WebSocket send")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -520,7 +518,7 @@ async def test_async_websocket_send(
 @pytest.mark.asyncio
 async def test_async_websocket_send_timestamps(resources: _Resources):
     logger.info("Testing async WebSocket send with timestamps")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -557,7 +555,7 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
 @pytest.mark.asyncio
 async def test_async_sse_send_context_manager(resources: _Resources):
     logger.info("Testing async SSE send context manager")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     async with create_async_client() as async_client:
         output_generate = await async_client.tts.sse(
@@ -581,7 +579,7 @@ async def test_async_sse_send_context_manager(resources: _Resources):
 @pytest.mark.asyncio
 async def test_async_sse_send_context_manager_with_err():
     logger.info("Testing async SSE send context manager with error")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     try:
         async with create_async_client() as async_client:
@@ -604,7 +602,7 @@ async def test_async_sse_send_context_manager_with_err():
 @pytest.mark.asyncio
 async def test_async_websocket_send_context_manager():
     logger.info("Testing async WebSocket send context manager")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     async with create_async_client() as async_client:
         ws = await async_client.tts.websocket()
@@ -633,7 +631,7 @@ async def test_async_websocket_send_context_manager():
 def test_sse_send_multilingual(resources: _Resources, stream: bool, language: str):
     logger.info("Testing SSE send")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     output_generate = client.tts.sse(
         transcript=transcript,
@@ -662,7 +660,7 @@ def test_websocket_send_multilingual(
 ):
     logger.info("Testing WebSocket send")
     client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     ws = client.tts.websocket()
     output_generate = ws.send(
@@ -786,7 +784,7 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
     logger.info(
         "Testing async continuation WebSocket context send with incorrect transcript"
     )
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -1111,7 +1109,7 @@ def test_invalid_output_format(resources: _Resources):
 
 def test_websocket_send_with_custom_url():
     logger.info("Testing WebSocket send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     client = Cartesia(
         api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.cartesia.ai"
@@ -1138,7 +1136,7 @@ def test_websocket_send_with_custom_url():
 
 def test_sse_send_with_custom_url():
     logger.info("Testing SSE send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     client = Cartesia(
         api_key=os.environ.get("CARTESIA_API_KEY"), base_url="https://api.cartesia.ai"
@@ -1161,7 +1159,7 @@ def test_sse_send_with_custom_url():
 
 def test_sse_send_with_incorrect_url():
     logger.info("Testing SSE send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     client = Cartesia(
         api_key=os.environ.get("CARTESIA_API_KEY"),
@@ -1186,7 +1184,7 @@ def test_sse_send_with_incorrect_url():
 
 def test_websocket_send_with_incorrect_url():
     logger.info("Testing WebSocket send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
+    transcript = "Hello, world! I'''m generating audio on Cartesia."
 
     client = Cartesia(
         api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.notcartesia.ai"
@@ -1211,37 +1209,6 @@ def test_websocket_send_with_incorrect_url():
         logger.info("Unexpected error occured: ", e)
 
 
-@pytest.mark.asyncio
-async def test_tts_bytes():
-    async with create_async_client() as async_client:
-        data = await async_client.tts.bytes(
-            model_id=DEFAULT_MODEL_ID,
-            voice_id=SAMPLE_VOICE_ID,
-            transcript=SAMPLE_TRANSCRIPT,
-            output_format={
-                "container": "wav",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
-        )
-        _validate_wav_response(data)
-
-
-def test_sync_tts_bytes():
-    client = create_client()
-    data = client.tts.bytes(
-        model_id=DEFAULT_MODEL_ID,
-        voice_id=SAMPLE_VOICE_ID,
-        transcript=SAMPLE_TRANSCRIPT,
-        output_format={
-            "container": "wav",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
-    )
-    _validate_wav_response(data)
-
-
 def _validate_schema(out):
     if "audio" in out:
         assert isinstance(out["audio"], bytes)
@@ -1259,8 +1226,3 @@ def _validate_schema(out):
         assert isinstance(word_timestamps["end"], list) and all(
             isinstance(end, (int, float)) for end in word_timestamps["end"]
         )
-
-def _validate_wav_response(data: bytes):
-    assert data.startswith(b'RIFF')
-    assert data[8:12] == b'WAVE'
-    assert len(data) > 44  # Ensure there's audio data beyond the header
