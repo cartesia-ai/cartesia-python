@@ -8,6 +8,8 @@ on:
       # this also allows us to run the workflow manually without skipping.
       - "cartesia/version.py"
 
+  pull_request:
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -41,8 +43,6 @@ jobs:
 
       - name: Publish to PyPI
         run: uv publish
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Get version
         run: |
