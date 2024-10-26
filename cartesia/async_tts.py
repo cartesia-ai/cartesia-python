@@ -1,6 +1,11 @@
+from typing import Iterator, List, Optional
+
+import httpx
 from cartesia._async_sse import _AsyncSSE
 from cartesia._async_websocket import _AsyncWebSocket
+from cartesia._types import OutputFormat, VoiceControls
 from cartesia.tts import TTS
+from cartesia.utils.tts import _construct_tts_request
 
 
 class AsyncTTS(TTS):
@@ -20,3 +25,39 @@ class AsyncTTS(TTS):
         )
         await ws.connect()
         return ws
+
+    async def bytes(
+        self,
+        *,
+        model_id: str,
+        transcript: str,
+        output_format: OutputFormat,
+        voice_id: Optional[str] = None,
+        voice_embedding: Optional[List[float]] = None,
+        duration: Optional[int] = None,
+        language: Optional[str] = None,
+        _experimental_voice_controls: Optional[VoiceControls] = None,
+    ) -> bytes:
+        request_body = _construct_tts_request(
+            model_id=model_id,
+            transcript=transcript,
+            output_format=output_format,
+            voice_id=voice_id,
+            voice_embedding=voice_embedding,
+            duration=duration,
+            language=language,
+            _experimental_voice_controls=_experimental_voice_controls,
+        )
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self._http_url()}/tts/bytes",
+                headers=self.headers,
+                timeout=self.timeout,
+                json=request_body,
+            )
+
+        if not response.is_success:
+            raise ValueError(f"Failed to generate audio. Error: {response.text}")
+
+        return response.content
