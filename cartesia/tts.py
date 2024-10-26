@@ -38,8 +38,9 @@ class TTS(Resource):
 
     def bytes(
         self,
+        *,
         model_id: str,
-        transcript: Iterator[str],
+        transcript: str,
         output_format: OutputFormat,
         voice_id: Optional[str] = None,
         voice_embedding: Optional[List[float]] = None,
