@@ -13,6 +13,7 @@ The official Cartesia Python library which provides convenient access to the Car
   - [Installation](#installation)
   - [Voices](#voices)
   - [Text-to-Speech](#text-to-speech)
+    - [Bytes](#bytes)
     - [Server-Sent Events (SSE)](#server-sent-events-sse)
     - [WebSocket](#websocket)
       - [Conditioning speech on previous generations using WebSocket](#conditioning-speech-on-previous-generations-using-websocket)
@@ -71,6 +72,30 @@ new_voice = client.voices.create(
 
 ## Text-to-Speech
 
+### Bytes
+
+```python
+from cartesia import Cartesia
+import os
+
+client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+data = client.tts.bytes(
+    model_id="sonic-english",
+    transcript="Hello, world! I'm generating audio on Cartesia.",
+    voice_id="a0e99841-438c-4a64-b679-ae501e7d6091",  # Barbershop Man
+    # You can find the supported `output_format`s at https://docs.cartesia.ai/api-reference/tts/bytes
+    output_format={
+        "container": "wav",
+        "encoding": "pcm_f32le",
+        "sample_rate": 44100,
+    },
+)
+
+with open("output.wav", "wb") as f:
+    f.write(data)
+```
+
 ### Server-Sent Events (SSE)
 
 ```python
@@ -79,7 +104,6 @@ import pyaudio
 import os
 
 client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
-voice_name = "Barbershop Man"
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 voice = client.voices.get(id=voice_id)
 
@@ -132,7 +156,6 @@ import os
 
 async def write_stream():
     client = AsyncCartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
-    voice_name = "Barbershop Man"
     voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
     voice = client.voices.get(id=voice_id)
     transcript = "Hello! Welcome to Cartesia"
@@ -186,7 +209,6 @@ import pyaudio
 import os
 
 client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
-voice_name = "Barbershop Man"
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 voice = client.voices.get(id=voice_id)
 transcript = "Hello! Welcome to Cartesia"
@@ -443,7 +465,6 @@ import pyaudio
 import os
 
 client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
-voice_name = "Barbershop Man"
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 voice = client.voices.get(id=voice_id)
 
