@@ -23,7 +23,6 @@ dev-dependencies = [
     "setuptools>=75.2.0",
     "twine>=5.1.1",
     "wheel>=0.44.0",
-    "bump-my-version>=0.28.0",
 ]
 
 [tool.ruff]
