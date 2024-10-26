@@ -1,7 +1,7 @@
 [project]
 name = "cartesia"
 version = "0.1.0"
-description = "Python SDK for the Cartesia API"
+description = "The official Python library for the Cartesia API."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -28,39 +28,39 @@ dev-dependencies = [
 [tool.ruff]
 # Add more rule codes as needed
 lint.extend-select = [
-    "D",    # pydocstyle - to replace docformatter
+    "D", # pydocstyle - to replace docformatter
 ]
 
 # Ignore specific rules
 lint.ignore = [
-    "E731",  # Do not assign a lambda expression, use a def
+    "E731", # Do not assign a lambda expression, use a def
     # "W503",  # Line break before binary operator - seems this has been removed in v0.3.7
-    "E741",  # Do not use variables named 'l', 'O', or 'I'
-    "E203",  # Whitespace before ':'
-    "E266",  # Too many leading '#' for block comment
-    "E501",  # Line too long (TODO: remove this once code has been refactored for other things)
-    "W605",  # Invalid escape sequence
-    "F401",  # Ignore unused imports in __init__.py
+    "E741", # Do not use variables named 'l', 'O', or 'I'
+    "E203", # Whitespace before ':'
+    "E266", # Too many leading '#' for block comment
+    "E501", # Line too long (TODO: remove this once code has been refactored for other things)
+    "W605", # Invalid escape sequence
+    "F401", # Ignore unused imports in __init__.py
 
     # Docstring Rules to Ignore
-    "D100",  # Missing docstring in public module
-    "D101",  # Missing docstring in public class
-    "D102",  # Missing docstring in public method
-    "D103",  # Missing docstring in public function
-    "D104",  # Missing docstring in public package
-    "D105",  # Missing docstring in magic method
-    "D106",  # Missing docstring in public nested class
-    "D107",  # Missing docstring in __init__
-    "D205",  # 1 Blank line required between summary line and description
-    "D212",  # Multi-line docstring summary should start at the first line (to allow google style docstrings)
-    "D417",  # Missing argument description
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D106", # Missing docstring in public nested class
+    "D107", # Missing docstring in __init__
+    "D205", # 1 Blank line required between summary line and description
+    "D212", # Multi-line docstring summary should start at the first line (to allow google style docstrings)
+    "D417", # Missing argument description
 ]
 
 # Exclude specific files and patterns
 exclude = [
     "setup.py",
     "tests/*",
-    "^.*https?://.*$",  # Long URLs in comments
+    "^.*https?://.*$", # Long URLs in comments
     "^.*figure.*$",
 ]
 
