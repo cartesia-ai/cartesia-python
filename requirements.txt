@@ -1,6 +1,0 @@
-aiohttp
-httpx
-pytest-asyncio
-requests
-websockets
-iterators
