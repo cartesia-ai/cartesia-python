@@ -19,7 +19,7 @@ VERSION_REGEX = r"""(?x)
         (?P<prelabel>[a-zA-Z-]+)         # pre-release label
         (?P<preversion>0|[1-9]\d*)        # pre-release version number
     )?                                # pre-release section is optional
-"""
+"""  # Source: https://github.com/callowayproject/bump-my-version
 
 
 def main(version: str):
