@@ -84,10 +84,15 @@ class _TTSContext:
         # Create the initial request body
         request_body = _construct_tts_request(
             model_id=model_id,
-            output_format=output_format,
             transcript=transcript,
+            output_format=output_format,
             voice_id=voice_id,
             voice_embedding=voice_embedding,
+            duration=duration,
+            language=language,
+            context_id=self._context_id,
+            add_timestamps=add_timestamps,
+            _experimental_voice_controls=_experimental_voice_controls,
         )
 
         try:

@@ -26,15 +26,17 @@ def _validate_and_construct_voice(
 
 
 def _construct_tts_request(
+    *,
     model_id: str,
     output_format: OutputFormat,
     transcript: Optional[str] = None,
     voice_id: Optional[str] = None,
     voice_embedding: Optional[List[float]] = None,
-    context_id: Optional[str] = None,
     duration: Optional[int] = None,
     language: Optional[str] = None,
     add_timestamps: bool = False,
+    context_id: Optional[str] = None,
+    continue_: bool = False,
     _experimental_voice_controls: Optional[VoiceControls] = None,
 ):
     tts_request = {
@@ -65,5 +67,8 @@ def _construct_tts_request(
 
     if context_id is not None:
         tts_request["context_id"] = context_id
+
+    if continue_:
+        tts_request["continue"] = continue_
 
     return tts_request

@@ -82,10 +82,11 @@ class _AsyncTTSContext:
             output_format=output_format,
             voice_id=voice_id,
             voice_embedding=voice_embedding,
-            context_id=context_id,
             duration=duration,
             language=language,
+            context_id=self._context_id,
             add_timestamps=add_timestamps,
+            continue_=continue_,
             _experimental_voice_controls=_experimental_voice_controls,
         )
 
