@@ -14,7 +14,7 @@ except ImportError:
 from iterators import TimeoutIterator
 
 from cartesia._types import EventType, OutputFormat, VoiceControls
-from cartesia.utils.tts import _construct_tts_request
+from cartesia.utils.tts import _construct_tts_request, _construct_tts_request_cancel
 
 
 class _TTSContext:
@@ -51,6 +51,7 @@ class _TTSContext:
         language: Optional[str] = None,
         add_timestamps: bool = False,
         _experimental_voice_controls: Optional[VoiceControls] = None,
+        cancel: Optional[bool] = False,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -78,6 +79,13 @@ class _TTSContext:
         """
         if context_id is not None and context_id != self._context_id:
             raise ValueError("Context ID does not match the context ID of the current context.")
+        
+        if cancel is not None:
+            if cancel == True:
+                request_body =_construct_tts_request_cancel(context_id=self._context_id)
+                self._websocket.websocket.send(json.dumps(request_body))
+                return
+
 
         self._websocket.connect()
 
