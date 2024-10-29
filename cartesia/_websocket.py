@@ -79,14 +79,6 @@ class _TTSContext:
         """
         if context_id is not None and context_id != self._context_id:
             raise ValueError("Context ID does not match the context ID of the current context.")
-        
-        if cancel is not None:
-            if cancel == True:
-                request_body =_construct_tts_request_cancel(context_id=self._context_id)
-                self._websocket.websocket.send(json.dumps(request_body))
-                return
-
-
         self._websocket.connect()
 
         # Create the initial request body
@@ -273,6 +265,7 @@ class _WebSocket:
         stream: bool = True,
         add_timestamps: bool = False,
         _experimental_voice_controls: Optional[VoiceControls] = None,
+        cancel: Optional[bool] = False,
     ) -> Union[bytes, Generator[bytes, None, None]]:
         """Send a request to the WebSocket to generate audio.
 
@@ -289,6 +282,8 @@ class _WebSocket:
             add_timestamps: Whether to return word-level timestamps.
             _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
                 Note: This is an experimental feature and may change rapidly in future releases.
+            cancel: Whether to cancel the request.
+                Note: This will cancel the request and close the context.if set to false will not do anything
 
         Returns:
             If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
@@ -301,6 +296,12 @@ class _WebSocket:
 
         if context_id is None:
             context_id = str(uuid.uuid4())
+
+        if cancel is not None:
+            if cancel == True:
+                request_body =_construct_tts_request_cancel(context_id=context_id)
+                self.websocket.send(json.dumps(request_body))
+                return
 
         request_body = _construct_tts_request(
             model_id=model_id,
