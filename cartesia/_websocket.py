@@ -51,7 +51,6 @@ class _TTSContext:
         language: Optional[str] = None,
         add_timestamps: bool = False,
         _experimental_voice_controls: Optional[VoiceControls] = None,
-        cancel: Optional[bool] = False,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -265,7 +264,6 @@ class _WebSocket:
         stream: bool = True,
         add_timestamps: bool = False,
         _experimental_voice_controls: Optional[VoiceControls] = None,
-        cancel: Optional[bool] = False,
     ) -> Union[bytes, Generator[bytes, None, None]]:
         """Send a request to the WebSocket to generate audio.
 
@@ -282,8 +280,6 @@ class _WebSocket:
             add_timestamps: Whether to return word-level timestamps.
             _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
                 Note: This is an experimental feature and may change rapidly in future releases.
-            cancel: Whether to cancel the request.
-                Note: This will cancel the request and close the context.if set to false will not do anything
 
         Returns:
             If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
@@ -296,12 +292,6 @@ class _WebSocket:
 
         if context_id is None:
             context_id = str(uuid.uuid4())
-
-        if cancel is not None:
-            if cancel == True:
-                request_body =_construct_tts_request_cancel(context_id=context_id)
-                self.websocket.send(json.dumps(request_body))
-                return
 
         request_body = _construct_tts_request(
             model_id=model_id,
@@ -362,3 +352,23 @@ class _WebSocket:
         if context_id not in self._contexts:
             self._contexts.add(context_id)
         return _TTSContext(context_id, self)
+
+    def cancel(self, context_id: Optional[str] = None) -> bool:
+        """Cancel an ongoing TTS request for the given context_id.
+        
+        Args:
+            context_id: The context ID of the request to cancel. If not specified, 
+                       a new context ID will be generated.
+
+        Returns:
+            None
+        """
+        self.connect()
+        
+        if context_id is None:
+            #context_id = str(uuid.uuid4())
+            return False
+            
+        request_body = _construct_tts_request_cancel(context_id=context_id)
+        self.websocket.send(json.dumps(request_body))
+        return True
