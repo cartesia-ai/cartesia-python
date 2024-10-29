@@ -644,6 +644,31 @@ generator = client.tts.sse(
     output_format=output_format,
 )
 ```
+### WebSocket Cancellation
+
+You can cancel ongoing TTS requests using the WebSocket's `cancel` method. This is useful for stopping audio generation mid-stream:
+
+```python
+    ws = client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    #Start generating audio
+    output_generate = ws.send(
+        model_id=model_id,
+        transcript=transcript,
+        voice_embedding=voice["embedding"],
+        stream=True,
+        output_format=output_format,
+        context_id=context_id
+    )
+    #Cancel the request using the context_id
+    success = ws.cancel(context_id)
+    if success:
+        print("Successfully cancelled request")
+    else:
+        print("Failed to cancel request - invalid or missing context_id")
+    ws.close()
+```
+
 
 To avoid storing your API key in the source code, we recommend doing one of the following:
 

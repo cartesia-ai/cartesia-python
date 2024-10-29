@@ -353,15 +353,16 @@ class _WebSocket:
             self._contexts.add(context_id)
         return _TTSContext(context_id, self)
 
-    def cancel(self, context_id: Optional[str] = None) -> bool:
+    def cancel(self, context_id: str) -> bool:
         """Cancel an ongoing TTS request for the given context_id.
         
         Args:
-            context_id: The context ID of the request to cancel. If not specified, 
-                       a new context ID will be generated.
+            context_id: The context ID of the request to cancel. If not specified,
+            request will fail
+                       
 
         Returns:
-            None
+            bool: True if the request was cancelled, False otherwise.
         """
         self.connect()
         
