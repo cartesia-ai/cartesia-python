@@ -4,6 +4,7 @@ import httpx
 
 from cartesia._types import VoiceMetadata
 from cartesia.resource import Resource
+from cartesia._constants import DEFAULT_MODEL_ID, MULTILINGUAL_MODEL_ID
 
 
 class Voices(Resource):
@@ -111,6 +112,42 @@ class Voices(Resource):
             },
             timeout=self.timeout,
         )
+
+        if not response.is_success:
+            raise ValueError(f"Failed to create voice. Error: {response.text}")
+
+        return response.json()
+
+
+    def create_hifi_clone(
+        self,
+        name: str,
+        description: str,
+        filepath: str,
+        language: str = "en",
+        base_voice_id: Optional[str] = None,
+    ) -> VoiceMetadata:
+        """Create a new voice by cloning from a file using the HiFi voice cloning model."""
+        url = f"{self._http_url()}/voices/clone/hifi"
+        with open(filepath, "rb") as file:
+            files = {
+                "clip": ("audio_file", file),
+                "name": (None, name),
+                "description": (None, description),
+                "language": (None, language),
+                "model_id": (None, DEFAULT_MODEL_ID if language == "en" else MULTILINGUAL_MODEL_ID),
+                "base_voice_id": (None, "" if base_voice_id is None else base_voice_id),
+            }
+
+            headers = self.headers.copy()
+            headers.pop("Content-Type", None)
+
+            response = httpx.post(
+                url,
+                headers=headers,
+                files=files,  # Use files parameter for multipart/form-data
+                timeout=self.timeout
+            )
 
         if not response.is_success:
             raise ValueError(f"Failed to create voice. Error: {response.text}")
