@@ -118,7 +118,6 @@ class Voices(Resource):
 
         return response.json()
 
-
     def create_hifi_clone(
         self,
         name: str,
@@ -127,7 +126,18 @@ class Voices(Resource):
         language: str = "en",
         base_voice_id: Optional[str] = None,
     ) -> VoiceMetadata:
-        """Create a new voice by cloning from a file using the HiFi voice cloning model."""
+        """Create a new voice by cloning from a file using the HiFi voice cloning model.
+
+        Args:
+            name: The name of the voice.
+            description: The description of the voice.
+            filepath: The path to the audio file.
+            language: The language of the audio file. Defaults to "en".
+            base_voice_id: The ID of the base voice. This should be a valid voice ID if specified.
+
+        Returns:
+            A dictionary containing the voice metadata.
+        """
         url = f"{self._http_url()}/voices/clone/hifi"
         with open(filepath, "rb") as file:
             files = {
@@ -146,7 +156,7 @@ class Voices(Resource):
                 url,
                 headers=headers,
                 files=files,  # Use files parameter for multipart/form-data
-                timeout=self.timeout
+                timeout=self.timeout,
             )
 
         if not response.is_success:
