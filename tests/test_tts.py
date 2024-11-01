@@ -119,9 +119,8 @@ def test_create_voice(client: Cartesia):
     assert voice in voices
 
     client.voices.delete(voice["id"])
+    
 
-
-@pytest.mark.skip(reason="Enable after https://github.com/cartesia-ai/bifrost/pull/847 is deployed")
 def test_create_voice_with_parent(client: Cartesia):
     logger.info("Testing voices.create with parent")
     voice = client.voices.create(
@@ -135,6 +134,24 @@ def test_create_voice_with_parent(client: Cartesia):
 
     get_voice = client.voices.get(voice["id"])
     assert get_voice["base_voice_id"] == SAMPLE_VOICE_ID
+
+    client.voices.delete(voice["id"])
+
+
+@pytest.mark.skip(reason="Enable after hifi voice cloning is deployed")
+def test_create_hifi_clone(client: Cartesia):
+    logger.info("Testing voices.create_hifi_clone")
+    voice = client.voices.create_hifi_clone(
+        name="Test Voice",
+        description="Test voice description",
+        filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"),
+    )
+    assert isinstance(voice, dict)
+    assert voice["name"] == "Test Voice"
+    assert voice["description"] == "Test voice description"
+    assert voice["is_public"] is False
+    voices = client.voices.list()
+    assert voice in voices
 
     client.voices.delete(voice["id"])
 
