@@ -155,7 +155,7 @@ class Voices(Resource):
             response = httpx.post(
                 url,
                 headers=headers,
-                files=files,  # Use files parameter for multipart/form-data
+                files=files,
                 timeout=self.timeout,
             )
 
