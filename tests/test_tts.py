@@ -119,7 +119,7 @@ def test_create_voice(client: Cartesia):
     assert voice in voices
 
     client.voices.delete(voice["id"])
-    
+
 
 def test_create_voice_with_parent(client: Cartesia):
     logger.info("Testing voices.create with parent")
@@ -139,9 +139,9 @@ def test_create_voice_with_parent(client: Cartesia):
 
 
 @pytest.mark.skip(reason="Enable after hifi voice cloning is deployed")
-def test_create_hifi_clone(client: Cartesia):
-    logger.info("Testing voices.create_hifi_clone")
-    voice = client.voices.create_hifi_clone(
+def test_hifi_clone(client: Cartesia):
+    logger.info("Testing voices.hifi_clone")
+    voice = client.voices.hifi_clone(
         name="Test Voice",
         description="Test voice description",
         filepath=os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"),
