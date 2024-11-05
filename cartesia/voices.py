@@ -59,7 +59,7 @@ class Voices(Resource):
 
         return response.json()
 
-    def clone(self, filepath: Optional[str] = None, enhance: str = True) -> List[float]:
+    def clone(self, filepath: Optional[str] = None, enhance: bool = True) -> List[float]:
         """Clone a voice from a clip.
 
         Args:
@@ -143,11 +143,11 @@ class Voices(Resource):
         url = f"{self._http_url()}/voices/clone/hifi"
         with open(filepath, "rb") as file:
             files = {
-                "clip": ("audio_file", file),
+                "clip": (filepath.split("/")[-1], file, "audio/wav"),
                 "name": (None, name),
                 "description": (None, description),
                 "language": (None, language),
-                "transcript": (None, transcript),
+                "transcript": (None, transcript if transcript is not None else ""),
                 "model_id": (None, DEFAULT_MODEL_ID if language == "en" else MULTILINGUAL_MODEL_ID),
                 "base_voice_id": (None, "" if base_voice_id is None else base_voice_id),
             }
