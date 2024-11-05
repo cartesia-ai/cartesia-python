@@ -118,7 +118,7 @@ class Voices(Resource):
 
         return response.json()
 
-    def create_hifi_clone(
+    def hifi_clone
         self,
         name: str,
         description: str,
