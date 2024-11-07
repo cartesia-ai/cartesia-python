@@ -125,6 +125,7 @@ class Voices(Resource):
         filepath: str,
         language: str = "en",
         transcript: Optional[str] = None,
+        enhance: bool = True,
         base_voice_id: Optional[str] = None,
     ) -> VoiceMetadata:
         """Create a new voice by cloning from a file using the HiFi voice cloning model.
@@ -135,6 +136,7 @@ class Voices(Resource):
             filepath: The path to the audio file.
             language: The language of the audio file. Defaults to "en".
             transcript: The transcript of the audio file. If None, transcript will be inferred from the audio file.
+            enhance: Whether to enhance the clip before cloning the voice (highly recommended). Defaults to True.
             base_voice_id: The ID of the base voice. This should be a valid voice ID if specified.
 
         Returns:
@@ -148,6 +150,7 @@ class Voices(Resource):
                 "description": (None, description),
                 "language": (None, language),
                 "transcript": (None, transcript if transcript is not None else ""),
+                "enhance": (None, str(enhance).lower()),
                 "model_id": (None, DEFAULT_MODEL_ID if language == "en" else MULTILINGUAL_MODEL_ID),
                 "base_voice_id": (None, "" if base_voice_id is None else base_voice_id),
             }
