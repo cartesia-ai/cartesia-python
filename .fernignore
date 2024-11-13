@@ -1,0 +1,8 @@
+# Specify files that shouldn't be modified by Fern
+
+# Custom Client Modifications
+
+src/cartesia/client.py
+src/cartesia/tts/socket_client.py
+src/cartesia/tts/types/web_socket_tts_output.py
+src/cartesia/tts/utils/timeout_iterator.py
