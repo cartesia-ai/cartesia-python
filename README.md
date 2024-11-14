@@ -1,14 +1,54 @@
 # Cartesia Python Library
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Ffern-demo%2Fcartesia-python-sdk)
+[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fcartesia-ai%2Fcartesia-python)
 [![pypi](https://img.shields.io/pypi/v/cartesia)](https://pypi.python.org/pypi/cartesia)
 
 The Cartesia Python library provides convenient access to the Cartesia API from Python.
+
+## Documentation
+
+Our complete API documentation can be found [on docs.cartesia.ai](https://docs.cartesia.ai).
 
 ## Installation
 
 ```sh
 pip install cartesia
+```
+
+## Reference
+
+A full reference for this library is available [here](./reference.md).
+
+## Voices
+
+```python
+from cartesia import Cartesia
+import os
+
+client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
+
+# Get all available voices
+voices = client.voices.list()
+print(voices)
+
+# Get a specific voice
+voice = client.voices.get(id="a0e99841-438c-4a64-b679-ae501e7d6091")
+print("The embedding for", voice["name"], "is", voice["embedding"])
+
+# Clone a voice using filepath
+cloned_voice_embedding = client.voices.clone(filepath="path/to/voice")
+
+# Mix voices together
+mixed_voice_embedding = client.voices.mix(
+    [{ "id": "voice_id_1", "weight": 0.5 }, { "id": "voice_id_2", "weight": 0.25 }, { "id": "voice_id_3", "weight": 0.25 }]
+)
+
+# Create a new voice
+new_voice = client.voices.create(
+    name="New Voice",
+    description="A clone of my own voice",
+    embedding=cloned_voice_embedding,
+)
 ```
 
 ## Usage
@@ -113,61 +153,6 @@ for chunk in response:
     yield chunk
 ```
 
-## WebSocket
-
-```python
-from cartesia import Cartesia
-from cartesia.tts import TtsRequestEmbeddingSpecifier, OutputFormat_Raw
-import pyaudio
-
-client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
-)
-voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
-voice = client.voices.get(id=voice_id)
-transcript = "Hello! Welcome to Cartesia"
-
-# You can check out our models at https://docs.cartesia.ai/getting-started/available-models
-model_id = "sonic-english"
-
-# You can find the supported `output_format`s at https://docs.cartesia.ai/reference/api-reference/rest/stream-speech-server-sent-events
-output_format = OutputFormat_Raw(
-    container="raw",
-    encoding="pcm_f32le",
-    sample_rate=22050
-)
-
-p = pyaudio.PyAudio()
-rate = 22050
-
-stream = None
-
-# Set up the websocket connection
-ws = client.tts.websocket()
-
-# Generate and stream audio using the websocket
-for output in ws.send(
-    model_id=model_id,
-    transcript=transcript,
-    voice=TtsRequestEmbeddingSpecifier(embedding=voice.embedding),
-    stream=True,
-    output_format=output_format,
-):
-    buffer = output.audio
-
-    if not stream:
-        stream = p.open(format=pyaudio.paFloat32, channels=1, rate=rate, output=True)
-
-    # Write the audio data to the stream
-    stream.write(buffer)
-
-stream.stop_stream()
-stream.close()
-p.terminate()
-
-ws.close()  # Close the websocket connection
-```
-
 ## Advanced
 
 ### Retries
@@ -185,7 +170,7 @@ A request is deemed retriable when any of the following HTTP status codes is ret
 Use the `max_retries` request option to configure this behavior.
 
 ```python
-client.tts.bytes(..., {
+client.tts.bytes(..., request_options={
     "max_retries": 1
 })
 ```
@@ -205,7 +190,7 @@ client = Cartesia(
 
 
 # Override timeout for a specific method
-client.tts.bytes(..., {
+client.tts.bytes(..., request_options={
     "timeout_in_seconds": 1
 })
 ```
