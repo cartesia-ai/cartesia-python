@@ -156,6 +156,119 @@ If the duration is not appropriate for the length of the transcript, the output 
 </dl>
 </details>
 
+<details><summary><code>client.tts.<a href="src/cartesia/tts/client.py">sse</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+
+client = Cartesia(
+    api_key_header="YOUR_API_KEY_HEADER",
+)
+response = client.tts.sse(
+    model_id="string",
+    transcript="string",
+    voice=TtsRequestIdSpecifier(
+        id="string",
+        experimental_controls=Controls(
+            speed=1.1,
+            emotion="anger:lowest",
+        ),
+    ),
+    language="en",
+    output_format=OutputFormat_Raw(),
+    duration=1.1,
+)
+for chunk in response:
+    yield chunk
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**model_id:** `str` — The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**transcript:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**voice:** `TtsRequestVoiceSpecifier` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format:** `OutputFormat` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**language:** `typing.Optional[SupportedLanguage]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**duration:** `typing.Optional[float]` 
+
+The maximum duration of the audio in seconds. You do not usually need to specify this.
+If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## VoiceChanger
 <details><summary><code>client.voice_changer.<a href="src/cartesia/voice_changer/client.py">bytes</a>(...)</code></summary>
 <dl>
@@ -447,10 +560,204 @@ client = Cartesia(
     api_key_header="YOUR_API_KEY_HEADER",
 )
 client.voices.create(
-    name="name",
-    description="description",
-    embedding=[1.1, 1.1],
+    name="string",
+    description="string",
+    embedding=[
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+    ],
     language="en",
+    base_voice_id="string",
 )
 
 ```
@@ -538,7 +845,7 @@ client = Cartesia(
     api_key_header="YOUR_API_KEY_HEADER",
 )
 client.voices.delete(
-    id="id",
+    id="string",
 )
 
 ```
@@ -594,9 +901,9 @@ client = Cartesia(
     api_key_header="YOUR_API_KEY_HEADER",
 )
 client.voices.update(
-    id="id",
-    name="name",
-    description="description",
+    id="string",
+    name="string",
+    description="string",
 )
 
 ```
@@ -668,7 +975,7 @@ client = Cartesia(
     api_key_header="YOUR_API_KEY_HEADER",
 )
 client.voices.get(
-    id="id",
+    id="string",
 )
 
 ```
@@ -724,7 +1031,200 @@ client = Cartesia(
     api_key_header="YOUR_API_KEY_HEADER",
 )
 client.voices.localize(
-    embedding=[1.1, 1.1],
+    embedding=[
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+    ],
     language="en",
     original_speaker_gender="male",
     dialect="au",
@@ -810,13 +1310,9 @@ client = Cartesia(
 client.voices.mix(
     voices=[
         IdSpecifier(
-            id="id",
+            id="string",
             weight=1.1,
-        ),
-        IdSpecifier(
-            id="id",
-            weight=1.1,
-        ),
+        )
     ],
 )
 
@@ -835,6 +1331,87 @@ client.voices.mix(
 <dd>
 
 **voices:** `typing.Sequence[MixVoiceSpecifier]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">clone_from_clip</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Clone a voice from a clip. The clip should be a 15-20 second recording of a person speaking with little to no background noise.
+
+The endpoint will return an embedding that can either be used directly with text-to-speech endpoints or used to create a new voice.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key_header="YOUR_API_KEY_HEADER",
+)
+client.voices.clone_from_clip()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**clip:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip is low quality.
+
     
 </dd>
 </dl>

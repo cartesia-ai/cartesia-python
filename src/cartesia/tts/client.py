@@ -144,6 +144,31 @@ class TtsClient:
         Yields
         ------
         typing.Iterator[WebSocketResponse]
+
+        Examples
+        --------
+        from cartesia import Cartesia
+        from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+
+        client = Cartesia(
+            api_key_header="YOUR_API_KEY_HEADER",
+        )
+        response = client.tts.sse(
+            model_id="string",
+            transcript="string",
+            voice=TtsRequestIdSpecifier(
+                id="string",
+                experimental_controls=Controls(
+                    speed=1.1,
+                    emotion="anger:lowest",
+                ),
+            ),
+            language="en",
+            output_format=OutputFormat_Raw(),
+            duration=1.1,
+        )
+        for chunk in response:
+            yield chunk
         """
         with self._client_wrapper.httpx_client.stream(
             "tts/sse",
@@ -318,6 +343,39 @@ class AsyncTtsClient:
         Yields
         ------
         typing.AsyncIterator[WebSocketResponse]
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+        from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+
+        client = AsyncCartesia(
+            api_key_header="YOUR_API_KEY_HEADER",
+        )
+
+
+        async def main() -> None:
+            response = await client.tts.sse(
+                model_id="string",
+                transcript="string",
+                voice=TtsRequestIdSpecifier(
+                    id="string",
+                    experimental_controls=Controls(
+                        speed=1.1,
+                        emotion="anger:lowest",
+                    ),
+                ),
+                language="en",
+                output_format=OutputFormat_Raw(),
+                duration=1.1,
+            )
+            async for chunk in response:
+                yield chunk
+
+
+        asyncio.run(main())
         """
         async with self._client_wrapper.httpx_client.stream(
             "tts/sse",
