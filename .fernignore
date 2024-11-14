@@ -6,3 +6,6 @@ src/cartesia/client.py
 src/cartesia/tts/socket_client.py
 src/cartesia/tts/types/web_socket_tts_output.py
 src/cartesia/tts/utils/timeout_iterator.py
+
+# Pending changes to README.md generation
+README.md
