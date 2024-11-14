@@ -262,7 +262,7 @@ class TtsWebsocketConnection:
     def _convert_response(
         self, response_obj: typing.Union[WebSocketResponse_Chunk, WebSocketResponse_Timestamp], include_context_id: bool
     ) -> WebSocketTtsOutput:
-        out: dict[str, typing.Any] = {}
+        out: typing.Dict[str, typing.Any] = {}
         if isinstance(response_obj, WebSocketResponse_Chunk):
             out["audio"] = base64.b64decode(response_obj.data)
         elif isinstance(response_obj, WebSocketResponse_Timestamp):
@@ -302,7 +302,7 @@ class TtsWebsocketConnection:
                 Note: This is an experimental feature and may change rapidly in future releases.
 
         Returns:
-            If `stream` is True, the method returns a generator that yields chunks. Each chunk is a dictionary.
+            If `stream` is True, the method returns a generator that yields chunks. Each chunk is a ionary.
             If `stream` is False, the method returns a dictionary.
             Both the generator and the dictionary contain the following key(s):
             - audio: The audio as bytes.
@@ -337,7 +337,7 @@ class TtsWebsocketConnection:
             if add_timestamps and "word_timestamps" in chunk:
                 for k, v in chunk["word_timestamps"].items():
                     word_timestamps[k].extend(v)
-        out: dict[str, typing.Any] = {"audio": b"".join(chunks), "context_id": context_id}
+        out: typing.Dict[str, typing.Any] = {"audio": b"".join(chunks), "context_id": context_id}
         if add_timestamps:
             out["word_timestamps"] = word_timestamps
         return WebSocketTtsOutput(**out)
