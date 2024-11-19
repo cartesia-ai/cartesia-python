@@ -58,29 +58,57 @@ class Voices(Resource):
 
         return response.json()
 
-    def clone(self, filepath: Optional[str] = None, enhance: str = True) -> List[float]:
+    def clone(
+        self,
+        filepath: Optional[str] = None,
+        enhance: str = True,
+        mode: str = "similarity",
+        language: str = "en",
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        transcript: Optional[str] = None,
+    ) -> Union[List[float], VoiceMetadata]:
         """Clone a voice from a clip.
 
         Args:
             filepath: The path to the clip file.
             enhance: Whether to enhance the clip before cloning the voice (highly recommended). Defaults to True.
+            mode: The mode to use for cloning. Either "similarity" or "stability".
+            language: The language of the clip. Defaults to "en".
+            name: The name of the cloned voice.
+            description: The description of the cloned voice.
+            transcript: The transcript of the clip. Only used if mode is "similarity".
 
         Returns:
             The embedding of the cloned voice as a list of floats.
         """
         if not filepath:
             raise ValueError("Filepath must be specified.")
-        url = f"{self._http_url()}/voices/clone/clip"
         with open(filepath, "rb") as file:
             files = {"clip": file}
-            files["enhance"] = str(enhance).lower()
-            headers = self.headers.copy()
-            headers.pop("Content-Type", None)
+        files["enhance"] = str(enhance).lower()
+        files["mode"] = mode
+        headers = self.headers.copy()
+        headers.pop("Content-Type", None)
+        if mode == 'clip':
+            url = f"{self._http_url()}/voices/clone/clip"
             response = httpx.post(url, headers=headers, files=files, timeout=self.timeout)
-            if not response.is_success:
-                raise ValueError(f"Failed to clone voice from clip. Error: {response.text}")
+        else:
+            files["name"] = name
+            files["description"] = description
+            files["language"] = language
+            if mode == "similarity" and transcript:
+                files["transcript"] = transcript
+            url = f"{self._http_url()}/voices/clone"
+            response = httpx.post(url, headers=headers, files=files, timeout=self.timeout)
 
-        return response.json()["embedding"]
+        if not response.is_success:
+            raise ValueError(
+                f"Failed to get voice. Status Code: {response.status_code}\n"
+                f"Error: {response.text}"
+            )
+
+        return response.json()
 
     def create(
         self,
