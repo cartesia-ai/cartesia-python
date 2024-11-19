@@ -74,7 +74,7 @@ class Voices(Resource):
             filepath: The path to the clip file.
             enhance: Whether to enhance the clip before cloning the voice (highly recommended). Defaults to True.
             mode: The mode to use for cloning. Either "similarity" or "stability".
-            language: The language of the clip. Defaults to "en".
+            language: The language code of the language spoken in the clip. Defaults to "en".
             name: The name of the cloned voice.
             description: The description of the cloned voice.
             transcript: The transcript of the clip. Only used if mode is "similarity".
@@ -115,6 +115,7 @@ class Voices(Resource):
         name: str,
         description: str,
         embedding: List[float],
+        language: str = "en",
         base_voice_id: Optional[str] = None,
     ) -> VoiceMetadata:
         """Create a new voice.
@@ -136,6 +137,7 @@ class Voices(Resource):
                 "description": description,
                 "embedding": embedding,
                 "base_voice_id": base_voice_id,
+                "language": language,
             },
             timeout=self.timeout,
         )
