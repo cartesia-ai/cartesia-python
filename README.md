@@ -629,8 +629,6 @@ display(audio)
 
 You can use the `client.tts.get_output_format` method to convert string-based output format names into the `output_format` dictionary which is expected by the `output_format` parameter. You can see the `OutputFormatMapping` class in `cartesia._types` for the currently supported output format names. You can also view the currently supported `output_format`s in our [API Reference](https://docs.cartesia.ai/reference/api-reference/rest/stream-speech-server-sent-events).
 
-The previously used `output_format` strings are now deprecated and will be removed in v1.2.0. These are listed in the `DeprecatedOutputFormatMapping` class in `cartesia._types`.
-
 ```python
 # Get the output format dictionary from string name
 output_format = client.tts.get_output_format("raw_pcm_f32le_44100")
