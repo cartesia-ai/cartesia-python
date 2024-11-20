@@ -26,6 +26,7 @@ class OutputFormatMapping:
         else:
             raise ValueError(f"Unsupported format: {format_name}")
 
+
 class VoiceMetadata(TypedDict):
     id: str
     name: str
