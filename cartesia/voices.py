@@ -119,8 +119,8 @@ class Voices(Resource):
         name: str,
         description: str,
         embedding: List[float],
-        language: str = "en",
         base_voice_id: Optional[str] = None,
+        language: str = "en",
     ) -> VoiceMetadata:
         """Create a new voice.
 
