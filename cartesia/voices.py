@@ -62,7 +62,7 @@ class Voices(Resource):
         self,
         filepath: Optional[str] = None,
         enhance: str = True,
-        mode: str = "similarity",
+        mode: str = "clip",
         language: str = "en",
         name: Optional[str] = None,
         description: Optional[str] = None,
