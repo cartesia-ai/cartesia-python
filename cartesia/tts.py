@@ -4,7 +4,6 @@ import httpx
 
 from cartesia._sse import _SSE
 from cartesia._types import (
-    DeprecatedOutputFormatMapping,
     OutputFormat,
     OutputFormatMapping,
     VoiceControls,
@@ -86,10 +85,6 @@ class TTS(Resource):
         """
         if output_format_name in OutputFormatMapping._format_mapping:
             output_format_obj = OutputFormatMapping.get_format(output_format_name)
-        elif output_format_name in DeprecatedOutputFormatMapping._format_mapping:
-            output_format_obj = DeprecatedOutputFormatMapping.get_format_deprecated(
-                output_format_name
-            )
         else:
             raise ValueError(f"Unsupported format: {output_format_name}")
 
@@ -114,10 +109,6 @@ class TTS(Resource):
         """
         if output_format_name in OutputFormatMapping._format_mapping:
             output_format_obj = OutputFormatMapping.get_format(output_format_name)
-        elif output_format_name in DeprecatedOutputFormatMapping._format_mapping:
-            output_format_obj = DeprecatedOutputFormatMapping.get_format_deprecated(
-                output_format_name
-            )
         else:
             raise ValueError(f"Unsupported format: {output_format_name}")
 
