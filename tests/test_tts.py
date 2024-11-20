@@ -1093,17 +1093,6 @@ def test_output_formats(resources: _Resources, output_format_name: str):
     assert output_format["encoding"] is not None, "Output format encoding is None"
     assert output_format["sample_rate"] is not None, "Output format sample rate is None"
 
-
-@pytest.mark.parametrize("output_format_name", deprecated_output_format_names)
-def test_deprecated_output_formats(resources: _Resources, output_format_name: str):
-    logger.info(f"Testing deprecated output format: {output_format_name}")
-    output_format = resources.client.tts.get_output_format(output_format_name)
-    assert isinstance(output_format, dict), "Output is not of type dict"
-    assert output_format["container"] is not None, "Output format container is None"
-    assert output_format["encoding"] is not None, "Output format encoding is None"
-    assert output_format["sample_rate"] is not None, "Output format sample rate is None"
-
-
 def test_invalid_output_format(resources: _Resources):
     logger.info("Testing invalid output format")
     with pytest.raises(ValueError):

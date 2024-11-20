@@ -162,7 +162,7 @@ wheels = [
 
 [[package]]
 name = "cartesia"
-version = "1.1.0"
+version = "1.2.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -172,7 +172,7 @@ dependencies = [
     { name = "websockets" },
 ]
 
-[package.dependency-groups]
+[package.dev-dependencies]
 dev = [
     { name = "isort" },
     { name = "numpy" },
@@ -195,7 +195,7 @@ requires-dist = [
     { name = "websockets", specifier = ">=13.1" },
 ]
 
-[package.metadata.dependency-groups]
+[package.metadata.requires-dev]
 dev = [
     { name = "isort", specifier = ">=5.13.2" },
     { name = "numpy", specifier = ">=2.0.2" },
