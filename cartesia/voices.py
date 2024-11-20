@@ -93,9 +93,11 @@ class Voices(Resource):
                 "enhance": str(enhance).lower(),
                 "mode": mode,
             }
-            if mode == 'clip':
+            if mode == "clip":
                 url = f"{self._http_url()}/voices/clone/clip"
-                response = httpx.post(url, headers=headers, files=files, data=data, timeout=self.timeout)
+                response = httpx.post(
+                    url, headers=headers, files=files, data=data, timeout=self.timeout
+                )
                 if not response.is_success:
                     raise ValueError(f"Failed to clone voice from clip. Error: {response.text}")
                 return response.json()["embedding"]
@@ -106,7 +108,9 @@ class Voices(Resource):
                 if mode == "similarity" and transcript:
                     data["transcript"] = transcript
                 url = f"{self._http_url()}/voices/clone"
-                response = httpx.post(url, headers=headers, files=files, data=data, timeout=self.timeout)
+                response = httpx.post(
+                    url, headers=headers, files=files, data=data, timeout=self.timeout
+                )
                 if not response.is_success:
                     raise ValueError(
                         f"Failed to clone voice. Status Code: {response.status_code}\n"
