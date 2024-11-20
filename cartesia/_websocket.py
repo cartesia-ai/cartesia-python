@@ -14,7 +14,7 @@ except ImportError:
 from iterators import TimeoutIterator
 
 from cartesia._types import EventType, OutputFormat, VoiceControls
-from cartesia.utils.tts import _construct_tts_request
+from cartesia.utils.tts import _construct_tts_request, _construct_tts_request_cancel
 
 
 class _TTSContext:
@@ -78,7 +78,6 @@ class _TTSContext:
         """
         if context_id is not None and context_id != self._context_id:
             raise ValueError("Context ID does not match the context ID of the current context.")
-
         self._websocket.connect()
 
         # Create the initial request body
@@ -353,3 +352,24 @@ class _WebSocket:
         if context_id not in self._contexts:
             self._contexts.add(context_id)
         return _TTSContext(context_id, self)
+
+    def cancel(self, context_id: str) -> bool:
+        """Cancel an ongoing TTS request for the given context_id.
+        
+        Args:
+            context_id: The context ID of the request to cancel. If not specified,
+            request will fail
+                       
+
+        Returns:
+            bool: True if the request was cancelled, False otherwise.
+        """
+        self.connect()
+        
+        if context_id is None:
+            #context_id = str(uuid.uuid4())
+            return False
+            
+        request_body = _construct_tts_request_cancel(context_id=context_id)
+        self.websocket.send(json.dumps(request_body))
+        return True

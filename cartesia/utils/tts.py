@@ -72,3 +72,15 @@ def _construct_tts_request(
         tts_request["continue"] = continue_
 
     return tts_request
+
+def _construct_tts_request_cancel(
+    *,
+    context_id: str
+):
+    
+    tts_request = {
+        "cancel": True,
+        "context_id": context_id,
+    }
+
+    return tts_request
