@@ -45,6 +45,7 @@ class _AsyncTTSContext:
         voice_embedding: Optional[List[float]] = None,
         context_id: Optional[str] = None,
         continue_: bool = False,
+        flush: bool = False,
         duration: Optional[int] = None,
         language: Optional[str] = None,
         add_timestamps: bool = False,
@@ -60,6 +61,7 @@ class _AsyncTTSContext:
             voice_embedding: The embedding of the voice to use for generating audio.
             context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
             continue_: Whether to continue the audio generation from the previous transcript or not.
+            flush: Whether to trigger a manual flush for the current context's generation.
             duration: The duration of the audio in seconds.
             language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`.
             add_timestamps: Whether to return word-level timestamps.
@@ -87,6 +89,7 @@ class _AsyncTTSContext:
             context_id=self._context_id,
             add_timestamps=add_timestamps,
             continue_=continue_,
+            flush=flush,
             _experimental_voice_controls=_experimental_voice_controls,
         )
 
@@ -105,6 +108,36 @@ class _AsyncTTSContext:
             context_id=self._context_id,
             continue_=False,
         )
+    
+    async def flush(self) -> AsyncGenerator[Dict[str, Any], None]:
+        """Trigger a manual flush for the current context's generation. This method returns a generation that yields the audio prior to the flush."""
+        await self.send(
+            model_id=DEFAULT_MODEL_ID,
+            transcript="",
+            output_format=TTS.get_output_format("raw_pcm_f32le_44100"),
+            voice_embedding=DEFAULT_VOICE_EMBEDDING,  # Default voice embedding since it's a required input for now.
+            context_id=self._context_id,
+            continue_=True,
+            flush=True,
+        )
+
+        # Save the old flush ID
+        flush_id = len(self._websocket._context_queues[self._context_id]) - 1
+
+        # Create a new Async Queue to store the responses for the new flush ID
+        self._websocket._context_queues[self._context_id].append(asyncio.Queue())
+
+        # Return the generator for the old flush ID
+        try:
+            while True:
+                response = await self._websocket._get_message(
+                    self._context_id, timeout=self.timeout, flush_id=flush_id
+                )
+                yield self._websocket._convert_response(response, include_context_id=True)
+        except Exception as e:
+            if isinstance(e, asyncio.TimeoutError):
+                raise RuntimeError("Timeout while waiting for audio chunk")
+            raise RuntimeError(f"Failed to generate audio:\n{e}")
 
     async def receive(self) -> AsyncGenerator[Dict[str, Any], None]:
         """Receive the audio chunks from the WebSocket. This method is a generator that yields audio chunks.
@@ -175,7 +208,7 @@ class _AsyncWebSocket(_WebSocket):
         self.timeout = timeout
         self._get_session = get_session
         self.websocket = None
-        self._context_queues: Dict[str, asyncio.Queue] = {}
+        self._context_queues: Dict[str, List[asyncio.Queue]] = {}
         self._processing_task: asyncio.Task = None
 
     def __del__(self):
@@ -284,16 +317,17 @@ class _AsyncWebSocket(_WebSocket):
                 response = await self.websocket.receive_json()
                 if response["context_id"]:
                     context_id = response["context_id"]
+                flush_id = response.get("flush_id", -1)
                 if context_id in self._context_queues:
-                    await self._context_queues[context_id].put(response)
+                    await self._context_queues[context_id][flush_id].put(response)
         except Exception as e:
             self._error = e
             raise e
 
-    async def _get_message(self, context_id: str, timeout: float) -> Dict[str, Any]:
+    async def _get_message(self, context_id: str, timeout: float, flush_id: Optional[int] = -1) -> Dict[str, Any]:
         if context_id not in self._context_queues:
             raise ValueError(f"Context ID {context_id} not found.")
-        return await asyncio.wait_for(self._context_queues[context_id].get(), timeout=timeout)
+        return await asyncio.wait_for(self._context_queues[context_id][flush_id].get(), timeout=timeout)
 
     def _remove_context(self, context_id: str):
         if context_id in self._context_queues:
@@ -309,5 +343,5 @@ class _AsyncWebSocket(_WebSocket):
         if context_id is None:
             context_id = str(uuid.uuid4())
         if context_id not in self._context_queues:
-            self._context_queues[context_id] = asyncio.Queue()
+            self._context_queues[context_id] = [asyncio.Queue()]
         return _AsyncTTSContext(context_id, self, self.timeout)
