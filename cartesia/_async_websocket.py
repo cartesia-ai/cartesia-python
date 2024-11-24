@@ -73,7 +73,7 @@ class _AsyncTTSContext:
         """
         if context_id is not None and context_id != self._context_id:
             raise ValueError("Context ID does not match the context ID of the current context.")
-        if continue_ and transcript == "":
+        if continue_ and transcript == "" and flush == False:
             raise ValueError("Transcript cannot be empty when continue_ is True.")
 
         await self._websocket.connect()
@@ -109,7 +109,7 @@ class _AsyncTTSContext:
             continue_=False,
         )
     
-    async def flush(self) -> AsyncGenerator[Dict[str, Any], None]:
+    async def flush(self) -> Callable[[], AsyncGenerator[Dict[str, Any], None]]:
         """Trigger a manual flush for the current context's generation. This method returns a generation that yields the audio prior to the flush."""
         await self.send(
             model_id=DEFAULT_MODEL_ID,
@@ -128,16 +128,75 @@ class _AsyncTTSContext:
         self._websocket._context_queues[self._context_id].append(asyncio.Queue())
 
         # Return the generator for the old flush ID
-        try:
-            while True:
-                response = await self._websocket._get_message(
-                    self._context_id, timeout=self.timeout, flush_id=flush_id
-                )
-                yield self._websocket._convert_response(response, include_context_id=True)
-        except Exception as e:
-            if isinstance(e, asyncio.TimeoutError):
-                raise RuntimeError("Timeout while waiting for audio chunk")
-            raise RuntimeError(f"Failed to generate audio:\n{e}")
+        async def generator():
+            try:
+                while True:
+                    # Create tasks for current queue
+                    current_queue_task = asyncio.create_task(self._websocket._get_message(self._context_id, timeout=self.timeout, flush_id=flush_id))
+                    tasks = [current_queue_task]
+                    
+                    # If next queue exists, create a task to check it
+                    next_queue_task = asyncio.create_task(self._websocket._get_message(self._context_id, timeout=self.timeout, flush_id=flush_id + 1))
+                    tasks.append(next_queue_task)
+
+                    # Wait for either:
+                    # 1. Current queue to get a message
+                    # 2. Next queue to get a message while current queue is empty
+                    # 3. Timeout to occur (only if next queue is empty)
+                    # Print the length of each queue
+                    done, pending = await asyncio.wait(
+                        tasks,
+                        return_when=asyncio.FIRST_COMPLETED,
+                        timeout=self.timeout
+                    )
+
+                    completed_or_cancelled_tasks = [completed_task for completed_task in done]
+                    
+                    # Cancel any pending tasks
+                    for task in pending:
+                        task.cancel()
+                        completed_or_cancelled_tasks.append(task)
+                    
+                    # If no tasks completed, we hit the timeout
+                    if not done:
+                        raise asyncio.TimeoutError()
+                    
+                    # Iterate over all completed or cancelled tasks
+                    next_queue_has_message = False
+                    response = None
+                    while completed_or_cancelled_tasks:
+                        completed_task = completed_or_cancelled_tasks.pop()
+                        if completed_task is next_queue_task:
+                            # Put the message back in the next queue
+                            try:
+                                message = await completed_task
+                                await self._websocket._context_queues[self._context_id][flush_id + 1].put(message)
+                                next_queue_has_message = True
+                            except asyncio.CancelledError:
+                                # Ignore the error if the task was cancelled
+                                pass
+                        else:
+                            # The current queue has a message
+                            try:
+                                response = await completed_task
+                            except asyncio.CancelledError:
+                                # Ignore the error if the task was cancelled
+                                pass
+                    
+                    if response is not None:
+                        if response["done"]:
+                            break
+                        yield self._websocket._convert_response(response, include_context_id=True)
+                    else:
+                        # If next queue has a message, we need to break out of the loop
+                        if next_queue_has_message:
+                            break
+            except Exception as e:
+                if isinstance(e, asyncio.TimeoutError):
+                    raise RuntimeError("Timeout while waiting for audio chunk")
+                raise RuntimeError(f"Failed to generate audio:\n{e}")
+        
+        return generator
 
     async def receive(self) -> AsyncGenerator[Dict[str, Any], None]:
         """Receive the audio chunks from the WebSocket. This method is a generator that yields audio chunks.
