@@ -73,7 +73,7 @@ class _AsyncTTSContext:
         """
         if context_id is not None and context_id != self._context_id:
             raise ValueError("Context ID does not match the context ID of the current context.")
-        if continue_ and transcript == "" and flush == False:
+        if continue_ and transcript == "" and not flush:
             raise ValueError("Transcript cannot be empty when continue_ is True.")
 
         await self._websocket.connect()
