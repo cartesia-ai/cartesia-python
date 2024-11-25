@@ -338,6 +338,8 @@ class _AsyncWebSocket(_WebSocket):
     ) -> Dict[str, Any]:
         if context_id not in self._context_queues:
             raise ValueError(f"Context ID {context_id} not found.")
+        if len(self._context_queues[context_id]) <= flush_id:
+            raise ValueError(f"Flush ID {flush_id} not found for context ID {context_id}.")
         return await asyncio.wait_for(
             self._context_queues[context_id][flush_id].get(), timeout=timeout
         )
