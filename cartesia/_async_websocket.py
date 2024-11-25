@@ -108,7 +108,7 @@ class _AsyncTTSContext:
             context_id=self._context_id,
             continue_=False,
         )
-    
+
     async def flush(self) -> Callable[[], AsyncGenerator[Dict[str, Any], None]]:
         """Trigger a manual flush for the current context's generation. This method returns a generation that yields the audio prior to the flush."""
         await self.send(
@@ -132,11 +132,19 @@ class _AsyncTTSContext:
             try:
                 while True:
                     # Create tasks for current queue
-                    current_queue_task = asyncio.create_task(self._websocket._get_message(self._context_id, timeout=self.timeout, flush_id=flush_id))
+                    current_queue_task = asyncio.create_task(
+                        self._websocket._get_message(
+                            self._context_id, timeout=self.timeout, flush_id=flush_id
+                        )
+                    )
                     tasks = [current_queue_task]
-                    
+
                     # If next queue exists, create a task to check it
-                    next_queue_task = asyncio.create_task(self._websocket._get_message(self._context_id, timeout=self.timeout, flush_id=flush_id + 1))
+                    next_queue_task = asyncio.create_task(
+                        self._websocket._get_message(
+                            self._context_id, timeout=self.timeout, flush_id=flush_id + 1
+                        )
+                    )
                     tasks.append(next_queue_task)
 
                     # Wait for either:
@@ -144,22 +152,20 @@ class _AsyncTTSContext:
                     # 2. Next queue to get a message while current queue is empty
                     # 3. Timeout to occur (only if next queue is empty)
                     done, pending = await asyncio.wait(
-                        tasks,
-                        return_when=asyncio.FIRST_COMPLETED,
-                        timeout=self.timeout
+                        tasks, return_when=asyncio.FIRST_COMPLETED, timeout=self.timeout
                     )
 
                     completed_or_canceled_tasks = [completed_task for completed_task in done]
-                    
+
                     # Cancel any pending tasks
                     for task in pending:
                         task.cancel()
                         completed_or_canceled_tasks.append(task)
-                    
+
                     # If no tasks completed, we hit the timeout
                     if not done:
                         raise asyncio.TimeoutError()
-                    
+
                     # Iterate over all completed or canceled tasks
                     next_queue_has_message = False
                     response = None
@@ -169,7 +175,9 @@ class _AsyncTTSContext:
                             # Put the message back in the next queue
                             try:
                                 message = await completed_task
-                                await self._websocket._context_queues[self._context_id][flush_id + 1].put(message)
+                                await self._websocket._context_queues[self._context_id][
+                                    flush_id + 1
+                                ].put(message)
                                 next_queue_has_message = True
                             except asyncio.CancelledError:
                                 # Ignore the error if the task was canceled
@@ -181,7 +189,7 @@ class _AsyncTTSContext:
                             except asyncio.CancelledError:
                                 # Ignore the error if the task was canceled
                                 pass
-                    
+
                     if response is not None:
                         if response["done"]:
                             break
@@ -194,7 +202,7 @@ class _AsyncTTSContext:
                 if isinstance(e, asyncio.TimeoutError):
                     raise RuntimeError("Timeout while waiting for audio chunk")
                 raise RuntimeError(f"Failed to generate audio:\n{e}")
-        
+
         return generator
 
     async def receive(self) -> AsyncGenerator[Dict[str, Any], None]:
@@ -382,10 +390,14 @@ class _AsyncWebSocket(_WebSocket):
             self._error = e
             raise e
 
-    async def _get_message(self, context_id: str, timeout: float, flush_id: Optional[int] = -1) -> Dict[str, Any]:
+    async def _get_message(
+        self, context_id: str, timeout: float, flush_id: Optional[int] = -1
+    ) -> Dict[str, Any]:
         if context_id not in self._context_queues:
             raise ValueError(f"Context ID {context_id} not found.")
-        return await asyncio.wait_for(self._context_queues[context_id][flush_id].get(), timeout=timeout)
+        return await asyncio.wait_for(
+            self._context_queues[context_id][flush_id].get(), timeout=timeout
+        )
 
     def _remove_context(self, context_id: str):
         if context_id in self._context_queues:

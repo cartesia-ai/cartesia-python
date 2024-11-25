@@ -249,7 +249,7 @@ class _WebSocket:
 
         if include_context_id:
             out["context_id"] = response["context_id"]
-        
+
         if include_flush_id and "flush_id" in response:
             out["flush_id"] = response["flush_id"]
 
