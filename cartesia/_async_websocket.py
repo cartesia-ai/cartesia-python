@@ -6,7 +6,7 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 
 import aiohttp
 
-from cartesia._constants import DEFAULT_MODEL_ID, DEFAULT_VOICE_EMBEDDING
+from cartesia._constants import DEFAULT_MODEL_ID, DEFAULT_OUTPUT_FORMAT, DEFAULT_VOICE_EMBEDDING
 from cartesia._types import OutputFormat, VoiceControls
 from cartesia._websocket import _WebSocket
 from cartesia.tts import TTS
@@ -103,7 +103,7 @@ class _AsyncTTSContext:
         await self.send(
             model_id=DEFAULT_MODEL_ID,
             transcript="",
-            output_format=TTS.get_output_format("raw_pcm_f32le_44100"),
+            output_format=TTS.get_output_format(DEFAULT_OUTPUT_FORMAT),
             voice_embedding=DEFAULT_VOICE_EMBEDDING,  # Default voice embedding since it's a required input for now.
             context_id=self._context_id,
             continue_=False,
@@ -114,7 +114,7 @@ class _AsyncTTSContext:
         await self.send(
             model_id=DEFAULT_MODEL_ID,
             transcript="",
-            output_format=TTS.get_output_format("raw_pcm_f32le_44100"),
+            output_format=TTS.get_output_format(DEFAULT_OUTPUT_FORMAT),
             voice_embedding=DEFAULT_VOICE_EMBEDDING,  # Default voice embedding since it's a required input for now.
             context_id=self._context_id,
             continue_=True,
@@ -143,29 +143,28 @@ class _AsyncTTSContext:
                     # 1. Current queue to get a message
                     # 2. Next queue to get a message while current queue is empty
                     # 3. Timeout to occur (only if next queue is empty)
-                    # Print the length of each queue
                     done, pending = await asyncio.wait(
                         tasks,
                         return_when=asyncio.FIRST_COMPLETED,
                         timeout=self.timeout
                     )
 
-                    completed_or_cancelled_tasks = [completed_task for completed_task in done]
+                    completed_or_canceled_tasks = [completed_task for completed_task in done]
                     
                     # Cancel any pending tasks
                     for task in pending:
                         task.cancel()
-                        completed_or_cancelled_tasks.append(task)
+                        completed_or_canceled_tasks.append(task)
                     
                     # If no tasks completed, we hit the timeout
                     if not done:
                         raise asyncio.TimeoutError()
                     
-                    # Iterate over all completed or cancelled tasks
+                    # Iterate over all completed or canceled tasks
                     next_queue_has_message = False
                     response = None
-                    while completed_or_cancelled_tasks:
-                        completed_task = completed_or_cancelled_tasks.pop()
+                    while completed_or_canceled_tasks:
+                        completed_task = completed_or_canceled_tasks.pop()
                         if completed_task is next_queue_task:
                             # Put the message back in the next queue
                             try:
@@ -173,14 +172,14 @@ class _AsyncTTSContext:
                                 await self._websocket._context_queues[self._context_id][flush_id + 1].put(message)
                                 next_queue_has_message = True
                             except asyncio.CancelledError:
-                                # Ignore the error if the task was cancelled
+                                # Ignore the error if the task was canceled
                                 pass
                         else:
                             # The current queue has a message
                             try:
                                 response = await completed_task
                             except asyncio.CancelledError:
-                                # Ignore the error if the task was cancelled
+                                # Ignore the error if the task was canceled
                                 pass
                     
                     if response is not None:
@@ -305,7 +304,7 @@ class _AsyncWebSocket(_WebSocket):
             except asyncio.CancelledError:
                 pass
             except TypeError as e:
-                # Ignore the error if the task is already cancelled
+                # Ignore the error if the task is already canceled
                 # For some reason we are getting None responses
                 # TODO: This needs to be fixed - we need to think about why we are getting None responses.
                 if "Received message 256:None" not in str(e):
