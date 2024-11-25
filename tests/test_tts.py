@@ -55,7 +55,7 @@ def create_client():
 
 
 def create_async_client():
-    return AsyncCartesia(api_key=os.environ.get("CARTESIA_API_KEY"), base_url='staging-api.cartesia.ai')
+    return AsyncCartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
 
 
 @pytest.fixture(scope="session")
