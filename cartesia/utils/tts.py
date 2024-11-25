@@ -37,6 +37,7 @@ def _construct_tts_request(
     add_timestamps: bool = False,
     context_id: Optional[str] = None,
     continue_: bool = False,
+    flush: bool = False,
     _experimental_voice_controls: Optional[VoiceControls] = None,
 ):
     tts_request = {
@@ -70,5 +71,8 @@ def _construct_tts_request(
 
     if continue_:
         tts_request["continue"] = continue_
+
+    if flush:
+        tts_request["flush"] = flush
 
     return tts_request
