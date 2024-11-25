@@ -239,7 +239,7 @@ class _WebSocket:
             self._contexts.clear()
 
     def _convert_response(
-        self, response: Dict[str, any], include_context_id: bool
+        self, response: Dict[str, any], include_context_id: bool, include_flush_id: bool = False
     ) -> Dict[str, Any]:
         out = {}
         if response["type"] == EventType.AUDIO:
@@ -249,6 +249,9 @@ class _WebSocket:
 
         if include_context_id:
             out["context_id"] = response["context_id"]
+
+        if include_flush_id and "flush_id" in response:
+            out["flush_id"] = response["flush_id"]
 
         return out
 
