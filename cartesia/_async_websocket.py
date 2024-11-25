@@ -131,73 +131,14 @@ class _AsyncTTSContext:
         async def generator():
             try:
                 while True:
-                    # Create tasks for current queue
-                    current_queue_task = asyncio.create_task(
-                        self._websocket._get_message(
-                            self._context_id, timeout=self.timeout, flush_id=flush_id
-                        )
+                    response = await self._websocket._get_message(
+                        self._context_id, timeout=self.timeout, flush_id=flush_id
                     )
-                    tasks = [current_queue_task]
-
-                    # If next queue exists, create a task to check it
-                    next_queue_task = asyncio.create_task(
-                        self._websocket._get_message(
-                            self._context_id, timeout=self.timeout, flush_id=flush_id + 1
-                        )
-                    )
-                    tasks.append(next_queue_task)
-
-                    # Wait for either:
-                    # 1. Current queue to get a message
-                    # 2. Next queue to get a message while current queue is empty
-                    # 3. Timeout to occur (only if next queue is empty)
-                    done, pending = await asyncio.wait(
-                        tasks, return_when=asyncio.FIRST_COMPLETED, timeout=self.timeout
-                    )
-
-                    completed_or_canceled_tasks = [completed_task for completed_task in done]
-
-                    # Cancel any pending tasks
-                    for task in pending:
-                        task.cancel()
-                        completed_or_canceled_tasks.append(task)
-
-                    # If no tasks completed, we hit the timeout
-                    if not done:
-                        raise asyncio.TimeoutError()
-
-                    # Iterate over all completed or canceled tasks
-                    next_queue_has_message = False
-                    response = None
-                    while completed_or_canceled_tasks:
-                        completed_task = completed_or_canceled_tasks.pop()
-                        if completed_task is next_queue_task:
-                            # Put the message back in the next queue
-                            try:
-                                message = await completed_task
-                                await self._websocket._context_queues[self._context_id][
-                                    flush_id + 1
-                                ].put(message)
-                                next_queue_has_message = True
-                            except asyncio.CancelledError:
-                                # Ignore the error if the task was canceled
-                                pass
-                        else:
-                            # The current queue has a message
-                            try:
-                                response = await completed_task
-                            except asyncio.CancelledError:
-                                # Ignore the error if the task was canceled
-                                pass
-
-                    if response is not None:
-                        if response["done"]:
-                            break
-                        yield self._websocket._convert_response(response, include_context_id=True)
-                    else:
-                        # If next queue has a message, we need to break out of the loop
-                        if next_queue_has_message:
-                            break
+                    if "error" in response:
+                        raise RuntimeError(f"Error generating audio:\n{response['error']}")
+                    if response.get("flush_done") or response["done"]:
+                        break
+                    yield self._websocket._convert_response(response, include_context_id=True)
             except Exception as e:
                 if isinstance(e, asyncio.TimeoutError):
                     raise RuntimeError("Timeout while waiting for audio chunk")
@@ -381,6 +322,8 @@ class _AsyncWebSocket(_WebSocket):
         try:
             while True:
                 response = await self.websocket.receive_json()
+                if response.get("flush_done"):
+                    print(f"Flush done received for flush ID {response.get('flush_id')}")
                 if response["context_id"]:
                     context_id = response["context_id"]
                 flush_id = response.get("flush_id", -1)
