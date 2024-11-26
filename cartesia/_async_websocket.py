@@ -110,7 +110,7 @@ class _AsyncTTSContext:
         )
 
     async def flush(self) -> Callable[[], AsyncGenerator[Dict[str, Any], None]]:
-        """Trigger a manual flush for the current context's generation. This method returns a generation that yields the audio prior to the flush."""
+        """Trigger a manual flush for the current context's generation. This method returns a generator that yields the audio prior to the flush."""
         await self.send(
             model_id=DEFAULT_MODEL_ID,
             transcript="",
@@ -253,7 +253,7 @@ class _AsyncWebSocket(_WebSocket):
             except asyncio.CancelledError:
                 pass
             except TypeError as e:
-                # Ignore the error if the task is already canceled
+                # Ignore the error if the task is already canceled.
                 # For some reason we are getting None responses
                 # TODO: This needs to be fixed - we need to think about why we are getting None responses.
                 if "Received message 256:None" not in str(e):
@@ -322,8 +322,6 @@ class _AsyncWebSocket(_WebSocket):
         try:
             while True:
                 response = await self.websocket.receive_json()
-                if response.get("flush_done"):
-                    print(f"Flush done received for flush ID {response.get('flush_id')}")
                 if response["context_id"]:
                     context_id = response["context_id"]
                 flush_id = response.get("flush_id", -1)
