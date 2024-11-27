@@ -23,6 +23,11 @@ sys.path.insert(0, os.path.dirname(THISDIR))
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
 DEFAULT_MODEL_ID = "sonic-english"  # latest default model
+DEFAULT_OUTPUT_FORMAT = {
+    "container": "raw",
+    "encoding": "pcm_f32le",
+    "sample_rate": 44100,
+}
 MULTILINGUAL_MODEL_ID = "sonic-multilingual"  # latest multilingual model
 SAMPLE_VOICE = "Newsman"
 SAMPLE_VOICE_ID = "d46abd1d-2d02-43e8-819f-51fb652c1c61"
@@ -165,11 +170,7 @@ def test_sse_send(
     output_generate = client.tts.sse(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=DEFAULT_MODEL_ID,
         _experimental_voice_controls=_experimental_voice_controls,
@@ -191,11 +192,7 @@ def test_sse_send_with_model_id(resources: _Resources, stream: bool):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=DEFAULT_MODEL_ID,
     )
@@ -231,18 +228,12 @@ async def test_sse_send_concurrent():
         "Hello, world! I'm generating audio on Cartesia. Hello, world! I'm generating audio on Cartesia.",
     ]
 
-    output_format = {
-        "container": "raw",
-        "encoding": "pcm_f32le",
-        "sample_rate": 44100
-    }
-
     tasks = [
         send_sse_request(
             client,
             transcript,
             SAMPLE_VOICE_ID,
-            output_format,
+            DEFAULT_OUTPUT_FORMAT,
             DEFAULT_MODEL_ID,
             num
         ) for num, transcript in enumerate(transcripts)
@@ -261,11 +252,7 @@ def test_sse_send_with_voice_id_and_embedding(resources: _Resources):
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
         voice_embedding=embedding,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=True,
         model_id=DEFAULT_MODEL_ID,
     )
@@ -291,11 +278,7 @@ def test_websocket_send(
     output_generate = ws.send(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=DEFAULT_MODEL_ID,
         context_id=context_id,
@@ -322,11 +305,7 @@ def test_websocket_send_timestamps(resources: _Resources, stream: bool):
     output_generate = ws.send(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=DEFAULT_MODEL_ID,
         context_id=context_id,
@@ -360,11 +339,7 @@ def test_sse_send_context_manager(
         output_generate = client.tts.sse(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
             _experimental_voice_controls=_experimental_voice_controls,
@@ -385,11 +360,7 @@ def test_sse_send_context_manager_with_err():
             client.tts.sse(
                 transcript=transcript,
                 voice_id="",
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 stream=True,
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
@@ -407,11 +378,7 @@ def test_websocket_send_context_manager(resources: _Resources):
         output_generate = ws.send(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
         )
@@ -432,11 +399,7 @@ def test_websocket_send_context_manage_err(resources: _Resources):
             ws.send(
                 transcript=transcript,
                 voice_id="",
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 stream=True,
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
@@ -461,11 +424,7 @@ async def test_async_sse_send(
         output = await async_client.tts.sse(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
             _experimental_voice_controls=_experimental_voice_controls,
@@ -497,11 +456,7 @@ async def test_async_websocket_send(
         output = await ws.send(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
             context_id=context_id,
@@ -529,11 +484,7 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
         output = await ws.send(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
             context_id=context_id,
@@ -563,11 +514,7 @@ async def test_async_sse_send_context_manager(resources: _Resources):
         output_generate = await async_client.tts.sse(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
         )
@@ -588,11 +535,7 @@ async def test_async_sse_send_context_manager_with_err():
             await async_client.tts.sse(
                 transcript=transcript,
                 voice_id="",
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 stream=True,
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
@@ -611,11 +554,7 @@ async def test_async_websocket_send_context_manager():
         output_generate = await ws.send(
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
         )
@@ -638,11 +577,7 @@ def test_sse_send_multilingual(resources: _Resources, stream: bool, language: st
     output_generate = client.tts.sse(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=MULTILINGUAL_MODEL_ID,
         language=language,
@@ -668,11 +603,7 @@ def test_websocket_send_multilingual(
     output_generate = ws.send(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=stream,
         model_id=MULTILINGUAL_MODEL_ID,
         language=language,
@@ -707,11 +638,7 @@ def test_sync_continuation_websocket_context_send():
             model_id=DEFAULT_MODEL_ID,
             transcript=chunk_generator(transcripts),
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
         )
         for out in output_generate:
             assert out.keys() == {"audio", "context_id"}
@@ -730,11 +657,7 @@ def test_sync_context_send_timestamps(resources: _Resources):
     output_generate = ctx.send(
         transcript=chunk_generator(transcripts),
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         model_id=DEFAULT_MODEL_ID,
         add_timestamps=True,
     )
@@ -763,11 +686,7 @@ async def test_continuation_websocket_context_send():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice_id=SAMPLE_VOICE_ID,
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
 
@@ -803,11 +722,7 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice_id=SAMPLE_VOICE_ID,
-                    output_format={
-                        "container": "raw",
-                        "encoding": "pcm_f32le",
-                        "sample_rate": 44100,
-                    },
+                    output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
 
@@ -839,11 +754,7 @@ async def test_continuation_websocket_context_send_incorrect_voice_id():
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice_id="",  # voice_id is empty
-                    output_format={
-                        "container": "raw",
-                        "encoding": "pcm_f32le",
-                        "sample_rate": 44100,
-                    },
+                    output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
 
@@ -910,11 +821,7 @@ async def test_continuation_websocket_context_send_incorrect_model_id():
                     model_id="",  # model_id is empty
                     transcript=transcript,
                     voice_id=SAMPLE_VOICE_ID,
-                    output_format={
-                        "container": "raw",
-                        "encoding": "pcm_f32le",
-                        "sample_rate": 44100,
-                    },
+                    output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
             async for _ in ctx.receive():
@@ -943,11 +850,7 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
                     transcript=transcript,
                     voice_id=SAMPLE_VOICE_ID,
                     context_id="sad-monkeys-fly",  # context_id is different
-                    output_format={
-                        "container": "raw",
-                        "encoding": "pcm_f32le",
-                        "sample_rate": 44100,
-                    },
+                    output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
 
@@ -977,11 +880,7 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice_id=SAMPLE_VOICE_ID,
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
 
@@ -991,11 +890,7 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice_id=SAMPLE_VOICE_ID,
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
 
@@ -1004,6 +899,46 @@ async def test_continuation_websocket_context_twice_on_same_context():
         async for out in ctx.receive():
             assert out.keys() == {"audio", "context_id"}
             assert isinstance(out["audio"], bytes)
+    finally:
+        await ws.close()
+        await async_client.close()
+
+
+@pytest.mark.asyncio
+async def test_continuation_websocket_context_send_flush():
+    logger.info("Testing async continuation WebSocket context send with flush")
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    try:
+        ctx = ws.context(context_id)
+        transcripts = [
+            "Hello, world!",
+            "My name is Cartesia.",
+            "I am a text-to-speech API.",
+        ]
+        receivers = []
+        for transcript in transcripts:
+            await ctx.send(
+                model_id=DEFAULT_MODEL_ID,
+                transcript=transcript,
+                voice_id=SAMPLE_VOICE_ID,
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                continue_=True,
+            )
+            new_receiver = await ctx.flush()
+            receivers.append(new_receiver)
+        await ctx.no_more_inputs()
+
+        for receiver in receivers:
+            async for out in receiver():
+                if out.get("audio"):
+                    assert out.keys() == {"audio", "context_id"}
+                    assert isinstance(out["audio"], bytes)
+                elif out.get("flush_done"):
+                    assert out.keys() == {"flush_done", "flush_id"}
+                else:
+                    assert False, f"Received unexpected message: {out}"
     finally:
         await ws.close()
         await async_client.close()
@@ -1019,11 +954,7 @@ async def context_runner(ws, transcripts):
             model_id=DEFAULT_MODEL_ID,
             transcript=transcript,
             voice_id=SAMPLE_VOICE_ID,
-            output_format={
-                "container": "raw",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
+            output_format=DEFAULT_OUTPUT_FORMAT,
             continue_=True,
         )
 
@@ -1110,11 +1041,7 @@ def test_websocket_send_with_custom_url():
     output_generate = ws.send(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=True,
         model_id=DEFAULT_MODEL_ID,
     )
@@ -1135,11 +1062,7 @@ def test_sse_send_with_custom_url():
     output_generate = client.tts.sse(
         transcript=transcript,
         voice_id=SAMPLE_VOICE_ID,
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
+        output_format=DEFAULT_OUTPUT_FORMAT,
         stream=True,
         model_id=DEFAULT_MODEL_ID,
     )
@@ -1161,11 +1084,7 @@ def test_sse_send_with_incorrect_url():
             client.tts.sse(
                 transcript=transcript,
                 voice_id=SAMPLE_VOICE_ID,
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 stream=False,
                 model_id=DEFAULT_MODEL_ID,
             )
@@ -1187,11 +1106,7 @@ def test_websocket_send_with_incorrect_url():
             ws.send(
                 transcript=transcript,
                 voice_id=SAMPLE_VOICE_ID,
-                output_format={
-                    "container": "raw",
-                    "encoding": "pcm_f32le",
-                    "sample_rate": 44100,
-                },
+                output_format=DEFAULT_OUTPUT_FORMAT,
                 stream=True,
                 model_id=DEFAULT_MODEL_ID,
             )
