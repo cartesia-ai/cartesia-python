@@ -786,7 +786,11 @@ async def test_continuation_websocket_context_send_incorrect_output_format():
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice_id=SAMPLE_VOICE_ID,
-                    output_format=DEFAULT_OUTPUT_FORMAT,
+                    output_format={
+                        "container": "raw",
+                        "encoding": "pcm_f32le",
+                        "sample_rate": 40,
+                    },  # output_format is empty
                     continue_=True,
                 )
 
@@ -1030,7 +1034,7 @@ def test_websocket_send_with_custom_url():
     transcript = SAMPLE_TRANSCRIPT
 
     client = Cartesia(
-        api_key=os.environ.get("CARTESIA_API_KEY"), base_url="ws://api.cartesia.ai"
+        api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.cartesia.ai"
     )
 
     ws = client.tts.websocket()
@@ -1118,7 +1122,11 @@ async def test_tts_bytes():
             model_id=DEFAULT_MODEL_ID,
             voice_id=SAMPLE_VOICE_ID,
             transcript=SAMPLE_TRANSCRIPT,
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format={
+                "container": "wav",
+                "encoding": "pcm_f32le",
+                "sample_rate": 44100,
+            },
         )
         _validate_wav_response(data)
 
@@ -1129,7 +1137,11 @@ def test_sync_tts_bytes():
         model_id=DEFAULT_MODEL_ID,
         voice_id=SAMPLE_VOICE_ID,
         transcript=SAMPLE_TRANSCRIPT,
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format={
+            "container": "wav",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        },
     )
     _validate_wav_response(data)
 
