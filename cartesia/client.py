@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 from cartesia._constants import DEFAULT_BASE_URL, DEFAULT_TIMEOUT
 from cartesia.tts import TTS
+from cartesia.voice_changer import VoiceChanger
 from cartesia.voices import Voices
 
 
@@ -56,6 +57,7 @@ class Cartesia(BaseClient):
         super().__init__(api_key=api_key, base_url=base_url, timeout=timeout)
         self.voices = Voices(api_key=self.api_key, base_url=self._base_url, timeout=self.timeout)
         self.tts = TTS(api_key=self.api_key, base_url=self._base_url, timeout=self.timeout)
+        self.voice_changer = VoiceChanger(api_key=self.api_key, base_url=self._base_url, timeout=self.timeout)
 
     def __enter__(self):
         return self
