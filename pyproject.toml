@@ -1,6 +1,6 @@
 [project]
 name = "cartesia"
-version = "1.3.0"
+version = "1.3.1"
 description = "The official Python library for the Cartesia API."
 readme = "README.md"
 requires-python = ">=3.9"
