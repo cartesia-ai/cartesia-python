@@ -12,6 +12,10 @@ dependencies = [
     "websockets>=10.4",
 ]
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.uv]
 dev-dependencies = [
     "isort>=5.13.2",
