@@ -87,6 +87,13 @@ class TTS(Resource):
             output_format_obj = OutputFormatMapping.get_format(output_format_name)
         else:
             raise ValueError(f"Unsupported format: {output_format_name}")
+        
+        if output_format_obj["container"].lower() == "mp3": 
+            return OutputFormat(
+                container=output_format_obj["container"],
+                bit_rate=output_format_obj["bit_rate"],
+                sample_rate=output_format_obj["sample_rate"], 
+            )
 
         return OutputFormat(
             container=output_format_obj["container"],

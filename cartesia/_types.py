@@ -17,6 +17,7 @@ class OutputFormatMapping:
         "raw_pcm_s16le_8000": {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 8000},
         "raw_pcm_mulaw_8000": {"container": "raw", "encoding": "pcm_mulaw", "sample_rate": 8000},
         "raw_pcm_alaw_8000": {"container": "raw", "encoding": "pcm_alaw", "sample_rate": 8000},
+        "mp3_128kbps_44100": {"container": "mp3", "bit_rate": 128000, "sample_rate": 44100},
     }
 
     @classmethod
