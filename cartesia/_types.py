@@ -36,7 +36,6 @@ class VoiceMetadata(TypedDict):
     user_id: str
     created_at: str
     language: str
-    base_voice_id: Optional[str] = None
 
 
 class VoiceControls(TypedDict):

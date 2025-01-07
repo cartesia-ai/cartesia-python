@@ -67,6 +67,7 @@ class Voices(Resource):
         name: Optional[str] = None,
         description: Optional[str] = None,
         transcript: Optional[str] = None,
+        model_id: Optional[str] = None,
     ) -> Union[List[float], VoiceMetadata]:
         """Clone a voice from a clip.
 
@@ -107,6 +108,8 @@ class Voices(Resource):
                 data["language"] = language
                 if mode == "similarity" and transcript:
                     data["transcript"] = transcript
+                if model_id:
+                    data["model_id"] = model_id
                 url = f"{self._http_url()}/voices/clone"
                 response = httpx.post(
                     url, headers=headers, files=files, data=data, timeout=self.timeout
@@ -123,7 +126,6 @@ class Voices(Resource):
         name: str,
         description: str,
         embedding: List[float],
-        base_voice_id: Optional[str] = None,
         language: str = "en",
     ) -> VoiceMetadata:
         """Create a new voice.
@@ -132,7 +134,6 @@ class Voices(Resource):
             name: The name of the voice.
             description: The description of the voice.
             embedding: The embedding of the voice. This should be generated with :meth:`clone`.
-            base_voice_id: The ID of the base voice. This should be a valid voice ID if specified.
 
         Returns:
             A dictionary containing the voice metadata.
@@ -144,7 +145,6 @@ class Voices(Resource):
                 "name": name,
                 "description": description,
                 "embedding": embedding,
-                "base_voice_id": base_voice_id,
                 "language": language,
             },
             timeout=self.timeout,
@@ -206,3 +206,40 @@ class Voices(Resource):
 
         result = response.json()
         return result["embedding"]
+
+    def backfill(
+        self,
+        voice_id: str,
+        audio_bytes: bytes,
+    ) -> bool:
+        """Backfill a voice with new audio data.
+
+        Args:
+            voice_id: The ID of the voice to backfill
+            audio_bytes: Audio data as bytes
+
+        Returns:
+            True if successful, False otherwise
+
+        Raises:
+            ValueError: If the request fails
+        """
+        url = f"{self._http_url()}/voices/clone/backfill"
+        headers = self.headers.copy()
+        headers.pop("Content-Type", None)
+
+        files = {"clip": audio_bytes}
+        data = {"voice_id": voice_id}
+
+        response = httpx.post(
+            url,
+            headers=headers,
+            files=files,
+            data=data,
+            timeout=self.timeout,
+        )
+
+        if not response.is_success:
+            raise ValueError(f"Failed to backfill voice. Error: {response.text}")
+
+        return True
