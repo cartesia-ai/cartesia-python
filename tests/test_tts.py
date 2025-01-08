@@ -977,6 +977,7 @@ output_format_names = [
     "raw_pcm_s16le_8000",
     "raw_pcm_mulaw_8000",
     "raw_pcm_alaw_8000",
+    "mp3_128kbps_44100"
 ]
 
 deprecated_output_format_names = [
@@ -1003,8 +1004,12 @@ def test_output_formats(resources: _Resources, output_format_name: str):
     output_format = resources.client.tts.get_output_format(output_format_name)
     assert isinstance(output_format, dict), "Output is not of type dict"
     assert output_format["container"] is not None, "Output format container is None"
-    assert output_format["encoding"] is not None, "Output format encoding is None"
     assert output_format["sample_rate"] is not None, "Output format sample rate is None"
+    if output_format["container"]=="mp3":
+        assert output_format["bit_rate"] is not None, "Output format bit rate is None"
+    else:
+        assert output_format["encoding"] is not None, "Output format encoding is None"
+        
 
 def test_invalid_output_format(resources: _Resources):
     logger.info("Testing invalid output format")
