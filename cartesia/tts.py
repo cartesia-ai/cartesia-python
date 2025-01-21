@@ -234,7 +234,10 @@ class TTS(Resource):
 
     @staticmethod
     def _concat_audio_segments(
-        left_audio: Optional[bytes], infill_audio: bytes, right_audio: Optional[bytes], format: str = "wav"
+        left_audio: Optional[bytes],
+        infill_audio: bytes,
+        right_audio: Optional[bytes],
+        format: str = "wav",
     ) -> bytes:
         """Helper method to concatenate three audio segments while preserving audio format and headers.
 
