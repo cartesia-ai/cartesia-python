@@ -57,7 +57,7 @@ class VoiceChangerClient:
 
 
         request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
         Yields
         ------
@@ -68,7 +68,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
         client.voice_changer.bytes(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -95,7 +95,8 @@ class VoiceChangerClient:
         ) as _response:
             try:
                 if 200 <= _response.status_code < 300:
-                    for _chunk in _response.iter_bytes():
+                    _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                    for _chunk in _response.iter_bytes(chunk_size=_chunk_size):
                         yield _chunk
                     return
                 _response.read()
@@ -147,7 +148,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
         response = client.voice_changer.sse(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -237,7 +238,7 @@ class AsyncVoiceChangerClient:
 
 
         request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
         Yields
         ------
@@ -250,7 +251,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
 
 
@@ -283,7 +284,8 @@ class AsyncVoiceChangerClient:
         ) as _response:
             try:
                 if 200 <= _response.status_code < 300:
-                    async for _chunk in _response.aiter_bytes():
+                    _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                    async for _chunk in _response.aiter_bytes(chunk_size=_chunk_size):
                         yield _chunk
                     return
                 await _response.aread()
@@ -337,7 +339,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
 
 

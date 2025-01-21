@@ -2,9 +2,11 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-from .output_format import OutputFormat
 import typing
+from .output_format import OutputFormat
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
+import typing_extensions
+from ...core.serialization import FieldMetadata
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -14,12 +16,13 @@ class WebSocketTtsRequest(UniversalBaseModel):
     The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
     """
 
-    output_format: OutputFormat
+    output_format: typing.Optional[OutputFormat] = None
     transcript: typing.Optional[str] = None
     voice: TtsRequestVoiceSpecifier
     duration: typing.Optional[int] = None
     language: typing.Optional[str] = None
-    add_timestamps: bool
+    add_timestamps: typing.Optional[bool] = None
+    continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
     context_id: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:

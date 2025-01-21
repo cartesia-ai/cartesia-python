@@ -29,9 +29,10 @@ from .web_socket_response import (
     WebSocketResponse_Chunk,
     WebSocketResponse_Done,
     WebSocketResponse_Error,
-    WebSocketResponse_Timestamp,
+    WebSocketResponse_Timestamps,
 )
-from .web_socket_timestamp_response import WebSocketTimestampResponse
+from .web_socket_stream_options import WebSocketStreamOptions
+from .web_socket_timestamps_response import WebSocketTimestampsResponse
 from .web_socket_tts_output import WebSocketTtsOutput
 from .web_socket_tts_request import WebSocketTtsRequest
 from .word_timestamps import WordTimestamps
@@ -68,8 +69,9 @@ __all__ = [
     "WebSocketResponse_Chunk",
     "WebSocketResponse_Done",
     "WebSocketResponse_Error",
-    "WebSocketResponse_Timestamp",
-    "WebSocketTimestampResponse",
+    "WebSocketResponse_Timestamps",
+    "WebSocketStreamOptions",
+    "WebSocketTimestampsResponse",
     "WebSocketTtsOutput",
     "WebSocketTtsRequest",
     "WordTimestamps",

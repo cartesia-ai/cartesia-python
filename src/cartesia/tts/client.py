@@ -53,7 +53,7 @@ class TtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
         Yields
         ------
@@ -65,7 +65,7 @@ class TtsClient:
         from cartesia.tts import OutputFormat_Mp3, TtsRequestIdSpecifier
 
         client = Cartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
         client.tts.bytes(
             model_id="sonic-english",
@@ -100,7 +100,8 @@ class TtsClient:
         ) as _response:
             try:
                 if 200 <= _response.status_code < 300:
-                    for _chunk in _response.iter_bytes():
+                    _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                    for _chunk in _response.iter_bytes(chunk_size=_chunk_size):
                         yield _chunk
                     return
                 _response.read()
@@ -148,24 +149,22 @@ class TtsClient:
         Examples
         --------
         from cartesia import Cartesia
-        from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+        from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
         client = Cartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
         response = client.tts.sse(
-            model_id="string",
-            transcript="string",
+            model_id="sonic-english",
+            transcript="Hello, world!",
             voice=TtsRequestIdSpecifier(
-                id="string",
-                experimental_controls=Controls(
-                    speed=1.1,
-                    emotion="anger:lowest",
-                ),
+                id="694f9389-aac1-45b6-b726-9d9369183238",
             ),
             language="en",
-            output_format=OutputFormat_Raw(),
-            duration=1.1,
+            output_format=OutputFormat_Raw(
+                sample_rate=44100,
+                encoding="pcm_f32le",
+            ),
         )
         for chunk in response:
             yield chunk
@@ -244,7 +243,7 @@ class AsyncTtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
         Yields
         ------
@@ -258,7 +257,7 @@ class AsyncTtsClient:
         from cartesia.tts import OutputFormat_Mp3, TtsRequestIdSpecifier
 
         client = AsyncCartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
 
 
@@ -299,7 +298,8 @@ class AsyncTtsClient:
         ) as _response:
             try:
                 if 200 <= _response.status_code < 300:
-                    async for _chunk in _response.aiter_bytes():
+                    _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                    async for _chunk in _response.aiter_bytes(chunk_size=_chunk_size):
                         yield _chunk
                     return
                 await _response.aread()
@@ -349,27 +349,25 @@ class AsyncTtsClient:
         import asyncio
 
         from cartesia import AsyncCartesia
-        from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+        from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
         client = AsyncCartesia(
-            api_key_header="YOUR_API_KEY_HEADER",
+            api_key="YOUR_API_KEY",
         )
 
 
         async def main() -> None:
             response = await client.tts.sse(
-                model_id="string",
-                transcript="string",
+                model_id="sonic-english",
+                transcript="Hello, world!",
                 voice=TtsRequestIdSpecifier(
-                    id="string",
-                    experimental_controls=Controls(
-                        speed=1.1,
-                        emotion="anger:lowest",
-                    ),
+                    id="694f9389-aac1-45b6-b726-9d9369183238",
                 ),
                 language="en",
-                output_format=OutputFormat_Raw(),
-                duration=1.1,
+                output_format=OutputFormat_Raw(
+                    sample_rate=44100,
+                    encoding="pcm_f32le",
+                ),
             )
             async for chunk in response:
                 yield chunk

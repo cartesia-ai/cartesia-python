@@ -2,12 +2,14 @@
 
 from .types import (
     BaseVoiceId,
+    CloneMode,
     CreateVoiceRequest,
     EmbeddingResponse,
     EmbeddingSpecifier,
     Gender,
     IdSpecifier,
     LocalizeDialect,
+    LocalizeEnglishDialect,
     LocalizeTargetLanguage,
     LocalizeVoiceRequest,
     MixVoiceSpecifier,
@@ -15,17 +17,20 @@ from .types import (
     UpdateVoiceRequest,
     Voice,
     VoiceId,
+    VoiceMetadata,
     Weight,
 )
 
 __all__ = [
     "BaseVoiceId",
+    "CloneMode",
     "CreateVoiceRequest",
     "EmbeddingResponse",
     "EmbeddingSpecifier",
     "Gender",
     "IdSpecifier",
     "LocalizeDialect",
+    "LocalizeEnglishDialect",
     "LocalizeTargetLanguage",
     "LocalizeVoiceRequest",
     "MixVoiceSpecifier",
@@ -33,5 +38,6 @@ __all__ = [
     "UpdateVoiceRequest",
     "Voice",
     "VoiceId",
+    "VoiceMetadata",
     "Weight",
 ]

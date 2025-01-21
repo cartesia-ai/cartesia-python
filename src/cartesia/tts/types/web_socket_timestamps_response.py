@@ -7,7 +7,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
-class WebSocketTimestampResponse(WebSocketBaseResponse):
+class WebSocketTimestampsResponse(WebSocketBaseResponse):
     word_timestamps: typing.Optional[WordTimestamps] = None
 
     if IS_PYDANTIC_V2:

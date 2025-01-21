@@ -43,8 +43,8 @@ class WebSocketResponse_Done(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WebSocketResponse_Timestamp(UniversalBaseModel):
-    type: typing.Literal["timestamp"] = "timestamp"
+class WebSocketResponse_Timestamps(UniversalBaseModel):
+    type: typing.Literal["timestamps"] = "timestamps"
     word_timestamps: typing.Optional[WordTimestamps] = None
     context_id: typing.Optional[ContextId] = None
     status_code: int
@@ -78,5 +78,5 @@ class WebSocketResponse_Error(UniversalBaseModel):
 
 
 WebSocketResponse = typing.Union[
-    WebSocketResponse_Chunk, WebSocketResponse_Done, WebSocketResponse_Timestamp, WebSocketResponse_Error
+    WebSocketResponse_Chunk, WebSocketResponse_Done, WebSocketResponse_Timestamps, WebSocketResponse_Error
 ]

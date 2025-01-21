@@ -16,7 +16,7 @@
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.api_status.get()
 
@@ -30,6 +30,239 @@ client.api_status.get()
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Datasets
+<details><summary><code>client.datasets.<a href="src/cartesia/datasets/client.py">list</a>()</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.datasets.list()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.datasets.<a href="src/cartesia/datasets/client.py">create</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.datasets.create(
+    name="string",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**name:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.datasets.<a href="src/cartesia/datasets/client.py">list_files</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.datasets.list_files(
+    id="string",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.datasets.<a href="src/cartesia/datasets/client.py">upload_file</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.datasets.upload_file(
+    id="string",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**file:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**purpose:** `FilePurpose` 
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -64,7 +297,7 @@ from cartesia import Cartesia
 from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.tts.bytes(
     model_id="sonic-english",
@@ -144,7 +377,7 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
     
 </dd>
 </dl>
@@ -170,24 +403,22 @@ If the duration is not appropriate for the length of the transcript, the output 
 
 ```python
 from cartesia import Cartesia
-from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 response = client.tts.sse(
-    model_id="string",
-    transcript="string",
+    model_id="sonic-english",
+    transcript="Hello, world!",
     voice=TtsRequestIdSpecifier(
-        id="string",
-        experimental_controls=Controls(
-            speed=1.1,
-            emotion="anger:lowest",
-        ),
+        id="694f9389-aac1-45b6-b726-9d9369183238",
     ),
     language="en",
-    output_format=OutputFormat_Raw(),
-    duration=1.1,
+    output_format=OutputFormat_Raw(
+        sample_rate=44100,
+        encoding="pcm_f32le",
+    ),
 )
 for chunk in response:
     yield chunk
@@ -302,7 +533,7 @@ This endpoint is priced at 15 characters per second of input audio.
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voice_changer.bytes(
     voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -377,7 +608,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
     
 </dd>
 </dl>
@@ -405,7 +636,7 @@ core.File` — See core.File for more documentation
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 response = client.voice_changer.sse(
     voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -511,7 +742,7 @@ core.File` — See core.File for more documentation
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.list()
 
@@ -557,7 +788,7 @@ client.voices.list()
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.create(
     name="string",
@@ -798,7 +1029,7 @@ client.voices.create(
 <dl>
 <dd>
 
-**language:** `SupportedLanguage` 
+**language:** `typing.Optional[SupportedLanguage]` 
     
 </dd>
 </dl>
@@ -842,7 +1073,7 @@ client.voices.create(
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.delete(
     id="string",
@@ -898,7 +1129,7 @@ client.voices.delete(
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.update(
     id="string",
@@ -972,7 +1203,7 @@ client.voices.update(
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.get(
     id="string",
@@ -1028,7 +1259,7 @@ client.voices.get(
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.localize(
     embedding=[
@@ -1268,7 +1499,7 @@ client.voices.localize(
 <dl>
 <dd>
 
-**dialect:** `LocalizeDialect` 
+**dialect:** `typing.Optional[LocalizeDialect]` 
     
 </dd>
 </dl>
@@ -1305,7 +1536,7 @@ from cartesia import Cartesia
 from cartesia.voices import IdSpecifier
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.voices.mix(
     voices=[
@@ -1350,7 +1581,7 @@ client.voices.mix(
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">clone_from_clip</a>(...)</code></summary>
+<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">clone</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1362,9 +1593,11 @@ client.voices.mix(
 <dl>
 <dd>
 
-Clone a voice from a clip. The clip should be a 15-20 second recording of a person speaking with little to no background noise.
+Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
 
-The endpoint will return an embedding that can either be used directly with text-to-speech endpoints or used to create a new voice.
+Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
+
+Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
 </dd>
 </dl>
 </dd>
@@ -1382,9 +1615,16 @@ The endpoint will return an embedding that can either be used directly with text
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
-client.voices.clone_from_clip()
+client.voices.clone(
+    name="A high-similarity cloned voice",
+    description="Copied from Cartesia docs",
+    mode="similarity",
+    language="en",
+    transcript="A transcript of the words spoken in the audio clip.",
+    enhance=False,
+)
 
 ```
 </dd>
@@ -1410,7 +1650,52 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip is low quality.
+**name:** `str` — The name of the voice.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**language:** `SupportedLanguage` — The language of the voice.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**mode:** `CloneMode` — Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — A description for the voice.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**transcript:** `typing.Optional[str]` — Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
 
     
 </dd>
