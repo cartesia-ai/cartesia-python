@@ -1,23 +1,24 @@
 import base64
-from collections import defaultdict
 import json
 import typing
-import httpx
 import uuid
+from collections import defaultdict
 
-from .utils.timeout_iterator import TimeoutIterator
+import httpx
+
+from ..core.pydantic_utilities import parse_obj_as
 from .types.output_format import OutputFormat
-from .types.web_socket_tts_request import WebSocketTtsRequest
-from .types.web_socket_tts_output import WebSocketTtsOutput
 from .types.tts_request_voice_specifier import TtsRequestVoiceSpecifier
 from .types.web_socket_response import (
     WebSocketResponse,
     WebSocketResponse_Chunk,
-    WebSocketResponse_Error,
     WebSocketResponse_Done,
-    WebSocketResponse_Timestamp,
+    WebSocketResponse_Error,
+    WebSocketResponse_Timestamps,
 )
-from ..core.pydantic_utilities import parse_obj_as
+from .types.web_socket_tts_output import WebSocketTtsOutput
+from .types.web_socket_tts_request import WebSocketTtsRequest
+from .utils.timeout_iterator import TimeoutIterator
 
 try:
     from websockets.sync.client import connect
@@ -26,7 +27,7 @@ try:
 except ImportError:
     IS_WEBSOCKET_SYNC_AVAILABLE = False
 
-from .client import TtsClient, AsyncTtsClient
+from .client import AsyncTtsClient, TtsClient
 
 
 class TtsConnectOptions(typing.TypedDict, total=False):
@@ -93,7 +94,9 @@ class _TTSContext:
             RuntimeError: If there's an error generating audio.
         """
         if context_id is not None and context_id != self._context_id:
-            raise ValueError("Context ID does not match the context ID of the current context.")
+            raise ValueError(
+                "Context ID does not match the context ID of the current context."
+            )
 
         self._websocket.connect()
 
@@ -111,12 +114,17 @@ class _TTSContext:
 
         try:
             # Create an iterator with a timeout to get text chunks
-            text_iterator = TimeoutIterator(transcript, timeout=0.001)  # 1ms timeout for nearly non-blocking receive
+            text_iterator = TimeoutIterator(
+                transcript, timeout=0.001
+            )  # 1ms timeout for nearly non-blocking receive
             next_chunk = next(text_iterator, None)
 
             while True:
                 # Send the next text chunk to the WebSocket if available
-                if next_chunk is not None and next_chunk != text_iterator.get_sentinel():
+                if (
+                    next_chunk is not None
+                    and next_chunk != text_iterator.get_sentinel()
+                ):
                     request_body["transcript"] = next_chunk
                     request_body["continue"] = True
                     self._websocket._send(request_body)
@@ -131,14 +139,24 @@ class _TTSContext:
                             object_=json.loads(self._websocket.recv(timeout=0.001)),
                         ),
                     )
-                    if hasattr(response_obj, "context_id") and response_obj.context_id != self._context_id:
+                    if (
+                        hasattr(response_obj, "context_id")
+                        and response_obj.context_id != self._context_id
+                    ):
                         pass
                     if isinstance(response_obj, WebSocketResponse_Error):
-                        raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
+                        raise RuntimeError(
+                            f"Error generating audio:\n{response_obj.error}"
+                        )
                     if isinstance(response_obj, WebSocketResponse_Done):
                         break
-                    if isinstance(response_obj, WebSocketResponse_Chunk) and response_obj.data:
-                        yield self._websocket._convert_response(response_obj=response_obj, include_context_id=True)
+                    if (
+                        isinstance(response_obj, WebSocketResponse_Chunk)
+                        and response_obj.data
+                    ):
+                        yield self._websocket._convert_response(
+                            response_obj=response_obj, include_context_id=True
+                        )
                 except TimeoutError:
                     pass
 
@@ -152,14 +170,24 @@ class _TTSContext:
                                 object_=json.loads(self._websocket.recv(timeout=0.001)),
                             ),
                         )
-                        if hasattr(response_obj, "context_id") and response_obj.context_id != self._context_id:
+                        if (
+                            hasattr(response_obj, "context_id")
+                            and response_obj.context_id != self._context_id
+                        ):
                             continue
                         if isinstance(response_obj, WebSocketResponse_Error):
-                            raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
+                            raise RuntimeError(
+                                f"Error generating audio:\n{response_obj.error}"
+                            )
                         if isinstance(response_obj, WebSocketResponse_Done):
                             break
-                        if isinstance(response_obj, WebSocketResponse_Chunk) and response_obj.data:
-                            yield self._websocket._convert_response(response_obj=response_obj, include_context_id=True)
+                        if (
+                            isinstance(response_obj, WebSocketResponse_Chunk)
+                            and response_obj.data
+                        ):
+                            yield self._websocket._convert_response(
+                                response_obj=response_obj, include_context_id=True
+                            )
                     except TimeoutError:
                         pass
                     next_chunk = next(text_iterator, None)
@@ -180,13 +208,18 @@ class _TTSContext:
                         object_=json.loads(self._websocket.recv(timeout=0.001)),
                     ),
                 )
-                if hasattr(response_obj, "context_id") and response_obj.context_id != self._context_id:
+                if (
+                    hasattr(response_obj, "context_id")
+                    and response_obj.context_id != self._context_id
+                ):
                     continue
                 if isinstance(response_obj, WebSocketResponse_Error):
                     raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
                 if isinstance(response_obj, WebSocketResponse_Done):
                     break
-                yield self._websocket._convert_response(response_obj=response_obj, include_context_id=True)
+                yield self._websocket._convert_response(
+                    response_obj=response_obj, include_context_id=True
+                )
 
         except Exception as e:
             self._websocket.close()
@@ -218,7 +251,7 @@ class TtsWebsocketConnection:
             self.close()
         except Exception as e:
             raise RuntimeError("Failed to close WebSocket: ", e)
-    
+
     def _send(self, data: typing.Any) -> None:
         if isinstance(data, dict):
             data = json.dumps(data)
@@ -228,7 +261,9 @@ class TtsWebsocketConnection:
         query_params = httpx.QueryParams()
 
         query_params = query_params.add("api_key", self.options.get("api_key"))
-        query_params = query_params.add("cartesia_version", self.options.get("cartesia_version"))
+        query_params = query_params.add(
+            "cartesia_version", self.options.get("cartesia_version")
+        )
         route = "tts/websocket"
         return f"{self.ws_url}/{route}?{query_params}"
 
@@ -260,7 +295,11 @@ class TtsWebsocketConnection:
             self._contexts.clear()
 
     def _convert_response(
-        self, response_obj: typing.Union[WebSocketResponse_Chunk, WebSocketResponse_Timestamp], include_context_id: bool
+        self,
+        response_obj: typing.Union[
+            WebSocketResponse_Chunk, WebSocketResponse_Timestamp
+        ],
+        include_context_id: bool,
     ) -> WebSocketTtsOutput:
         out: typing.Dict[str, typing.Any] = {}
         if isinstance(response_obj, WebSocketResponse_Chunk):
@@ -337,7 +376,10 @@ class TtsWebsocketConnection:
             if add_timestamps and "word_timestamps" in chunk:
                 for k, v in chunk["word_timestamps"].items():
                     word_timestamps[k].extend(v)
-        out: typing.Dict[str, typing.Any] = {"audio": b"".join(chunks), "context_id": context_id}
+        out: typing.Dict[str, typing.Any] = {
+            "audio": b"".join(chunks),
+            "context_id": context_id,
+        }
         if add_timestamps:
             out["word_timestamps"] = word_timestamps
         return WebSocketTtsOutput(**out)
@@ -358,11 +400,15 @@ class TtsWebsocketConnection:
                     raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
                 if isinstance(response_obj, WebSocketResponse_Done):
                     break
-                yield self._convert_response(response_obj=response_obj, include_context_id=True)
+                yield self._convert_response(
+                    response_obj=response_obj, include_context_id=True
+                )
         except Exception as e:
             # Close the websocket connection if an error occurs.
             self.close()
-            raise RuntimeError(f"Failed to generate audio. {response_obj}. Exception {e}")
+            raise RuntimeError(
+                f"Failed to generate audio. {response_obj}. Exception {e}"
+            )
 
     def _remove_context(self, context_id: str):
         if context_id in self._contexts:
@@ -394,7 +440,8 @@ class TtsClientWithWebsocket(TtsClient):
     def websocket(self) -> TtsWebsocketConnection:
         client_headers = self._client_wrapper.get_headers()
         tts_connect_options = TtsConnectOptions(
-            cartesia_version=client_headers["Cartesia-Version"], api_key=client_headers["X-API-Key"]
+            cartesia_version=client_headers["Cartesia-Version"],
+            api_key=client_headers["X-API-Key"],
         )
         return TtsWebsocketConnection(
             ws_url=self._ws_url(),

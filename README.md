@@ -60,7 +60,7 @@ from cartesia import Cartesia
 from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 client.tts.bytes(
     model_id="sonic-english",
@@ -87,7 +87,7 @@ from cartesia import AsyncCartesia
 from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = AsyncCartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 
 
@@ -133,7 +133,7 @@ from cartesia import Cartesia
 from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 response = client.tts.sse(
     model_id="string",
@@ -161,7 +161,7 @@ from cartesia.tts import TtsRequestEmbeddingSpecifier, OutputFormat_Raw
 import pyaudio
 
 client = Cartesia(
-    api_key_header="YOUR_API_KEY_HEADER",
+    api_key="YOUR_API_KEY",
 )
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 voice = client.voices.get(id=voice_id)

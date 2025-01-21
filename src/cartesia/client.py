@@ -4,8 +4,8 @@ import typing
 
 import httpx
 
-from .environment import CartesiaEnvironment
 from .base_client import AsyncBaseCartesia, BaseCartesia
+from .environment import CartesiaEnvironment
 from .tts.socket_client import AsyncTtsClientWithWebsocket, TtsClientWithWebsocket
 
 
@@ -27,7 +27,7 @@ class Cartesia(BaseCartesia):
 
 
 
-    api_key_header : str
+    api_key : str
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -42,7 +42,7 @@ class Cartesia(BaseCartesia):
     from cartesia import Cartesia
 
     client = Cartesia(
-        api_key_header="YOUR_API_KEY_HEADER",
+        api_key="YOUR_API_KEY",
     )
     """
 
@@ -51,7 +51,7 @@ class Cartesia(BaseCartesia):
         *,
         base_url: typing.Optional[str] = None,
         environment: CartesiaEnvironment = CartesiaEnvironment.PRODUCTION,
-        api_key_header: str,
+        api_key: str,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
@@ -59,7 +59,7 @@ class Cartesia(BaseCartesia):
         super().__init__(
             base_url=base_url,
             environment=environment,
-            api_key_header=api_key_header,
+            api_key=api_key,
             timeout=timeout,
             follow_redirects=follow_redirects,
             httpx_client=httpx_client,
@@ -85,7 +85,7 @@ class AsyncCartesia(AsyncBaseCartesia):
 
 
 
-    api_key_header : str
+    api_key : str
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -100,7 +100,7 @@ class AsyncCartesia(AsyncBaseCartesia):
     from cartesia import AsyncCartesia
 
     client = AsyncCartesia(
-        api_key_header="YOUR_API_KEY_HEADER",
+        api_key="YOUR_API_KEY",
     )
     """
 
@@ -109,7 +109,7 @@ class AsyncCartesia(AsyncBaseCartesia):
         *,
         base_url: typing.Optional[str] = None,
         environment: CartesiaEnvironment = CartesiaEnvironment.PRODUCTION,
-        api_key_header: str,
+        api_key: str,
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
@@ -117,7 +117,7 @@ class AsyncCartesia(AsyncBaseCartesia):
         super().__init__(
             base_url=base_url,
             environment=environment,
-            api_key_header=api_key_header,
+            api_key=api_key,
             timeout=timeout,
             follow_redirects=follow_redirects,
             httpx_client=httpx_client,
