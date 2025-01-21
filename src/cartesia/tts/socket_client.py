@@ -297,14 +297,14 @@ class TtsWebsocketConnection:
     def _convert_response(
         self,
         response_obj: typing.Union[
-            WebSocketResponse_Chunk, WebSocketResponse_Timestamp
+            WebSocketResponse_Chunk, WebSocketResponse_Timestamps
         ],
         include_context_id: bool,
     ) -> WebSocketTtsOutput:
         out: typing.Dict[str, typing.Any] = {}
         if isinstance(response_obj, WebSocketResponse_Chunk):
             out["audio"] = base64.b64decode(response_obj.data)
-        elif isinstance(response_obj, WebSocketResponse_Timestamp):
+        elif isinstance(response_obj, WebSocketResponse_Timestamps):
             out["word_timestamps"] = response_obj.word_timestamps
 
         if include_context_id:
