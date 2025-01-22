@@ -7,8 +7,11 @@ from collections import defaultdict
 import httpx
 
 from ..core.pydantic_utilities import parse_obj_as
+from .types.cancel_context_request import CancelContextRequest
+from .types.generation_request import GenerationRequest
 from .types.output_format import OutputFormat
 from .types.tts_request_voice_specifier import TtsRequestVoiceSpecifier
+from .types.web_socket_request import WebSocketRequest
 from .types.web_socket_response import (
     WebSocketResponse,
     WebSocketResponse_Chunk,
@@ -17,7 +20,6 @@ from .types.web_socket_response import (
     WebSocketResponse_Timestamps,
 )
 from .types.web_socket_tts_output import WebSocketTtsOutput
-from .types.web_socket_tts_request import WebSocketTtsRequest
 from .utils.timeout_iterator import TimeoutIterator
 
 try:
@@ -60,78 +62,99 @@ class _TTSContext:
 
     def send(
         self,
-        model_id: str,
-        transcript: typing.Iterator[str],
-        output_format: OutputFormat,
-        voice: TtsRequestVoiceSpecifier,
-        context_id: typing.Optional[str] = None,
-        duration: typing.Optional[int] = None,
-        language: typing.Optional[str] = None,
-        add_timestamps: bool = False,
+        request: WebSocketRequest,
     ) -> typing.Generator[bytes, None, None]:
-        """Send audio generation requests to the WebSocket and yield responses.
-
-        Args:
-            model_id: The ID of the model to use for generating audio.
-            transcript: Iterator over text chunks with <1s latency.
-            output_format: A dictionary containing the details of the output format.
-            voice_id: The ID of the voice to use for generating audio.
-            voice_embedding: The embedding of the voice to use for generating audio.
-            context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
-            duration: The duration of the audio in seconds.
-            language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
-            add_timestamps: Whether to return word-level timestamps.
-            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
-                Note: This is an experimental feature and may change rapidly in future releases.
-
-        Yields:
-            Dictionary containing the following key(s):
-            - audio: The audio as bytes.
-            - context_id: The context ID for the request.
-
-        Raises:
-            ValueError: If provided context_id doesn't match the current context.
-            RuntimeError: If there's an error generating audio.
         """
-        if context_id is not None and context_id != self._context_id:
-            raise ValueError(
-                "Context ID does not match the context ID of the current context."
-            )
+        Handle both GenerationRequest and CancelContextRequest via a single WebSocketRequest object.
+        Yields audio chunks (as bytes) when generating speech.
+        """
 
-        self._websocket.connect()
+        if isinstance(request, CancelContextRequest):
+            if request.context_id != self._context_id:
+                raise ValueError(
+                    f"Context ID {request.context_id} does not match current context {self._context_id}."
+                )
+            self._websocket.connect()
+            self._websocket._send(request.dict(by_alias=True))
 
-        # Create the initial request body
-        request_body = WebSocketTtsRequest(
-            model_id=model_id,
-            transcript=transcript,
-            output_format=output_format,
-            voice=voice,
-            duration=duration,
-            language=language,
-            context_id=self._context_id,
-            add_timestamps=add_timestamps,
-        ).dict()
+            try:
+                while True:
+                    response_str = self._websocket.recv(timeout=0.5)
+                    if not response_str:
+                        break
+                    response_obj = json.loads(response_str)
 
-        try:
-            # Create an iterator with a timeout to get text chunks
-            text_iterator = TimeoutIterator(
-                transcript, timeout=0.001
-            )  # 1ms timeout for nearly non-blocking receive
+                    if response_obj.get("type") == "Done":
+                        break
+                    if response_obj.get("type") == "Error":
+                        raise RuntimeError(f"Error cancelling context: {response_obj}")
+
+            except TimeoutError:
+                pass
+            finally:
+                self._websocket.close()
+
+            return
+
+        if isinstance(request, GenerationRequest):
+            if request.context_id != self._context_id:
+                raise ValueError(
+                    f"Context ID {request.context_id} does not match current context {self._context_id}."
+                )
+
+            self._websocket.connect()
+
+            request_body = request.dict(by_alias=True)
+            text_iterator = iter([request.transcript])
+
             next_chunk = next(text_iterator, None)
 
-            while True:
-                # Send the next text chunk to the WebSocket if available
-                if (
-                    next_chunk is not None
-                    and next_chunk != text_iterator.get_sentinel()
-                ):
-                    request_body["transcript"] = next_chunk
-                    request_body["continue"] = True
-                    self._websocket._send(request_body)
-                    next_chunk = next(text_iterator, None)
+            try:
+                while True:
+                    if next_chunk:
+                        request_body["transcript"] = next_chunk
+                        request_body["continue"] = request.continue_ or False
+                        self._websocket._send(request_body)
+                        next_chunk = next(text_iterator, None)
 
-                try:
-                    # Receive responses from the WebSocket with a small timeout
+                    try:
+                        response_str = self._websocket.recv(timeout=0.001)
+                        if response_str:
+                            response_obj = typing.cast(
+                                WebSocketResponse,
+                                parse_obj_as(
+                                    type_=WebSocketResponse,  # type: ignore
+                                    object_=json.loads(
+                                        self._websocket.recv(timeout=0.001)
+                                    ),
+                                ),
+                            )
+                            if isinstance(response_obj, WebSocketResponse_Error):
+                                raise RuntimeError(
+                                    f"Error generating audio:\n{response_obj.error}"
+                                )
+                            if isinstance(response_obj, WebSocketResponse_Done):
+                                break
+                            if (
+                                isinstance(response_obj, WebSocketResponse_Chunk)
+                                and response_obj.data
+                            ):
+                                yield self._websocket._convert_response(
+                                    response_obj=response_obj, include_context_id=True
+                                )
+                    except TimeoutError:
+                        pass
+
+                    if next_chunk is None:
+                        request_body["transcript"] = ""
+                        request_body["continue"] = False
+                        self._websocket._send(request_body)
+                        break
+
+                while True:
+                    response_str = self._websocket.recv(timeout=0.001)
+                    if not response_str:
+                        break
                     response_obj = typing.cast(
                         WebSocketResponse,
                         parse_obj_as(
@@ -139,11 +162,6 @@ class _TTSContext:
                             object_=json.loads(self._websocket.recv(timeout=0.001)),
                         ),
                     )
-                    if (
-                        hasattr(response_obj, "context_id")
-                        and response_obj.context_id != self._context_id
-                    ):
-                        pass
                     if isinstance(response_obj, WebSocketResponse_Error):
                         raise RuntimeError(
                             f"Error generating audio:\n{response_obj.error}"
@@ -157,73 +175,13 @@ class _TTSContext:
                         yield self._websocket._convert_response(
                             response_obj=response_obj, include_context_id=True
                         )
-                except TimeoutError:
-                    pass
 
-                # Continuously receive from WebSocket until the next text chunk is available
-                while next_chunk == text_iterator.get_sentinel():
-                    try:
-                        response_obj = typing.cast(
-                            WebSocketResponse,
-                            parse_obj_as(
-                                type_=WebSocketResponse,  # type: ignore
-                                object_=json.loads(self._websocket.recv(timeout=0.001)),
-                            ),
-                        )
-                        if (
-                            hasattr(response_obj, "context_id")
-                            and response_obj.context_id != self._context_id
-                        ):
-                            continue
-                        if isinstance(response_obj, WebSocketResponse_Error):
-                            raise RuntimeError(
-                                f"Error generating audio:\n{response_obj.error}"
-                            )
-                        if isinstance(response_obj, WebSocketResponse_Done):
-                            break
-                        if (
-                            isinstance(response_obj, WebSocketResponse_Chunk)
-                            and response_obj.data
-                        ):
-                            yield self._websocket._convert_response(
-                                response_obj=response_obj, include_context_id=True
-                            )
-                    except TimeoutError:
-                        pass
-                    next_chunk = next(text_iterator, None)
+            except Exception as e:
+                self._websocket.close()
+                raise RuntimeError(f"Failed to generate audio. {e}")
 
-                # Send final message if all input text chunks are exhausted
-                if next_chunk is None:
-                    request_body["transcript"] = ""
-                    request_body["continue"] = False
-                    self._websocket._send(request_body)
-                    break
-
-            # Receive remaining messages from the WebSocket until "done" is received
-            while True:
-                response_obj = typing.cast(
-                    WebSocketResponse,
-                    parse_obj_as(
-                        type_=WebSocketResponse,  # type: ignore
-                        object_=json.loads(self._websocket.recv(timeout=0.001)),
-                    ),
-                )
-                if (
-                    hasattr(response_obj, "context_id")
-                    and response_obj.context_id != self._context_id
-                ):
-                    continue
-                if isinstance(response_obj, WebSocketResponse_Error):
-                    raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
-                if isinstance(response_obj, WebSocketResponse_Done):
-                    break
-                yield self._websocket._convert_response(
-                    response_obj=response_obj, include_context_id=True
-                )
-
-        except Exception as e:
+            # Close the websocket
             self._websocket.close()
-            raise RuntimeError(f"Failed to generate audio. {e}")
 
     def _close(self):
         """Closes the context. Automatically called when a done message is received for this context."""
@@ -314,75 +272,67 @@ class TtsWebsocketConnection:
 
     def send(
         self,
-        model_id: str,
-        transcript: str,
-        output_format: OutputFormat,
-        voice: TtsRequestVoiceSpecifier,
-        context_id: typing.Optional[str] = None,
-        duration: typing.Optional[int] = None,
-        language: typing.Optional[str] = None,
+        request: WebSocketRequest,
         stream: bool = True,
-        add_timestamps: bool = False,
-    ) -> WebSocketTtsOutput:
-        """Send a request to the WebSocket to generate audio.
-
-        Args:
-            model_id: The ID of the model to use for generating audio.
-            transcript: The text to convert to speech.
-            output_format: A dictionary containing the details of the output format.
-            voice_id: The ID of the voice to use for generating audio.
-            voice_embedding: The embedding of the voice to use for generating audio.
-            context_id: The context ID to use for the request. If not specified, a random context ID will be generated.
-            duration: The duration of the audio in seconds.
-            language: The language code for the audio request. This can only be used with `model_id = sonic-multilingual`
-            stream: Whether to stream the audio or not.
-            add_timestamps: Whether to return word-level timestamps.
-            _experimental_voice_controls: Experimental voice controls for controlling speed and emotion.
-                Note: This is an experimental feature and may change rapidly in future releases.
-
-        Returns:
-            If `stream` is True, the method returns a generator that yields chunks. Each chunk is a ionary.
-            If `stream` is False, the method returns a dictionary.
-            Both the generator and the dictionary contain the following key(s):
-            - audio: The audio as bytes.
-            - context_id: The context ID for the request.
+    ) -> typing.Union[typing.Generator[dict, None, None], dict]:
         """
+        Send either a GenerationRequest or a CancelContextRequest to the TTS WebSocket.
+
+        If `stream` is True, returns a generator of audio chunks (dict).
+        Otherwise, returns a single dict with all audio concatenated.
+
+        For a CancelContextRequest, there is typically no audio returned.
+        """
+
         self.connect()
 
-        if context_id is None:
-            context_id = str(uuid.uuid4())
+        if isinstance(request, CancelContextRequest):
+            try:
+                self._websocket_generator(request.dict(by_alias=True))
+            except TimeoutError:
+                pass
+            finally:
+                self.close()
 
-        request_body = WebSocketTtsRequest(
-            model_id=model_id,
-            transcript=transcript,
-            output_format=output_format,
-            voice=voice,
-            context_id=context_id,
-            duration=duration,
-            language=language,
-            add_timestamps=add_timestamps,
-        ).dict()
+            return {"status": "cancelled", "context_id": request.context_id}
 
-        generator = self._websocket_generator(request_body)
+        if isinstance(request, GenerationRequest):
+            if not request.context_id:
+                request.context_id = str(uuid.uuid4())
 
-        if stream:
-            return generator
+            request_body = request.dict(by_alias=True)
 
-        chunks = []
-        word_timestamps = defaultdict(list)
-        for chunk in generator:
-            if "audio" in chunk:
-                chunks.append(chunk["audio"])
-            if add_timestamps and "word_timestamps" in chunk:
-                for k, v in chunk["word_timestamps"].items():
-                    word_timestamps[k].extend(v)
-        out: typing.Dict[str, typing.Any] = {
-            "audio": b"".join(chunks),
-            "context_id": context_id,
-        }
-        if add_timestamps:
-            out["word_timestamps"] = word_timestamps
-        return WebSocketTtsOutput(**out)
+            generator = self._websocket_generator(request_body)
+
+            if stream:
+                return generator
+
+            chunks = []
+            word_timestamps = defaultdict(list)
+
+            try:
+                for chunk in generator:
+                    if "audio" in chunk:
+                        chunks.append(chunk["audio"])
+
+                    if request.add_timestamps and "word_timestamps" in chunk:
+                        for k, v in chunk["word_timestamps"].items():
+                            word_timestamps[k].extend(v)
+
+            except Exception as e:
+                self.close()
+                raise RuntimeError(f"Failed to generate audio. Exception: {e}")
+
+            audio_bytes = b"".join(chunks)
+
+            out_dict: typing.Dict[str, typing.Any] = {
+                "audio": audio_bytes,
+                "context_id": request.context_id,
+            }
+            if request.add_timestamps:
+                out_dict["word_timestamps"] = word_timestamps
+
+            return out_dict
 
     def _websocket_generator(self, request_body: typing.Dict[str, typing.Any]):
         self._send(request_body)
