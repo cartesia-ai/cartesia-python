@@ -42,7 +42,6 @@ from .tts import (
     WebSocketStreamOptions,
     WebSocketTimestampsResponse,
     WebSocketTtsOutput,
-    WebSocketTtsRequest,
     WordTimestamps,
 )
 from .version import __version__
@@ -143,7 +142,6 @@ __all__ = [
     "WebSocketStreamOptions",
     "WebSocketTimestampsResponse",
     "WebSocketTtsOutput",
-    "WebSocketTtsRequest",
     "Weight",
     "WordTimestamps",
     "__version__",

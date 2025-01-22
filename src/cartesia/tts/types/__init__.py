@@ -34,7 +34,6 @@ from .web_socket_response import (
 from .web_socket_stream_options import WebSocketStreamOptions
 from .web_socket_timestamps_response import WebSocketTimestampsResponse
 from .web_socket_tts_output import WebSocketTtsOutput
-from .web_socket_tts_request import WebSocketTtsRequest
 from .word_timestamps import WordTimestamps
 
 __all__ = [
@@ -73,6 +72,5 @@ __all__ = [
     "WebSocketStreamOptions",
     "WebSocketTimestampsResponse",
     "WebSocketTtsOutput",
-    "WebSocketTtsRequest",
     "WordTimestamps",
 ]

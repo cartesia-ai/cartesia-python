@@ -36,7 +36,6 @@ from .types import (
     WebSocketStreamOptions,
     WebSocketTimestampsResponse,
     WebSocketTtsOutput,
-    WebSocketTtsRequest,
     WordTimestamps,
 )
 
@@ -76,6 +75,5 @@ __all__ = [
     "WebSocketStreamOptions",
     "WebSocketTimestampsResponse",
     "WebSocketTtsOutput",
-    "WebSocketTtsRequest",
     "WordTimestamps",
 ]
