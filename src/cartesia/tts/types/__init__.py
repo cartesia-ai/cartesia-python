@@ -9,6 +9,7 @@ from .mp_3_output_format import Mp3OutputFormat
 from .natural_specifier import NaturalSpecifier
 from .numerical_specifier import NumericalSpecifier
 from .output_format import OutputFormat, OutputFormat_Mp3, OutputFormat_Raw, OutputFormat_Wav
+from .phoneme_timestamps import PhonemeTimestamps
 from .raw_encoding import RawEncoding
 from .raw_output_format import RawOutputFormat
 from .speed import Speed
@@ -22,6 +23,7 @@ from .web_socket_base_response import WebSocketBaseResponse
 from .web_socket_chunk_response import WebSocketChunkResponse
 from .web_socket_done_response import WebSocketDoneResponse
 from .web_socket_error_response import WebSocketErrorResponse
+from .web_socket_phoneme_timestamps_response import WebSocketPhonemeTimestampsResponse
 from .web_socket_raw_output_format import WebSocketRawOutputFormat
 from .web_socket_request import WebSocketRequest
 from .web_socket_response import (
@@ -29,11 +31,13 @@ from .web_socket_response import (
     WebSocketResponse_Chunk,
     WebSocketResponse_Done,
     WebSocketResponse_Error,
+    WebSocketResponse_PhonemeTimestamps,
     WebSocketResponse_Timestamps,
 )
 from .web_socket_stream_options import WebSocketStreamOptions
 from .web_socket_timestamps_response import WebSocketTimestampsResponse
 from .web_socket_tts_output import WebSocketTtsOutput
+from .web_socket_tts_request import WebSocketTtsRequest
 from .word_timestamps import WordTimestamps
 
 __all__ = [
@@ -49,6 +53,7 @@ __all__ = [
     "OutputFormat_Mp3",
     "OutputFormat_Raw",
     "OutputFormat_Wav",
+    "PhonemeTimestamps",
     "RawEncoding",
     "RawOutputFormat",
     "Speed",
@@ -62,15 +67,18 @@ __all__ = [
     "WebSocketChunkResponse",
     "WebSocketDoneResponse",
     "WebSocketErrorResponse",
+    "WebSocketPhonemeTimestampsResponse",
     "WebSocketRawOutputFormat",
     "WebSocketRequest",
     "WebSocketResponse",
     "WebSocketResponse_Chunk",
     "WebSocketResponse_Done",
     "WebSocketResponse_Error",
+    "WebSocketResponse_PhonemeTimestamps",
     "WebSocketResponse_Timestamps",
     "WebSocketStreamOptions",
     "WebSocketTimestampsResponse",
     "WebSocketTtsOutput",
+    "WebSocketTtsRequest",
     "WordTimestamps",
 ]

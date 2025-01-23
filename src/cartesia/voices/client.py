@@ -9,7 +9,6 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..embedding.types.embedding import Embedding
 from ..tts.types.supported_language import SupportedLanguage
-from .types.base_voice_id import BaseVoiceId
 from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
 from .types.localize_target_language import LocalizeTargetLanguage
@@ -77,7 +76,6 @@ class VoicesClient:
         description: str,
         embedding: Embedding,
         language: typing.Optional[SupportedLanguage] = OMIT,
-        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Voice:
         """
@@ -92,8 +90,6 @@ class VoicesClient:
         embedding : Embedding
 
         language : typing.Optional[SupportedLanguage]
-
-        base_voice_id : typing.Optional[BaseVoiceId]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -307,7 +303,6 @@ class VoicesClient:
                 1.0,
             ],
             language="en",
-            base_voice_id="string",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -318,7 +313,6 @@ class VoicesClient:
                 "description": description,
                 "embedding": embedding,
                 "language": language,
-                "base_voice_id": base_voice_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -954,7 +948,6 @@ class AsyncVoicesClient:
         description: str,
         embedding: Embedding,
         language: typing.Optional[SupportedLanguage] = OMIT,
-        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Voice:
         """
@@ -969,8 +962,6 @@ class AsyncVoicesClient:
         embedding : Embedding
 
         language : typing.Optional[SupportedLanguage]
-
-        base_voice_id : typing.Optional[BaseVoiceId]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1189,7 +1180,6 @@ class AsyncVoicesClient:
                     1.0,
                 ],
                 language="en",
-                base_voice_id="string",
             )
 
 
@@ -1203,7 +1193,6 @@ class AsyncVoicesClient:
                 "description": description,
                 "embedding": embedding,
                 "language": language,
-                "base_voice_id": base_voice_id,
             },
             request_options=request_options,
             omit=OMIT,

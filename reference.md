@@ -279,6 +279,193 @@ core.File` — See core.File for more documentation
 </dl>
 </details>
 
+## Infill
+<details><summary><code>client.infill.<a href="src/cartesia/infill/client.py">bytes</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
+
+Only the `sonic-preview` model is supported for infill at this time.
+
+At least one of `left_audio` or `right_audio` must be provided.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.infill.bytes(
+    model_id="sonic-preview",
+    language="en",
+    transcript="middle segment",
+    voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+    output_format_container="wav",
+    output_format_sample_rate=44100,
+    output_format_encoding="pcm_f32le",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**left_audio:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**right_audio:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**model_id:** `str` — The ID of the model to use for generating audio
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**language:** `str` — The language of the transcript
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**transcript:** `str` — The infill text to generate
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**voice_id:** `str` — The ID of the voice to use for generating audio
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format_container:** `OutputFormatContainer` — The format of the output audio
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format_sample_rate:** `int` — The sample rate of the output audio
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**voice_experimental_controls_speed:** `typing.Optional[Speed]` 
+
+Either a number between -1.0 and 1.0 or a natural language description of speed.
+
+If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**voice_experimental_controls_emotion:** `typing.Optional[Emotion]` 
+
+An array of emotion:level tags.
+
+Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
+
+Supported levels are: lowest, low, (omit), high, highest.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Tts
 <details><summary><code>client.tts.<a href="src/cartesia/tts/client.py">bytes</a>(...)</code></summary>
 <dl>
@@ -988,7 +1175,6 @@ client.voices.create(
         1.0,
     ],
     language="en",
-    base_voice_id="string",
 )
 
 ```
@@ -1030,14 +1216,6 @@ client.voices.create(
 <dd>
 
 **language:** `typing.Optional[SupportedLanguage]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**base_voice_id:** `typing.Optional[BaseVoiceId]` 
     
 </dd>
 </dl>

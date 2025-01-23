@@ -7,6 +7,7 @@ from .context_id import ContextId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 from .word_timestamps import WordTimestamps
+from .phoneme_timestamps import PhonemeTimestamps
 
 
 class WebSocketResponse_Chunk(UniversalBaseModel):
@@ -77,6 +78,27 @@ class WebSocketResponse_Error(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class WebSocketResponse_PhonemeTimestamps(UniversalBaseModel):
+    type: typing.Literal["phoneme_timestamps"] = "phoneme_timestamps"
+    phoneme_timestamps: typing.Optional[PhonemeTimestamps] = None
+    context_id: typing.Optional[ContextId] = None
+    status_code: int
+    done: bool
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 WebSocketResponse = typing.Union[
-    WebSocketResponse_Chunk, WebSocketResponse_Done, WebSocketResponse_Timestamps, WebSocketResponse_Error
+    WebSocketResponse_Chunk,
+    WebSocketResponse_Done,
+    WebSocketResponse_Timestamps,
+    WebSocketResponse_Error,
+    WebSocketResponse_PhonemeTimestamps,
 ]

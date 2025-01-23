@@ -7,7 +7,6 @@ import pydantic
 import datetime as dt
 from ...embedding.types.embedding import Embedding
 from ...tts.types.supported_language import SupportedLanguage
-from .base_voice_id import BaseVoiceId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -40,7 +39,6 @@ class Voice(UniversalBaseModel):
 
     embedding: Embedding
     language: SupportedLanguage
-    base_voice_id: typing.Optional[BaseVoiceId] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
