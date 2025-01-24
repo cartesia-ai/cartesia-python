@@ -28,7 +28,7 @@ class GenerationRequest(UniversalBaseModel):
     If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
     """
 
-    context_id: ContextId
+    context_id: typing.Optional[ContextId] = None
     continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = pydantic.Field(
         default=None
     )
