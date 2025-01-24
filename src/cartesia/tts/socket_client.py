@@ -331,10 +331,10 @@ class TtsWebsocketConnection:
             return {"status": "cancelled", "context_id": request.context_id}
 
         if isinstance(request, GenerationRequest):
-            if not request.context_id:
-                request.context_id = str(uuid.uuid4())
-
             request_body = request.dict(by_alias=True)
+
+            if not request_body.get("context_id"):
+                request_body["context_id"] = str(uuid.uuid4())
 
             generator = self._websocket_generator(request_body)
 
@@ -678,10 +678,10 @@ class AsyncTtsWebsocketConnection:
             return {"status": "cancelled", "context_id": request.context_id}
 
         if isinstance(request, GenerationRequest):
-            if not request.context_id:
-                request.context_id = str(uuid.uuid4())
-
             request_body = request.dict(by_alias=True)
+
+            if not request_body.get("context_id"):
+                request_body["context_id"] = str(uuid.uuid4())
 
             generator = self._async_websocket_generator(request_body)
 
