@@ -13,10 +13,10 @@ from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
 from .types.localize_target_language import LocalizeTargetLanguage
 from .types.gender import Gender
-from .types.localize_dialect import LocalizeDialect
+from .requests.localize_dialect import LocalizeDialectParams
 from .types.embedding_response import EmbeddingResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
-from .types.mix_voice_specifier import MixVoiceSpecifier
+from .requests.mix_voice_specifier import MixVoiceSpecifierParams
 from .. import core
 from .types.clone_mode import CloneMode
 from .types.voice_metadata import VoiceMetadata
@@ -475,7 +475,7 @@ class VoicesClient:
         embedding: Embedding,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
-        dialect: typing.Optional[LocalizeDialect] = OMIT,
+        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbeddingResponse:
         """
@@ -487,7 +487,7 @@ class VoicesClient:
 
         original_speaker_gender : Gender
 
-        dialect : typing.Optional[LocalizeDialect]
+        dialect : typing.Optional[LocalizeDialectParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -711,7 +711,7 @@ class VoicesClient:
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
-                    object_=dialect, annotation=LocalizeDialect, direction="write"
+                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
                 ),
             },
             request_options=request_options,
@@ -732,12 +732,15 @@ class VoicesClient:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     def mix(
-        self, *, voices: typing.Sequence[MixVoiceSpecifier], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        voices: typing.Sequence[MixVoiceSpecifierParams],
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbeddingResponse:
         """
         Parameters
         ----------
-        voices : typing.Sequence[MixVoiceSpecifier]
+        voices : typing.Sequence[MixVoiceSpecifierParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -749,18 +752,12 @@ class VoicesClient:
         Examples
         --------
         from cartesia import Cartesia
-        from cartesia.voices import IdSpecifier
 
         client = Cartesia(
             api_key="YOUR_API_KEY",
         )
         client.voices.mix(
-            voices=[
-                IdSpecifier(
-                    id="string",
-                    weight=1.1,
-                )
-            ],
+            voices=[{"id": "string", "weight": 1.1}],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -768,7 +765,7 @@ class VoicesClient:
             method="POST",
             json={
                 "voices": convert_and_respect_annotation_metadata(
-                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifier], direction="write"
+                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
                 ),
             },
             request_options=request_options,
@@ -1379,7 +1376,7 @@ class AsyncVoicesClient:
         embedding: Embedding,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
-        dialect: typing.Optional[LocalizeDialect] = OMIT,
+        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbeddingResponse:
         """
@@ -1391,7 +1388,7 @@ class AsyncVoicesClient:
 
         original_speaker_gender : Gender
 
-        dialect : typing.Optional[LocalizeDialect]
+        dialect : typing.Optional[LocalizeDialectParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1623,7 +1620,7 @@ class AsyncVoicesClient:
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
-                    object_=dialect, annotation=LocalizeDialect, direction="write"
+                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
                 ),
             },
             request_options=request_options,
@@ -1644,12 +1641,15 @@ class AsyncVoicesClient:
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
     async def mix(
-        self, *, voices: typing.Sequence[MixVoiceSpecifier], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        voices: typing.Sequence[MixVoiceSpecifierParams],
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> EmbeddingResponse:
         """
         Parameters
         ----------
-        voices : typing.Sequence[MixVoiceSpecifier]
+        voices : typing.Sequence[MixVoiceSpecifierParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1663,7 +1663,6 @@ class AsyncVoicesClient:
         import asyncio
 
         from cartesia import AsyncCartesia
-        from cartesia.voices import IdSpecifier
 
         client = AsyncCartesia(
             api_key="YOUR_API_KEY",
@@ -1672,12 +1671,7 @@ class AsyncVoicesClient:
 
         async def main() -> None:
             await client.voices.mix(
-                voices=[
-                    IdSpecifier(
-                        id="string",
-                        weight=1.1,
-                    )
-                ],
+                voices=[{"id": "string", "weight": 1.1}],
             )
 
 
@@ -1688,7 +1682,7 @@ class AsyncVoicesClient:
             method="POST",
             json={
                 "voices": convert_and_respect_annotation_metadata(
-                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifier], direction="write"
+                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
                 ),
             },
             request_options=request_options,

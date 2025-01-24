@@ -481,7 +481,6 @@ Supported levels are: lowest, low, (omit), high, highest.
 
 ```python
 from cartesia import Cartesia
-from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
     api_key="YOUR_API_KEY",
@@ -489,14 +488,13 @@ client = Cartesia(
 client.tts.bytes(
     model_id="sonic-english",
     transcript="Hello, world!",
-    voice=TtsRequestIdSpecifier(
-        id="694f9389-aac1-45b6-b726-9d9369183238",
-    ),
+    voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
     language="en",
-    output_format=OutputFormat_Raw(
-        sample_rate=44100,
-        encoding="pcm_f32le",
-    ),
+    output_format={
+        "sample_rate": 44100,
+        "encoding": "pcm_f32le",
+        "container": "raw",
+    },
 )
 
 ```
@@ -529,7 +527,7 @@ client.tts.bytes(
 <dl>
 <dd>
 
-**voice:** `TtsRequestVoiceSpecifier` 
+**voice:** `TtsRequestVoiceSpecifierParams` 
     
 </dd>
 </dl>
@@ -537,7 +535,7 @@ client.tts.bytes(
 <dl>
 <dd>
 
-**output_format:** `OutputFormat` 
+**output_format:** `OutputFormatParams` 
     
 </dd>
 </dl>
@@ -590,7 +588,6 @@ If the duration is not appropriate for the length of the transcript, the output 
 
 ```python
 from cartesia import Cartesia
-from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = Cartesia(
     api_key="YOUR_API_KEY",
@@ -598,14 +595,13 @@ client = Cartesia(
 response = client.tts.sse(
     model_id="sonic-english",
     transcript="Hello, world!",
-    voice=TtsRequestIdSpecifier(
-        id="694f9389-aac1-45b6-b726-9d9369183238",
-    ),
+    voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
     language="en",
-    output_format=OutputFormat_Raw(
-        sample_rate=44100,
-        encoding="pcm_f32le",
-    ),
+    output_format={
+        "sample_rate": 44100,
+        "encoding": "pcm_f32le",
+        "container": "raw",
+    },
 )
 for chunk in response:
     yield chunk
@@ -640,7 +636,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**voice:** `TtsRequestVoiceSpecifier` 
+**voice:** `TtsRequestVoiceSpecifierParams` 
     
 </dd>
 </dl>
@@ -648,7 +644,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**output_format:** `OutputFormat` 
+**output_format:** `OutputFormatParams` 
     
 </dd>
 </dl>
@@ -1677,7 +1673,7 @@ client.voices.localize(
 <dl>
 <dd>
 
-**dialect:** `typing.Optional[LocalizeDialect]` 
+**dialect:** `typing.Optional[LocalizeDialectParams]` 
     
 </dd>
 </dl>
@@ -1711,18 +1707,12 @@ client.voices.localize(
 
 ```python
 from cartesia import Cartesia
-from cartesia.voices import IdSpecifier
 
 client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.voices.mix(
-    voices=[
-        IdSpecifier(
-            id="string",
-            weight=1.1,
-        )
-    ],
+    voices=[{"id": "string", "weight": 1.1}],
 )
 
 ```
@@ -1739,7 +1729,7 @@ client.voices.mix(
 <dl>
 <dd>
 
-**voices:** `typing.Sequence[MixVoiceSpecifier]` 
+**voices:** `typing.Sequence[MixVoiceSpecifierParams]` 
     
 </dd>
 </dl>

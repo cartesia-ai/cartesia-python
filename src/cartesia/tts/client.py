@@ -2,8 +2,8 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
-from .types.tts_request_voice_specifier import TtsRequestVoiceSpecifier
-from .types.output_format import OutputFormat
+from .requests.tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
+from .requests.output_format import OutputFormatParams
 from .types.supported_language import SupportedLanguage
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
@@ -28,8 +28,8 @@ class TtsClient:
         *,
         model_id: str,
         transcript: str,
-        voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifierParams,
+        output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -42,9 +42,9 @@ class TtsClient:
 
         transcript : str
 
-        voice : TtsRequestVoiceSpecifier
+        voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormat
+        output_format : OutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -62,7 +62,6 @@ class TtsClient:
         Examples
         --------
         from cartesia import Cartesia
-        from cartesia.tts import OutputFormat_Mp3, TtsRequestIdSpecifier
 
         client = Cartesia(
             api_key="YOUR_API_KEY",
@@ -70,14 +69,13 @@ class TtsClient:
         client.tts.bytes(
             model_id="sonic-english",
             transcript="Hello, world!",
-            voice=TtsRequestIdSpecifier(
-                id="694f9389-aac1-45b6-b726-9d9369183238",
-            ),
+            voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
             language="en",
-            output_format=OutputFormat_Mp3(
-                sample_rate=44100,
-                bit_rate=128000,
-            ),
+            output_format={
+                "sample_rate": 44100,
+                "bit_rate": 128000,
+                "container": "mp3",
+            },
         )
         """
         with self._client_wrapper.httpx_client.stream(
@@ -87,11 +85,11 @@ class TtsClient:
                 "model_id": model_id,
                 "transcript": transcript,
                 "voice": convert_and_respect_annotation_metadata(
-                    object_=voice, annotation=TtsRequestVoiceSpecifier, direction="write"
+                    object_=voice, annotation=TtsRequestVoiceSpecifierParams, direction="write"
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormat, direction="write"
+                    object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
             },
@@ -115,8 +113,8 @@ class TtsClient:
         *,
         model_id: str,
         transcript: str,
-        voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifierParams,
+        output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -129,9 +127,9 @@ class TtsClient:
 
         transcript : str
 
-        voice : TtsRequestVoiceSpecifier
+        voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormat
+        output_format : OutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -149,7 +147,6 @@ class TtsClient:
         Examples
         --------
         from cartesia import Cartesia
-        from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
         client = Cartesia(
             api_key="YOUR_API_KEY",
@@ -157,14 +154,13 @@ class TtsClient:
         response = client.tts.sse(
             model_id="sonic-english",
             transcript="Hello, world!",
-            voice=TtsRequestIdSpecifier(
-                id="694f9389-aac1-45b6-b726-9d9369183238",
-            ),
+            voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
             language="en",
-            output_format=OutputFormat_Raw(
-                sample_rate=44100,
-                encoding="pcm_f32le",
-            ),
+            output_format={
+                "sample_rate": 44100,
+                "encoding": "pcm_f32le",
+                "container": "raw",
+            },
         )
         for chunk in response:
             yield chunk
@@ -176,11 +172,11 @@ class TtsClient:
                 "model_id": model_id,
                 "transcript": transcript,
                 "voice": convert_and_respect_annotation_metadata(
-                    object_=voice, annotation=TtsRequestVoiceSpecifier, direction="write"
+                    object_=voice, annotation=TtsRequestVoiceSpecifierParams, direction="write"
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormat, direction="write"
+                    object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
             },
@@ -218,8 +214,8 @@ class AsyncTtsClient:
         *,
         model_id: str,
         transcript: str,
-        voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifierParams,
+        output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -232,9 +228,9 @@ class AsyncTtsClient:
 
         transcript : str
 
-        voice : TtsRequestVoiceSpecifier
+        voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormat
+        output_format : OutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -254,7 +250,6 @@ class AsyncTtsClient:
         import asyncio
 
         from cartesia import AsyncCartesia
-        from cartesia.tts import OutputFormat_Mp3, TtsRequestIdSpecifier
 
         client = AsyncCartesia(
             api_key="YOUR_API_KEY",
@@ -265,14 +260,13 @@ class AsyncTtsClient:
             await client.tts.bytes(
                 model_id="sonic-english",
                 transcript="Hello, world!",
-                voice=TtsRequestIdSpecifier(
-                    id="694f9389-aac1-45b6-b726-9d9369183238",
-                ),
+                voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
                 language="en",
-                output_format=OutputFormat_Mp3(
-                    sample_rate=44100,
-                    bit_rate=128000,
-                ),
+                output_format={
+                    "sample_rate": 44100,
+                    "bit_rate": 128000,
+                    "container": "mp3",
+                },
             )
 
 
@@ -285,11 +279,11 @@ class AsyncTtsClient:
                 "model_id": model_id,
                 "transcript": transcript,
                 "voice": convert_and_respect_annotation_metadata(
-                    object_=voice, annotation=TtsRequestVoiceSpecifier, direction="write"
+                    object_=voice, annotation=TtsRequestVoiceSpecifierParams, direction="write"
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormat, direction="write"
+                    object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
             },
@@ -313,8 +307,8 @@ class AsyncTtsClient:
         *,
         model_id: str,
         transcript: str,
-        voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifierParams,
+        output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -327,9 +321,9 @@ class AsyncTtsClient:
 
         transcript : str
 
-        voice : TtsRequestVoiceSpecifier
+        voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormat
+        output_format : OutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -349,7 +343,6 @@ class AsyncTtsClient:
         import asyncio
 
         from cartesia import AsyncCartesia
-        from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
         client = AsyncCartesia(
             api_key="YOUR_API_KEY",
@@ -360,14 +353,13 @@ class AsyncTtsClient:
             response = await client.tts.sse(
                 model_id="sonic-english",
                 transcript="Hello, world!",
-                voice=TtsRequestIdSpecifier(
-                    id="694f9389-aac1-45b6-b726-9d9369183238",
-                ),
+                voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
                 language="en",
-                output_format=OutputFormat_Raw(
-                    sample_rate=44100,
-                    encoding="pcm_f32le",
-                ),
+                output_format={
+                    "sample_rate": 44100,
+                    "encoding": "pcm_f32le",
+                    "container": "raw",
+                },
             )
             async for chunk in response:
                 yield chunk
@@ -382,11 +374,11 @@ class AsyncTtsClient:
                 "model_id": model_id,
                 "transcript": transcript,
                 "voice": convert_and_respect_annotation_metadata(
-                    object_=voice, annotation=TtsRequestVoiceSpecifier, direction="write"
+                    object_=voice, annotation=TtsRequestVoiceSpecifierParams, direction="write"
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormat, direction="write"
+                    object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
             },
