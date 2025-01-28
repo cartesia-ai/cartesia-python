@@ -341,6 +341,8 @@ class TtsWebsocketConnection:
             if stream:
                 return generator
 
+            return self._accumulate_chunks(request, generator)
+
     def _websocket_generator(self, request_body: typing.Dict[str, typing.Any]):
         """
         Send a request to the TTS WebSocket and yield responses as they arrive.
