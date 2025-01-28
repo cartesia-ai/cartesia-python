@@ -121,7 +121,7 @@ class _TTSContext:
                         raise RuntimeError(f"Error generating audio:\n{response['error']}")
                     if response["done"]:
                         break
-                    if response["data"]:
+                    if "data" in response and response["data"]:
                         yield self._websocket._convert_response(
                             response=response, include_context_id=True
                         )
@@ -138,7 +138,7 @@ class _TTSContext:
                             raise RuntimeError(f"Error generating audio:\n{response['error']}")
                         if response["done"]:
                             break
-                        if response["data"]:
+                        if "data" in response and response["data"]:
                             yield self._websocket._convert_response(
                                 response=response, include_context_id=True
                             )
