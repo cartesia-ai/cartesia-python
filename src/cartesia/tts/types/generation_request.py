@@ -2,8 +2,8 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
 import typing
+from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
 from .supported_language import SupportedLanguage
 from .web_socket_raw_output_format import WebSocketRawOutputFormat
 from .context_id import ContextId
@@ -18,7 +18,11 @@ class GenerationRequest(UniversalBaseModel):
     The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
     """
 
-    transcript: str
+    transcript: typing.Optional[typing.Any] = pydantic.Field(default=None)
+    """
+    The transcript to generate speech for. This can be a string or an iterator over strings.
+    """
+
     voice: TtsRequestVoiceSpecifier
     language: typing.Optional[SupportedLanguage] = None
     output_format: WebSocketRawOutputFormat

@@ -6,6 +6,7 @@ from .word_timestamps import WordTimestampsParams
 from .phoneme_timestamps import PhonemeTimestampsParams
 import typing
 from ..types.context_id import ContextId
+from ..types.flush_id import FlushId
 
 
 class WebSocketTtsOutputParams(typing_extensions.TypedDict):
@@ -13,3 +14,4 @@ class WebSocketTtsOutputParams(typing_extensions.TypedDict):
     phoneme_timestamps: typing_extensions.NotRequired[PhonemeTimestampsParams]
     audio: typing_extensions.NotRequired[typing.Optional[typing.Any]]
     context_id: typing_extensions.NotRequired[ContextId]
+    flush_id: typing_extensions.NotRequired[FlushId]
