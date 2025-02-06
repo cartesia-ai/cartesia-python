@@ -15,3 +15,4 @@ class WebSocketTtsOutputParams(typing_extensions.TypedDict):
     audio: typing_extensions.NotRequired[typing.Optional[typing.Any]]
     context_id: typing_extensions.NotRequired[ContextId]
     flush_id: typing_extensions.NotRequired[FlushId]
+    flush_done: typing_extensions.NotRequired[bool]
