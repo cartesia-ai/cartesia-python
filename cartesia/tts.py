@@ -185,14 +185,33 @@ class TTS(Resource):
                 right_audio_file = open(right_audio_path, "rb")
                 files["right_audio"] = right_audio_file
 
+            # Construct form data with output_format fields directly
             data = {
                 "model_id": model_id,
                 "language": language,
                 "transcript": transcript,
                 "voice_id": voice_id,
-                "output_format": json.dumps(output_format),
-                "__experimental_voice_controls": json.dumps(experimental_voice_controls),
+                "output_format[container]": output_format["container"],
+                "output_format[encoding]": output_format["encoding"],
+                "output_format[sample_rate]": output_format["sample_rate"],
             }
+
+            # Add bit_rate for mp3 container
+            if "bit_rate" in output_format:
+                data["output_format[bit_rate]"] = output_format["bit_rate"]
+
+            # Add voice controls if specified
+            if experimental_voice_controls:
+                if "speed" in experimental_voice_controls:
+                    data["voice[__experimental_controls][speed]"] = experimental_voice_controls[
+                        "speed"
+                    ]
+                if "emotion" in experimental_voice_controls:
+                    # Pass emotions as a list instead of individual values
+                    data["voice[__experimental_controls][emotion][]"] = experimental_voice_controls[
+                        "emotion"
+                    ]
+
             response = httpx.post(
                 f"{self._http_url()}/infill/bytes",
                 headers=headers,
