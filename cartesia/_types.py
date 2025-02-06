@@ -63,6 +63,7 @@ class OutputFormat(TypedDict):
     sample_rate: int
     bit_rate: Optional[int] = None
 
+
 class EventType:
     NULL = ""
     AUDIO = "chunk"
