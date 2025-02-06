@@ -6,6 +6,7 @@ import typing
 from .context_id import ContextId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from .flush_id import FlushId
 from .word_timestamps import WordTimestamps
 from .phoneme_timestamps import PhonemeTimestamps
 
@@ -14,6 +15,24 @@ class WebSocketResponse_Chunk(UniversalBaseModel):
     type: typing.Literal["chunk"] = "chunk"
     data: str
     step_time: float
+    context_id: typing.Optional[ContextId] = None
+    status_code: int
+    done: bool
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class WebSocketResponse_FlushDone(UniversalBaseModel):
+    type: typing.Literal["flush_done"] = "flush_done"
+    flush_id: FlushId
+    flush_done: bool
     context_id: typing.Optional[ContextId] = None
     status_code: int
     done: bool
@@ -97,6 +116,7 @@ class WebSocketResponse_PhonemeTimestamps(UniversalBaseModel):
 
 WebSocketResponse = typing.Union[
     WebSocketResponse_Chunk,
+    WebSocketResponse_FlushDone,
     WebSocketResponse_Done,
     WebSocketResponse_Timestamps,
     WebSocketResponse_Error,

@@ -24,6 +24,7 @@ from .web_socket_base_response import WebSocketBaseResponse
 from .web_socket_chunk_response import WebSocketChunkResponse
 from .web_socket_done_response import WebSocketDoneResponse
 from .web_socket_error_response import WebSocketErrorResponse
+from .web_socket_flush_done_response import WebSocketFlushDoneResponse
 from .web_socket_phoneme_timestamps_response import WebSocketPhonemeTimestampsResponse
 from .web_socket_raw_output_format import WebSocketRawOutputFormat
 from .web_socket_request import WebSocketRequest
@@ -32,6 +33,7 @@ from .web_socket_response import (
     WebSocketResponse_Chunk,
     WebSocketResponse_Done,
     WebSocketResponse_Error,
+    WebSocketResponse_FlushDone,
     WebSocketResponse_PhonemeTimestamps,
     WebSocketResponse_Timestamps,
 )
@@ -69,6 +71,7 @@ __all__ = [
     "WebSocketChunkResponse",
     "WebSocketDoneResponse",
     "WebSocketErrorResponse",
+    "WebSocketFlushDoneResponse",
     "WebSocketPhonemeTimestampsResponse",
     "WebSocketRawOutputFormat",
     "WebSocketRequest",
@@ -76,6 +79,7 @@ __all__ = [
     "WebSocketResponse_Chunk",
     "WebSocketResponse_Done",
     "WebSocketResponse_Error",
+    "WebSocketResponse_FlushDone",
     "WebSocketResponse_PhonemeTimestamps",
     "WebSocketResponse_Timestamps",
     "WebSocketStreamOptions",

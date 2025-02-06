@@ -5,6 +5,7 @@ import typing_extensions
 import typing
 import typing_extensions
 from ..types.context_id import ContextId
+from ..types.flush_id import FlushId
 from .word_timestamps import WordTimestampsParams
 from .phoneme_timestamps import PhonemeTimestampsParams
 
@@ -13,6 +14,15 @@ class WebSocketResponse_ChunkParams(typing_extensions.TypedDict):
     type: typing.Literal["chunk"]
     data: str
     step_time: float
+    context_id: typing_extensions.NotRequired[ContextId]
+    status_code: int
+    done: bool
+
+
+class WebSocketResponse_FlushDoneParams(typing_extensions.TypedDict):
+    type: typing.Literal["flush_done"]
+    flush_id: FlushId
+    flush_done: bool
     context_id: typing_extensions.NotRequired[ContextId]
     status_code: int
     done: bool
@@ -51,6 +61,7 @@ class WebSocketResponse_PhonemeTimestampsParams(typing_extensions.TypedDict):
 
 WebSocketResponseParams = typing.Union[
     WebSocketResponse_ChunkParams,
+    WebSocketResponse_FlushDoneParams,
     WebSocketResponse_DoneParams,
     WebSocketResponse_TimestampsParams,
     WebSocketResponse_ErrorParams,
