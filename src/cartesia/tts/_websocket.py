@@ -269,12 +269,12 @@ class TtsWebsocket:
 
     def _convert_response(
         self,
-        response: (
-            WebSocketResponse_Chunk
-            | WebSocketResponse_Timestamps
-            | WebSocketResponse_PhonemeTimestamps
-            | WebSocketResponse_FlushDone
-        ),
+        response: typing.Union[
+            WebSocketResponse_Chunk,
+            WebSocketResponse_Timestamps,
+            WebSocketResponse_PhonemeTimestamps,
+            WebSocketResponse_FlushDone,
+        ],
         include_context_id: bool,
         include_flush_id: bool = False,
     ) -> WebSocketTtsOutput:
