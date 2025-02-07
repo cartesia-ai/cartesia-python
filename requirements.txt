@@ -1,6 +1,9 @@
+python>=3.8
+aiohttp>=3.10.10
 httpx>=0.21.2
 httpx-sse==0.4.0
+iterators>=0.2.0
 pydantic>=1.9.2
-pydantic-core>=2.18.2,<3.0.0
+pydantic-core>=2.18.2
 typing_extensions>=4.0.0
-websockets==12.0
+websockets>=10.4
