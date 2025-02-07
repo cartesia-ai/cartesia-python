@@ -37,6 +37,11 @@ class GenerationRequestParams(typing_extensions.TypedDict):
     If not specified, this defaults to `false`.
     """
 
+    flush: typing_extensions.NotRequired[bool]
+    """
+    Whether to flush the context.
+    """
+
     add_timestamps: typing_extensions.NotRequired[bool]
     """
     Whether to return word-level timestamps.

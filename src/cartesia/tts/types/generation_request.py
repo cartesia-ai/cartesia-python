@@ -41,6 +41,11 @@ class GenerationRequest(UniversalBaseModel):
     If not specified, this defaults to `false`.
     """
 
+    flush: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether to flush the context.
+    """
+
     add_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to return word-level timestamps.
