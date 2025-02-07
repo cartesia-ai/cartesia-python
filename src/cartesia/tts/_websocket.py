@@ -23,6 +23,7 @@ from cartesia.tts.types import (
     WebSocketResponse_PhonemeTimestamps,
     WebSocketResponse_Timestamps,
     WebSocketTtsOutput,
+    WordTimestamps,
 )
 
 from ..core.pydantic_utilities import parse_obj_as
@@ -290,7 +291,7 @@ class TtsWebsocket:
         if include_context_id and response.context_id:
             out["context_id"] = response.context_id  # type: ignore
 
-        return WebSocketTtsOutput(**out)
+        return WebSocketTtsOutput(**out)  # type: ignore
 
     def send(
         self,
@@ -333,7 +334,15 @@ class TtsWebsocket:
         return WebSocketTtsOutput(
             audio=b"".join(chunks),
             context_id=request_body["context_id"],
-            word_timestamps=word_timestamps if request.add_timestamps else None,
+            word_timestamps=(
+                WordTimestamps(
+                    words=word_timestamps["words"],
+                    start=word_timestamps["start"],
+                    end=word_timestamps["end"],
+                )
+                if request.add_timestamps
+                else None
+            ),
         )
 
     def _websocket_generator(self, request_body: Dict[str, Any]):

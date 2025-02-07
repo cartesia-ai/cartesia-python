@@ -9,11 +9,13 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 import aiohttp
 
 from cartesia.tts.types import (
+    TtsRequestEmbeddingSpecifier,
     WebSocketResponse,
     WebSocketResponse_Done,
     WebSocketResponse_Error,
     WebSocketResponse_FlushDone,
     WebSocketTtsOutput,
+    WordTimestamps,
 )
 
 from ..core.pydantic_utilities import parse_obj_as
@@ -97,9 +99,10 @@ class _AsyncTTSContext:
             model_id=DEFAULT_MODEL_ID,
             transcript="",
             output_format=get_output_format(DEFAULT_OUTPUT_FORMAT),
-            voice={
-                "embedding": DEFAULT_VOICE_EMBEDDING
-            },  # Default voice embedding since it's a required input for now.
+            voice=TtsRequestEmbeddingSpecifier(
+                mode="embedding",
+                embedding=DEFAULT_VOICE_EMBEDDING,
+            ),
             context_id=self._context_id,
             continue_=False,
         )
@@ -111,9 +114,10 @@ class _AsyncTTSContext:
             model_id=DEFAULT_MODEL_ID,
             transcript="",
             output_format=get_output_format(DEFAULT_OUTPUT_FORMAT),
-            voice={
-                "embedding": DEFAULT_VOICE_EMBEDDING
-            },  # Default voice embedding since it's a required input for now.
+            voice=TtsRequestEmbeddingSpecifier(
+                mode="embedding",
+                embedding=DEFAULT_VOICE_EMBEDDING,
+            ),
             context_id=self._context_id,
             continue_=True,
             flush=True,
@@ -317,7 +321,15 @@ class AsyncTtsWebsocket(TtsWebsocket):
         out = WebSocketTtsOutput(
             audio=b"".join(chunks),
             context_id=request_body["context_id"],
-            word_timestamps=word_timestamps if request.add_timestamps else None,
+            word_timestamps=(
+                WordTimestamps(
+                    words=word_timestamps["words"],
+                    start=word_timestamps["start"],
+                    end=word_timestamps["end"],
+                )
+                if request.add_timestamps
+                else None
+            ),
         )
         return out
 
