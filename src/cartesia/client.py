@@ -68,6 +68,20 @@ class Cartesia(BaseCartesia):
         )
         self.tts = TtsClientWithWebsocket(client_wrapper=self._client_wrapper)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Union[type, None],
+        exc: Union[BaseException, None],
+        exc_tb: Union[TracebackType, None],
+    ):
+        pass
+
+    def __del__(self):
+        pass
+
 
 class AsyncCartesia(AsyncBaseCartesia):
     """
@@ -130,8 +144,7 @@ class AsyncCartesia(AsyncBaseCartesia):
         self._loop = None
         self.max_num_connections = max_num_connections
         self.tts = AsyncTtsClientWithWebsocket(
-            client_wrapper=self._client_wrapper,
-            get_session=self._get_session
+            client_wrapper=self._client_wrapper, get_session=self._get_session
         )
 
     async def _get_session(self):

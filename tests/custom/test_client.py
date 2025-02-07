@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 import uuid
-from typing import AsyncGenerator, List, Optional, TypedDict, Union
+from typing import AsyncGenerator, Generator, Iterator, List, Optional, TypedDict, Union
 
 import numpy as np
 import pytest
@@ -276,6 +276,95 @@ def test_sse_send_with_embedding(resources: _Resources):
         assert isinstance(response, WebSocketResponse)  # type: ignore
 
 
+@pytest.mark.parametrize(
+    "voice_controls",
+    [
+        None,
+        {"speed": 1.0, "emotion": ["positivity:high"]},  # Example voice controls
+        {
+            "speed": "normal",
+            "emotion": ["curiosity:high", "surprise:high"],
+        },  # Example voice controls 2
+    ],
+)
+def test_sse_send_context_manager(
+    resources: _Resources, voice_controls: Optional[ControlsParams]
+):
+    logger.info("Testing SSE send context manager")
+    transcript = SAMPLE_TRANSCRIPT
+
+    voice: TtsRequestVoiceSpecifierParams = {"mode": "id", "id": SAMPLE_VOICE_ID}
+    if voice_controls:
+        voice["experimental_controls"] = voice_controls
+
+    with create_client() as client:
+        output_generate = client.tts.sse(
+            transcript=transcript,
+            voice=voice,
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            model_id=DEFAULT_MODEL_ID,
+        )
+        assert isinstance(output_generate, Iterator)
+
+        for response in output_generate:
+            assert isinstance(response, WebSocketResponse)  # type: ignore
+
+
+def test_sse_send_context_manager_with_err():
+    logger.info("Testing SSE send context manager with error")
+    transcript = SAMPLE_TRANSCRIPT
+
+    try:
+        with create_client() as client:
+            client.tts.sse(
+                transcript=transcript,
+                voice={"mode": "id", "id": ""},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                model_id=DEFAULT_MODEL_ID,
+            )  # should throw err because voice_id is ""
+        raise RuntimeError("Expected error to be thrown")
+    except Exception:
+        pass
+
+
+def test_websocket_send_context_manager(resources: _Resources):
+    logger.info("Testing WebSocket send context manager")
+    transcript = SAMPLE_TRANSCRIPT
+
+    with create_client() as client:
+        ws = client.tts.websocket()
+        request = GenerationRequest(
+            transcript=transcript,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
+            output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+            model_id=DEFAULT_MODEL_ID,
+        )
+        output_generate = ws.send(request=request, stream=True)
+        assert isinstance(output_generate, Generator)
+
+        for out in output_generate:
+            assert isinstance(out.audio, bytes)
+
+
+def test_websocket_send_context_manage_err(resources: _Resources):
+    logger.info("Testing WebSocket send context manager")
+    transcript = SAMPLE_TRANSCRIPT
+
+    try:
+        with create_client() as client:
+            ws = client.tts.websocket()
+            request = GenerationRequest(
+                transcript=transcript,
+                voice={"mode": "id", "id": ""},  # type: ignore
+                output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+                model_id=DEFAULT_MODEL_ID,
+            )
+            ws.send(request=request)  # should throw err because voice_id is ""
+        raise RuntimeError("Expected error to be thrown")
+    except Exception:
+        pass
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "voice_controls",
@@ -360,6 +449,43 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
     # Close the websocket
     await ws.close()
     await async_client.close()
+
+
+@pytest.mark.asyncio
+async def test_async_sse_send_context_manager(resources: _Resources):
+    logger.info("Testing async SSE send context manager")
+    transcript = SAMPLE_TRANSCRIPT
+
+    async with create_async_client() as async_client:
+        output_generate = async_client.tts.sse(
+            transcript=transcript,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            model_id=DEFAULT_MODEL_ID,
+        )
+        assert isinstance(output_generate, AsyncGenerator)
+
+        async for out in output_generate:
+            assert isinstance(base64.b64decode(out.data), bytes)
+
+
+@pytest.mark.asyncio
+async def test_async_sse_send_context_manager_with_err():
+    logger.info("Testing async SSE send context manager with error")
+    transcript = SAMPLE_TRANSCRIPT
+
+    try:
+        async with create_async_client() as async_client:
+            await async_client.tts.sse(
+                transcript=transcript,
+                voice={"mode": "id", "id": ""},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                stream=True,
+                model_id=DEFAULT_MODEL_ID,
+            )  # should throw err because voice_id is ""
+        raise RuntimeError("Expected error to be thrown")
+    except Exception:
+        pass
 
 
 @pytest.mark.asyncio
