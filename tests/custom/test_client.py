@@ -19,8 +19,14 @@ from pydantic import ValidationError
 
 from cartesia import AsyncCartesia, Cartesia
 from cartesia.tts.requests import ControlsParams, TtsRequestVoiceSpecifierParams
-from cartesia.tts.types import GenerationRequest, WebSocketResponse, WebSocketTtsOutput
-from cartesia.tts.types.word_timestamps import WordTimestamps
+from cartesia.tts.types import (
+    GenerationRequest,
+    WebSocketResponse,
+    WebSocketResponse_Chunk,
+    WebSocketTtsOutput,
+    WordTimestamps,
+)
+from cartesia.tts.utils.tts import get_output_format
 from cartesia.voices.types import Voice, VoiceMetadata
 
 
@@ -84,7 +90,7 @@ def resources(client: Cartesia):
     voice = client.voices.get(SAMPLE_VOICE_ID)
     voices = client.voices.list()
 
-    return _Resources(client=client, voices=voices, voice=voice)
+    return _Resources(client=client, voices=voices, voice=voice)  # type: ignore
 
 
 def test_get_voices(client: Cartesia):
@@ -134,7 +140,7 @@ def test_clone_voice_with_file(client: Cartesia, mode: str, enhance: bool):
 
 def test_create_voice(client: Cartesia):
     logger.info("Testing voices.create")
-    embedding = np.ones(192).tolist()
+    embedding = [1.0] * 192
     voice = client.voices.create(
         name="Test Voice",
         description="Test voice description",
@@ -158,7 +164,6 @@ def test_mix_voice(client: Cartesia):
             {"id": SAMPLE_VOICE_ID, "weight": 0.9},
         ]
     )
-    # Validate that output is an EmbeddingResponse
     assert isinstance(output.embedding, list)
     assert all(isinstance(x, float) for x in output.embedding)
 
@@ -168,11 +173,11 @@ def test_mix_voice(client: Cartesia):
     "voice_controls",
     [
         None,
-        {"speed": 1.0, "emotion": ["positivity:high"]},  # Example voice controls
+        {"speed": 1.0, "emotion": ["positivity:high"]},
         {
             "speed": "normal",
             "emotion": ["curiosity:high", "surprise:high"],
-        },  # Example voice controls 2
+        },
     ],
 )
 def test_sse_send(resources: _Resources, voice_controls: Optional[ControlsParams]):
@@ -187,12 +192,12 @@ def test_sse_send(resources: _Resources, voice_controls: Optional[ControlsParams
     output_generate = client.tts.sse(
         transcript=transcript,
         voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)
+        assert isinstance(response, WebSocketResponse)  # type: ignore
 
 
 @pytest.mark.skip(reason="Working locally but failing on CI")
@@ -204,12 +209,12 @@ def test_sse_send_with_model_id(resources: _Resources):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)
+        assert isinstance(response, WebSocketResponse)  # type: ignore
 
 
 @pytest.mark.skip(reason="Working locally but failing on CI")
@@ -227,7 +232,7 @@ async def test_sse_send_concurrent():
             model_id=model_id,
         )
         async for response in output_generate:
-            assert isinstance(response, WebSocketResponse)
+            assert isinstance(response, WebSocketResponse)  # type: ignore
 
     logger.info("Testing concurrent SSE send")
     client = create_async_client()
@@ -263,12 +268,12 @@ def test_sse_send_with_embedding(resources: _Resources):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "embedding", "embedding": embedding},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)
+        assert isinstance(response, WebSocketResponse)  # type: ignore
 
 
 @pytest.mark.asyncio
@@ -282,7 +287,7 @@ async def test_async_sse_send(resources: _Resources, voice_controls: VoiceContro
 
     voice = {"mode": "id", "id": SAMPLE_VOICE_ID}
     if voice_controls:
-        voice["experimental_controls"] = voice_controls
+        voice["experimental_controls"] = voice_controls  # type: ignore
 
     async_client = create_async_client()
     output = async_client.tts.sse(
@@ -309,18 +314,17 @@ async def test_async_websocket_send(
 
     voice = {"mode": "id", "id": SAMPLE_VOICE_ID}
     if voice_controls:
-        voice["experimental_controls"] = voice_controls
+        voice["experimental_controls"] = voice_controls  # type: ignore
 
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     request = GenerationRequest(
         transcript=transcript,
-        voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT,
-        stream=True,
+        voice=voice,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
-    output_generate = await ws.send(request=request)
+    output_generate = await ws.send(request=request, stream=True)
 
     async for out in output_generate:
         assert isinstance(out.audio, bytes)
@@ -339,13 +343,12 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
     ws = await async_client.tts.websocket()
     request = GenerationRequest(
         transcript=transcript,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
-        stream=True,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
         add_timestamps=True,
     )
-    output_generate = await ws.send(request=request)
+    output_generate = await ws.send(request=request, stream=True)
     has_wordtimestamps = False
     async for out in output_generate:
         assert out.context_id is not None
@@ -391,13 +394,14 @@ def test_sse_send_multilingual(resources: _Resources, language: str):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         language=language,
         model_id=DEFAULT_MODEL_ID,
     )
 
     for out in output_generate:
-        assert isinstance(base64.b64decode(out.data), bytes)
+        if isinstance(out, WebSocketResponse_Chunk):
+            assert isinstance(base64.b64decode(out.data), bytes)
 
 
 @pytest.mark.parametrize("stream", [True, False])
@@ -410,13 +414,13 @@ def test_websocket_send_multilingual(
 
     request = GenerationRequest(
         transcript=SAMPLE_TRANSCRIPT,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         language=language,
         model_id=DEFAULT_MODEL_ID,
     )
 
-    ws = client.tts.websocket()
+    ws = client.tts.websocket()  # type: ignore
     output_generate = ws.send(request=request, stream=stream)
 
     if not stream:
@@ -467,8 +471,8 @@ def test_sync_context_send_timestamps(resources: _Resources):
     request = GenerationRequest(
         model_id=DEFAULT_MODEL_ID,
         transcript=chunk_generator(transcripts),
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         add_timestamps=True,
     )
     output_generate = ctx.send(request=request)
@@ -833,19 +837,19 @@ deprecated_output_format_names = [
 
 
 @pytest.mark.parametrize("output_format_name", output_format_names)
-def test_output_formats(resources: _Resources, output_format_name: str):
+def test_output_formats(output_format_name: str):
     logger.info(f"Testing output format: {output_format_name}")
-    output_format = resources.client.tts.get_output_format(output_format_name)
+    output_format = get_output_format(output_format_name)
     assert isinstance(output_format, dict), "Output is not of type dict"
     assert output_format["container"] is not None, "Output format container is None"
     assert output_format["encoding"] is not None, "Output format encoding is None"
     assert output_format["sample_rate"] is not None, "Output format sample rate is None"
 
 
-def test_invalid_output_format(resources: _Resources):
+def test_invalid_output_format():
     logger.info("Testing invalid output format")
     with pytest.raises(ValueError):
-        resources.client.tts.get_output_format("invalid_format")
+        get_output_format("invalid_format")
 
 
 def test_websocket_send_with_custom_url():
@@ -900,7 +904,7 @@ def test_sse_send_with_incorrect_url():
     )
     try:
         with pytest.raises(RuntimeError):
-            client.tts.sse(
+            response = client.tts.sse(
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
