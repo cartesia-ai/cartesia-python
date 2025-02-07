@@ -35,6 +35,8 @@ jobs:
 
       - name: Test
         run: poetry run pytest -rP .
+        env:
+          CARTESIA_API_KEY: ${{ secrets.CARTESIA_API_KEY }}
 
   publish:
     needs: [compile, test]

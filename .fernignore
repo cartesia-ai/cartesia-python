@@ -2,6 +2,7 @@
 
 mypy.ini
 requirements.txt
+.github/workflows/ci.yml
 
 # Custom Client Modifications
 
