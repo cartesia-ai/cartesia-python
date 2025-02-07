@@ -15,6 +15,8 @@ except ImportError:
 from iterators import TimeoutIterator  # type: ignore
 
 from cartesia.tts.types import (
+    OutputFormat,
+    TtsRequestVoiceSpecifier,
     WebSocketResponse,
     WebSocketResponse_Chunk,
     WebSocketResponse_Done,
@@ -54,7 +56,16 @@ class _TTSContext:
 
     def send(
         self,
-        request: GenerationRequest,
+        *,
+        model_id: str,
+        transcript: str,
+        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifier,
+        context_id: Optional[str] = None,
+        duration: Optional[int] = None,
+        language: Optional[str] = None,
+        stream: bool = True,
+        add_timestamps: bool = False,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -73,8 +84,23 @@ class _TTSContext:
         self._websocket.connect()
         assert self._websocket.websocket is not None, "WebSocket is not connected"
 
-        request_body = request.dict(by_alias=True)
-        request_body["context_id"] = self._context_id
+        request_body = {
+            "model_id": model_id,
+            "transcript": transcript,
+            "output_format": output_format,
+            "voice": voice,
+            "context_id": self._context_id,
+        }
+        if context_id is not None:
+            request_body["context_id"] = context_id
+        if duration is not None:
+            request_body["duration"] = duration
+        if language is not None:
+            request_body["language"] = language
+        if stream:
+            request_body["stream"] = stream
+        if add_timestamps:
+            request_body["add_timestamps"] = add_timestamps
 
         if (
             "context_id" in request_body
@@ -295,8 +321,16 @@ class TtsWebsocket:
 
     def send(
         self,
-        request: GenerationRequest,
+        *,
+        model_id: str,
+        transcript: str,
+        output_format: OutputFormat,
+        voice: TtsRequestVoiceSpecifier,
+        context_id: Optional[str] = None,
+        duration: Optional[int] = None,
+        language: Optional[str] = None,
         stream: bool = True,
+        add_timestamps: bool = False,
     ):
         """Send a request to the WebSocket to generate audio.
 
@@ -312,11 +346,21 @@ class TtsWebsocket:
             - context_id: The context ID for the request.
         """
         self.connect()
-        request_body = request.dict(by_alias=True)
 
-        if request.context_id is None:
-            request_body["context_id"] = str(uuid.uuid4())
+        if context_id is None:
+            context_id = str(uuid.uuid4())
 
+        request_body = {
+            "model_id": model_id,
+            "transcript": transcript,
+            "output_format": output_format,
+            "voice": voice,
+            "context_id": context_id,
+            "duration": duration,
+            "language": language,
+            "stream": stream,
+            "add_timestamps": add_timestamps,
+        }
         generator = self._websocket_generator(request_body)
 
         if stream:
@@ -327,20 +371,20 @@ class TtsWebsocket:
         for chunk in generator:
             if "audio" in chunk:
                 chunks.append(chunk["audio"])
-            if request.add_timestamps and "word_timestamps" in chunk:
+            if add_timestamps and "word_timestamps" in chunk:
                 for k, v in chunk["word_timestamps"].items():
                     word_timestamps[k].extend(v)
 
         return WebSocketTtsOutput(
             audio=b"".join(chunks),
-            context_id=request_body["context_id"],
+            context_id=context_id,
             word_timestamps=(
                 WordTimestamps(
                     words=word_timestamps["words"],
                     start=word_timestamps["start"],
                     end=word_timestamps["end"],
                 )
-                if request.add_timestamps
+                if add_timestamps
                 else None
             ),
         )

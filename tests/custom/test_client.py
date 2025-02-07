@@ -20,7 +20,6 @@ from pydantic import ValidationError
 from cartesia import AsyncCartesia, Cartesia
 from cartesia.tts.requests import ControlsParams, TtsRequestVoiceSpecifierParams
 from cartesia.tts.types import (
-    GenerationRequest,
     WebSocketResponse,
     WebSocketResponse_Chunk,
     WebSocketTtsOutput,
@@ -336,13 +335,13 @@ def test_websocket_send_context_manager(resources: _Resources):
 
     with create_client() as client:
         ws = client.tts.websocket()
-        request = GenerationRequest(
+        output_generate = ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
             output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
             model_id=DEFAULT_MODEL_ID,
+            stream=True,
         )
-        output_generate = ws.send(request=request, stream=True)
         assert isinstance(output_generate, Generator)
 
         for out in output_generate:
@@ -356,13 +355,12 @@ def test_websocket_send_context_manage_err(resources: _Resources):
     try:
         with create_client() as client:
             ws = client.tts.websocket()
-            request = GenerationRequest(
+            ws.send(
                 transcript=transcript,
                 voice={"mode": "id", "id": ""},  # type: ignore
                 output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
                 model_id=DEFAULT_MODEL_ID,
-            )
-            ws.send(request=request)  # should throw err because voice_id is ""
+            )  # should throw err because voice_id is ""
         raise RuntimeError("Expected error to be thrown")
     except Exception:
         pass
@@ -410,13 +408,13 @@ async def test_async_websocket_send(
 
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
-    request = GenerationRequest(
+    output_generate = await ws.send(
         transcript=transcript,
         voice=voice,  # type: ignore
         output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
+        stream=True,
     )
-    output_generate = await ws.send(request=request, stream=True)
 
     async for out in output_generate:
         assert isinstance(out.audio, bytes)
@@ -433,14 +431,14 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
 
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
-    request = GenerationRequest(
+    output_generate = await ws.send(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
         output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
         add_timestamps=True,
+        stream=True,
     )
-    output_generate = await ws.send(request=request, stream=True)
     has_wordtimestamps = False
     async for out in output_generate:
         assert out.context_id is not None
@@ -498,14 +496,13 @@ async def test_async_websocket_send_context_manager():
 
     async with create_async_client() as async_client:
         ws = await async_client.tts.websocket()
-        request = GenerationRequest(
+        output_generate = await ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
         )
-        output_generate = await ws.send(request=request)
         assert isinstance(output_generate, AsyncGenerator)
 
         async for out in output_generate:
@@ -541,16 +538,15 @@ def test_websocket_send_multilingual(
     logger.info("Testing WebSocket send")
     client = resources.client
 
-    request = GenerationRequest(
+    ws = client.tts.websocket()  # type: ignore
+    output_generate = ws.send(
         transcript=SAMPLE_TRANSCRIPT,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
         output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         language=language,
         model_id=DEFAULT_MODEL_ID,
+        stream=stream,
     )
-
-    ws = client.tts.websocket()  # type: ignore
-    output_generate = ws.send(request=request, stream=stream)
 
     if not stream:
         output_generate = [output_generate]
@@ -577,13 +573,12 @@ def test_sync_continuation_websocket_context_send():
     try:
         ctx = ws.context(context_id)
         transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
-        request = GenerationRequest(
+        output_generate = ctx.send(
             model_id=DEFAULT_MODEL_ID,
             transcript=chunk_generator(transcripts),
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
         )
-        output_generate = ctx.send(request=request)
         for out in output_generate:
             assert isinstance(out.audio, bytes)
     finally:
@@ -597,14 +592,13 @@ def test_sync_context_send_timestamps(resources: _Resources):
 
     ws = client.tts.websocket()
     ctx = ws.context()
-    request = GenerationRequest(
+    output_generate = ctx.send(
         model_id=DEFAULT_MODEL_ID,
         transcript=chunk_generator(transcripts),
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
         output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
         add_timestamps=True,
     )
-    output_generate = ctx.send(request=request)
 
     has_wordtimestamps = False
     for out in output_generate:
@@ -626,14 +620,13 @@ async def test_continuation_websocket_context_send():
         ctx = ws.context(context_id)
         transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
         for _, transcript in enumerate(transcripts):
-            request = GenerationRequest(
+            await ctx.send(
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
-            await ctx.send(request=request)
 
         await ctx.no_more_inputs()
 
@@ -662,14 +655,13 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
                 "I'''m generating audio on Cartesia.",
             ]  # second transcript is empty
             for _, transcript in enumerate(transcripts):
-                request = GenerationRequest(
+                await ctx.send(
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                     output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
-                await ctx.send(request=request)
 
             await ctx.no_more_inputs()
 
@@ -695,14 +687,13 @@ async def test_continuation_websocket_context_send_incorrect_voice_id():
             ctx = ws.context(context_id)
             transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
             for _, transcript in enumerate(transcripts):
-                request = GenerationRequest(
+                await ctx.send(
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": ""},
                     output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
-                await ctx.send(request=request)
 
             await ctx.no_more_inputs()
 
@@ -728,7 +719,7 @@ async def test_continuation_websocket_context_send_incorrect_output_format():
             ctx = ws.context(context_id)
             transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
             for _, transcript in enumerate(transcripts):
-                request = GenerationRequest(
+                await ctx.send(
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -739,7 +730,6 @@ async def test_continuation_websocket_context_send_incorrect_output_format():
                     },  # output_format is empty
                     continue_=True,
                 )
-                await ctx.send(request=request)
 
             await ctx.no_more_inputs()
 
@@ -764,14 +754,13 @@ async def test_continuation_websocket_context_send_incorrect_model_id():
             ctx = ws.context()
             transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
             for _, transcript in enumerate(transcripts):
-                request = GenerationRequest(
+                await ctx.send(
                     model_id="",  # model_id is empty
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                     output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
-                await ctx.send(request=request)
             async for _ in ctx.receive():
                 pass
     except Exception as e:
@@ -793,7 +782,7 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
             ctx = ws.context(str(uuid.uuid4()))  # create context with context_id
             transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
             for _, transcript in enumerate(transcripts):
-                request = GenerationRequest(
+                await ctx.send(
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -801,7 +790,6 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
                     output_format=DEFAULT_OUTPUT_FORMAT,
                     continue_=True,
                 )
-                await ctx.send(request=request)
             await ctx.no_more_inputs()
 
             async for _ in ctx.receive():
@@ -824,25 +812,23 @@ async def test_continuation_websocket_context_twice_on_same_context():
         transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
         # Send once on the context
         for _, transcript in enumerate(transcripts):
-            request = GenerationRequest(
+            await ctx.send(
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
-            await ctx.send(request=request)
 
         # Send again on the same context
         for _, transcript in enumerate(transcripts):
-            request = GenerationRequest(
+            await ctx.send(
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
-            await ctx.send(request=request)
 
         await ctx.no_more_inputs()
 
@@ -868,14 +854,13 @@ async def test_continuation_websocket_context_send_flush():
         ]
         receivers = []
         for transcript in transcripts:
-            request = GenerationRequest(
+            await ctx.send(
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
                 continue_=True,
             )
-            await ctx.send(request=request)
             new_receiver = await ctx.flush()
             receivers.append(new_receiver)
         await ctx.no_more_inputs()
@@ -900,14 +885,13 @@ async def context_runner(ws, transcripts):
     out = []
 
     for _, transcript in enumerate(transcripts):
-        request = GenerationRequest(
+        await ctx.send(
             model_id=DEFAULT_MODEL_ID,
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
             continue_=True,
         )
-        await ctx.send(request=request)
 
     await ctx.no_more_inputs()
 
@@ -988,15 +972,14 @@ def test_websocket_send_with_custom_url():
         api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.cartesia.ai"
     )
 
-    request = GenerationRequest(
+    ws = client.tts.websocket()
+    output_generate = ws.send(
         transcript=SAMPLE_TRANSCRIPT,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
         output_format=DEFAULT_OUTPUT_FORMAT,
         model_id=DEFAULT_MODEL_ID,
+        stream=True,
     )
-
-    ws = client.tts.websocket()
-    output_generate = ws.send(request=request, stream=True)
 
     for out in output_generate:
         assert isinstance(out.audio, bytes)
@@ -1050,18 +1033,16 @@ def test_websocket_send_with_incorrect_url():
     client = Cartesia(
         api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.notcartesia.ai"
     )
-
-    request = GenerationRequest(
-        transcript=SAMPLE_TRANSCRIPT,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
-        model_id=DEFAULT_MODEL_ID,
-    )
-
     try:
         with pytest.raises(RuntimeError):
             ws = client.tts.websocket()
-            ws.send(request=request, stream=True)
+            ws.send(
+                transcript=SAMPLE_TRANSCRIPT,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                model_id=DEFAULT_MODEL_ID,
+                stream=True,
+            )
             ws.close()
     except Exception as e:
         logger.info("Unexpected error occured: ", e)
