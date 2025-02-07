@@ -86,7 +86,6 @@ class _AsyncTTSContext:
         ):
             raise ValueError("Transcript cannot be empty when continue_ is True.")
 
-        print("Request Body: ", request_body)
         await self._websocket.websocket.send_json(request_body)
 
         # Start listening for responses on the WebSocket
@@ -326,7 +325,6 @@ class AsyncTtsWebsocket(TtsWebsocket):
         try:
             while True:
                 response = await self.websocket.receive_json()
-                print("Received message, context_id: ", response["context_id"])
                 if response["context_id"]:
                     context_id = response["context_id"]
                 flush_id = response.get("flush_id", -1)
