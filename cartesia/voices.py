@@ -52,8 +52,7 @@ class Voices(Resource):
 
         if not response.is_success:
             raise ValueError(
-                f"Failed to get voice. Status Code: {response.status_code}\n"
-                f"Error: {response.text}"
+                f"Failed to get voice. Status Code: {response.status_code}\nError: {response.text}"
             )
 
         return response.json()
