@@ -13,12 +13,21 @@ import sys
 import uuid
 from typing import AsyncGenerator, Generator, Iterator, List, Optional, TypedDict, Union
 
-import numpy as np
 import pytest
 from pydantic import ValidationError
 
 from cartesia import AsyncCartesia, Cartesia
-from cartesia.tts.requests import ControlsParams, TtsRequestVoiceSpecifierParams
+from cartesia.tts.requests import (
+    ControlsParams,
+    TtsRequestIdSpecifierParams,
+    TtsRequestVoiceSpecifierParams,
+)
+from cartesia.tts.requests.output_format import (
+    OutputFormat_Mp3Params,
+    OutputFormat_RawParams,
+    OutputFormat_WavParams,
+    OutputFormatParams,
+)
 from cartesia.tts.types import (
     WebSocketResponse,
     WebSocketResponse_Chunk,
@@ -39,23 +48,71 @@ sys.path.insert(0, os.path.dirname(THISDIR))
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
 DEFAULT_MODEL_ID = "sonic"
-DEFAULT_OUTPUT_FORMAT = {
+DEFAULT_PREVIEW_MODEL_ID = "sonic-preview"
+DEFAULT_OUTPUT_FORMAT_PARAMS = {
     "container": "raw",
     "encoding": "pcm_f32le",
     "sample_rate": 44100,
 }
-DEFAULT_VOICE = {
-    "mode": "id",
-    "id": "d46abd1d-2d02-43e8-819f-51fb652c1c61",  # SAMPLE_VOICE_ID
-}
+DEFAULT_OUTPUT_FORMAT = OutputFormat_RawParams(
+    container="raw", encoding="pcm_f32le", sample_rate=44100
+)
 EXPERIMENTAL_VOICE_CONTROLS = {
     "speed": "fastest",
     "emotion": ["anger:high", "positivity:low"],
 }
 EXPERIMENTAL_VOICE_CONTROLS_2 = {"speed": 0.4, "emotion": []}
-SAMPLE_VOICE = "Newsman"
-SAMPLE_VOICE_ID = "d46abd1d-2d02-43e8-819f-51fb652c1c61"
+
+SAMPLE_VOICE_NAME = "Southern Woman"
+SAMPLE_VOICE_ID = "f9836c6e-a0bd-460e-9d3c-f7299fa60f94"
+SAMPLE_VOICE_SPEC = TtsRequestIdSpecifierParams(mode="id", id=SAMPLE_VOICE_ID)
 SAMPLE_TRANSCRIPT = "Hello, world! I'm generating audio on Cartesia."
+SAMPLE_LANGUAGE = "en"
+
+
+def _output_format_to_str(fmt: OutputFormatParams) -> str:
+    """Convert an output format to a string key.
+
+    Examples:
+        wav_pcm_f32le_44100
+        wav_pcm_s16le_24000
+        mp3_44100
+    """
+    if fmt["container"] == "wav":
+        return f"wav_{fmt['encoding']}_{fmt['sample_rate']}"
+    else:  # mp3
+        return f"mp3_{fmt['sample_rate']}"
+
+
+TEST_OUTPUT_FORMATS = [
+    # WAV format with different encodings and sample rates
+    OutputFormat_WavParams(container="wav", encoding="pcm_f32le", sample_rate=44100),
+    OutputFormat_WavParams(container="wav", encoding="pcm_s16le", sample_rate=44100),
+    OutputFormat_WavParams(container="wav", encoding="pcm_f32le", sample_rate=16000),
+    OutputFormat_WavParams(container="wav", encoding="pcm_s16le", sample_rate=16000),
+    # MP3 format
+    OutputFormat_Mp3Params(container="mp3", sample_rate=44100, bit_rate=128000),
+]
+
+# Input audio files keyed by output format string
+TEST_INPUT_AUDIO_PATHS = {
+    # WAV 44.1kHz
+    "wav_pcm_f32le_44100": os.path.join(
+        RESOURCES_DIR, "sample-speech-4s-pcm_f32le-44100.wav"
+    ),
+    "wav_pcm_s16le_44100": os.path.join(
+        RESOURCES_DIR, "sample-speech-4s-pcm_s16le-44100.wav"
+    ),
+    # WAV 16kHz
+    "wav_pcm_f32le_16000": os.path.join(
+        RESOURCES_DIR, "sample-speech-4s-pcm_f32le-16000.wav"
+    ),
+    "wav_pcm_s16le_16000": os.path.join(
+        RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav"
+    ),
+    # MP3
+    "mp3_44100": os.path.join(RESOURCES_DIR, "sample-speech-4s-44100.mp3"),
+}
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +163,7 @@ def test_get_voice_from_id(client: Cartesia):
     logger.info("Testing voices.get")
     voice = client.voices.get(SAMPLE_VOICE_ID)
     assert voice.id == SAMPLE_VOICE_ID
-    assert voice.name == SAMPLE_VOICE
+    assert voice.name == SAMPLE_VOICE_NAME
     assert voice.is_public is True
     voices = client.voices.list()
     assert voice in voices
@@ -191,7 +248,7 @@ def test_sse_send(resources: _Resources, voice_controls: Optional[ControlsParams
     output_generate = client.tts.sse(
         transcript=transcript,
         voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
@@ -208,7 +265,7 @@ def test_sse_send_with_model_id(resources: _Resources):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
@@ -247,7 +304,7 @@ async def test_sse_send_concurrent():
             client,
             transcript,
             SAMPLE_VOICE_ID,
-            DEFAULT_OUTPUT_FORMAT,
+            DEFAULT_OUTPUT_FORMAT_PARAMS,
             DEFAULT_MODEL_ID,
             num,
         )
@@ -259,15 +316,14 @@ async def test_sse_send_concurrent():
 
 @pytest.mark.skip(reason="Working locally but failing on CI")
 def test_sse_send_with_embedding(resources: _Resources):
-    client = resources.client
     transcript = SAMPLE_TRANSCRIPT
-    voice = client.voices.get(SAMPLE_VOICE_ID)
+    voice = resources.client.voices.get(SAMPLE_VOICE_ID)
     embedding = voice.embedding
 
-    output_generate = client.tts.sse(
+    output_generate = resources.client.tts.sse(
         transcript=transcript,
         voice={"mode": "embedding", "embedding": embedding},
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
     )
 
@@ -301,7 +357,7 @@ def test_sse_send_context_manager(
         output_generate = client.tts.sse(
             transcript=transcript,
             voice=voice,
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             model_id=DEFAULT_MODEL_ID,
         )
         assert isinstance(output_generate, Iterator)
@@ -320,7 +376,7 @@ def test_sse_send_context_manager_with_err():
             client.tts.sse(
                 transcript=transcript,
                 voice={"mode": "id", "id": ""},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
         raise RuntimeError("Expected error to be thrown")
@@ -338,7 +394,7 @@ def test_websocket_send_context_manager(resources: _Resources):
         output_generate = ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-            output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
             model_id=DEFAULT_MODEL_ID,
             stream=True,
         )
@@ -358,7 +414,7 @@ def test_websocket_send_context_manage_err(resources: _Resources):
             ws.send(
                 transcript=transcript,
                 voice={"mode": "id", "id": ""},  # type: ignore
-                output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
         raise RuntimeError("Expected error to be thrown")
@@ -383,7 +439,7 @@ async def test_async_sse_send(resources: _Resources, voice_controls: VoiceContro
     output = async_client.tts.sse(
         transcript=transcript,
         voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
     )
 
@@ -411,7 +467,7 @@ async def test_async_websocket_send(
     output_generate = await ws.send(
         transcript=transcript,
         voice=voice,  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
         stream=True,
     )
@@ -434,7 +490,7 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
     output_generate = await ws.send(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
         add_timestamps=True,
         stream=True,
@@ -461,7 +517,7 @@ async def test_async_sse_send_context_manager(resources: _Resources):
         output_generate = async_client.tts.sse(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             model_id=DEFAULT_MODEL_ID,
         )
         assert isinstance(output_generate, AsyncGenerator)
@@ -480,7 +536,7 @@ async def test_async_sse_send_context_manager_with_err():
             await async_client.tts.sse(
                 transcript=transcript,
                 voice={"mode": "id", "id": ""},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 stream=True,
                 model_id=DEFAULT_MODEL_ID,
             )  # should throw err because voice_id is ""
@@ -499,7 +555,7 @@ async def test_async_websocket_send_context_manager():
         output_generate = await ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             stream=True,
             model_id=DEFAULT_MODEL_ID,
         )
@@ -520,7 +576,7 @@ def test_sse_send_multilingual(resources: _Resources, language: str):
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         language=language,
         model_id=DEFAULT_MODEL_ID,
     )
@@ -542,7 +598,7 @@ def test_websocket_send_multilingual(
     output_generate = ws.send(
         transcript=SAMPLE_TRANSCRIPT,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         language=language,
         model_id=DEFAULT_MODEL_ID,
         stream=stream,
@@ -577,7 +633,7 @@ def test_sync_continuation_websocket_context_send():
             model_id=DEFAULT_MODEL_ID,
             transcript=chunk_generator(transcripts),
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         )
         for out in output_generate:
             assert isinstance(out.audio, bytes)
@@ -596,7 +652,7 @@ def test_sync_context_send_timestamps(resources: _Resources):
         model_id=DEFAULT_MODEL_ID,
         transcript=chunk_generator(transcripts),
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT,  # type: ignore
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         add_timestamps=True,
     )
 
@@ -624,7 +680,7 @@ async def test_continuation_websocket_context_send():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
             )
 
@@ -659,7 +715,7 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                    output_format=DEFAULT_OUTPUT_FORMAT,
+                    output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                     continue_=True,
                 )
 
@@ -691,7 +747,7 @@ async def test_continuation_websocket_context_send_incorrect_voice_id():
                     model_id=DEFAULT_MODEL_ID,
                     transcript=transcript,
                     voice={"mode": "id", "id": ""},
-                    output_format=DEFAULT_OUTPUT_FORMAT,
+                    output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                     continue_=True,
                 )
 
@@ -758,7 +814,7 @@ async def test_continuation_websocket_context_send_incorrect_model_id():
                     model_id="",  # model_id is empty
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                    output_format=DEFAULT_OUTPUT_FORMAT,
+                    output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                     continue_=True,
                 )
             async for _ in ctx.receive():
@@ -787,7 +843,7 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
                     transcript=transcript,
                     voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                     context_id="sad-monkeys-fly",  # context_id is different
-                    output_format=DEFAULT_OUTPUT_FORMAT,
+                    output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                     continue_=True,
                 )
             await ctx.no_more_inputs()
@@ -816,7 +872,7 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
             )
 
@@ -826,7 +882,7 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
             )
 
@@ -858,7 +914,7 @@ async def test_continuation_websocket_context_send_flush():
                 model_id=DEFAULT_MODEL_ID,
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
             )
             new_receiver = await ctx.flush()
@@ -889,7 +945,7 @@ async def context_runner(ws, transcripts):
             model_id=DEFAULT_MODEL_ID,
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             continue_=True,
         )
 
@@ -976,7 +1032,7 @@ def test_websocket_send_with_custom_url():
     output_generate = ws.send(
         transcript=SAMPLE_TRANSCRIPT,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
         stream=True,
     )
@@ -997,7 +1053,7 @@ def test_sse_send_with_custom_url():
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT,
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
     )
 
@@ -1016,10 +1072,10 @@ def test_sse_send_with_incorrect_url():
     )
     try:
         with pytest.raises(RuntimeError):
-            response = client.tts.sse(
+            _ = client.tts.sse(
                 transcript=transcript,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 model_id=DEFAULT_MODEL_ID,
             )
     except Exception as e:
@@ -1039,7 +1095,7 @@ def test_websocket_send_with_incorrect_url():
             ws.send(
                 transcript=SAMPLE_TRANSCRIPT,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 model_id=DEFAULT_MODEL_ID,
                 stream=True,
             )
@@ -1107,6 +1163,139 @@ def _validate_schema(out: WebSocketTtsOutput):
 
 
 def _validate_wav_response(data: bytes):
+    """Validate WAV format audio data."""
     assert data.startswith(b"RIFF")
     assert data[8:12] == b"WAVE"
     assert len(data) > 44  # Ensure there's audio data beyond the header
+
+
+def _validate_mp3_response(data: bytes):
+    """Validate MP3 format audio data.
+
+    We do basic validation:
+    1. Check minimum length
+    2. Look for MP3 frame sync word anywhere in first 1KB
+    3. Don't enforce specific MPEG version/layer as encoder may vary
+    """
+    assert len(data) > 128, "MP3 data too short"
+
+    # Search for sync word in first 1KB
+    # Valid sync word: 11 bits set (0xFFE0) followed by valid version/layer bits
+    found_sync = False
+    search_window = min(len(data), 1024)
+    for i in range(search_window - 1):
+        if data[i] == 0xFF and (data[i + 1] & 0xE0) == 0xE0:
+            found_sync = True
+            break
+    assert found_sync, "No valid MP3 frame sync found"
+
+
+def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
+    """Validate audio data based on format."""
+    assert len(data) > 0  # All formats should have non-empty data
+
+    if output_format["container"] == "wav":
+        _validate_wav_response(data)
+    elif output_format["container"] == "mp3":
+        _validate_mp3_response(data)
+    else:
+        raise ValueError(
+            f"Unsupported output format container: {output_format['container']}"
+        )
+
+
+@pytest.mark.parametrize("output_format", TEST_OUTPUT_FORMATS)
+def test_infill_sync(client: Cartesia, output_format: OutputFormatParams):
+    """Test synchronous infill with different output formats."""
+    # Get test input audio file matching the output format
+    input_audio_path = TEST_INPUT_AUDIO_PATHS[_output_format_to_str(output_format)]
+
+    # Test infill with both left and right audio
+    infill_audio, total_audio = client.tts.infill(  # type: ignore
+        model_id=DEFAULT_PREVIEW_MODEL_ID,
+        language=SAMPLE_LANGUAGE,
+        transcript=SAMPLE_TRANSCRIPT,
+        left_audio_path=input_audio_path,
+        right_audio_path=input_audio_path,
+        voice=SAMPLE_VOICE_SPEC,
+        output_format=output_format,
+    )
+    _validate_audio_response(infill_audio, output_format)
+    _validate_audio_response(total_audio, output_format)
+
+    # Test infill with only left audio
+    infill_audio, total_audio = client.tts.infill(  # type: ignore
+        model_id=DEFAULT_PREVIEW_MODEL_ID,
+        language=SAMPLE_LANGUAGE,
+        transcript=SAMPLE_TRANSCRIPT,
+        left_audio_path=input_audio_path,
+        right_audio_path=None,
+        voice=SAMPLE_VOICE_SPEC,
+        output_format=output_format,
+    )
+    _validate_audio_response(infill_audio, output_format)
+    _validate_audio_response(total_audio, output_format)
+
+    # Test infill with only right audio
+    infill_audio, total_audio = client.tts.infill(  # type: ignore
+        model_id=DEFAULT_PREVIEW_MODEL_ID,
+        language=SAMPLE_LANGUAGE,
+        transcript=SAMPLE_TRANSCRIPT,
+        left_audio_path=None,
+        right_audio_path=input_audio_path,
+        voice=SAMPLE_VOICE_SPEC,
+        output_format=output_format,
+    )
+    _validate_audio_response(infill_audio, output_format)
+    _validate_audio_response(total_audio, output_format)
+
+
+@pytest.mark.parametrize("output_format", TEST_OUTPUT_FORMATS)
+async def test_infill_async(output_format: OutputFormatParams):
+    """Test asynchronous infill with different output formats."""
+    # Get test input audio file matching the output format
+    input_audio_path = TEST_INPUT_AUDIO_PATHS[_output_format_to_str(output_format)]
+
+    # Create async client for this test
+    async_client = create_async_client()
+    try:
+        # Test infill with both left and right audio
+        infill_audio, total_audio = await async_client.tts.infill(
+            model_id=DEFAULT_PREVIEW_MODEL_ID,
+            language=SAMPLE_LANGUAGE,
+            transcript=SAMPLE_TRANSCRIPT,
+            left_audio_path=input_audio_path,
+            right_audio_path=input_audio_path,
+            voice=SAMPLE_VOICE_SPEC,
+            output_format=output_format,
+        )
+        _validate_audio_response(infill_audio, output_format)
+        _validate_audio_response(total_audio, output_format)
+
+        # Test infill with only left audio
+        infill_audio, total_audio = await async_client.tts.infill(
+            model_id=DEFAULT_PREVIEW_MODEL_ID,
+            language=SAMPLE_LANGUAGE,
+            transcript=SAMPLE_TRANSCRIPT,
+            left_audio_path=input_audio_path,
+            right_audio_path=None,
+            voice=SAMPLE_VOICE_SPEC,
+            output_format=output_format,
+        )
+        _validate_audio_response(infill_audio, output_format)
+        _validate_audio_response(total_audio, output_format)
+
+        # Test infill with only right audio
+        infill_audio, total_audio = await async_client.tts.infill(
+            model_id=DEFAULT_PREVIEW_MODEL_ID,
+            language=SAMPLE_LANGUAGE,
+            transcript=SAMPLE_TRANSCRIPT,
+            left_audio_path=None,
+            right_audio_path=input_audio_path,
+            voice=SAMPLE_VOICE_SPEC,
+            output_format=output_format,
+        )
+        _validate_audio_response(infill_audio, output_format)
+        _validate_audio_response(total_audio, output_format)
+    finally:
+        await async_client.close()
