@@ -8,10 +8,12 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 
 import aiohttp
 
+from cartesia.tts.requests import (
+    TtsRequestEmbeddingSpecifierParams,
+    TtsRequestVoiceSpecifierParams,
+)
 from cartesia.tts.requests.output_format import OutputFormatParams
 from cartesia.tts.types import (
-    TtsRequestEmbeddingSpecifier,
-    TtsRequestVoiceSpecifier,
     WebSocketResponse,
     WebSocketResponse_Done,
     WebSocketResponse_Error,
@@ -62,7 +64,7 @@ class _AsyncTTSContext:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        voice: TtsRequestVoiceSpecifier,
+        voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
@@ -137,34 +139,24 @@ class _AsyncTTSContext:
             model_id=DEFAULT_MODEL_ID,
             transcript="",
             output_format=get_output_format(DEFAULT_OUTPUT_FORMAT),
-            voice=TtsRequestEmbeddingSpecifier(
-                mode="embedding", embedding=DEFAULT_VOICE_EMBEDDING
-            ),
+            voice={
+                "mode": "embedding",
+                "embedding": DEFAULT_VOICE_EMBEDDING,
+            },
             context_id=self._context_id,
             continue_=False,
         )
 
     async def flush(self) -> Callable[[], AsyncGenerator[Dict[str, Any], None]]:
         """Trigger a manual flush for the current context's generation. This method returns a generator that yields the audio prior to the flush."""
-        request = GenerationRequest(
-            model_id=DEFAULT_MODEL_ID,
-            transcript="",
-            output_format=get_output_format(DEFAULT_OUTPUT_FORMAT),
-            voice=TtsRequestEmbeddingSpecifier(
-                mode="embedding",
-                embedding=DEFAULT_VOICE_EMBEDDING,
-            ),
-            context_id=self._context_id,
-            continue_=True,
-            flush=True,
-        )
         await self.send(
             model_id=DEFAULT_MODEL_ID,
             transcript="",
             output_format=get_output_format(DEFAULT_OUTPUT_FORMAT),
-            voice=TtsRequestEmbeddingSpecifier(
-                mode="embedding", embedding=DEFAULT_VOICE_EMBEDDING
-            ),
+            voice={
+                "mode": "embedding",
+                "embedding": DEFAULT_VOICE_EMBEDDING,
+            },
             context_id=self._context_id,
             continue_=True,
             flush=True,
@@ -343,7 +335,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        voice: TtsRequestVoiceSpecifier,
+        voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,

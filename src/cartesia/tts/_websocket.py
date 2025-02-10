@@ -14,9 +14,9 @@ except ImportError:
 
 from iterators import TimeoutIterator  # type: ignore
 
+from cartesia.tts.requests import TtsRequestVoiceSpecifierParams
 from cartesia.tts.requests.output_format import OutputFormatParams
 from cartesia.tts.types import (
-    TtsRequestVoiceSpecifier,
     WebSocketResponse,
     WebSocketResponse_Chunk,
     WebSocketResponse_Done,
@@ -60,7 +60,7 @@ class _TTSContext:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        voice: TtsRequestVoiceSpecifier,
+        voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
@@ -325,7 +325,7 @@ class TtsWebsocket:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        voice: TtsRequestVoiceSpecifier,
+        voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
