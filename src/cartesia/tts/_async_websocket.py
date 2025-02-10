@@ -8,11 +8,8 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 
 import aiohttp
 
+from cartesia.tts.requests.output_format import OutputFormatParams
 from cartesia.tts.types import (
-    OutputFormat,
-    OutputFormat_Raw,
-    OutputFormat_Wav,
-    OutputFormat_Mp3,
     TtsRequestEmbeddingSpecifier,
     TtsRequestVoiceSpecifier,
     WebSocketResponse,
@@ -64,7 +61,7 @@ class _AsyncTTSContext:
         *,
         model_id: str,
         transcript: str,
-        output_format: OutputFormat,
+        output_format: OutputFormatParams,
         voice: TtsRequestVoiceSpecifier,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
@@ -89,9 +86,9 @@ class _AsyncTTSContext:
             "model_id": model_id,
             "transcript": transcript,
             "output_format": (
-                output_format.dict()
-                if isinstance(output_format, (OutputFormat_Raw, OutputFormat_Wav, OutputFormat_Mp3))
-                else output_format
+                output_format
+                if isinstance(output_format, dict)
+                else output_format.dict()
             ),
             "voice": voice.dict() if hasattr(voice, "dict") else voice,
             "context_id": self._context_id,
@@ -345,7 +342,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         *,
         model_id: str,
         transcript: str,
-        output_format: OutputFormat,
+        output_format: OutputFormatParams,
         voice: TtsRequestVoiceSpecifier,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,

@@ -8,7 +8,8 @@ from ..core.api_error import ApiError
 from ._async_websocket import AsyncTtsWebsocket
 from ._websocket import TtsWebsocket
 from .client import AsyncTtsClient, TtsClient
-from .types import OutputFormat, TtsRequestVoiceSpecifier
+from .requests.output_format import OutputFormatParams
+from .types import TtsRequestVoiceSpecifier
 from .utils.tts import concat_audio_segments, get_output_format
 
 
@@ -20,7 +21,7 @@ class TtsClientWithWebsocket(TtsClient):
     def __init__(self, *, client_wrapper):
         super().__init__(client_wrapper=client_wrapper)
 
-    def get_output_format(self, output_format_name: str) -> OutputFormat:
+    def get_output_format(self, output_format_name: str) -> OutputFormatParams:
         return get_output_format(output_format_name)
 
     def _ws_url(self):
@@ -39,7 +40,7 @@ class TtsClientWithWebsocket(TtsClient):
         language: str,
         transcript: str,
         voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        output_format: OutputFormatParams,
         left_audio_path: typing.Optional[str] = None,
         right_audio_path: typing.Optional[str] = None,
     ) -> typing.Tuple[bytes, bytes]:
@@ -78,24 +79,26 @@ class TtsClientWithWebsocket(TtsClient):
                 right_audio_file = open(right_audio_path, "rb")
                 files["right_audio"] = (None, right_audio_file)
 
+            output_format_dict = typing.cast(dict, output_format)
+
             # Construct form data with output_format fields directly
             data = {
                 "model_id": model_id,
                 "language": language,
                 "transcript": transcript,
                 "voice": voice,
-                "output_format[container]": output_format.container,
-                "output_format[sample_rate]": output_format.sample_rate,
+                "output_format[container]": output_format_dict["container"],
+                "output_format[sample_rate]": output_format_dict["sample_rate"],
             }
 
             # Add bit_rate for mp3 container
-            if output_format.bit_rate is not None:
-                data["output_format[bit_rate]"] = output_format.bit_rate
+            if output_format_dict["bit_rate"] is not None:
+                data["output_format[bit_rate]"] = output_format_dict["bit_rate"]
             if (
-                hasattr(output_format, "encoding")
-                and output_format.encoding is not None
+                "encoding" in output_format_dict
+                and output_format_dict["encoding"] is not None
             ):
-                data["output_format[encoding]"] = output_format.encoding
+                data["output_format[encoding]"] = output_format_dict["encoding"]
 
             _response = self._client_wrapper.httpx_client.request(
                 "infill/bytes",
@@ -119,7 +122,7 @@ class TtsClientWithWebsocket(TtsClient):
                         right_audio = None
 
                     infill_audio = _response.content
-                    format = output_format.container.lower()
+                    format = output_format_dict["container"].lower()
                     total_audio = concat_audio_segments(
                         left_audio, infill_audio, right_audio, format=format
                     )
@@ -156,7 +159,7 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
         super().__init__(client_wrapper=client_wrapper)
         self._get_session = get_session
 
-    def get_output_format(self, output_format_name: str) -> OutputFormat:
+    def get_output_format(self, output_format_name: str) -> OutputFormatParams:
         return get_output_format(output_format_name)
 
     def _ws_url(self) -> str:
@@ -175,7 +178,7 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
         language: str,
         transcript: str,
         voice: TtsRequestVoiceSpecifier,
-        output_format: OutputFormat,
+        output_format: OutputFormatParams,
         left_audio_path: typing.Optional[str] = None,
         right_audio_path: typing.Optional[str] = None,
     ) -> typing.Tuple[bytes, bytes]:
@@ -202,6 +205,8 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
         headers = self._client_wrapper.get_headers()
         headers.pop("Content-Type", None)
 
+        output_format_dict = typing.cast(dict, output_format)
+
         left_audio_file = None
         right_audio_file = None
         try:
@@ -218,17 +223,17 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
                 "language": language,
                 "transcript": transcript,
                 "voice": voice,
-                "output_format[container]": output_format.container,
-                "output_format[sample_rate]": output_format.sample_rate,
+                "output_format[container]": output_format_dict["container"],
+                "output_format[sample_rate]": output_format_dict["sample_rate"],
             }
 
-            if output_format.bit_rate is not None:
-                data["output_format[bit_rate]"] = output_format.bit_rate
+            if output_format_dict["bit_rate"] is not None:
+                data["output_format[bit_rate]"] = output_format_dict["bit_rate"]
             if (
-                hasattr(output_format, "encoding")
-                and output_format.encoding is not None
+                "encoding" in output_format_dict
+                and output_format_dict["encoding"] is not None
             ):
-                data["output_format[encoding]"] = output_format.encoding
+                data["output_format[encoding]"] = output_format_dict["encoding"]
 
             _response = await self._client_wrapper.httpx_client.request(
                 "infill/bytes",
@@ -254,7 +259,7 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
                         right_audio = None
 
                     infill_audio = _response.content
-                    audio_format = output_format.container.lower()
+                    audio_format = output_format_dict["container"].lower()
                     total_audio = concat_audio_segments(
                         left_audio, infill_audio, right_audio, format=audio_format
                     )
