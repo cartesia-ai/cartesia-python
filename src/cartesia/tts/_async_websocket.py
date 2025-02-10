@@ -10,6 +10,9 @@ import aiohttp
 
 from cartesia.tts.types import (
     OutputFormat,
+    OutputFormat_Raw,
+    OutputFormat_Wav,
+    OutputFormat_Mp3,
     TtsRequestEmbeddingSpecifier,
     TtsRequestVoiceSpecifier,
     WebSocketResponse,
@@ -87,7 +90,7 @@ class _AsyncTTSContext:
             "transcript": transcript,
             "output_format": (
                 output_format.dict()
-                if isinstance(output_format, OutputFormat)
+                if isinstance(output_format, (OutputFormat_Raw, OutputFormat_Wav, OutputFormat_Mp3))
                 else output_format
             ),
             "voice": voice.dict() if hasattr(voice, "dict") else voice,
