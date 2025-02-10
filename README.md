@@ -65,14 +65,14 @@ client = Cartesia(
 client.tts.bytes(
     model_id="sonic-english",
     transcript="Hello, world!",
-    voice=TtsRequestIdSpecifier(
-        id="694f9389-aac1-45b6-b726-9d9369183238",
+    voice={"id": "694f9389-aac1-45b6-b726-9d9369183238"},
     ),
     language="en",
-    output_format=OutputFormat_Raw(
-        sample_rate=44100,
-        encoding="pcm_f32le",
-    ),
+    output_format={
+        "container": "raw",
+        "sample_rate": 44100,
+        "encoding": "pcm_f32le",
+    },
 )
 ```
 
@@ -95,14 +95,13 @@ async def main() -> None:
     await client.tts.bytes(
         model_id="sonic-english",
         transcript="Hello, world!",
-        voice=TtsRequestIdSpecifier(
-            id="694f9389-aac1-45b6-b726-9d9369183238",
-        ),
+        voice={"id": "694f9389-aac1-45b6-b726-9d9369183238"},
         language="en",
-        output_format=OutputFormat_Raw(
-            sample_rate=44100,
-            encoding="pcm_f32le",
-        ),
+        output_format={
+            "container": "raw",
+            "sample_rate": 44100,
+            "encoding": "pcm_f32le",
+        },
     )
 
 
@@ -130,7 +129,7 @@ The SDK supports streaming responses, as well, the response will be a generator 
 
 ```python
 from cartesia import Cartesia
-from cartesia.tts import Controls, OutputFormat_Raw, TtsRequestIdSpecifier
+from cartesia.tts import Controls, OutputFormat_RawParams, TtsRequestIdSpecifierParams
 
 client = Cartesia(
     api_key="YOUR_API_KEY",
@@ -138,15 +137,15 @@ client = Cartesia(
 response = client.tts.sse(
     model_id="string",
     transcript="string",
-    voice=TtsRequestIdSpecifier(
-        id="string",
-        experimental_controls=Controls(
+    voice={
+        "id": "string",
+        "experimental_controls": {
             speed=1.1,
             emotion="anger:lowest",
-        ),
-    ),
+        },
+    },
     language="en",
-    output_format=OutputFormat_Raw(),
+    output_format={},
     duration=1.1,
 )
 for chunk in response:
@@ -157,7 +156,7 @@ for chunk in response:
 
 ```python
 from cartesia import Cartesia
-from cartesia.tts import TtsRequestEmbeddingSpecifier, OutputFormat_Raw
+from cartesia.tts import TtsRequestEmbeddingSpecifierParams, OutputFormat_RawParams
 import pyaudio
 
 client = Cartesia(
@@ -169,13 +168,6 @@ transcript = "Hello! Welcome to Cartesia"
 
 # You can check out our models at https://docs.cartesia.ai/getting-started/available-models
 model_id = "sonic-english"
-
-# You can find the supported `output_format`s at https://docs.cartesia.ai/reference/api-reference/rest/stream-speech-server-sent-events
-output_format = OutputFormat_Raw(
-    container="raw",
-    encoding="pcm_f32le",
-    sample_rate=22050
-)
 
 p = pyaudio.PyAudio()
 rate = 22050
@@ -189,9 +181,13 @@ ws = client.tts.websocket()
 for output in ws.send(
     model_id=model_id,
     transcript=transcript,
-    voice=TtsRequestEmbeddingSpecifier(embedding=voice.embedding),
+    voice={"embedding": voice.embedding},
     stream=True,
-    output_format=output_format,
+    output_format={
+        "container": "raw",
+        "encoding": "pcm_f32le", 
+        "sample_rate": 22050
+    },
 ):
     buffer = output.audio
 

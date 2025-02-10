@@ -89,11 +89,7 @@ class _AsyncTTSContext:
                 if isinstance(output_format, dict)
                 else output_format.dict()
             ),
-            "voice": (
-                voice
-                if isinstance(voice, dict)
-                else voice.dict()
-            ),
+            "voice": (voice if isinstance(voice, dict) else voice.dict()),
             "context_id": self._context_id,
         }
         if context_id is not None:
@@ -366,28 +362,32 @@ class AsyncTtsWebsocket(TtsWebsocket):
         if stream:
             return generator
 
-        chunks = []
-        word_timestamps = defaultdict(list)
+        chunks: typing.List[str] = []
+        words: typing.List[str] = []
+        start: typing.List[float] = []
+        end: typing.List[float] = []
         async for chunk in generator:
-            if "audio" in chunk:
-                chunks.append(chunk["audio"])
-            if add_timestamps and "word_timestamps" in chunk:
-                for k, v in chunk["word_timestamps"].items():
-                    word_timestamps[k].extend(v)
-        out = WebSocketTtsOutput(
-            audio=b"".join(chunks),
+            if chunk.audio is not None:
+                chunks.append(chunk.audio)
+            if add_timestamps and chunk.word_timestamps is not None:
+                if chunk.word_timestamps is not None:
+                    words.extend(chunk.word_timestamps.words)
+                    start.extend(chunk.word_timestamps.start)
+                    end.extend(chunk.word_timestamps.end)
+
+        return WebSocketTtsOutput(
+            audio=b"".join(chunks),  # type: ignore
             context_id=context_id,
             word_timestamps=(
                 WordTimestamps(
-                    words=word_timestamps["words"],
-                    start=word_timestamps["start"],
-                    end=word_timestamps["end"],
+                    words=words,
+                    start=start,
+                    end=end,
                 )
                 if add_timestamps
                 else None
             ),
         )
-        return out
 
     async def _process_responses(self):
         try:
