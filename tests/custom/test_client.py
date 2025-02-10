@@ -224,7 +224,6 @@ def test_mix_voice(client: Cartesia):
     assert all(isinstance(x, float) for x in output.embedding)
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 @pytest.mark.parametrize(
     "voice_controls",
     [
@@ -252,11 +251,11 @@ def test_sse_send(resources: _Resources, voice_controls: Optional[ControlsParams
         model_id=DEFAULT_MODEL_ID,
     )
 
+    expected_types = WebSocketResponse.__args__
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)  # type: ignore
+        assert isinstance(response, expected_types)  # type: ignore
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 def test_sse_send_with_model_id(resources: _Resources):
     logger.info("Testing SSE send with model_id")
     client = resources.client
@@ -269,11 +268,11 @@ def test_sse_send_with_model_id(resources: _Resources):
         model_id=DEFAULT_MODEL_ID,
     )
 
+    expected_types = WebSocketResponse.__args__
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)  # type: ignore
+        assert isinstance(response, expected_types)  # type: ignore
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 @pytest.mark.asyncio
 async def test_sse_send_concurrent():
     async def send_sse_request(
@@ -287,8 +286,10 @@ async def test_sse_send_concurrent():
             output_format=output_format,
             model_id=model_id,
         )
+
+        expected_types = WebSocketResponse.__args__
         async for response in output_generate:
-            assert isinstance(response, WebSocketResponse)  # type: ignore
+            assert isinstance(response, expected_types)  # type: ignore
 
     logger.info("Testing concurrent SSE send")
     client = create_async_client()
@@ -314,7 +315,6 @@ async def test_sse_send_concurrent():
     await asyncio.gather(*tasks)
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 def test_sse_send_with_embedding(resources: _Resources):
     transcript = SAMPLE_TRANSCRIPT
     voice = resources.client.voices.get(SAMPLE_VOICE_ID)
@@ -327,11 +327,11 @@ def test_sse_send_with_embedding(resources: _Resources):
         model_id=DEFAULT_MODEL_ID,
     )
 
+    expected_types = WebSocketResponse.__args__
     for response in output_generate:
-        assert isinstance(response, WebSocketResponse)  # type: ignore
+        assert isinstance(response, expected_types)  # type: ignore
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 @pytest.mark.parametrize(
     "voice_controls",
     [
@@ -362,11 +362,11 @@ def test_sse_send_context_manager(
         )
         assert isinstance(output_generate, Iterator)
 
+        expected_types = WebSocketResponse.__args__
         for response in output_generate:
-            assert isinstance(response, WebSocketResponse)  # type: ignore
+            assert isinstance(response, expected_types)  # type: ignore
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 def test_sse_send_context_manager_with_err():
     logger.info("Testing SSE send context manager with error")
     transcript = SAMPLE_TRANSCRIPT
@@ -384,7 +384,6 @@ def test_sse_send_context_manager_with_err():
         pass
 
 
-@pytest.mark.skip(reason="Working locally but failing on CI")
 def test_websocket_send_context_manager(resources: _Resources):
     logger.info("Testing WebSocket send context manager")
     transcript = SAMPLE_TRANSCRIPT
