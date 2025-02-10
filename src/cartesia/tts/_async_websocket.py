@@ -89,7 +89,11 @@ class _AsyncTTSContext:
                 if isinstance(output_format, dict)
                 else output_format.dict()
             ),
-            "voice": voice.dict() if hasattr(voice, "dict") else voice,
+            "voice": (
+                voice
+                if isinstance(voice, dict)
+                else voice.dict()
+            ),
             "context_id": self._context_id,
         }
         if context_id is not None:
