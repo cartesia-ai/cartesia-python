@@ -8,10 +8,7 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 
 import aiohttp
 
-from cartesia.tts.requests import (
-    TtsRequestEmbeddingSpecifierParams,
-    TtsRequestVoiceSpecifierParams,
-)
+from cartesia.tts.requests import TtsRequestVoiceSpecifierParams
 from cartesia.tts.requests.output_format import OutputFormatParams
 from cartesia.tts.types import (
     WebSocketResponse,
