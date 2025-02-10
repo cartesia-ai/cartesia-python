@@ -41,6 +41,7 @@ httpx-sse = "0.4.0"
 iterators = ">=0.2.0"
 pydantic = ">= 1.9.2"
 pydantic-core = "^2.18.2"
+pydub = ">=0.25.1"
 typing_extensions = ">= 4.0.0"
 websockets = ">=10.4"
 

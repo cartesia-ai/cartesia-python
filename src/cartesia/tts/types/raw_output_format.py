@@ -2,14 +2,15 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 from .raw_encoding import RawEncoding
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import typing
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
 
 class RawOutputFormat(UniversalBaseModel):
     encoding: RawEncoding
     sample_rate: int
+    bit_rate: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
