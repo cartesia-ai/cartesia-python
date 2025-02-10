@@ -64,6 +64,14 @@ class TtsClientWithWebsocket(TtsClient):
                 "Must specify at least one of left_audio_path or right_audio_path"
             )
 
+        if voice.mode != "id":
+            raise ValueError("Infill is only supported for id-based voice specifiers")
+
+        if output_format.container == "raw":
+            raise ValueError(
+                "Raw format is not supported for infill. Use wav or mp3 format instead."
+            )
+
         headers = self._client_wrapper.get_headers()
         headers.pop("Content-Type", None)
 
@@ -73,17 +81,17 @@ class TtsClientWithWebsocket(TtsClient):
             files = {}
             if left_audio_path:
                 left_audio_file = open(left_audio_path, "rb")
-                files["left_audio"] = (None, left_audio_file)
+                files["left_audio"] = left_audio_file
             if right_audio_path:
                 right_audio_file = open(right_audio_path, "rb")
-                files["right_audio"] = (None, right_audio_file)
+                files["right_audio"] = right_audio_file
 
             # Construct form data with output_format fields directly
             data = {
                 "model_id": model_id,
                 "language": language,
                 "transcript": transcript,
-                "voice": voice,
+                "voice_id": voice.id,
                 "output_format[container]": output_format.container,
                 "output_format[sample_rate]": output_format.sample_rate,
             }
@@ -199,6 +207,14 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
                 "Must specify at least one of left_audio_path or right_audio_path"
             )
 
+        if voice.mode != "id":
+            raise ValueError("Infill is only supported for id-based voice specifiers")
+
+        if output_format.container == "raw":
+            raise ValueError(
+                "Raw format is not supported for infill. Use wav or mp3 format instead."
+            )
+
         headers = self._client_wrapper.get_headers()
         headers.pop("Content-Type", None)
 
@@ -208,16 +224,16 @@ class AsyncTtsClientWithWebsocket(AsyncTtsClient):
             files = {}
             if left_audio_path:
                 left_audio_file = open(left_audio_path, "rb")
-                files["left_audio"] = (None, left_audio_file)
+                files["left_audio"] = left_audio_file
             if right_audio_path:
                 right_audio_file = open(right_audio_path, "rb")
-                files["right_audio"] = (None, right_audio_file)
+                files["right_audio"] = right_audio_file
 
             data = {
                 "model_id": model_id,
                 "language": language,
                 "transcript": transcript,
-                "voice": voice,
+                "voice_id": voice.id,
                 "output_format[container]": output_format.container,
                 "output_format[sample_rate]": output_format.sample_rate,
             }
