@@ -1,0 +1,18 @@
+# Specify files that shouldn't be modified by Fern
+
+mypy.ini
+requirements.txt
+.github/workflows/ci.yml
+
+# Custom Client Modifications
+
+src/cartesia/client.py
+src/cartesia/tts/_async_websocket.py
+src/cartesia/tts/_websocket.py
+src/cartesia/tts/socket_client.py
+src/cartesia/tts/utils
+src/cartesia/tts/types/web_socket_tts_output.py
+tests/custom
+
+# Pending changes to README.md generation
+README.md
