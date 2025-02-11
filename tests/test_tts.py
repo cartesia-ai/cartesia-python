@@ -126,24 +126,6 @@ def test_create_voice(client: Cartesia):
     client.voices.delete(voice["id"])
 
 
-@pytest.mark.skip(reason="Enable after https://github.com/cartesia-ai/bifrost/pull/847 is deployed")
-def test_create_voice_with_parent(client: Cartesia):
-    logger.info("Testing voices.create with parent")
-    voice = client.voices.create(
-        name="Test Base voice",
-        description="Test base voice description",
-        embedding=np.ones(192).tolist(),
-        base_voice_id=SAMPLE_VOICE_ID,
-    )
-    assert isinstance(voice, dict)
-    assert voice["base_voice_id"] == SAMPLE_VOICE_ID
-
-    get_voice = client.voices.get(voice["id"])
-    assert get_voice["base_voice_id"] == SAMPLE_VOICE_ID
-
-    client.voices.delete(voice["id"])
-
-
 def test_mix_voice(client: Cartesia):
     logger.info("Testing voices.mix")
     output = client.voices.mix(

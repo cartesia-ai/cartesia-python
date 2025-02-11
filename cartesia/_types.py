@@ -36,7 +36,6 @@ class VoiceMetadata(TypedDict):
     user_id: str
     created_at: str
     language: str
-    base_voice_id: Optional[str] = None
 
 
 class VoiceControls(TypedDict):
@@ -62,6 +61,7 @@ class OutputFormat(TypedDict):
     container: str
     encoding: str
     sample_rate: int
+    bit_rate: Optional[int] = None
 
 
 class EventType:

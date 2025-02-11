@@ -122,7 +122,6 @@ class Voices(Resource):
         name: str,
         description: str,
         embedding: List[float],
-        base_voice_id: Optional[str] = None,
         language: str = "en",
     ) -> VoiceMetadata:
         """Create a new voice.
@@ -131,7 +130,6 @@ class Voices(Resource):
             name: The name of the voice.
             description: The description of the voice.
             embedding: The embedding of the voice. This should be generated with :meth:`clone`.
-            base_voice_id: The ID of the base voice. This should be a valid voice ID if specified.
 
         Returns:
             A dictionary containing the voice metadata.
@@ -143,7 +141,6 @@ class Voices(Resource):
                 "name": name,
                 "description": description,
                 "embedding": embedding,
-                "base_voice_id": base_voice_id,
                 "language": language,
             },
             timeout=self.timeout,
