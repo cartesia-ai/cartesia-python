@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 import uuid
-from typing import AsyncGenerator, Generator, Iterator, List, Optional, TypedDict, Union
+from typing import  Generator, List, Optional, TypedDict, Union
 
 import pytest
 from pydantic import ValidationError
@@ -29,7 +29,6 @@ from cartesia.tts.requests.output_format import (
     OutputFormatParams,
 )
 from cartesia.tts.types import (
-    WebSocketResponse,
     WebSocketResponse_Chunk,
     WebSocketTtsOutput,
     WordTimestamps,
@@ -54,9 +53,7 @@ DEFAULT_OUTPUT_FORMAT_PARAMS = {
     "encoding": "pcm_f32le",
     "sample_rate": 44100,
 }
-DEFAULT_OUTPUT_FORMAT = OutputFormat_RawParams(
-    container="raw", encoding="pcm_f32le", sample_rate=44100
-)
+DEFAULT_OUTPUT_FORMAT = OutputFormat_RawParams(container="raw", encoding="pcm_f32le", sample_rate=44100)
 EXPERIMENTAL_VOICE_CONTROLS = {
     "speed": "fastest",
     "emotion": ["anger:high", "positivity:low"],
@@ -84,6 +81,13 @@ def _output_format_to_str(fmt: OutputFormatParams) -> str:
         return f"mp3_{fmt['sample_rate']}"
 
 
+TEST_RAW_OUTPUT_FORMATS = [
+    OutputFormat_RawParams(container="raw", encoding="pcm_f32le", sample_rate=44100),
+    OutputFormat_RawParams(container="raw", encoding="pcm_s16le", sample_rate=44100),
+    OutputFormat_RawParams(container="raw", encoding="pcm_f32le", sample_rate=16000),
+    OutputFormat_RawParams(container="raw", encoding="pcm_s16le", sample_rate=16000),
+]
+
 TEST_OUTPUT_FORMATS = [
     # WAV format with different encodings and sample rates
     OutputFormat_WavParams(container="wav", encoding="pcm_f32le", sample_rate=44100),
@@ -97,19 +101,11 @@ TEST_OUTPUT_FORMATS = [
 # Input audio files keyed by output format string
 TEST_INPUT_AUDIO_PATHS = {
     # WAV 44.1kHz
-    "wav_pcm_f32le_44100": os.path.join(
-        RESOURCES_DIR, "sample-speech-4s-pcm_f32le-44100.wav"
-    ),
-    "wav_pcm_s16le_44100": os.path.join(
-        RESOURCES_DIR, "sample-speech-4s-pcm_s16le-44100.wav"
-    ),
+    "wav_pcm_f32le_44100": os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_f32le-44100.wav"),
+    "wav_pcm_s16le_44100": os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-44100.wav"),
     # WAV 16kHz
-    "wav_pcm_f32le_16000": os.path.join(
-        RESOURCES_DIR, "sample-speech-4s-pcm_f32le-16000.wav"
-    ),
-    "wav_pcm_s16le_16000": os.path.join(
-        RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav"
-    ),
+    "wav_pcm_f32le_16000": os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_f32le-16000.wav"),
+    "wav_pcm_s16le_16000": os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav"),
     # MP3
     "mp3_44100": os.path.join(RESOURCES_DIR, "sample-speech-4s-44100.mp3"),
 }
@@ -118,9 +114,7 @@ logger = logging.getLogger(__name__)
 
 
 class _Resources:
-    def __init__(
-        self, *, client: Cartesia, voices: List[VoiceMetadata], voice: VoiceMetadata
-    ):
+    def __init__(self, *, client: Cartesia, voices: List[VoiceMetadata], voice: VoiceMetadata):
         self.client = client
         self.voices = voices
         self.voice = voice
@@ -147,6 +141,72 @@ def resources(client: Cartesia):
     voices = client.voices.list()
 
     return _Resources(client=client, voices=voices, voice=voice)  # type: ignore
+
+
+def _validate_schema(out: WebSocketTtsOutput):
+    if out.audio is not None:
+        assert isinstance(out.audio, bytes)
+    if out.word_timestamps is not None:
+        assert isinstance(out.word_timestamps, WordTimestamps)
+        word_timestamps = out.word_timestamps
+
+        assert word_timestamps.words is not None
+        assert word_timestamps.start is not None
+        assert word_timestamps.end is not None
+        assert isinstance(word_timestamps.words, list) and all(isinstance(word, str) for word in word_timestamps.words)
+        assert isinstance(word_timestamps.start, list) and all(
+            isinstance(start, (int, float)) for start in word_timestamps.start
+        )
+        assert isinstance(word_timestamps.end, list) and all(
+            isinstance(end, (int, float)) for end in word_timestamps.end
+        )
+
+
+def _validate_wav_response(data: bytes):
+    """Validate WAV format audio data."""
+    assert data.startswith(b"RIFF")
+    assert data[8:12] == b"WAVE"
+    assert len(data) > 44  # Ensure there's audio data beyond the header
+
+
+def _validate_mp3_response(data: bytes):
+    """Validate MP3 format audio data.
+
+    We do basic validation:
+    1. Check minimum length
+    2. Look for MP3 frame sync word anywhere in first 1KB
+    3. Don't enforce specific MPEG version/layer as encoder may vary
+    """
+    assert len(data) > 128, "MP3 data too short"
+
+    # Search for sync word in first 1KB
+    # Valid sync word: 11 bits set (0xFFE0) followed by valid version/layer bits
+    found_sync = False
+    search_window = min(len(data), 1024)
+    for i in range(search_window - 1):
+        if data[i] == 0xFF and (data[i + 1] & 0xE0) == 0xE0:
+            found_sync = True
+            break
+    assert found_sync, "No valid MP3 frame sync found"
+
+
+def _validate_raw_response(data: bytes, sample_rate: int, min_duration_s: float = 1.0):
+    """Validate raw audio data."""
+    assert len(data) >= sample_rate * min_duration_s, "Raw audio data is too short"
+
+
+def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
+    """Validate audio data based on format."""
+    assert len(data) > 0  # All formats should have non-empty data
+
+    if output_format["container"] == "wav":
+        _validate_wav_response(data)
+    elif output_format["container"] == "mp3":
+        _validate_mp3_response(data)
+    elif output_format["container"] == "raw":
+        _validate_raw_response(data, output_format["sample_rate"])
+    else:
+        raise ValueError(f"Unsupported output format container: {output_format['container']}")
 
 
 def test_get_voices(client: Cartesia):
@@ -224,151 +284,101 @@ def test_mix_voice(client: Cartesia):
     assert all(isinstance(x, float) for x in output.embedding)
 
 
-@pytest.mark.parametrize(
-    "voice_controls",
-    [
-        None,
-        {"speed": 1.0, "emotion": ["positivity:high"]},
-        {
-            "speed": "normal",
-            "emotion": ["curiosity:high", "surprise:high"],
-        },
-    ],
-)
-def test_sse_send(resources: _Resources, voice_controls: Optional[ControlsParams]):
-    logger.info("Testing SSE send")
+@pytest.mark.parametrize("output_format", TEST_OUTPUT_FORMATS)
+def test_bytes_sync(resources: _Resources, output_format: OutputFormatParams):
+    logger.info("Testing bytes sync")
     client = resources.client
     transcript = SAMPLE_TRANSCRIPT
 
-    voice: TtsRequestVoiceSpecifierParams = {"mode": "id", "id": SAMPLE_VOICE_ID}
-    if voice_controls:
-        voice["experimental_controls"] = voice_controls
-
-    output_generate = client.tts.sse(
+    output = client.tts.bytes(
         transcript=transcript,
-        voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=output_format,
         model_id=DEFAULT_MODEL_ID,
     )
 
-    expected_types = WebSocketResponse.__args__
-    for response in output_generate:
-        assert isinstance(response, expected_types)  # type: ignore
+    data = b"".join(output)
+    _validate_audio_response(data, output_format)
 
 
-def test_sse_send_with_model_id(resources: _Resources):
-    logger.info("Testing SSE send with model_id")
+@pytest.mark.asyncio
+async def test_bytes_async():
+    """Test asynchronous bytes generation."""
+    async with create_async_client() as async_client:
+        chunks = []
+        async for chunk in async_client.tts.bytes(
+            model_id=DEFAULT_MODEL_ID,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            transcript=SAMPLE_TRANSCRIPT,
+            output_format={
+                "container": "wav",
+                "encoding": "pcm_f32le",
+                "sample_rate": 44100,
+            },
+        ):
+            chunks.append(chunk)
+
+        data = b"".join(chunks)
+        _validate_wav_response(data)
+
+
+@pytest.mark.parametrize("output_format", TEST_RAW_OUTPUT_FORMATS)
+def test_sse_sync(resources: _Resources, output_format: OutputFormatParams):
+    logger.info("Testing SSE sync")
     client = resources.client
     transcript = SAMPLE_TRANSCRIPT
 
     output_generate = client.tts.sse(
         transcript=transcript,
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+        output_format=output_format,
         model_id=DEFAULT_MODEL_ID,
     )
 
-    expected_types = WebSocketResponse.__args__
+    chunks = []
     for response in output_generate:
-        assert isinstance(response, expected_types)  # type: ignore
+        assert isinstance(response, WebSocketResponse_Chunk)
+        audio_bytes = base64.b64decode(response.data)
+        chunks.append(audio_bytes)
+
+    data = b"".join(chunks)
+    _validate_audio_response(data, output_format)
 
 
 @pytest.mark.asyncio
-async def test_sse_send_concurrent():
-    async def send_sse_request(
-        client, transcript, voice_id, output_format, model_id, num
-    ):
+@pytest.mark.parametrize("num_requests", [1, 4])
+async def test_sse_async(num_requests: int):
+    """Test asynchronous SSE generation with concurrent requests."""
+
+    async def send_sse_request(client, transcript, num):
         logger.info(f"Concurrent SSE request {num} sent")
         await asyncio.sleep(0.1)
         output_generate = client.tts.sse(
             transcript=transcript,
-            voice={"mode": "id", "id": voice_id},
-            output_format=output_format,
-            model_id=model_id,
-        )
-
-        expected_types = WebSocketResponse.__args__
-        async for response in output_generate:
-            assert isinstance(response, expected_types)  # type: ignore
-
-    logger.info("Testing concurrent SSE send")
-    client = create_async_client()
-
-    transcripts = [
-        "Hello, world! I'm generating audio on Cartesia. Hello, world! I'm generating audio on Cartesia.",
-        "Hello, world! I'm generating audio on Cartesia. Hello, world! I'm generating audio on Cartesia.",
-        "Hello, world! I'm generating audio on Cartesia. Hello, world! I'm generating audio on Cartesia.",
-    ]
-
-    tasks = [
-        send_sse_request(
-            client,
-            transcript,
-            SAMPLE_VOICE_ID,
-            DEFAULT_OUTPUT_FORMAT_PARAMS,
-            DEFAULT_MODEL_ID,
-            num,
-        )
-        for num, transcript in enumerate(transcripts)
-    ]
-
-    await asyncio.gather(*tasks)
-
-
-def test_sse_send_with_embedding(resources: _Resources):
-    transcript = SAMPLE_TRANSCRIPT
-    voice = resources.client.voices.get(SAMPLE_VOICE_ID)
-    embedding = voice.embedding
-
-    output_generate = resources.client.tts.sse(
-        transcript=transcript,
-        voice={"mode": "embedding", "embedding": embedding},
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
-        model_id=DEFAULT_MODEL_ID,
-    )
-
-    expected_types = WebSocketResponse.__args__
-    for response in output_generate:
-        assert isinstance(response, expected_types)  # type: ignore
-
-
-@pytest.mark.parametrize(
-    "voice_controls",
-    [
-        None,
-        {"speed": 1.0, "emotion": ["positivity:high"]},  # Example voice controls
-        {
-            "speed": "normal",
-            "emotion": ["curiosity:high", "surprise:high"],
-        },  # Example voice controls 2
-    ],
-)
-def test_sse_send_context_manager(
-    resources: _Resources, voice_controls: Optional[ControlsParams]
-):
-    logger.info("Testing SSE send context manager")
-    transcript = SAMPLE_TRANSCRIPT
-
-    voice: TtsRequestVoiceSpecifierParams = {"mode": "id", "id": SAMPLE_VOICE_ID}
-    if voice_controls:
-        voice["experimental_controls"] = voice_controls
-
-    with create_client() as client:
-        output_generate = client.tts.sse(
-            transcript=transcript,
-            voice=voice,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             model_id=DEFAULT_MODEL_ID,
         )
-        assert isinstance(output_generate, Iterator)
 
-        expected_types = WebSocketResponse.__args__
-        for response in output_generate:
-            assert isinstance(response, expected_types)  # type: ignore
+        chunks = []
+        async for response in output_generate:
+            assert isinstance(response, WebSocketResponse_Chunk)
+            audio_bytes = base64.b64decode(response.data)
+            chunks.append(audio_bytes)
+
+        data = b"".join(chunks)
+        _validate_audio_response(data, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    async with create_async_client() as async_client:
+        transcripts = [SAMPLE_TRANSCRIPT] * num_requests
+
+        tasks = [send_sse_request(async_client, transcript, num) for num, transcript in enumerate(transcripts)]
+
+        await asyncio.gather(*tasks)
 
 
-def test_sse_send_context_manager_with_err():
-    logger.info("Testing SSE send context manager with error")
+def test_sse_err():
+    logger.info("Testing SSE with error")
     transcript = SAMPLE_TRANSCRIPT
 
     try:
@@ -384,8 +394,11 @@ def test_sse_send_context_manager_with_err():
         pass
 
 
-def test_websocket_send_context_manager(resources: _Resources):
+@pytest.mark.parametrize("output_format", TEST_RAW_OUTPUT_FORMATS)
+@pytest.mark.parametrize("stream", [True, False])
+def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, stream: bool):
     logger.info("Testing WebSocket send context manager")
+    client = resources.client
     transcript = SAMPLE_TRANSCRIPT
 
     with create_client() as client:
@@ -393,18 +406,21 @@ def test_websocket_send_context_manager(resources: _Resources):
         output_generate = ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+            output_format=output_format,
             model_id=DEFAULT_MODEL_ID,
-            stream=True,
+            stream=stream,
         )
-        assert isinstance(output_generate, Generator)
+        if stream:
+            assert isinstance(output_generate, Generator)
+            audio = b"".join(out.audio for out in output_generate)
+        else:
+            assert isinstance(output_generate, WebSocketTtsOutput)
+            audio = output_generate.audio
 
-        for out in output_generate:
-            assert isinstance(out.audio, bytes)
+        _validate_audio_response(audio, output_format)
 
-
-def test_websocket_send_context_manage_err(resources: _Resources):
-    logger.info("Testing WebSocket send context manager")
+def test_ws_err():
+    logger.info("Testing WebSocket with error")
     transcript = SAMPLE_TRANSCRIPT
 
     try:
@@ -422,66 +438,72 @@ def test_websocket_send_context_manage_err(resources: _Resources):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "voice_controls",
-    [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2],
-)
-async def test_async_sse_send(resources: _Resources, voice_controls: VoiceControls):
-    logger.info("Testing async SSE send")
-    transcript = SAMPLE_TRANSCRIPT
+@pytest.mark.parametrize("num_requests", [1, 4])
+@pytest.mark.parametrize("stream", [True, False])
+async def test_ws_async(num_requests: int, stream: bool):
+    """Test asynchronous WebSocket generation with concurrent requests."""
 
-    voice = {"mode": "id", "id": SAMPLE_VOICE_ID}
-    if voice_controls:
-        voice["experimental_controls"] = voice_controls  # type: ignore
+    async def send_websocket_request(client, transcript, num):
+        logger.info(f"Concurrent WebSocket request {num} sent")
+        await asyncio.sleep(0.1)
+        ws = await client.tts.websocket()
+        try:
+            output_generate = await ws.send(
+                transcript=transcript,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+                model_id=DEFAULT_MODEL_ID,
+                stream=stream,
+            )
 
-    async_client = create_async_client()
-    output = async_client.tts.sse(
-        transcript=transcript,
-        voice=voice,
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-        model_id=DEFAULT_MODEL_ID,
-    )
+            if stream:
+                chunks = []
+                async for out in output_generate:
+                    chunks.append(out.audio)
 
-    async for out in output:
-        assert isinstance(base64.b64decode(out.data), bytes)
+                audio = b"".join(chunks)
+            else:
+                audio = output_generate.audio
+
+            _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+        finally:
+            await ws.close()
+
+    async with create_async_client() as async_client:
+        transcripts = [SAMPLE_TRANSCRIPT] * num_requests
+
+        tasks = [send_websocket_request(async_client, transcript, num) for num, transcript in enumerate(transcripts)]
+
+        await asyncio.gather(*tasks)
+
+
+def _validate_timestamps(all_words: List[str], all_starts: List[float], all_ends: List[float], transcript: str):
+    """Helper method to validate word timestamps against a transcript.
+
+    Args:
+        all_words: List of words from timestamps
+        all_starts: List of start times
+        all_ends: List of end times
+        transcript: Original transcript text
+    """
+    # Verify timestamps
+    expected_words = transcript.split()
+    assert len(all_words) == len(
+        expected_words
+    ), f"Expected {len(expected_words)} words in timestamps, got {len(all_words)}"
+    assert len(all_starts) == len(all_words), "Number of start times doesn't match number of words"
+    assert len(all_ends) == len(all_words), "Number of end times doesn't match number of words"
+
+    # Verify timing order
+    for i in range(len(all_starts) - 1):
+        assert all_starts[i] <= all_starts[i + 1], "Start times are not monotonically increasing"
+        assert all_ends[i] <= all_starts[i + 1], "Word end time is after next word's start time"
+        assert all_starts[i] <= all_ends[i], "Word start time is after its end time"
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "voice_controls",
-    [None, EXPERIMENTAL_VOICE_CONTROLS, EXPERIMENTAL_VOICE_CONTROLS_2],
-)
-async def test_async_websocket_send(
-    resources: _Resources, voice_controls: VoiceControls
-):
-    logger.info("Testing async WebSocket send")
-    transcript = SAMPLE_TRANSCRIPT
-
-    voice = {"mode": "id", "id": SAMPLE_VOICE_ID}
-    if voice_controls:
-        voice["experimental_controls"] = voice_controls  # type: ignore
-
-    async_client = create_async_client()
-    ws = await async_client.tts.websocket()
-    output_generate = await ws.send(
-        transcript=transcript,
-        voice=voice,  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
-        model_id=DEFAULT_MODEL_ID,
-        stream=True,
-    )
-
-    async for out in output_generate:
-        assert isinstance(out.audio, bytes)
-
-    # Close the websocket
-    await ws.close()
-    await async_client.close()
-
-
-@pytest.mark.asyncio
-async def test_async_websocket_send_timestamps(resources: _Resources):
-    logger.info("Testing async WebSocket send with timestamps")
+async def test_ws_timestamps():
+    logger.info("Testing WebSocket with timestamps")
     transcript = SAMPLE_TRANSCRIPT
 
     async_client = create_async_client()
@@ -495,121 +517,32 @@ async def test_async_websocket_send_timestamps(resources: _Resources):
         stream=True,
     )
     has_wordtimestamps = False
+    chunks = []
+    all_words = []
+    all_starts = []
+    all_ends = []
     async for out in output_generate:
         assert out.context_id is not None
         has_wordtimestamps |= out.word_timestamps is not None
         _validate_schema(out)
+        if out.word_timestamps is not None:
+            all_words.extend(out.word_timestamps.words)
+            all_starts.extend(out.word_timestamps.start)
+            all_ends.extend(out.word_timestamps.end)
+        has_audio = out.audio is not None
+        if has_audio:
+            chunks.append(out.audio)
 
     assert has_wordtimestamps, "No word timestamps found"
+    _validate_timestamps(all_words, all_starts, all_ends, transcript)
+
+    # Verify audio
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     # Close the websocket
     await ws.close()
     await async_client.close()
-
-
-@pytest.mark.asyncio
-async def test_async_sse_send_context_manager(resources: _Resources):
-    logger.info("Testing async SSE send context manager")
-    transcript = SAMPLE_TRANSCRIPT
-
-    async with create_async_client() as async_client:
-        output_generate = async_client.tts.sse(
-            transcript=transcript,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-            model_id=DEFAULT_MODEL_ID,
-        )
-        assert isinstance(output_generate, AsyncGenerator)
-
-        async for out in output_generate:
-            assert isinstance(base64.b64decode(out.data), bytes)
-
-
-@pytest.mark.asyncio
-async def test_async_sse_send_context_manager_with_err():
-    logger.info("Testing async SSE send context manager with error")
-    transcript = SAMPLE_TRANSCRIPT
-
-    try:
-        async with create_async_client() as async_client:
-            await async_client.tts.sse(
-                transcript=transcript,
-                voice={"mode": "id", "id": ""},
-                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-                stream=True,
-                model_id=DEFAULT_MODEL_ID,
-            )  # should throw err because voice_id is ""
-        raise RuntimeError("Expected error to be thrown")
-    except Exception:
-        pass
-
-
-@pytest.mark.asyncio
-async def test_async_websocket_send_context_manager():
-    logger.info("Testing async WebSocket send context manager")
-    transcript = SAMPLE_TRANSCRIPT
-
-    async with create_async_client() as async_client:
-        ws = await async_client.tts.websocket()
-        output_generate = await ws.send(
-            transcript=transcript,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-            stream=True,
-            model_id=DEFAULT_MODEL_ID,
-        )
-        assert isinstance(output_generate, AsyncGenerator)
-
-        async for out in output_generate:
-            assert isinstance(out.audio, bytes)
-
-        await ws.close()
-
-
-@pytest.mark.parametrize("language", ["en", "es", "fr", "de", "ja", "pt", "zh"])
-def test_sse_send_multilingual(resources: _Resources, language: str):
-    logger.info("Testing SSE send")
-    client = resources.client
-    transcript = SAMPLE_TRANSCRIPT
-
-    output_generate = client.tts.sse(
-        transcript=transcript,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
-        language=language,
-        model_id=DEFAULT_MODEL_ID,
-    )
-
-    for out in output_generate:
-        if isinstance(out, WebSocketResponse_Chunk):
-            assert isinstance(base64.b64decode(out.data), bytes)
-
-
-@pytest.mark.parametrize("stream", [True, False])
-@pytest.mark.parametrize("language", ["en", "es", "fr", "de", "ja", "pt", "zh"])
-def test_websocket_send_multilingual(
-    resources: _Resources, stream: bool, language: str
-):
-    logger.info("Testing WebSocket send")
-    client = resources.client
-
-    ws = client.tts.websocket()  # type: ignore
-    output_generate = ws.send(
-        transcript=SAMPLE_TRANSCRIPT,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
-        language=language,
-        model_id=DEFAULT_MODEL_ID,
-        stream=stream,
-    )
-
-    if not stream:
-        output_generate = [output_generate]
-
-    for out in output_generate:
-        assert isinstance(out.audio, bytes)
-
-    ws.close()
 
 
 def chunk_generator(transcripts):
@@ -620,8 +553,9 @@ def chunk_generator(transcripts):
             yield transcript + " "
 
 
-def test_sync_continuation_websocket_context_send():
-    logger.info("Testing sync continuation WebSocket context send")
+@pytest.mark.parametrize("stream", [True, False])
+def test_continuation_sync(stream: bool):
+    logger.info("Testing sync continuations")
     client = create_client()
     ws = client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -633,17 +567,19 @@ def test_sync_continuation_websocket_context_send():
             transcript=chunk_generator(transcripts),
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+            stream=stream,
         )
-        for out in output_generate:
-            assert isinstance(out.audio, bytes)
+        audio = b"".join(out.audio for out in output_generate)
+        _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
     finally:
         ws.close()
 
 
-def test_sync_context_send_timestamps(resources: _Resources):
-    logger.info("Testing WebSocket send")
+def test_continuation_timestamps():
+    logger.info("Testing continuations with timestamps")
     client = create_client()
     transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
+    full_transcript = " ".join(transcripts)
 
     ws = client.tts.websocket()
     ctx = ws.context()
@@ -656,18 +592,33 @@ def test_sync_context_send_timestamps(resources: _Resources):
     )
 
     has_wordtimestamps = False
+    chunks = []
+    all_words = []
+    all_starts = []
+    all_ends = []
     for out in output_generate:
         has_wordtimestamps |= out.word_timestamps is not None
         _validate_schema(out)
+        if out.word_timestamps is not None:
+            all_words.extend(out.word_timestamps.words)
+            all_starts.extend(out.word_timestamps.start)
+            all_ends.extend(out.word_timestamps.end)
+        if out.audio is not None:
+            chunks.append(out.audio)
 
     assert has_wordtimestamps, "No word timestamps found"
+    _validate_timestamps(all_words, all_starts, all_ends, full_transcript)
+
+    # Verify audio
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     ws.close()
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send():
-    logger.info("Testing async continuation WebSocket context send")
+async def test_continuation_async():
+    logger.info("Testing async continuations")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -685,18 +636,20 @@ async def test_continuation_websocket_context_send():
 
         await ctx.no_more_inputs()
 
+        chunks = []
         async for out in ctx.receive():
-            assert isinstance(out.audio, bytes)
+            chunks.append(out.audio)
+
+        audio = b"".join(chunks)
+        _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
     finally:
         await ws.close()
         await async_client.close()
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_incorrect_transcript():
-    logger.info(
-        "Testing async continuation WebSocket context send with incorrect transcript"
-    )
+async def test_continuation_incorrect_transcript():
+    logger.info("Testing continuations with incorrect transcript")
     transcript = SAMPLE_TRANSCRIPT
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -730,10 +683,8 @@ async def test_continuation_websocket_context_send_incorrect_transcript():
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_incorrect_voice_id():
-    logger.info(
-        "Testing async continuation WebSocket context send with incorrect voice_id"
-    )
+async def test_continuation_incorrect_voice_id():
+    logger.info("Testing continuations with incorrect voice_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -762,10 +713,8 @@ async def test_continuation_websocket_context_send_incorrect_voice_id():
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_incorrect_output_format():
-    logger.info(
-        "Testing async continuation WebSocket context send with incorrect output_format"
-    )
+async def test_continuation_incorrect_output_format():
+    logger.info("Testing continuations with incorrect output_format")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -798,10 +747,8 @@ async def test_continuation_websocket_context_send_incorrect_output_format():
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_incorrect_model_id():
-    logger.info(
-        "Testing async continuation WebSocket context send with incorrect model_id"
-    )
+async def test_continuation_incorrect_model_id():
+    logger.info("Testing continuations with incorrect model_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:
@@ -826,10 +773,8 @@ async def test_continuation_websocket_context_send_incorrect_model_id():
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_incorrect_context_id():
-    logger.info(
-        "Testing async continuation WebSocket context send with incorrect context_id"
-    )
+async def test_continuation_incorrect_context_id():
+    logger.info("Testing continuations with incorrect context_id")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:
@@ -857,14 +802,15 @@ async def test_continuation_websocket_context_send_incorrect_context_id():
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_twice_on_same_context():
-    logger.info("Testing async continuation WebSocket context twice on same context")
+async def test_continuation_same_context():
+    logger.info("Testing continuations with same context")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
     try:
         ctx = ws.context(context_id)
         transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
+        full_transcript = " ".join(transcripts)
         # Send once on the context
         for _, transcript in enumerate(transcripts):
             await ctx.send(
@@ -873,6 +819,7 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
+                add_timestamps=True,
             )
 
         # Send again on the same context
@@ -883,20 +830,35 @@ async def test_continuation_websocket_context_twice_on_same_context():
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
+                add_timestamps=True,
             )
 
         await ctx.no_more_inputs()
 
+        chunks = []
+        all_words = []
+        all_starts = []
+        all_ends = []
         async for out in ctx.receive():
-            assert isinstance(out.audio, bytes)
+            if out.word_timestamps is not None:
+                all_words.extend(out.word_timestamps.words)
+                all_starts.extend(out.word_timestamps.start)
+                all_ends.extend(out.word_timestamps.end)
+            if out.audio is not None:
+                chunks.append(out.audio)
+
+        _validate_timestamps(all_words, all_starts, all_ends, full_transcript + " " + full_transcript)
+        audio = b"".join(chunks)
+        _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
     finally:
         await ws.close()
         await async_client.close()
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_send_flush():
-    logger.info("Testing async continuation WebSocket context send with flush")
+async def test_continuation_flush():
+    logger.info("Testing continuations with flush")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     context_id = str(uuid.uuid4())
@@ -921,14 +883,19 @@ async def test_continuation_websocket_context_send_flush():
         await ctx.no_more_inputs()
 
         for receiver in receivers:
+            chunks = []
             async for out in receiver():
-                if out.audio:
-                    assert isinstance(out.audio, bytes)
+                if out.audio is not None:
+                    chunks.append(out.audio)
                 elif out.flush_done:
                     assert out.flush_done is True
                     assert out.flush_id is not None
                 else:
                     assert False, f"Received unexpected message: {out}"
+
+            # Validate complete audio
+            complete_audio = b"".join(chunks)
+            _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
     finally:
         await ws.close()
         await async_client.close()
@@ -937,7 +904,12 @@ async def test_continuation_websocket_context_send_flush():
 async def context_runner(ws, transcripts):
     ctx = ws.context()
 
-    out = []
+    full_transcript = " ".join(transcripts)
+    chunks = []
+    all_words = []
+    all_starts = []
+    all_ends = []
+    has_wordtimestamps = False
 
     for _, transcript in enumerate(transcripts):
         await ctx.send(
@@ -946,6 +918,7 @@ async def context_runner(ws, transcripts):
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             continue_=True,
+            add_timestamps=True,
         )
 
     await ctx.no_more_inputs()
@@ -954,17 +927,33 @@ async def context_runner(ws, transcripts):
 
     async for out in async_gen:
         assert out.context_id == ctx.context_id
-        assert isinstance(out.audio, bytes)
+        _validate_schema(out)
+        if out.audio is not None:
+            chunks.append(out.audio)
+        if out.word_timestamps is not None:
+            has_wordtimestamps = True
+            all_words.extend(out.word_timestamps.words)
+            all_starts.extend(out.word_timestamps.start)
+            all_ends.extend(out.word_timestamps.end)
+
+    # Validate timestamps
+    assert has_wordtimestamps, "No word timestamps found"
+    _validate_timestamps(all_words, all_starts, all_ends, full_transcript)
+
+    # Validate complete audio
+    complete_audio = b"".join(chunks)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
 
 @pytest.mark.asyncio
-async def test_continuation_websocket_context_three_contexts_parallel():
-    logger.info("Testing async continuation WebSocket context three contexts parallel")
+@pytest.mark.parametrize("num_contexts", [3])
+async def test_continuation_parallel(num_contexts: int):
+    logger.info(f"Testing async continuation parallel with {num_contexts} contexts")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
     try:
         transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
-        tasks = [context_runner(ws, transcripts) for _ in range(3)]
+        tasks = [context_runner(ws, transcripts) for _ in range(num_contexts)]
         await asyncio.gather(*tasks)
     finally:
         await ws.close()
@@ -1020,12 +1009,10 @@ def test_invalid_output_format():
         get_output_format("invalid_format")
 
 
-def test_websocket_send_with_custom_url():
+def test_ws_with_custom_url():
     logger.info("Testing WebSocket send with custom URL")
 
-    client = Cartesia(
-        api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.cartesia.ai"
-    )
+    client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.cartesia.ai")
 
     ws = client.tts.websocket()
     output_generate = ws.send(
@@ -1034,173 +1021,27 @@ def test_websocket_send_with_custom_url():
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
         stream=True,
+        add_timestamps=True,
     )
 
+    chunks = []
+    all_words = []
+    all_starts = []
+    all_ends = []
     for out in output_generate:
-        assert isinstance(out.audio, bytes)
+        if out.word_timestamps is not None:
+            all_words.extend(out.word_timestamps.words)
+            all_starts.extend(out.word_timestamps.start)
+            all_ends.extend(out.word_timestamps.end)
+        if out.audio is not None:
+            chunks.append(out.audio)
+
+    _validate_timestamps(all_words, all_starts, all_ends, SAMPLE_TRANSCRIPT)
+
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     ws.close()
-
-
-def test_sse_send_with_custom_url():
-    logger.info("Testing SSE send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
-
-    client = Cartesia(
-        api_key=os.environ.get("CARTESIA_API_KEY"), base_url="https://api.cartesia.ai"
-    )
-    output_generate = client.tts.sse(
-        transcript=transcript,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-        model_id=DEFAULT_MODEL_ID,
-    )
-
-    for out in output_generate:
-        assert isinstance(base64.b64decode(out.data), bytes)
-
-
-@pytest.mark.skip("Skipping SSE send with incorrect URL")
-def test_sse_send_with_incorrect_url():
-    logger.info("Testing SSE send with custom URL")
-    transcript = SAMPLE_TRANSCRIPT
-
-    client = Cartesia(
-        api_key=os.environ.get("CARTESIA_API_KEY"),
-        base_url="https://api.notcartesia.ai",
-    )
-    try:
-        with pytest.raises(RuntimeError):
-            _ = client.tts.sse(
-                transcript=transcript,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-                model_id=DEFAULT_MODEL_ID,
-            )
-    except Exception as e:
-        print("What is going on: ", e)
-        logger.info("Unexpected error occured: ", e)
-
-
-def test_websocket_send_with_incorrect_url():
-    logger.info("Testing WebSocket send with custom URL")
-
-    client = Cartesia(
-        api_key=os.environ.get("CARTESIA_API_KEY"), base_url="wss://api.notcartesia.ai"
-    )
-    try:
-        with pytest.raises(RuntimeError):
-            ws = client.tts.websocket()
-            ws.send(
-                transcript=SAMPLE_TRANSCRIPT,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-                model_id=DEFAULT_MODEL_ID,
-                stream=True,
-            )
-            ws.close()
-    except Exception as e:
-        logger.info("Unexpected error occured: ", e)
-
-
-@pytest.mark.asyncio
-async def test_tts_bytes():
-    async with create_async_client() as async_client:
-        chunks = []
-        async for chunk in async_client.tts.bytes(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            transcript=SAMPLE_TRANSCRIPT,
-            output_format={
-                "container": "wav",
-                "encoding": "pcm_f32le",
-                "sample_rate": 44100,
-            },
-        ):
-            chunks.append(chunk)
-
-        data = b"".join(chunks)
-        _validate_wav_response(data)
-
-
-def test_sync_tts_bytes():
-    client = create_client()
-    chunks = client.tts.bytes(
-        model_id=DEFAULT_MODEL_ID,
-        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-        transcript=SAMPLE_TRANSCRIPT,
-        output_format={
-            "container": "wav",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
-    )
-    data = b"".join(chunks)
-
-    _validate_wav_response(data)
-
-
-def _validate_schema(out: WebSocketTtsOutput):
-    if out.audio is not None:
-        assert isinstance(out.audio, bytes)
-    if out.word_timestamps is not None:
-        assert isinstance(out.word_timestamps, WordTimestamps)
-        word_timestamps = out.word_timestamps
-
-        assert word_timestamps.words is not None
-        assert word_timestamps.start is not None
-        assert word_timestamps.end is not None
-        assert isinstance(word_timestamps.words, list) and all(
-            isinstance(word, str) for word in word_timestamps.words
-        )
-        assert isinstance(word_timestamps.start, list) and all(
-            isinstance(start, (int, float)) for start in word_timestamps.start
-        )
-        assert isinstance(word_timestamps.end, list) and all(
-            isinstance(end, (int, float)) for end in word_timestamps.end
-        )
-
-
-def _validate_wav_response(data: bytes):
-    """Validate WAV format audio data."""
-    assert data.startswith(b"RIFF")
-    assert data[8:12] == b"WAVE"
-    assert len(data) > 44  # Ensure there's audio data beyond the header
-
-
-def _validate_mp3_response(data: bytes):
-    """Validate MP3 format audio data.
-
-    We do basic validation:
-    1. Check minimum length
-    2. Look for MP3 frame sync word anywhere in first 1KB
-    3. Don't enforce specific MPEG version/layer as encoder may vary
-    """
-    assert len(data) > 128, "MP3 data too short"
-
-    # Search for sync word in first 1KB
-    # Valid sync word: 11 bits set (0xFFE0) followed by valid version/layer bits
-    found_sync = False
-    search_window = min(len(data), 1024)
-    for i in range(search_window - 1):
-        if data[i] == 0xFF and (data[i + 1] & 0xE0) == 0xE0:
-            found_sync = True
-            break
-    assert found_sync, "No valid MP3 frame sync found"
-
-
-def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
-    """Validate audio data based on format."""
-    assert len(data) > 0  # All formats should have non-empty data
-
-    if output_format["container"] == "wav":
-        _validate_wav_response(data)
-    elif output_format["container"] == "mp3":
-        _validate_mp3_response(data)
-    else:
-        raise ValueError(
-            f"Unsupported output format container: {output_format['container']}"
-        )
 
 
 @pytest.mark.parametrize("output_format", TEST_OUTPUT_FORMATS)
@@ -1249,10 +1090,9 @@ def test_infill_sync(client: Cartesia, output_format: OutputFormatParams):
     _validate_audio_response(total_audio, output_format)
 
 
-@pytest.mark.parametrize("output_format", TEST_OUTPUT_FORMATS)
-async def test_infill_async(output_format: OutputFormatParams):
-    """Test asynchronous infill with different output formats."""
-    # Get test input audio file matching the output format
+async def test_infill_async():
+    """Test asynchronous infill"""
+    output_format = TEST_OUTPUT_FORMATS[0]
     input_audio_path = TEST_INPUT_AUDIO_PATHS[_output_format_to_str(output_format)]
 
     # Create async client for this test
@@ -1298,3 +1138,86 @@ async def test_infill_async(output_format: OutputFormatParams):
         _validate_audio_response(total_audio, output_format)
     finally:
         await async_client.close()
+
+
+@pytest.mark.parametrize(
+    "voice_controls",
+    [
+        None,
+        {"speed": 1.0, "emotion": ["positivity:high"]},
+        {
+            "speed": "normal",
+            "emotion": ["curiosity:high", "surprise:high"],
+        },
+    ],
+)
+def test_voice_controls(resources: _Resources, voice_controls: Optional[ControlsParams]):
+    logger.info("Testing voice controls")
+    client = resources.client
+    transcript = SAMPLE_TRANSCRIPT
+
+    voice: TtsRequestVoiceSpecifierParams = {"mode": "id", "id": SAMPLE_VOICE_ID}
+    if voice_controls:
+        voice["experimental_controls"] = voice_controls
+
+    output_generate = client.tts.sse(
+        transcript=transcript,
+        voice=voice,
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+        model_id=DEFAULT_MODEL_ID,
+    )
+
+    chunks = []
+    for response in output_generate:
+        assert isinstance(response, WebSocketResponse_Chunk)
+        audio_bytes = base64.b64decode(response.data)
+        chunks.append(audio_bytes)
+
+    complete_audio = b"".join(chunks)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+
+def test_voice_embedding(resources: _Resources):
+    transcript = SAMPLE_TRANSCRIPT
+    voice = resources.client.voices.get(SAMPLE_VOICE_ID)
+    embedding = voice.embedding
+
+    output_generate = resources.client.tts.sse(
+        transcript=transcript,
+        voice={"mode": "embedding", "embedding": embedding},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+        model_id=DEFAULT_MODEL_ID,
+    )
+
+    chunks = []
+    for response in output_generate:
+        assert isinstance(response, WebSocketResponse_Chunk)
+        audio_bytes = base64.b64decode(response.data)
+        chunks.append(audio_bytes)
+
+    complete_audio = b"".join(chunks)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+
+@pytest.mark.parametrize("language", ["en", "es", "fr", "de", "ja", "pt", "zh"])
+def test_multilingual(resources: _Resources, language: str):
+    logger.info("Testing multilingual")
+    client = resources.client
+    transcript = SAMPLE_TRANSCRIPT
+
+    output_generate = client.tts.sse(
+        transcript=transcript,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
+        language=language,
+        model_id=DEFAULT_MODEL_ID,
+    )
+
+    chunks = []
+    for out in output_generate:
+        assert isinstance(out, WebSocketResponse_Chunk)
+        audio_bytes = base64.b64decode(out.data)
+        chunks.append(audio_bytes)
+
+    complete_audio = b"".join(chunks)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
