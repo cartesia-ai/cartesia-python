@@ -11,7 +11,7 @@ import logging
 import os
 import sys
 import uuid
-from typing import  Generator, List, Optional, TypedDict, Union
+from typing import Generator, List, Optional, TypedDict, Union
 
 import pytest
 from pydantic import ValidationError
@@ -231,14 +231,15 @@ def test_get_voice_from_id(client: Cartesia):
 
 @pytest.mark.parametrize("mode", ["similarity", "stability"])
 @pytest.mark.parametrize("enhance", [True, False])
-def test_clone_voice_with_file(client: Cartesia, mode: str, enhance: bool):
+@pytest.mark.parametrize("language", ["en", "es"])
+def test_clone_voice(client: Cartesia, mode: str, enhance: bool, language: str):
     logger.info(
         f"Testing voices.clone with file with path {RESOURCES_DIR}/sample-speech-4s.wav, mode {mode}, enhance {enhance}"
     )
     output = client.voices.clone(
         clip=open(os.path.join(RESOURCES_DIR, "sample-speech-4s.wav"), "rb"),
         name="Test cloned voice",
-        language="en",
+        language=language,
         mode=mode,
         enhance=enhance,
         description="Test voice description",
@@ -248,8 +249,22 @@ def test_clone_voice_with_file(client: Cartesia, mode: str, enhance: bool):
     except ValidationError as e:
         pytest.fail(f"Validation error: {e}")
     assert output.name == "Test cloned voice"
-    assert output.language == "en"
+    assert output.language == language
     assert output.description == "Test voice description"
+
+    # TTS with the cloned voice
+    for model_id in [DEFAULT_MODEL_ID, DEFAULT_PREVIEW_MODEL_ID]:
+        audio_chunks = client.tts.bytes(
+            transcript=SAMPLE_TRANSCRIPT,
+            voice={"mode": "id", "id": output.id},
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+            model_id=model_id,
+            language=language,
+        )
+
+        # Combine chunks and validate audio
+        audio_data = b"".join(audio_chunks)
+        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     client.voices.delete(output.id)
 
@@ -418,6 +433,7 @@ def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, strea
             audio = output_generate.audio
 
         _validate_audio_response(audio, output_format)
+
 
 def test_ws_err():
     logger.info("Testing WebSocket with error")
