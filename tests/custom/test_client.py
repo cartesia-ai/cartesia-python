@@ -257,14 +257,14 @@ def test_clone_voice(client: Cartesia, mode: str, enhance: bool, language: str):
         audio_chunks = client.tts.bytes(
             transcript=SAMPLE_TRANSCRIPT,
             voice={"mode": "id", "id": output.id},
-            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
             model_id=model_id,
             language=language,
         )
 
         # Combine chunks and validate audio
         audio_data = b"".join(audio_chunks)
-        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT_PARAMS)
+        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT_PARAMS)  # type: ignore
 
     client.voices.delete(output.id)
 
@@ -417,7 +417,7 @@ def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, strea
     transcript = SAMPLE_TRANSCRIPT
 
     with create_client() as client:
-        ws = client.tts.websocket()
+        ws = client.tts.websocket()  # type: ignore
         output_generate = ws.send(
             transcript=transcript,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
@@ -430,7 +430,7 @@ def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, strea
             audio = b"".join(out.audio for out in output_generate)
         else:
             assert isinstance(output_generate, WebSocketTtsOutput)
-            audio = output_generate.audio
+            audio = output_generate.audio  # type: ignore
 
         _validate_audio_response(audio, output_format)
 
@@ -586,7 +586,7 @@ def test_continuation_sync(stream: bool):
             stream=stream,
         )
         audio = b"".join(out.audio for out in output_generate)
-        _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+        _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)  # type: ignore
     finally:
         ws.close()
 
@@ -1190,7 +1190,7 @@ def test_voice_controls(resources: _Resources, voice_controls: Optional[Controls
         chunks.append(audio_bytes)
 
     complete_audio = b"".join(chunks)
-    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)  # type: ignore
 
 
 def test_voice_embedding(resources: _Resources):
@@ -1212,7 +1212,7 @@ def test_voice_embedding(resources: _Resources):
         chunks.append(audio_bytes)
 
     complete_audio = b"".join(chunks)
-    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)  # type: ignore
 
 
 @pytest.mark.parametrize("language", ["en", "es", "fr", "de", "ja", "pt", "zh"])
@@ -1236,4 +1236,4 @@ def test_multilingual(resources: _Resources, language: str):
         chunks.append(audio_bytes)
 
     complete_audio = b"".join(chunks)
-    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+    _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)  # type: ignore
