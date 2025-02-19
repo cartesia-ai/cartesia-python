@@ -9,6 +9,8 @@ from .gender import Gender
 from .id_specifier import IdSpecifier
 from .localize_dialect import LocalizeDialect
 from .localize_english_dialect import LocalizeEnglishDialect
+from .localize_portuguese_dialect import LocalizePortugueseDialect
+from .localize_spanish_dialect import LocalizeSpanishDialect
 from .localize_target_language import LocalizeTargetLanguage
 from .localize_voice_request import LocalizeVoiceRequest
 from .mix_voice_specifier import MixVoiceSpecifier
@@ -29,6 +31,8 @@ __all__ = [
     "IdSpecifier",
     "LocalizeDialect",
     "LocalizeEnglishDialect",
+    "LocalizePortugueseDialect",
+    "LocalizeSpanishDialect",
     "LocalizeTargetLanguage",
     "LocalizeVoiceRequest",
     "MixVoiceSpecifier",

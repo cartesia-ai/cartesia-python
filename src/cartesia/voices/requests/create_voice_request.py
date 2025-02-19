@@ -4,6 +4,7 @@ import typing_extensions
 from ...embedding.types.embedding import Embedding
 import typing_extensions
 from ...tts.types.supported_language import SupportedLanguage
+from ..types.base_voice_id import BaseVoiceId
 
 
 class CreateVoiceRequestParams(typing_extensions.TypedDict):
@@ -19,3 +20,4 @@ class CreateVoiceRequestParams(typing_extensions.TypedDict):
 
     embedding: Embedding
     language: typing_extensions.NotRequired[SupportedLanguage]
+    base_voice_id: typing_extensions.NotRequired[BaseVoiceId]

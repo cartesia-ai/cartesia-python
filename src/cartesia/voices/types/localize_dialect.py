@@ -2,5 +2,7 @@
 
 import typing
 from .localize_english_dialect import LocalizeEnglishDialect
+from .localize_spanish_dialect import LocalizeSpanishDialect
+from .localize_portuguese_dialect import LocalizePortugueseDialect
 
-LocalizeDialect = typing.Union[LocalizeEnglishDialect]
+LocalizeDialect = typing.Union[LocalizeEnglishDialect, LocalizeSpanishDialect, LocalizePortugueseDialect]

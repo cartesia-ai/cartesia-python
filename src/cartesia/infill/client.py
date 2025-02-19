@@ -34,15 +34,25 @@ class InfillClient:
         output_format_encoding: typing.Optional[RawEncoding] = OMIT,
         output_format_bit_rate: typing.Optional[int] = OMIT,
         voice_experimental_controls_speed: typing.Optional[Speed] = OMIT,
-        voice_experimental_controls_emotion: typing.Optional[Emotion] = OMIT,
+        voice_experimental_controls_emotion: typing.Optional[typing.List[Emotion]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
         Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
 
+        **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
+
         Only the `sonic-preview` model is supported for infill at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
+
+        As with all generative models, there's some inherent variability, but here's some tips we recommend to get the best results from infill:
+        - Use longer infill transcripts
+          - This gives the model more flexibility to adapt to the rest of the audio
+        - Target natural pauses in the audio when deciding where to clip
+          - This means you don't need word-level timestamps to be as precise
+        - Clip right up to the start and end of the audio segment you want infilled, keeping as much silence in the left/right audio segments as possible
+          - This helps the model generate more natural transitions
 
         Parameters
         ----------
@@ -84,7 +94,7 @@ class InfillClient:
             If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
 
 
-        voice_experimental_controls_emotion : typing.Optional[Emotion]
+        voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
             An array of emotion:level tags.
 
             Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
@@ -114,16 +124,18 @@ class InfillClient:
             output_format_container="mp3",
             output_format_sample_rate=44100,
             output_format_bit_rate=128000,
+            voice_experimental_controls_speed="slowest",
+            voice_experimental_controls_emotion=["surprise:high", "curiosity:high"],
         )
         """
         with self._client_wrapper.httpx_client.stream(
             "infill/bytes",
             method="POST",
             data={
-                "model_id[]": model_id,
-                "language[]": language,
-                "transcript[]": transcript,
-                "voice[id]": voice_id,
+                "model_id": model_id,
+                "language": language,
+                "transcript": transcript,
+                "voice_id": voice_id,
                 "output_format[container]": output_format_container,
                 "output_format[sample_rate]": output_format_sample_rate,
                 "output_format[encoding]": output_format_encoding,
@@ -169,15 +181,25 @@ class AsyncInfillClient:
         output_format_encoding: typing.Optional[RawEncoding] = OMIT,
         output_format_bit_rate: typing.Optional[int] = OMIT,
         voice_experimental_controls_speed: typing.Optional[Speed] = OMIT,
-        voice_experimental_controls_emotion: typing.Optional[Emotion] = OMIT,
+        voice_experimental_controls_emotion: typing.Optional[typing.List[Emotion]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
         Generate audio that smoothly connects two existing audio segments. This is useful for inserting new speech between existing speech segments while maintaining natural transitions.
 
+        **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
+
         Only the `sonic-preview` model is supported for infill at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
+
+        As with all generative models, there's some inherent variability, but here's some tips we recommend to get the best results from infill:
+        - Use longer infill transcripts
+          - This gives the model more flexibility to adapt to the rest of the audio
+        - Target natural pauses in the audio when deciding where to clip
+          - This means you don't need word-level timestamps to be as precise
+        - Clip right up to the start and end of the audio segment you want infilled, keeping as much silence in the left/right audio segments as possible
+          - This helps the model generate more natural transitions
 
         Parameters
         ----------
@@ -219,7 +241,7 @@ class AsyncInfillClient:
             If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
 
 
-        voice_experimental_controls_emotion : typing.Optional[Emotion]
+        voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
             An array of emotion:level tags.
 
             Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
@@ -254,6 +276,8 @@ class AsyncInfillClient:
                 output_format_container="mp3",
                 output_format_sample_rate=44100,
                 output_format_bit_rate=128000,
+                voice_experimental_controls_speed="slowest",
+                voice_experimental_controls_emotion=["surprise:high", "curiosity:high"],
             )
 
 
@@ -263,10 +287,10 @@ class AsyncInfillClient:
             "infill/bytes",
             method="POST",
             data={
-                "model_id[]": model_id,
-                "language[]": language,
-                "transcript[]": transcript,
-                "voice[id]": voice_id,
+                "model_id": model_id,
+                "language": language,
+                "transcript": transcript,
+                "voice_id": voice_id,
                 "output_format[container]": output_format_container,
                 "output_format[sample_rate]": output_format_sample_rate,
                 "output_format[encoding]": output_format_encoding,

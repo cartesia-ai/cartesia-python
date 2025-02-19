@@ -82,7 +82,7 @@ class DatasetsClient:
             api_key="YOUR_API_KEY",
         )
         client.datasets.create(
-            name="string",
+            name="name",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -129,7 +129,7 @@ class DatasetsClient:
             api_key="YOUR_API_KEY",
         )
         client.datasets.list_files(
-            id="string",
+            id="id",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -170,17 +170,6 @@ class DatasetsClient:
         Returns
         -------
         None
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.datasets.upload_file(
-            id="string",
-        )
         """
         _response = self._client_wrapper.httpx_client.request(
             f"datasets/{jsonable_encoder(id)}/files",
@@ -280,7 +269,7 @@ class AsyncDatasetsClient:
 
         async def main() -> None:
             await client.datasets.create(
-                name="string",
+                name="name",
             )
 
 
@@ -337,7 +326,7 @@ class AsyncDatasetsClient:
 
         async def main() -> None:
             await client.datasets.list_files(
-                id="string",
+                id="id",
             )
 
 
@@ -381,25 +370,6 @@ class AsyncDatasetsClient:
         Returns
         -------
         None
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.datasets.upload_file(
-                id="string",
-            )
-
-
-        asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"datasets/{jsonable_encoder(id)}/files",

@@ -7,19 +7,20 @@ from .types.voice import Voice
 from ..core.pydantic_utilities import parse_obj_as
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from ..embedding.types.embedding import Embedding
+from .. import core
 from ..tts.types.supported_language import SupportedLanguage
+from .types.clone_mode import CloneMode
+from .types.voice_metadata import VoiceMetadata
 from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
+from ..embedding.types.embedding import Embedding
 from .types.localize_target_language import LocalizeTargetLanguage
 from .types.gender import Gender
 from .requests.localize_dialect import LocalizeDialectParams
 from .types.embedding_response import EmbeddingResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 from .requests.mix_voice_specifier import MixVoiceSpecifierParams
-from .. import core
-from .types.clone_mode import CloneMode
-from .types.voice_metadata import VoiceMetadata
+from .types.base_voice_id import BaseVoiceId
 from ..core.client_wrapper import AsyncClientWrapper
 
 # this is used as the default value for optional parameters
@@ -61,722 +62,6 @@ class VoicesClient:
                     typing.List[Voice],
                     parse_obj_as(
                         type_=typing.List[Voice],  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def create(
-        self,
-        *,
-        name: str,
-        description: str,
-        embedding: Embedding,
-        language: typing.Optional[SupportedLanguage] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
-        """
-        Parameters
-        ----------
-        name : str
-            The name of the voice.
-
-        description : str
-            The description of the voice.
-
-        embedding : Embedding
-
-        language : typing.Optional[SupportedLanguage]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.create(
-            name="string",
-            description="string",
-            embedding=[
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-            ],
-            language="en",
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            "voices/",
-            method="POST",
-            json={
-                "name": name,
-                "description": description,
-                "embedding": embedding,
-                "language": language,
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def delete(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.delete(
-            id="string",
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def update(
-        self, id: VoiceId, *, name: str, description: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> Voice:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        name : str
-            The name of the voice.
-
-        description : str
-            The description of the voice.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.update(
-            id="string",
-            name="string",
-            description="string",
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="PATCH",
-            json={
-                "name": name,
-                "description": description,
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def get(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> Voice:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.get(
-            id="string",
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def localize(
-        self,
-        *,
-        embedding: Embedding,
-        language: LocalizeTargetLanguage,
-        original_speaker_gender: Gender,
-        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
-        """
-        Parameters
-        ----------
-        embedding : Embedding
-
-        language : LocalizeTargetLanguage
-
-        original_speaker_gender : Gender
-
-        dialect : typing.Optional[LocalizeDialectParams]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EmbeddingResponse
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.localize(
-            embedding=[
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-                1.0,
-            ],
-            language="en",
-            original_speaker_gender="male",
-            dialect="au",
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            "voices/localize",
-            method="POST",
-            json={
-                "embedding": embedding,
-                "language": language,
-                "original_speaker_gender": original_speaker_gender,
-                "dialect": convert_and_respect_annotation_metadata(
-                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
-                ),
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    EmbeddingResponse,
-                    parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    def mix(
-        self,
-        *,
-        voices: typing.Sequence[MixVoiceSpecifierParams],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
-        """
-        Parameters
-        ----------
-        voices : typing.Sequence[MixVoiceSpecifierParams]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EmbeddingResponse
-
-        Examples
-        --------
-        from cartesia import Cartesia
-
-        client = Cartesia(
-            api_key="YOUR_API_KEY",
-        )
-        client.voices.mix(
-            voices=[{"id": "string", "weight": 1.1}],
-        )
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            "voices/mix",
-            method="POST",
-            json={
-                "voices": convert_and_respect_annotation_metadata(
-                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
-                ),
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    EmbeddingResponse,
-                    parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -886,6 +171,342 @@ class VoicesClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
+    def delete(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.delete(
+            id="id",
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    def update(
+        self, id: VoiceId, *, name: str, description: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> Voice:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        name : str
+            The name of the voice.
+
+        description : str
+            The description of the voice.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.update(
+            id="id",
+            name="name",
+            description="description",
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "name": name,
+                "description": description,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    def get(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> Voice:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.get(
+            id="id",
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    def localize(
+        self,
+        *,
+        embedding: Embedding,
+        language: LocalizeTargetLanguage,
+        original_speaker_gender: Gender,
+        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EmbeddingResponse:
+        """
+        Parameters
+        ----------
+        embedding : Embedding
+
+        language : LocalizeTargetLanguage
+
+        original_speaker_gender : Gender
+
+        dialect : typing.Optional[LocalizeDialectParams]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbeddingResponse
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.localize(
+            embedding=[1.1, 1.1],
+            language="en",
+            original_speaker_gender="male",
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "voices/localize",
+            method="POST",
+            json={
+                "embedding": embedding,
+                "language": language,
+                "original_speaker_gender": original_speaker_gender,
+                "dialect": convert_and_respect_annotation_metadata(
+                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
+                ),
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    EmbeddingResponse,
+                    parse_obj_as(
+                        type_=EmbeddingResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    def mix(
+        self,
+        *,
+        voices: typing.Sequence[MixVoiceSpecifierParams],
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EmbeddingResponse:
+        """
+        Parameters
+        ----------
+        voices : typing.Sequence[MixVoiceSpecifierParams]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbeddingResponse
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.mix(
+            voices=[{"id": "id", "weight": 1.1}, {"id": "id", "weight": 1.1}],
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "voices/mix",
+            method="POST",
+            json={
+                "voices": convert_and_respect_annotation_metadata(
+                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
+                ),
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    EmbeddingResponse,
+                    parse_obj_as(
+                        type_=EmbeddingResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    def create(
+        self,
+        *,
+        name: str,
+        description: str,
+        embedding: Embedding,
+        language: typing.Optional[SupportedLanguage] = OMIT,
+        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> Voice:
+        """
+        Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
+
+        Parameters
+        ----------
+        name : str
+            The name of the voice.
+
+        description : str
+            The description of the voice.
+
+        embedding : Embedding
+
+        language : typing.Optional[SupportedLanguage]
+
+        base_voice_id : typing.Optional[BaseVoiceId]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        from cartesia import Cartesia
+
+        client = Cartesia(
+            api_key="YOUR_API_KEY",
+        )
+        client.voices.create(
+            name="My Custom Voice",
+            description="A custom voice created through the API",
+            embedding=[],
+            language="en",
+            base_voice_id="123e4567-e89b-12d3-a456-426614174000",
+        )
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "voices/",
+            method="POST",
+            json={
+                "name": name,
+                "description": description,
+                "embedding": embedding,
+                "language": language,
+                "base_voice_id": base_voice_id,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
 
 class AsyncVoicesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -930,770 +551,6 @@ class AsyncVoicesClient:
                     typing.List[Voice],
                     parse_obj_as(
                         type_=typing.List[Voice],  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def create(
-        self,
-        *,
-        name: str,
-        description: str,
-        embedding: Embedding,
-        language: typing.Optional[SupportedLanguage] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
-        """
-        Parameters
-        ----------
-        name : str
-            The name of the voice.
-
-        description : str
-            The description of the voice.
-
-        embedding : Embedding
-
-        language : typing.Optional[SupportedLanguage]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.create(
-                name="string",
-                description="string",
-                embedding=[
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                ],
-                language="en",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            "voices/",
-            method="POST",
-            json={
-                "name": name,
-                "description": description,
-                "embedding": embedding,
-                "language": language,
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def delete(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.delete(
-                id="string",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def update(
-        self, id: VoiceId, *, name: str, description: str, request_options: typing.Optional[RequestOptions] = None
-    ) -> Voice:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        name : str
-            The name of the voice.
-
-        description : str
-            The description of the voice.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.update(
-                id="string",
-                name="string",
-                description="string",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="PATCH",
-            json={
-                "name": name,
-                "description": description,
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def get(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> Voice:
-        """
-        Parameters
-        ----------
-        id : VoiceId
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Voice
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.get(
-                id="string",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"voices/{jsonable_encoder(id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    Voice,
-                    parse_obj_as(
-                        type_=Voice,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def localize(
-        self,
-        *,
-        embedding: Embedding,
-        language: LocalizeTargetLanguage,
-        original_speaker_gender: Gender,
-        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
-        """
-        Parameters
-        ----------
-        embedding : Embedding
-
-        language : LocalizeTargetLanguage
-
-        original_speaker_gender : Gender
-
-        dialect : typing.Optional[LocalizeDialectParams]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EmbeddingResponse
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.localize(
-                embedding=[
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                ],
-                language="en",
-                original_speaker_gender="male",
-                dialect="au",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            "voices/localize",
-            method="POST",
-            json={
-                "embedding": embedding,
-                "language": language,
-                "original_speaker_gender": original_speaker_gender,
-                "dialect": convert_and_respect_annotation_metadata(
-                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
-                ),
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    EmbeddingResponse,
-                    parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, body=_response.text)
-        raise ApiError(status_code=_response.status_code, body=_response_json)
-
-    async def mix(
-        self,
-        *,
-        voices: typing.Sequence[MixVoiceSpecifierParams],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
-        """
-        Parameters
-        ----------
-        voices : typing.Sequence[MixVoiceSpecifierParams]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EmbeddingResponse
-
-        Examples
-        --------
-        import asyncio
-
-        from cartesia import AsyncCartesia
-
-        client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.voices.mix(
-                voices=[{"id": "string", "weight": 1.1}],
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            "voices/mix",
-            method="POST",
-            json={
-                "voices": convert_and_respect_annotation_metadata(
-                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
-                ),
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return typing.cast(
-                    EmbeddingResponse,
-                    parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1803,6 +660,390 @@ class AsyncVoicesClient:
                     VoiceMetadata,
                     parse_obj_as(
                         type_=VoiceMetadata,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def delete(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.delete(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def update(
+        self, id: VoiceId, *, name: str, description: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> Voice:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        name : str
+            The name of the voice.
+
+        description : str
+            The description of the voice.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.update(
+                id="id",
+                name="name",
+                description="description",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="PATCH",
+            json={
+                "name": name,
+                "description": description,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def get(self, id: VoiceId, *, request_options: typing.Optional[RequestOptions] = None) -> Voice:
+        """
+        Parameters
+        ----------
+        id : VoiceId
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.get(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"voices/{jsonable_encoder(id)}",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def localize(
+        self,
+        *,
+        embedding: Embedding,
+        language: LocalizeTargetLanguage,
+        original_speaker_gender: Gender,
+        dialect: typing.Optional[LocalizeDialectParams] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EmbeddingResponse:
+        """
+        Parameters
+        ----------
+        embedding : Embedding
+
+        language : LocalizeTargetLanguage
+
+        original_speaker_gender : Gender
+
+        dialect : typing.Optional[LocalizeDialectParams]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbeddingResponse
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.localize(
+                embedding=[1.1, 1.1],
+                language="en",
+                original_speaker_gender="male",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "voices/localize",
+            method="POST",
+            json={
+                "embedding": embedding,
+                "language": language,
+                "original_speaker_gender": original_speaker_gender,
+                "dialect": convert_and_respect_annotation_metadata(
+                    object_=dialect, annotation=LocalizeDialectParams, direction="write"
+                ),
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    EmbeddingResponse,
+                    parse_obj_as(
+                        type_=EmbeddingResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def mix(
+        self,
+        *,
+        voices: typing.Sequence[MixVoiceSpecifierParams],
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EmbeddingResponse:
+        """
+        Parameters
+        ----------
+        voices : typing.Sequence[MixVoiceSpecifierParams]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmbeddingResponse
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.mix(
+                voices=[{"id": "id", "weight": 1.1}, {"id": "id", "weight": 1.1}],
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "voices/mix",
+            method="POST",
+            json={
+                "voices": convert_and_respect_annotation_metadata(
+                    object_=voices, annotation=typing.Sequence[MixVoiceSpecifierParams], direction="write"
+                ),
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    EmbeddingResponse,
+                    parse_obj_as(
+                        type_=EmbeddingResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, body=_response.text)
+        raise ApiError(status_code=_response.status_code, body=_response_json)
+
+    async def create(
+        self,
+        *,
+        name: str,
+        description: str,
+        embedding: Embedding,
+        language: typing.Optional[SupportedLanguage] = OMIT,
+        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> Voice:
+        """
+        Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
+
+        Parameters
+        ----------
+        name : str
+            The name of the voice.
+
+        description : str
+            The description of the voice.
+
+        embedding : Embedding
+
+        language : typing.Optional[SupportedLanguage]
+
+        base_voice_id : typing.Optional[BaseVoiceId]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Voice
+
+        Examples
+        --------
+        import asyncio
+
+        from cartesia import AsyncCartesia
+
+        client = AsyncCartesia(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.voices.create(
+                name="My Custom Voice",
+                description="A custom voice created through the API",
+                embedding=[],
+                language="en",
+                base_voice_id="123e4567-e89b-12d3-a456-426614174000",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "voices/",
+            method="POST",
+            json={
+                "name": name,
+                "description": description,
+                "embedding": embedding,
+                "language": language,
+                "base_voice_id": base_voice_id,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return typing.cast(
+                    Voice,
+                    parse_obj_as(
+                        type_=Voice,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
