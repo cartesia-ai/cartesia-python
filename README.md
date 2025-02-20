@@ -156,21 +156,31 @@ def get_tts_chunks():
         api_key=os.getenv("CARTESIA_API_KEY"),
     )
     response = client.tts.sse(
-        model_id="string",
-        transcript="string",
+        model_id="sonic",
+        transcript="Hello world!",
         voice={
-            "id": "string",
+            "id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94",
             "experimental_controls": {
-                "speed": 1.1,
-                "emotion": "anger:lowest",
+                "speed": "normal",
+                "emotion": [],
             },
         },
         language="en",
-        output_format={},
-        duration=1.1,
+        output_format={
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        },
     )
+    
+    audio_chunks = []
     for chunk in response:
-        yield chunk
+        audio_chunks.append(chunk)
+    return audio_chunks
+
+chunks = get_tts_chunks()
+for chunk in chunks:
+    print(f"Received chunk of size: {len(chunk.data)}")
 ```
 
 ## WebSocket
