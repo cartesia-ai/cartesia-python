@@ -25,7 +25,7 @@ A full reference for this library is available [here](./reference.md).
 from cartesia import Cartesia
 import os
 
-client = Cartesia(api_key=os.environ.get("CARTESIA_API_KEY"))
+client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
 
 # Get all available voices
 voices = client.voices.list()
@@ -33,21 +33,32 @@ print(voices)
 
 # Get a specific voice
 voice = client.voices.get(id="a0e99841-438c-4a64-b679-ae501e7d6091")
-print("The embedding for", voice["name"], "is", voice["embedding"])
+print("The embedding for", voice.name, "is", voice.embedding)
 
-# Clone a voice using filepath
-cloned_voice_embedding = client.voices.clone(filepath="path/to/voice")
-
-# Mix voices together
-mixed_voice_embedding = client.voices.mix(
-    [{ "id": "voice_id_1", "weight": 0.5 }, { "id": "voice_id_2", "weight": 0.25 }, { "id": "voice_id_3", "weight": 0.25 }]
+# Clone a voice using file data
+cloned_voice = client.voices.clone(
+    clip=open("path/to/voice.wav", "rb"),
+    name="Test cloned voice", 
+    language="en",
+    mode="similarity",  # or "stability"
+    enhance=False, # use enhance=True to clean and denoise the cloning audio
+    description="Test voice description"
 )
 
-# Create a new voice
+# Mix voices together
+mixed_voice = client.voices.mix(
+    voices=[
+        {"id": "voice_id_1", "weight": 0.25},
+        {"id": "voice_id_2", "weight": 0.75}
+    ]
+)
+
+# Create a new voice from embedding
 new_voice = client.voices.create(
-    name="New Voice",
-    description="A clone of my own voice",
-    embedding=cloned_voice_embedding,
+    name="Test Voice",
+    description="Test voice description",
+    embedding=[...],  # List[float] with 192 dimensions
+    language="en"
 )
 ```
 
@@ -58,15 +69,22 @@ Instantiate and use the client with the following:
 ```python
 from cartesia import Cartesia
 from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
+import os
 
 client = Cartesia(
-    api_key="YOUR_API_KEY",
+    api_key=os.getenv("CARTESIA_API_KEY"),
 )
 client.tts.bytes(
     model_id="sonic-english",
     transcript="Hello, world!",
-    voice={"id": "694f9389-aac1-45b6-b726-9d9369183238"},
-    ),
+    voice={
+        "mode": "id",
+        "id": "694f9389-aac1-45b6-b726-9d9369183238",
+        "experimental_controls": {
+            "speed": 0.5,  # range between [-1.0, 1.0], or "slow", "fastest", etc.
+            "emotion": ["positivity", "curiosity:low"] # list of emotions with optional intensity
+        }
+    },
     language="en",
     output_format={
         "container": "raw",
@@ -82,17 +100,17 @@ The SDK also exports an `async` client so that you can make non-blocking calls t
 
 ```python
 import asyncio
+import os
 
 from cartesia import AsyncCartesia
 from cartesia.tts import OutputFormat_Raw, TtsRequestIdSpecifier
 
 client = AsyncCartesia(
-    api_key="YOUR_API_KEY",
+    api_key=os.getenv("CARTESIA_API_KEY"),
 )
 
-
 async def main() -> None:
-    await client.tts.bytes(
+    async for output in client.tts.bytes(
         model_id="sonic-english",
         transcript="Hello, world!",
         voice={"id": "694f9389-aac1-45b6-b726-9d9369183238"},
@@ -102,7 +120,8 @@ async def main() -> None:
             "sample_rate": 44100,
             "encoding": "pcm_f32le",
         },
-    )
+    ):
+        print(f"Received chunk of size: {len(output)}")
 
 
 asyncio.run(main())
@@ -130,26 +149,38 @@ The SDK supports streaming responses, as well, the response will be a generator 
 ```python
 from cartesia import Cartesia
 from cartesia.tts import Controls, OutputFormat_RawParams, TtsRequestIdSpecifierParams
+import os
 
-client = Cartesia(
-    api_key="YOUR_API_KEY",
-)
-response = client.tts.sse(
-    model_id="string",
-    transcript="string",
-    voice={
-        "id": "string",
-        "experimental_controls": {
-            speed=1.1,
-            emotion="anger:lowest",
+def get_tts_chunks():
+    client = Cartesia(
+        api_key=os.getenv("CARTESIA_API_KEY"),
+    )
+    response = client.tts.sse(
+        model_id="sonic",
+        transcript="Hello world!",
+        voice={
+            "id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94",
+            "experimental_controls": {
+                "speed": "normal",
+                "emotion": [],
+            },
         },
-    },
-    language="en",
-    output_format={},
-    duration=1.1,
-)
-for chunk in response:
-    yield chunk
+        language="en",
+        output_format={
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        },
+    )
+    
+    audio_chunks = []
+    for chunk in response:
+        audio_chunks.append(chunk)
+    return audio_chunks
+
+chunks = get_tts_chunks()
+for chunk in chunks:
+    print(f"Received chunk of size: {len(chunk.data)}")
 ```
 
 ## WebSocket
@@ -158,16 +189,16 @@ for chunk in response:
 from cartesia import Cartesia
 from cartesia.tts import TtsRequestEmbeddingSpecifierParams, OutputFormat_RawParams
 import pyaudio
+import os
 
 client = Cartesia(
-    api_key="YOUR_API_KEY",
+    api_key=os.getenv("CARTESIA_API_KEY"),
 )
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
-voice = client.voices.get(id=voice_id)
 transcript = "Hello! Welcome to Cartesia"
 
 # You can check out our models at https://docs.cartesia.ai/getting-started/available-models
-model_id = "sonic-english"
+model_id = "sonic"
 
 p = pyaudio.PyAudio()
 rate = 22050
@@ -181,7 +212,7 @@ ws = client.tts.websocket()
 for output in ws.send(
     model_id=model_id,
     transcript=transcript,
-    voice={"embedding": voice.embedding},
+    voice={"id": voice_id},
     stream=True,
     output_format={
         "container": "raw",
