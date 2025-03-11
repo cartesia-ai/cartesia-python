@@ -46,8 +46,8 @@ THISDIR = os.path.dirname(__file__)
 sys.path.insert(0, os.path.dirname(THISDIR))
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
-DEFAULT_MODEL_ID = "sonic"
-DEFAULT_PREVIEW_MODEL_ID = "sonic-preview"
+DEFAULT_MODEL_ID = "sonic-2"
+DEFAULT_PREVIEW_MODEL_ID = "sonic-2"
 DEFAULT_OUTPUT_FORMAT_PARAMS = {
     "container": "raw",
     "encoding": "pcm_f32le",

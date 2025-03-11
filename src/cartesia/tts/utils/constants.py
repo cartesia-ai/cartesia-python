@@ -1,5 +1,5 @@
-DEFAULT_MODEL_ID = "sonic-english"  # latest default model
-MULTILINGUAL_MODEL_ID = "sonic-multilingual"  # latest multilingual model
+DEFAULT_MODEL_ID = "sonic-2"  # latest default model
+MULTILINGUAL_MODEL_ID = "sonic-2"  # latest multilingual model
 DEFAULT_BASE_URL = "api.cartesia.ai"
 DEFAULT_CARTESIA_VERSION = "2024-06-10"  # latest version
 DEFAULT_OUTPUT_FORMAT = "raw_pcm_f32le_44100"

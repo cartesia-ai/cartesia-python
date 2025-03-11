@@ -235,7 +235,7 @@ class TtsWebsocket:
     Usage:
         >>> ws = client.tts.websocket()
         >>> generation_request = GenerationRequest(
-        ...     model_id="sonic-english",
+        ...     model_id="sonic-2",
         ...     transcript="Hello world!",
         ...     voice_embedding=embedding
         ...     output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}

@@ -42,7 +42,7 @@ class InfillClient:
 
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-        Only the `sonic-preview` model is supported for infill at this time.
+        Only the `sonic-2` model is supported for infill at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
 
@@ -117,7 +117,7 @@ class InfillClient:
             api_key="YOUR_API_KEY",
         )
         client.infill.bytes(
-            model_id="sonic-preview",
+            model_id="sonic-2",
             language="en",
             transcript="middle segment",
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -189,7 +189,7 @@ class AsyncInfillClient:
 
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-        Only the `sonic-preview` model is supported for infill at this time.
+        Only the `sonic-2` model is supported for infill at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
 
@@ -269,7 +269,7 @@ class AsyncInfillClient:
 
         async def main() -> None:
             await client.infill.bytes(
-                model_id="sonic-preview",
+                model_id="sonic-2",
                 language="en",
                 transcript="middle segment",
                 voice_id="694f9389-aac1-45b6-b726-9d9369183238",
