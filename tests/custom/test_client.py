@@ -282,7 +282,7 @@ def test_create_voice(client: Cartesia):
     assert voice.description == "Test voice description"
     assert voice.is_public is False
     voices = client.voices.list()
-    assert voice in voices
+    assert voice.id in [v.id for v in voices]
 
     client.voices.delete(voice.id)
 
