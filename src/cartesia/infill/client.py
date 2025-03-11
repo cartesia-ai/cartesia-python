@@ -42,7 +42,7 @@ class InfillClient:
 
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-        Only the `sonic-2` model is supported for infill at this time.
+        Infilling is only available on `sonic-2` at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
 
@@ -189,7 +189,7 @@ class AsyncInfillClient:
 
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-        Only the `sonic-2` model is supported for infill at this time.
+        Infilling is only available on `sonic-2` at this time.
 
         At least one of `left_audio` or `right_audio` must be provided.
 

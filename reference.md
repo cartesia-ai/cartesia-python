@@ -222,7 +222,7 @@ Generate audio that smoothly connects two existing audio segments. This is usefu
 
 **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-Only the `sonic-2` model is supported for infill at this time.
+Infilling is only available on `sonic-2` at this time.
 
 At least one of `left_audio` or `right_audio` must be provided.
 
@@ -1218,6 +1218,20 @@ client.voices.get(
 <dl>
 <dd>
 
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new voice from an existing voice localized to a new language and dialect.
+</dd>
+</dl>
+</dd>
+</dl>
+
 #### 🔌 Usage
 
 <dl>
@@ -1233,9 +1247,12 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.voices.localize(
-    embedding=[1.1, 1.1],
-    language="en",
-    original_speaker_gender="male",
+    voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+    name="Sarah Peninsular Spanish",
+    description="Sarah Voice in Peninsular Spanish",
+    language="es",
+    original_speaker_gender="female",
+    dialect="pe",
 )
 
 ```
@@ -1252,7 +1269,23 @@ client.voices.localize(
 <dl>
 <dd>
 
-**embedding:** `Embedding` 
+**voice_id:** `str` — The ID of the voice to localize.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — The name of the new localized voice.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `str` — The description of the new localized voice.
     
 </dd>
 </dl>

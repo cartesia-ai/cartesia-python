@@ -13,13 +13,13 @@ from .types.clone_mode import CloneMode
 from .types.voice_metadata import VoiceMetadata
 from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
-from ..embedding.types.embedding import Embedding
 from .types.localize_target_language import LocalizeTargetLanguage
 from .types.gender import Gender
 from .requests.localize_dialect import LocalizeDialectParams
-from .types.embedding_response import EmbeddingResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 from .requests.mix_voice_specifier import MixVoiceSpecifierParams
+from .types.embedding_response import EmbeddingResponse
+from ..embedding.types.embedding import Embedding
 from .types.base_voice_id import BaseVoiceId
 from ..core.client_wrapper import AsyncClientWrapper
 
@@ -312,16 +312,27 @@ class VoicesClient:
     def localize(
         self,
         *,
-        embedding: Embedding,
+        voice_id: str,
+        name: str,
+        description: str,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
         dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
+    ) -> VoiceMetadata:
         """
+        Create a new voice from an existing voice localized to a new language and dialect.
+
         Parameters
         ----------
-        embedding : Embedding
+        voice_id : str
+            The ID of the voice to localize.
+
+        name : str
+            The name of the new localized voice.
+
+        description : str
+            The description of the new localized voice.
 
         language : LocalizeTargetLanguage
 
@@ -334,7 +345,7 @@ class VoicesClient:
 
         Returns
         -------
-        EmbeddingResponse
+        VoiceMetadata
 
         Examples
         --------
@@ -344,16 +355,21 @@ class VoicesClient:
             api_key="YOUR_API_KEY",
         )
         client.voices.localize(
-            embedding=[1.1, 1.1],
-            language="en",
-            original_speaker_gender="male",
+            voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+            name="Sarah Peninsular Spanish",
+            description="Sarah Voice in Peninsular Spanish",
+            language="es",
+            original_speaker_gender="female",
+            dialect="pe",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "voices/localize",
             method="POST",
             json={
-                "embedding": embedding,
+                "voice_id": voice_id,
+                "name": name,
+                "description": description,
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
@@ -366,9 +382,9 @@ class VoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    EmbeddingResponse,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -440,7 +456,7 @@ class VoicesClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
+    ) -> VoiceMetadata:
         """
         Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
 
@@ -463,7 +479,7 @@ class VoicesClient:
 
         Returns
         -------
-        Voice
+        VoiceMetadata
 
         Examples
         --------
@@ -496,9 +512,9 @@ class VoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    Voice,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=Voice,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -833,16 +849,27 @@ class AsyncVoicesClient:
     async def localize(
         self,
         *,
-        embedding: Embedding,
+        voice_id: str,
+        name: str,
+        description: str,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
         dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
+    ) -> VoiceMetadata:
         """
+        Create a new voice from an existing voice localized to a new language and dialect.
+
         Parameters
         ----------
-        embedding : Embedding
+        voice_id : str
+            The ID of the voice to localize.
+
+        name : str
+            The name of the new localized voice.
+
+        description : str
+            The description of the new localized voice.
 
         language : LocalizeTargetLanguage
 
@@ -855,7 +882,7 @@ class AsyncVoicesClient:
 
         Returns
         -------
-        EmbeddingResponse
+        VoiceMetadata
 
         Examples
         --------
@@ -870,9 +897,12 @@ class AsyncVoicesClient:
 
         async def main() -> None:
             await client.voices.localize(
-                embedding=[1.1, 1.1],
-                language="en",
-                original_speaker_gender="male",
+                voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+                name="Sarah Peninsular Spanish",
+                description="Sarah Voice in Peninsular Spanish",
+                language="es",
+                original_speaker_gender="female",
+                dialect="pe",
             )
 
 
@@ -882,7 +912,9 @@ class AsyncVoicesClient:
             "voices/localize",
             method="POST",
             json={
-                "embedding": embedding,
+                "voice_id": voice_id,
+                "name": name,
+                "description": description,
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
@@ -895,9 +927,9 @@ class AsyncVoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    EmbeddingResponse,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -977,7 +1009,7 @@ class AsyncVoicesClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
+    ) -> VoiceMetadata:
         """
         Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
 
@@ -1000,7 +1032,7 @@ class AsyncVoicesClient:
 
         Returns
         -------
-        Voice
+        VoiceMetadata
 
         Examples
         --------
@@ -1041,9 +1073,9 @@ class AsyncVoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    Voice,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=Voice,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
