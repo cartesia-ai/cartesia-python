@@ -67,7 +67,7 @@ class TtsClient:
             api_key="YOUR_API_KEY",
         )
         client.tts.bytes(
-            model_id="sonic",
+            model_id="sonic-2",
             transcript="Hello, world!",
             voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
             language="en",
@@ -152,7 +152,7 @@ class TtsClient:
             api_key="YOUR_API_KEY",
         )
         response = client.tts.sse(
-            model_id="sonic",
+            model_id="sonic-2",
             transcript="Hello, world!",
             voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
             language="en",
@@ -258,7 +258,7 @@ class AsyncTtsClient:
 
         async def main() -> None:
             await client.tts.bytes(
-                model_id="sonic",
+                model_id="sonic-2",
                 transcript="Hello, world!",
                 voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
                 language="en",
@@ -351,7 +351,7 @@ class AsyncTtsClient:
 
         async def main() -> None:
             response = await client.tts.sse(
-                model_id="sonic",
+                model_id="sonic-2",
                 transcript="Hello, world!",
                 voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
                 language="en",

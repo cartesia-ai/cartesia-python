@@ -222,7 +222,7 @@ Generate audio that smoothly connects two existing audio segments. This is usefu
 
 **The cost is 1 credit per character of the infill text plus a fixed cost of 300 credits.**
 
-Only the `sonic-preview` model is supported for infill at this time.
+Only the `sonic-2` model is supported for infill at this time.
 
 At least one of `left_audio` or `right_audio` must be provided.
 
@@ -253,7 +253,7 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.infill.bytes(
-    model_id="sonic-preview",
+    model_id="sonic-2",
     language="en",
     transcript="middle segment",
     voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -424,7 +424,7 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.tts.bytes(
-    model_id="sonic",
+    model_id="sonic-2",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
     language="en",
@@ -531,7 +531,7 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 response = client.tts.sse(
-    model_id="sonic",
+    model_id="sonic-2",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
     language="en",

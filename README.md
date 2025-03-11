@@ -75,7 +75,7 @@ client = Cartesia(
     api_key=os.getenv("CARTESIA_API_KEY"),
 )
 client.tts.bytes(
-    model_id="sonic-english",
+    model_id="sonic-2",
     transcript="Hello, world!",
     voice={
         "mode": "id",
@@ -111,7 +111,7 @@ client = AsyncCartesia(
 
 async def main() -> None:
     async for output in client.tts.bytes(
-        model_id="sonic-english",
+        model_id="sonic-2",
         transcript="Hello, world!",
         voice={"id": "694f9389-aac1-45b6-b726-9d9369183238"},
         language="en",
@@ -156,7 +156,7 @@ def get_tts_chunks():
         api_key=os.getenv("CARTESIA_API_KEY"),
     )
     response = client.tts.sse(
-        model_id="sonic",
+        model_id="sonic-2",
         transcript="Hello world!",
         voice={
             "id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94",
@@ -198,7 +198,7 @@ voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 transcript = "Hello! Welcome to Cartesia"
 
 # You can check out our models at https://docs.cartesia.ai/getting-started/available-models
-model_id = "sonic"
+model_id = "sonic-2"
 
 p = pyaudio.PyAudio()
 rate = 22050
