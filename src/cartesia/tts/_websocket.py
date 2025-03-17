@@ -26,6 +26,7 @@ from cartesia.tts.types import (
     WebSocketResponse_Timestamps,
     WebSocketTtsOutput,
     WordTimestamps,
+    PhonemeTimestamps,
 )
 
 from ..core.pydantic_utilities import parse_obj_as
@@ -66,6 +67,7 @@ class _TTSContext:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -101,6 +103,8 @@ class _TTSContext:
             request_body["stream"] = stream
         if add_timestamps:
             request_body["add_timestamps"] = add_timestamps
+        if add_phoneme_timestamps:
+            request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
 
         if (
             "context_id" in request_body
@@ -331,6 +335,7 @@ class TtsWebsocket:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
     ):
         """Send a request to the WebSocket to generate audio.
 
@@ -370,6 +375,9 @@ class TtsWebsocket:
         words: typing.List[str] = []
         start: typing.List[float] = []
         end: typing.List[float] = []
+        phonemes: typing.List[str] = []
+        phoneme_start: typing.List[float] = []
+        phoneme_end: typing.List[float] = []
         for chunk in generator:
             if chunk.audio is not None:
                 chunks.append(chunk.audio)
@@ -378,6 +386,11 @@ class TtsWebsocket:
                     words.extend(chunk.word_timestamps.words)
                     start.extend(chunk.word_timestamps.start)
                     end.extend(chunk.word_timestamps.end)
+            if add_phoneme_timestamps and chunk.phoneme_timestamps is not None:
+                if chunk.phoneme_timestamps is not None:
+                    phonemes.extend(chunk.phoneme_timestamps.phonemes)
+                    phoneme_start.extend(chunk.phoneme_timestamps.start)
+                    phoneme_end.extend(chunk.phoneme_timestamps.end)
 
         return WebSocketTtsOutput(
             audio=b"".join(chunks),  # type: ignore

@@ -17,6 +17,7 @@ from cartesia.tts.types import (
     WebSocketResponse_FlushDone,
     WebSocketTtsOutput,
     WordTimestamps,
+    PhonemeTimestamps,
 )
 
 from ..core.pydantic_utilities import parse_obj_as
@@ -67,6 +68,7 @@ class _AsyncTTSContext:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
         continue_: bool = False,
         flush: bool = False,
     ) -> None:
@@ -102,11 +104,12 @@ class _AsyncTTSContext:
             request_body["stream"] = stream
         if add_timestamps:
             request_body["add_timestamps"] = add_timestamps
+        if add_phoneme_timestamps:
+            request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
         if continue_:
             request_body["continue"] = continue_
         if flush:
             request_body["flush"] = flush
-
         if (
             "context_id" in request_body
             and request_body["context_id"] is not None
