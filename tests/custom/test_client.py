@@ -917,6 +917,43 @@ async def test_continuation_flush():
         await async_client.close()
 
 
+@pytest.mark.asyncio
+async def test_context_cancel():
+    """Test cancelling a context during generation."""
+    logger.info("Testing context cancellation")
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+    try:
+        # Create a context with a long transcript to ensure there's time to cancel
+        ctx = ws.context()
+        long_transcript = "This is a very long transcript that will take some time to generate. " * 10
+        
+        # Send the request
+        await ctx.send(
+            model_id=DEFAULT_MODEL_ID,
+            transcript=long_transcript,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+            continue_=False,
+        )
+        
+        # Start receiving but cancel after getting a few chunks
+        chunks_received = 0
+        async for out in ctx.receive():
+            chunks_received += 1
+            if chunks_received >= 2:  # Cancel after receiving 2 chunks
+                await ctx.cancel()
+                break
+        
+        # Verify the context was closed after cancellation
+        assert ctx.is_closed(), "Context should be closed after cancellation"
+        logger.info(f"Chunks received: {chunks_received}")
+        
+    finally:
+        await ws.close()
+        await async_client.close()
+
+
 async def context_runner(ws, transcripts):
     ctx = ws.context()
 

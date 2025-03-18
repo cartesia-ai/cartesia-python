@@ -235,6 +235,55 @@ p.terminate()
 ws.close()  # Close the websocket connection
 ```
 
+## Requesting Timestamps
+
+```python
+import asyncio
+from cartesia import AsyncCartesia
+import os
+
+async def main():
+    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+    
+    # Connect to the websocket
+    ws = await client.tts.websocket()
+    
+    # Generate speech with timestamps
+    output_generate = await ws.send(
+        model_id="sonic-2",
+        transcript="Hello! Welcome to Cartesia's text-to-speech.",
+        voice={"id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94"},
+        output_format={
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100
+        },
+        add_timestamps=True,  # Enable word-level timestamps
+        stream=True
+    )
+    
+    # Process the streaming response with timestamps
+    all_words = []
+    all_starts = []
+    all_ends = []
+    audio_chunks = []
+    
+    async for out in output_generate:
+        # Collect audio data
+        if out.audio is not None:
+            audio_chunks.append(out.audio)
+            
+        # Process timestamp data
+        if out.word_timestamps is not None:
+            all_words.extend(out.word_timestamps.words)    # List of words
+            all_starts.extend(out.word_timestamps.start)   # Start time for each word (seconds)
+            all_ends.extend(out.word_timestamps.end)       # End time for each word (seconds)
+    
+    await ws.close()
+
+asyncio.run(main())
+```
+
 ## Advanced
 
 ### Retries
