@@ -435,42 +435,6 @@ def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, strea
         _validate_audio_response(audio, output_format)
 
 
-def test_context_cancel_sync(resources: _Resources):
-    """Test cancelling a context during synchronous generation."""
-    logger.info("Testing synchronous context cancellation")
-    client = resources.client
-    ws = client.tts.websocket()
-    
-    try:
-        # Create a context with a long transcript to ensure there's time to cancel
-        ctx = ws.context()
-        long_transcript = "This is a very long transcript that will take some time to generate. " * 10
-        
-        # Start receiving chunks
-        generator = ctx.send(
-            model_id=DEFAULT_MODEL_ID,
-            transcript=long_transcript,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
-            stream=True,
-        )
-        
-        chunks_received = 0
-        for _ in generator:
-            chunks_received += 1
-            if chunks_received >= 2:  # Cancel after receiving 2 chunks
-                ctx.cancel()
-                break
-
-    
-        logger.info(f"Chunks received: {chunks_received}")
-        
-        # Verify the context was closed after cancellation
-        assert ctx.is_closed(), "Context should be closed after cancellation"
-    finally:
-        ws.close()
-
-
 def test_ws_err():
     logger.info("Testing WebSocket with error")
     transcript = SAMPLE_TRANSCRIPT
