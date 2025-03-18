@@ -7,11 +7,13 @@ import pydantic
 from ...core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .context_id import ContextId
 from .flush_id import FlushId
+from .phoneme_timestamps import PhonemeTimestamps
 from .word_timestamps import WordTimestamps
 
 
 class WebSocketTtsOutput(UniversalBaseModel):
     word_timestamps: typing.Optional[WordTimestamps] = None
+    phoneme_timestamps: typing.Optional[PhonemeTimestamps] = None
     audio: typing.Optional[bytes] = None
     context_id: typing.Optional[ContextId] = None
     flush_id: typing.Optional[FlushId] = None
