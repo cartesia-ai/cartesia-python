@@ -302,7 +302,26 @@ class AsyncTtsWebsocket(TtsWebsocket):
             try:
                 self.websocket = await session.ws_connect(url)
             except Exception as e:
-                raise RuntimeError(f"Failed to connect to WebSocket at {url}. {e}")
+                # Extract status code if available
+                status_code = None
+                error_message = str(e)
+                
+                if hasattr(e, 'status') and e.status is not None:
+                    status_code = e.status
+                
+                    # Create a meaningful error message based on status code
+                    if status_code == 402:
+                        error_message = "Payment required. Your API key may have insufficient credits or permissions."
+                    elif status_code == 401:
+                        error_message = "Unauthorized. Please check your API key."
+                    elif status_code == 403:
+                        error_message = "Forbidden. You don't have permission to access this resource."
+                    elif status_code == 404:
+                        error_message = "Not found. The requested resource doesn't exist."
+                    
+                    raise RuntimeError(f"Failed to connect to WebSocket.\nStatus: {status_code}. Error message: {error_message}")
+                else:
+                    raise RuntimeError(f"Failed to connect to WebSocket at {url}. {e}")
 
     def _is_websocket_closed(self):
         return self.websocket.closed
