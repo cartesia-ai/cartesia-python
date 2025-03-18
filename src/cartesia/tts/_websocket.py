@@ -58,7 +58,7 @@ class _TTSContext:
         self,
         *,
         model_id: str,
-        transcript: str,
+        transcript: typing.Generator[str, None, None],
         output_format: OutputFormatParams,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
