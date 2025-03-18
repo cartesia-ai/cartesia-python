@@ -227,6 +227,11 @@ class _TTSContext:
     def is_closed(self):
         """Check if the context is closed or not. Returns True if closed."""
         return self._context_id not in self._websocket._contexts
+    
+    def cancel(self):
+        """Cancel the context. This will stop the generation of audio for this context."""
+        self._websocket.websocket.send(json.dumps({"context_id": self._context_id, "cancel": True}))
+        self._close()
 
 
 class TtsWebsocket:

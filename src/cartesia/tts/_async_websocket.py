@@ -229,6 +229,11 @@ class _AsyncTTSContext:
         finally:
             self._close()
 
+    async def cancel(self):
+        """Cancel the context. This will stop the generation of audio for this context."""
+        await self._websocket.websocket.send_json({"context_id": self._context_id, "cancel": True})
+        self._close()
+
     def _close(self) -> None:
         """Closes the context. Automatically called when a done message is received for this context."""
         self._websocket._remove_context(self._context_id)
