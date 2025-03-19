@@ -330,6 +330,8 @@ class TtsWebsocket:
             out["audio"] = base64.b64decode(response.data)
         elif isinstance(response, WebSocketResponse_Timestamps):
             out["word_timestamps"] = response.word_timestamps  # type: ignore
+        elif isinstance(response, WebSocketResponse_PhonemeTimestamps):
+            out["phoneme_timestamps"] = response.phoneme_timestamps  # type: ignore
         elif include_flush_id and isinstance(response, WebSocketResponse_FlushDone):
             out["flush_done"] = response.flush_done  # type: ignore
             out["flush_id"] = response.flush_id  # type: ignore

@@ -428,8 +428,8 @@ class AsyncTtsWebsocket(TtsWebsocket):
             phoneme_timestamps=(
                 PhonemeTimestamps(
                     phonemes=phonemes,
-                    start=start,
-                    end=end,
+                    start=phoneme_start,
+                    end=phoneme_end,
                 )
                 if add_phoneme_timestamps
                 else None
