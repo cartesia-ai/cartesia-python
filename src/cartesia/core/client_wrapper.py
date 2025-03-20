@@ -19,7 +19,7 @@ class BaseClientWrapper:
             "X-Fern-SDK-Version": "2.0.0b3",
         }
         headers["X-API-Key"] = self.api_key
-        headers["Cartesia-Version"] = "2024-06-10"
+        headers["Cartesia-Version"] = "2024-11-13"
         return headers
 
     def get_base_url(self) -> str:

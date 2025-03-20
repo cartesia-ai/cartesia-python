@@ -2,9 +2,9 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 from .voice_id import VoiceId
-import typing
 import pydantic
 import datetime as dt
+import typing
 from ...embedding.types.embedding import Embedding
 from ...tts.types.supported_language import SupportedLanguage
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
@@ -12,14 +12,9 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 class Voice(UniversalBaseModel):
     id: VoiceId
-    user_id: typing.Optional[str] = pydantic.Field(default=None)
+    is_owner: bool = pydantic.Field()
     """
-    The ID of the user who owns the voice.
-    """
-
-    is_public: bool = pydantic.Field()
-    """
-    Whether the voice is publicly accessible.
+    Whether the current user is the owner of the voice.
     """
 
     name: str = pydantic.Field()
@@ -37,7 +32,16 @@ class Voice(UniversalBaseModel):
     The date and time the voice was created.
     """
 
-    embedding: Embedding
+    embedding: typing.Optional[Embedding] = pydantic.Field(default=None)
+    """
+    The vector embedding of the voice. Only included when `expand` includes `embedding`.
+    """
+
+    is_starred: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether the current user has starred the voice. Only included when `expand` includes `is_starred`.
+    """
+
     language: SupportedLanguage
 
     if IS_PYDANTIC_V2:

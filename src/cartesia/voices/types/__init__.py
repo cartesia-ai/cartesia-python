@@ -6,18 +6,18 @@ from .create_voice_request import CreateVoiceRequest
 from .embedding_response import EmbeddingResponse
 from .embedding_specifier import EmbeddingSpecifier
 from .gender import Gender
+from .gender_presentation import GenderPresentation
+from .get_voices_response import GetVoicesResponse
 from .id_specifier import IdSpecifier
 from .localize_dialect import LocalizeDialect
 from .localize_english_dialect import LocalizeEnglishDialect
-from .localize_french_dialect import LocalizeFrenchDialect
-from .localize_portuguese_dialect import LocalizePortugueseDialect
-from .localize_spanish_dialect import LocalizeSpanishDialect
 from .localize_target_language import LocalizeTargetLanguage
 from .localize_voice_request import LocalizeVoiceRequest
 from .mix_voice_specifier import MixVoiceSpecifier
 from .mix_voices_request import MixVoicesRequest
 from .update_voice_request import UpdateVoiceRequest
 from .voice import Voice
+from .voice_expand_options import VoiceExpandOptions
 from .voice_id import VoiceId
 from .voice_metadata import VoiceMetadata
 from .weight import Weight
@@ -29,18 +29,18 @@ __all__ = [
     "EmbeddingResponse",
     "EmbeddingSpecifier",
     "Gender",
+    "GenderPresentation",
+    "GetVoicesResponse",
     "IdSpecifier",
     "LocalizeDialect",
     "LocalizeEnglishDialect",
-    "LocalizeFrenchDialect",
-    "LocalizePortugueseDialect",
-    "LocalizeSpanishDialect",
     "LocalizeTargetLanguage",
     "LocalizeVoiceRequest",
     "MixVoiceSpecifier",
     "MixVoicesRequest",
     "UpdateVoiceRequest",
     "Voice",
+    "VoiceExpandOptions",
     "VoiceId",
     "VoiceMetadata",
     "Weight",

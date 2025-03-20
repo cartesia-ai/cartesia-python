@@ -5,14 +5,12 @@ from .environment import CartesiaEnvironment
 import httpx
 from .core.client_wrapper import SyncClientWrapper
 from .api_status.client import ApiStatusClient
-from .datasets.client import DatasetsClient
 from .infill.client import InfillClient
 from .tts.client import TtsClient
 from .voice_changer.client import VoiceChangerClient
 from .voices.client import VoicesClient
 from .core.client_wrapper import AsyncClientWrapper
 from .api_status.client import AsyncApiStatusClient
-from .datasets.client import AsyncDatasetsClient
 from .infill.client import AsyncInfillClient
 from .tts.client import AsyncTtsClient
 from .voice_changer.client import AsyncVoiceChangerClient
@@ -78,7 +76,6 @@ class BaseCartesia:
             timeout=_defaulted_timeout,
         )
         self.api_status = ApiStatusClient(client_wrapper=self._client_wrapper)
-        self.datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         self.infill = InfillClient(client_wrapper=self._client_wrapper)
         self.tts = TtsClient(client_wrapper=self._client_wrapper)
         self.voice_changer = VoiceChangerClient(client_wrapper=self._client_wrapper)
@@ -144,7 +141,6 @@ class AsyncBaseCartesia:
             timeout=_defaulted_timeout,
         )
         self.api_status = AsyncApiStatusClient(client_wrapper=self._client_wrapper)
-        self.datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         self.infill = AsyncInfillClient(client_wrapper=self._client_wrapper)
         self.tts = AsyncTtsClient(client_wrapper=self._client_wrapper)
         self.voice_changer = AsyncVoiceChangerClient(client_wrapper=self._client_wrapper)

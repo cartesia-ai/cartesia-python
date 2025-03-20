@@ -3,6 +3,7 @@
 from .create_voice_request import CreateVoiceRequestParams
 from .embedding_response import EmbeddingResponseParams
 from .embedding_specifier import EmbeddingSpecifierParams
+from .get_voices_response import GetVoicesResponseParams
 from .id_specifier import IdSpecifierParams
 from .localize_dialect import LocalizeDialectParams
 from .localize_voice_request import LocalizeVoiceRequestParams
@@ -16,6 +17,7 @@ __all__ = [
     "CreateVoiceRequestParams",
     "EmbeddingResponseParams",
     "EmbeddingSpecifierParams",
+    "GetVoicesResponseParams",
     "IdSpecifierParams",
     "LocalizeDialectParams",
     "LocalizeVoiceRequestParams",
