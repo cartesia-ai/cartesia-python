@@ -2,8 +2,8 @@
 
 import typing
 from ..core.client_wrapper import SyncClientWrapper
-from .types.voice_expand_options import VoiceExpandOptions
 from .types.gender_presentation import GenderPresentation
+from .types.voice_expand_options import VoiceExpandOptions
 from ..core.request_options import RequestOptions
 from .types.get_voices_response import GetVoicesResponse
 from ..core.pydantic_utilities import parse_obj_as
@@ -36,21 +36,18 @@ class VoicesClient:
     def list(
         self,
         *,
-        expand: typing.Sequence[VoiceExpandOptions],
         limit: typing.Optional[int] = None,
         starting_after: typing.Optional[str] = None,
         ending_before: typing.Optional[str] = None,
         is_owner: typing.Optional[bool] = None,
         is_starred: typing.Optional[bool] = None,
         gender: typing.Optional[GenderPresentation] = None,
+        expand: typing.Optional[typing.Sequence[VoiceExpandOptions]] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GetVoicesResponse:
         """
         Parameters
         ----------
-        expand : typing.Sequence[VoiceExpandOptions]
-            Additional fields to include in the response.
-
         limit : typing.Optional[int]
             The number of Voices to return per page, ranging between 1 and 100.
 
@@ -75,6 +72,9 @@ class VoicesClient:
         gender : typing.Optional[GenderPresentation]
             The gender presentation of the voices to return.
 
+        expand : typing.Optional[typing.Sequence[VoiceExpandOptions]]
+            Additional fields to include in the response.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -89,9 +89,7 @@ class VoicesClient:
         client = Cartesia(
             api_key="YOUR_API_KEY",
         )
-        client.voices.list(
-            expand=["embedding", "embedding"],
-        )
+        client.voices.list()
         """
         _response = self._client_wrapper.httpx_client.request(
             "voices/",
@@ -556,21 +554,18 @@ class AsyncVoicesClient:
     async def list(
         self,
         *,
-        expand: typing.Sequence[VoiceExpandOptions],
         limit: typing.Optional[int] = None,
         starting_after: typing.Optional[str] = None,
         ending_before: typing.Optional[str] = None,
         is_owner: typing.Optional[bool] = None,
         is_starred: typing.Optional[bool] = None,
         gender: typing.Optional[GenderPresentation] = None,
+        expand: typing.Optional[typing.Sequence[VoiceExpandOptions]] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GetVoicesResponse:
         """
         Parameters
         ----------
-        expand : typing.Sequence[VoiceExpandOptions]
-            Additional fields to include in the response.
-
         limit : typing.Optional[int]
             The number of Voices to return per page, ranging between 1 and 100.
 
@@ -595,6 +590,9 @@ class AsyncVoicesClient:
         gender : typing.Optional[GenderPresentation]
             The gender presentation of the voices to return.
 
+        expand : typing.Optional[typing.Sequence[VoiceExpandOptions]]
+            Additional fields to include in the response.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -614,9 +612,7 @@ class AsyncVoicesClient:
 
 
         async def main() -> None:
-            await client.voices.list(
-                expand=["embedding", "embedding"],
-            )
+            await client.voices.list()
 
 
         asyncio.run(main())

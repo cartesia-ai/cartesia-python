@@ -706,9 +706,7 @@ from cartesia import Cartesia
 client = Cartesia(
     api_key="YOUR_API_KEY",
 )
-client.voices.list(
-    expand=["embedding", "embedding"],
-)
+client.voices.list()
 
 ```
 </dd>
@@ -720,14 +718,6 @@ client.voices.list(
 
 <dl>
 <dd>
-
-<dl>
-<dd>
-
-**expand:** `typing.Sequence[VoiceExpandOptions]` — Additional fields to include in the response.
-    
-</dd>
-</dl>
 
 <dl>
 <dd>
@@ -783,6 +773,14 @@ objects, starting with `voice_abc123`, your subsequent call can include
 <dd>
 
 **gender:** `typing.Optional[GenderPresentation]` — The gender presentation of the voices to return.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expand:** `typing.Optional[typing.Sequence[VoiceExpandOptions]]` — Additional fields to include in the response.
     
 </dd>
 </dl>
