@@ -1274,3 +1274,110 @@ def test_multilingual(resources: _Resources, language: str):
 
     complete_audio = b"".join(chunks)
     _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+
+def _validate_phoneme_timestamps(phonemes: List[str], starts: List[float], ends: List[float], transcript: str):
+    """Helper method to validate phoneme timestamps against a transcript.
+
+    Args:
+        phonemes: List of phonemes from timestamps
+        starts: List of start times
+        ends: List of end times
+        transcript: Original transcript text
+    """
+    # Verify timestamps
+    assert len(phonemes) > 0, "Expected phonemes in timestamps, got none"
+    assert len(starts) == len(phonemes), "Number of start times doesn't match number of phonemes"
+    assert len(ends) == len(phonemes), "Number of end times doesn't match number of phonemes"
+
+    # Verify timing order
+    for i in range(len(starts) - 1):
+        assert starts[i] <= starts[i + 1], "Start times are not monotonically increasing"
+        assert ends[i] <= starts[i + 1], "Phoneme end time is after next phoneme's start time"
+        assert starts[i] <= ends[i], "Phoneme start time is after its end time"
+
+
+def test_ws_phoneme_timestamps():
+    logger.info("Testing WebSocket with phoneme timestamps")
+    transcript = SAMPLE_TRANSCRIPT
+
+    client = create_client()
+    ws = client.tts.websocket()
+    output_generate = ws.send(
+        transcript=transcript,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+        model_id=DEFAULT_MODEL_ID,
+        add_phoneme_timestamps=True,
+        stream=True,
+    )
+    has_phoneme_timestamps = False
+    chunks = []
+    all_phonemes = []
+    all_starts = []
+    all_ends = []
+    for out in output_generate:
+        assert out.context_id is not None
+        has_phoneme_timestamps |= out.phoneme_timestamps is not None
+        _validate_schema(out)
+        if out.phoneme_timestamps is not None:
+            all_phonemes.extend(out.phoneme_timestamps.phonemes)
+            all_starts.extend(out.phoneme_timestamps.start)
+            all_ends.extend(out.phoneme_timestamps.end)
+        has_audio = out.audio is not None
+        if has_audio:
+            chunks.append(out.audio)
+
+    assert has_phoneme_timestamps, "No phoneme timestamps found"
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends, transcript)
+
+    # Verify audio
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    # Close the websocket
+    ws.close()
+
+
+@pytest.mark.asyncio
+async def test_ws_phoneme_timestamps_async():
+    logger.info("Testing WebSocket with phoneme timestamps (async)")
+    transcript = SAMPLE_TRANSCRIPT
+
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+    output_generate = await ws.send(
+        transcript=transcript,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+        model_id=DEFAULT_MODEL_ID,
+        add_phoneme_timestamps=True,
+        stream=True,
+    )
+    has_phoneme_timestamps = False
+    chunks = []
+    all_phonemes = []
+    all_starts = []
+    all_ends = []
+    async for out in output_generate:
+        assert out.context_id is not None
+        has_phoneme_timestamps |= out.phoneme_timestamps is not None
+        _validate_schema(out)
+        if out.phoneme_timestamps is not None:
+            all_phonemes.extend(out.phoneme_timestamps.phonemes)
+            all_starts.extend(out.phoneme_timestamps.start)
+            all_ends.extend(out.phoneme_timestamps.end)
+        has_audio = out.audio is not None
+        if has_audio:
+            chunks.append(out.audio)
+
+    assert has_phoneme_timestamps, "No phoneme timestamps found"
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends, transcript)
+
+    # Verify audio
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    # Close the websocket
+    await ws.close()
+    await async_client.close()

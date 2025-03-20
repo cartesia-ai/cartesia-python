@@ -17,6 +17,7 @@ from cartesia.tts.types import (
     WebSocketResponse_FlushDone,
     WebSocketTtsOutput,
     WordTimestamps,
+    PhonemeTimestamps,
 )
 
 from ..core.pydantic_utilities import parse_obj_as
@@ -67,6 +68,7 @@ class _AsyncTTSContext:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
         continue_: bool = False,
         flush: bool = False,
     ) -> None:
@@ -102,6 +104,8 @@ class _AsyncTTSContext:
             request_body["stream"] = stream
         if add_timestamps:
             request_body["add_timestamps"] = add_timestamps
+        if add_phoneme_timestamps:
+            request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
         if continue_:
             request_body["continue"] = continue_
         if flush:
@@ -362,6 +366,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
     ):
         """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
@@ -379,6 +384,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
             language=language,
             continue_=False,
             add_timestamps=add_timestamps,
+            add_phoneme_timestamps=add_phoneme_timestamps,
         )
 
         generator = ctx.receive()
@@ -390,6 +396,9 @@ class AsyncTtsWebsocket(TtsWebsocket):
         words: typing.List[str] = []
         start: typing.List[float] = []
         end: typing.List[float] = []
+        phonemes: typing.List[str] = []
+        phoneme_start: typing.List[float] = []
+        phoneme_end: typing.List[float] = []
         async for chunk in generator:
             if chunk.audio is not None:
                 chunks.append(chunk.audio)
@@ -398,6 +407,11 @@ class AsyncTtsWebsocket(TtsWebsocket):
                     words.extend(chunk.word_timestamps.words)
                     start.extend(chunk.word_timestamps.start)
                     end.extend(chunk.word_timestamps.end)
+            if add_phoneme_timestamps and chunk.phoneme_timestamps is not None:
+                if chunk.phoneme_timestamps is not None:
+                    phonemes.extend(chunk.phoneme_timestamps.phonemes)
+                    phoneme_start.extend(chunk.phoneme_timestamps.start)
+                    phoneme_end.extend(chunk.phoneme_timestamps.end)
 
         return WebSocketTtsOutput(
             audio=b"".join(chunks),  # type: ignore
@@ -409,6 +423,15 @@ class AsyncTtsWebsocket(TtsWebsocket):
                     end=end,
                 )
                 if add_timestamps
+                else None
+            ),
+            phoneme_timestamps=(
+                PhonemeTimestamps(
+                    phonemes=phonemes,
+                    start=phoneme_start,
+                    end=phoneme_end,
+                )
+                if add_phoneme_timestamps
                 else None
             ),
         )
