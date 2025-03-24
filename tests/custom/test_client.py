@@ -211,7 +211,7 @@ def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
 
 def test_get_voices(client: Cartesia):
     logger.info("Testing voices.list")
-    voices = client.voices.list()
+    voices = client.voices.list().data
     assert isinstance(voices, list)
     # Check that voices is a list of Voice objects
     assert all(isinstance(voice, Voice) for voice in voices)
@@ -224,8 +224,8 @@ def test_get_voice_from_id(client: Cartesia):
     voice = client.voices.get(SAMPLE_VOICE_ID)
     assert voice.id == SAMPLE_VOICE_ID
     assert voice.name == SAMPLE_VOICE_NAME
-    assert voice.is_public is True
-    voices = client.voices.list()
+    assert voice.is_owner is False
+    voices = client.voices.list().data
     assert voice in voices
 
 
@@ -280,8 +280,8 @@ def test_create_voice(client: Cartesia):
     )
     assert voice.name == "Test Voice"
     assert voice.description == "Test voice description"
-    assert voice.is_public is False
-    voices = client.voices.list()
+    assert voice.is_owner is True
+    voices = client.voices.list().data
     assert voice.id in [v.id for v in voices]
 
     client.voices.delete(voice.id)
@@ -927,7 +927,7 @@ async def test_context_cancel():
         # Create a context with a long transcript to ensure there's time to cancel
         ctx = ws.context()
         long_transcript = "This is a very long transcript that will take some time to generate. " * 10
-        
+
         # Send the request
         await ctx.send(
             model_id=DEFAULT_MODEL_ID,
@@ -936,7 +936,7 @@ async def test_context_cancel():
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             continue_=False,
         )
-        
+
         # Start receiving but cancel after getting a few chunks
         chunks_received = 0
         async for out in ctx.receive():
@@ -944,11 +944,11 @@ async def test_context_cancel():
             if chunks_received >= 2:  # Cancel after receiving 2 chunks
                 await ctx.cancel()
                 break
-        
+
         # Verify the context was closed after cancellation
         assert ctx.is_closed(), "Context should be closed after cancellation"
         logger.info(f"Chunks received: {chunks_received}")
-        
+
     finally:
         await ws.close()
         await async_client.close()
