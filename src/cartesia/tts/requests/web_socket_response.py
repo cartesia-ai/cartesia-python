@@ -4,8 +4,8 @@ from __future__ import annotations
 import typing_extensions
 import typing
 import typing_extensions
-from ..types.context_id import ContextId
 from ..types.flush_id import FlushId
+from ..types.context_id import ContextId
 from .word_timestamps import WordTimestampsParams
 from .phoneme_timestamps import PhonemeTimestampsParams
 
@@ -14,6 +14,7 @@ class WebSocketResponse_ChunkParams(typing_extensions.TypedDict):
     type: typing.Literal["chunk"]
     data: str
     step_time: float
+    flush_id: typing_extensions.NotRequired[FlushId]
     context_id: typing_extensions.NotRequired[ContextId]
     status_code: int
     done: bool

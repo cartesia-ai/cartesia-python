@@ -4,6 +4,7 @@ from ...core.pydantic_utilities import UniversalBaseModel
 import typing
 from .voice import Voice
 import pydantic
+from .voice_id import VoiceId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -13,7 +14,15 @@ class GetVoicesResponse(UniversalBaseModel):
     The paginated list of Voices.
     """
 
-    has_more: bool
+    has_more: bool = pydantic.Field()
+    """
+    Whether there are more Voices to fetch (using `starting_after=id`, where id is the ID of the last Voice in the current response).
+    """
+
+    next_page: typing.Optional[VoiceId] = pydantic.Field(default=None)
+    """
+    (Deprecated - use `starting_after` instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -19,6 +19,7 @@ class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     duration: typing_extensions.NotRequired[int]
     language: typing_extensions.NotRequired[str]
     add_timestamps: typing_extensions.NotRequired[bool]
+    use_original_timestamps: typing_extensions.NotRequired[bool]
     add_phoneme_timestamps: typing_extensions.NotRequired[bool]
     continue_: typing_extensions.NotRequired[typing_extensions.Annotated[bool, FieldMetadata(alias="continue")]]
     context_id: typing_extensions.NotRequired[str]

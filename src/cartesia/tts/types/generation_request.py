@@ -56,6 +56,11 @@ class GenerationRequest(UniversalBaseModel):
     Whether to return phoneme-level timestamps.
     """
 
+    use_original_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether to use the original transcript for timestamps.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:
