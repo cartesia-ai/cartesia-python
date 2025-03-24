@@ -355,4 +355,22 @@ by checking for this comment at the top of the file:
 
 ### Running tests
 
-###
+```sh
+uv pip install -r requirements.txt
+uv run pytest -rP -vv tests/custom/test_client.py::test_get_voices
+```
+### Manually generating SDK code from docs
+
+Assuming all your repos are cloned into your home directory:
+
+```sh
+$ cd ~/docs
+$ fern generate --group python-sdk --log-level debug --api version-2024-11-13 --preview
+$ cd ~/cartesia-python
+$ git pull ~/docs/fern/apis/version-2024-11-13/.preview/fern-python-sdk
+$ git commit --amend # optional
+```
+
+### Automatically generating new SDK releases
+
+From https://github.com/cartesia-ai/docs click `Actions` then `Release Python SDK`. (Requires permissions.)
