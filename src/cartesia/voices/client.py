@@ -108,7 +108,7 @@ class VoicesClient:
                 "is_owner": is_owner,
                 "is_starred": is_starred,
                 "gender": gender,
-                "expand": expand,
+                "expand[]": expand,
             },
             request_options=request_options,
         )
@@ -647,7 +647,7 @@ class AsyncVoicesClient:
                 "is_owner": is_owner,
                 "is_starred": is_starred,
                 "gender": gender,
-                "expand": expand,
+                "expand[]": expand,
             },
             request_options=request_options,
         )
