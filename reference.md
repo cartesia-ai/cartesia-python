@@ -188,7 +188,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -197,7 +196,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -210,7 +208,6 @@ core.File` — See core.File for more documentation
 Either a number between -1.0 and 1.0 or a natural language description of speed.
 
 If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
     
 </dd>
 </dl>
@@ -225,7 +222,6 @@ An array of emotion:level tags.
 Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
 
 Supported levels are: lowest, low, (omit), high, highest.
-
     
 </dd>
 </dl>
@@ -553,7 +549,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -562,7 +557,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -658,7 +652,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -667,7 +660,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -706,7 +698,12 @@ from cartesia import Cartesia
 client = Cartesia(
     api_key="YOUR_API_KEY",
 )
-client.voices.list()
+response = client.voices.list()
+for item in response:
+    yield item
+# alternatively, you can paginate page-by-page
+for page in response.iter_pages():
+    yield page
 
 ```
 </dd>
@@ -1274,7 +1271,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **name:** `str` — The name of the voice.
-
     
 </dd>
 </dl>
@@ -1283,7 +1279,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **language:** `SupportedLanguage` — The language of the voice.
-
     
 </dd>
 </dl>
@@ -1292,7 +1287,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **mode:** `CloneMode` — Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-
     
 </dd>
 </dl>
@@ -1301,7 +1295,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
     
 </dd>
 </dl>
@@ -1310,7 +1303,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **description:** `typing.Optional[str]` — A description for the voice.
-
     
 </dd>
 </dl>
@@ -1319,7 +1311,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **transcript:** `typing.Optional[str]` — Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
     
 </dd>
 </dl>

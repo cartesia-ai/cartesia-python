@@ -3,6 +3,8 @@
 import typing_extensions
 import typing
 from .voice import VoiceParams
+import typing_extensions
+from ..types.voice_id import VoiceId
 
 
 class GetVoicesResponseParams(typing_extensions.TypedDict):
@@ -11,4 +13,7 @@ class GetVoicesResponseParams(typing_extensions.TypedDict):
     The paginated list of Voices.
     """
 
-    has_more: bool
+    next_page: typing_extensions.NotRequired[VoiceId]
+    """
+    Deprecated. An ID that can be passed as `starting_after` to get the next page of Voices.
+    """

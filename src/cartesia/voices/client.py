@@ -5,13 +5,14 @@ from ..core.client_wrapper import SyncClientWrapper
 from .types.gender_presentation import GenderPresentation
 from .types.voice_expand_options import VoiceExpandOptions
 from ..core.request_options import RequestOptions
+from ..core.pagination import SyncPager
+from .types.voice import Voice
 from .types.get_voices_response import GetVoicesResponse
 from ..core.pydantic_utilities import parse_obj_as
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..embedding.types.embedding import Embedding
 from ..tts.types.supported_language import SupportedLanguage
-from .types.voice import Voice
 from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
 from .types.localize_target_language import LocalizeTargetLanguage
@@ -24,6 +25,7 @@ from .. import core
 from .types.clone_mode import CloneMode
 from .types.voice_metadata import VoiceMetadata
 from ..core.client_wrapper import AsyncClientWrapper
+from ..core.pagination import AsyncPager
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -44,7 +46,7 @@ class VoicesClient:
         gender: typing.Optional[GenderPresentation] = None,
         expand: typing.Optional[typing.Sequence[VoiceExpandOptions]] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetVoicesResponse:
+    ) -> SyncPager[Voice]:
         """
         Parameters
         ----------
@@ -80,7 +82,7 @@ class VoicesClient:
 
         Returns
         -------
-        GetVoicesResponse
+        SyncPager[Voice]
 
         Examples
         --------
@@ -89,7 +91,12 @@ class VoicesClient:
         client = Cartesia(
             api_key="YOUR_API_KEY",
         )
-        client.voices.list()
+        response = client.voices.list()
+        for item in response:
+            yield item
+        # alternatively, you can paginate page-by-page
+        for page in response.iter_pages():
+            yield page
         """
         _response = self._client_wrapper.httpx_client.request(
             "voices/",
@@ -107,13 +114,27 @@ class VoicesClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return typing.cast(
+                _parsed_response = typing.cast(
                     GetVoicesResponse,
                     parse_obj_as(
                         type_=GetVoicesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
+                _parsed_next = _parsed_response.next_page
+                _has_next = _parsed_next is not None and _parsed_next != ""
+                _get_next = lambda: self.list(
+                    limit=limit,
+                    starting_after=_parsed_next,
+                    ending_before=ending_before,
+                    is_owner=is_owner,
+                    is_starred=is_starred,
+                    gender=gender,
+                    expand=expand,
+                    request_options=request_options,
+                )
+                _items = _parsed_response.data
+                return SyncPager(has_next=_has_next, items=_items, get_next=_get_next)
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -472,26 +493,20 @@ class VoicesClient:
         name : str
             The name of the voice.
 
-
         language : SupportedLanguage
             The language of the voice.
-
 
         mode : CloneMode
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
-
         enhance : bool
             Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
 
         description : typing.Optional[str]
             A description for the voice.
 
-
         transcript : typing.Optional[str]
             Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -562,7 +577,7 @@ class AsyncVoicesClient:
         gender: typing.Optional[GenderPresentation] = None,
         expand: typing.Optional[typing.Sequence[VoiceExpandOptions]] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> GetVoicesResponse:
+    ) -> AsyncPager[Voice]:
         """
         Parameters
         ----------
@@ -598,7 +613,7 @@ class AsyncVoicesClient:
 
         Returns
         -------
-        GetVoicesResponse
+        AsyncPager[Voice]
 
         Examples
         --------
@@ -612,7 +627,12 @@ class AsyncVoicesClient:
 
 
         async def main() -> None:
-            await client.voices.list()
+            response = await client.voices.list()
+            async for item in response:
+                yield item
+            # alternatively, you can paginate page-by-page
+            async for page in response.iter_pages():
+                yield page
 
 
         asyncio.run(main())
@@ -633,13 +653,27 @@ class AsyncVoicesClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return typing.cast(
+                _parsed_response = typing.cast(
                     GetVoicesResponse,
                     parse_obj_as(
                         type_=GetVoicesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
+                _parsed_next = _parsed_response.next_page
+                _has_next = _parsed_next is not None and _parsed_next != ""
+                _get_next = lambda: self.list(
+                    limit=limit,
+                    starting_after=_parsed_next,
+                    ending_before=ending_before,
+                    is_owner=is_owner,
+                    is_starred=is_starred,
+                    gender=gender,
+                    expand=expand,
+                    request_options=request_options,
+                )
+                _items = _parsed_response.data
+                return AsyncPager(has_next=_has_next, items=_items, get_next=_get_next)
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, body=_response.text)
@@ -1046,26 +1080,20 @@ class AsyncVoicesClient:
         name : str
             The name of the voice.
 
-
         language : SupportedLanguage
             The language of the voice.
-
 
         mode : CloneMode
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
-
         enhance : bool
             Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
 
         description : typing.Optional[str]
             A description for the voice.
 
-
         transcript : typing.Optional[str]
             Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
