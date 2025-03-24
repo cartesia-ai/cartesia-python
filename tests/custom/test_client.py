@@ -227,8 +227,15 @@ def test_get_voice_from_id(client: Cartesia):
     assert voice.id == SAMPLE_VOICE_ID
     assert voice.name == SAMPLE_VOICE_NAME
     assert voice.is_owner is False
+
+    # The API does not yet support expand[]=tags for voices.list, but voices.get does return tags.
+    # thus this will not work:
+    # voices = client.voices.list(expand=["embedding", "tags"])
+    # assert voice in voices
+    # Instead:
     voices = client.voices.list()
-    assert voice.id in [v.id for v in voices]
+    assert voice.id in (v.id for v in voices)
+
 
 
 @pytest.mark.parametrize("mode", ["similarity", "stability"])

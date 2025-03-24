@@ -368,7 +368,7 @@ $ cd ~/docs
 $ fern generate --group python-sdk --log-level debug --api version-2024-11-13 --preview
 $ cd ~/cartesia-python
 $ git pull ~/docs/fern/apis/version-2024-11-13/.preview/fern-python-sdk
-$ git commit --amend # optional
+$ git commit --amend -m "manually regenerate from docs" # optional
 ```
 
 ### Automatically generating new SDK releases
