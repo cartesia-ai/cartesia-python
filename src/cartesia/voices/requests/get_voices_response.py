@@ -13,7 +13,12 @@ class GetVoicesResponseParams(typing_extensions.TypedDict):
     The paginated list of Voices.
     """
 
+    has_more: bool
+    """
+    Whether there are more Voices to fetch (using `starting_after=id`, where id is the ID of the last Voice in the current response).
+    """
+
     next_page: typing_extensions.NotRequired[VoiceId]
     """
-    Deprecated. An ID that can be passed as `starting_after` to get the next page of Voices.
+    (Deprecated - use `starting_after` instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
     """

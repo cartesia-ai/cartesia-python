@@ -14,9 +14,14 @@ class GetVoicesResponse(UniversalBaseModel):
     The paginated list of Voices.
     """
 
+    has_more: bool = pydantic.Field()
+    """
+    Whether there are more Voices to fetch (using `starting_after=id`, where id is the ID of the last Voice in the current response).
+    """
+
     next_page: typing.Optional[VoiceId] = pydantic.Field(default=None)
     """
-    Deprecated. An ID that can be passed as `starting_after` to get the next page of Voices.
+    (Deprecated - use `starting_after` instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
     """
 
     if IS_PYDANTIC_V2:

@@ -3,7 +3,7 @@ name = "cartesia"
 
 [tool.poetry]
 name = "cartesia"
-version = "2.0.0b5"
+version = "1.4.1"
 description = ""
 readme = "README.md"
 authors = []
