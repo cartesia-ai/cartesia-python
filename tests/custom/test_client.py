@@ -213,7 +213,6 @@ def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
 def test_get_voices(client: Cartesia):
     logger.info("Testing voices.list")
     voices = client.voices.list()
-    print(voices, type(voices))
     assert isinstance(voices, SyncPager)
     # Check that voices is a list of Voice objects
     assert all(isinstance(voice, Voice) for voice in voices)
