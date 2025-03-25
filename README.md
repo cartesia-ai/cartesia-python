@@ -258,7 +258,8 @@ async def main():
             "encoding": "pcm_f32le",
             "sample_rate": 44100
         },
-        add_timestamps=True,  # Enable word-level timestamps
+        add_timestamps=True,            # Enable word-level timestamps
+        add_phoneme_timestamps=True,    # Enable phonemized timestamps
         stream=True
     )
 
