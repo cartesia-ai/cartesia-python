@@ -1355,8 +1355,7 @@ def test_continuation_phoneme_timestamps():
     ws = client.tts.websocket()
     context_id = str(uuid.uuid4())
     ctx = ws.context(context_id)
-    transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
-    full_transcript = " ".join(transcripts)
+    transcripts = ["Hello, world!", "I'm generating audio on Cartesia."]
 
     output_generate = ctx.send(
         model_id=DEFAULT_MODEL_ID,
@@ -1439,7 +1438,7 @@ async def test_continuation_phoneme_timestamps_async():
     ws = await client.tts.websocket()
     context_id = str(uuid.uuid4())
     ctx = ws.context(context_id)
-    transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
+    transcripts = ["Hello, world!", "I'm generating audio on Cartesia."]
 
     for transcript in transcripts:
         await ctx.send(
