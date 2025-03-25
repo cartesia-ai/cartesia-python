@@ -15,53 +15,6 @@ Our complete API documentation can be found [on docs.cartesia.ai](https://docs.c
 pip install cartesia
 ```
 
-## Reference
-
-A full reference for this library is available [here](./reference.md).
-
-## Voices
-
-```python
-from cartesia import Cartesia
-import os
-
-client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-# Get all available voices
-voices = client.voices.list()
-print(voices)
-
-# Get a specific voice
-voice = client.voices.get(id="a0e99841-438c-4a64-b679-ae501e7d6091")
-print("The embedding for", voice.name, "is", voice.embedding)
-
-# Clone a voice using file data
-cloned_voice = client.voices.clone(
-    clip=open("path/to/voice.wav", "rb"),
-    name="Test cloned voice",
-    language="en",
-    mode="similarity",  # or "stability"
-    enhance=False, # use enhance=True to clean and denoise the cloning audio
-    description="Test voice description"
-)
-
-# Mix voices together
-mixed_voice = client.voices.mix(
-    voices=[
-        {"id": "voice_id_1", "weight": 0.25},
-        {"id": "voice_id_2", "weight": 0.75}
-    ]
-)
-
-# Create a new voice from embedding
-new_voice = client.voices.create(
-    name="Test Voice",
-    description="Test voice description",
-    embedding=[...],  # List[float] with 192 dimensions
-    language="en"
-)
-```
-
 ## Usage
 
 Instantiate and use the client with the following:
@@ -80,10 +33,6 @@ client.tts.bytes(
     voice={
         "mode": "id",
         "id": "694f9389-aac1-45b6-b726-9d9369183238",
-        "experimental_controls": {
-            "speed": 0.5,  # range between [-1.0, 1.0], or "slow", "fastest", etc.
-            "emotion": ["positivity", "curiosity:low"] # list of emotions with optional intensity
-        }
     },
     language="en",
     output_format={
@@ -144,7 +93,7 @@ except ApiError as e:
 
 ## Streaming
 
-The SDK supports streaming responses, as well, the response will be a generator that you can loop over.
+The SDK supports streaming responses as well, returning a generator that you can iterate over with a `for ... in ...` loop:
 
 ```python
 from cartesia import Cartesia
@@ -183,7 +132,9 @@ for chunk in chunks:
     print(f"Received chunk of size: {len(chunk.data)}")
 ```
 
-## WebSocket
+## WebSockets
+
+For the lowest latency in advanced usecases (such as streaming in an LLM-generated transcript and streaming out audio), you should use our websockets client:
 
 ```python
 from cartesia import Cartesia
@@ -191,14 +142,9 @@ from cartesia.tts import TtsRequestEmbeddingSpecifierParams, OutputFormat_RawPar
 import pyaudio
 import os
 
-client = Cartesia(
-    api_key=os.getenv("CARTESIA_API_KEY"),
-)
+client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
 voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
 transcript = "Hello! Welcome to Cartesia"
-
-# You can check out our models at https://docs.cartesia.ai/getting-started/available-models
-model_id = "sonic-2"
 
 p = pyaudio.PyAudio()
 rate = 22050
@@ -210,14 +156,14 @@ ws = client.tts.websocket()
 
 # Generate and stream audio using the websocket
 for output in ws.send(
-    model_id=model_id,
+    model_id="sonic-2", # see: https://docs.cartesia.ai/getting-started/available-models
     transcript=transcript,
     voice={"id": voice_id},
     stream=True,
     output_format={
         "container": "raw",
         "encoding": "pcm_f32le",
-        "sample_rate": 22050
+        "sample_rate": rate
     },
 ):
     buffer = output.audio
@@ -233,6 +179,40 @@ stream.close()
 p.terminate()
 
 ws.close()  # Close the websocket connection
+```
+
+## Voices
+
+List all available Voices with `client.voices.list`, which returns an iterable that automatically handles pagination:
+
+```python
+from cartesia import Cartesia
+import os
+
+client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+
+# Get all available Voices
+voices = client.voices.list()
+for voice in voices:
+    print(voice)
+```
+
+You can also get the complete metadata for a specific Voice, or make a new Voice by cloning from an audio sample:
+
+```python
+# Get a specific Voice
+voice = client.voices.get(id="a0e99841-438c-4a64-b679-ae501e7d6091")
+print("The embedding for", voice.name, "is", voice.embedding)
+
+# Clone a Voice using file data
+cloned_voice = client.voices.clone(
+    clip=open("path/to/voice.wav", "rb"),
+    name="Test cloned voice",
+    language="en",
+    mode="similarity",  # or "stability"
+    enhance=False, # use enhance=True to clean and denoise the cloning audio
+    description="Test voice description"
+)
 ```
 
 ## Requesting Timestamps
@@ -326,6 +306,26 @@ client.tts.bytes(..., request_options={
 })
 ```
 
+### Mixing voices and creating from embeddings
+
+```python
+# Mix voices together
+mixed_voice = client.voices.mix(
+    voices=[
+        {"id": "voice_id_1", "weight": 0.25},
+        {"id": "voice_id_2", "weight": 0.75}
+    ]
+)
+
+# Create a new voice from embedding
+new_voice = client.voices.create(
+    name="Test Voice",
+    description="Test voice description",
+    embedding=[...],  # List[float] with 192 dimensions
+    language="en"
+)
+```
+
 ### Custom Client
 
 You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
@@ -342,6 +342,10 @@ client = Cartesia(
     ),
 )
 ```
+
+## Reference
+
+A full reference for this library is available [here](./reference.md).
 
 ## Contributing
 
