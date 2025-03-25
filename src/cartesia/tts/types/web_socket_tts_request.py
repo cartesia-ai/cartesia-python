@@ -22,6 +22,7 @@ class WebSocketTtsRequest(UniversalBaseModel):
     duration: typing.Optional[int] = None
     language: typing.Optional[str] = None
     add_timestamps: typing.Optional[bool] = None
+    use_original_timestamps: typing.Optional[bool] = None
     add_phoneme_timestamps: typing.Optional[bool] = None
     continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
     context_id: typing.Optional[str] = None

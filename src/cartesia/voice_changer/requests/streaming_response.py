@@ -4,6 +4,7 @@ from __future__ import annotations
 import typing_extensions
 import typing
 import typing_extensions
+from ...tts.types.flush_id import FlushId
 from ...tts.types.context_id import ContextId
 
 
@@ -11,6 +12,7 @@ class StreamingResponse_ChunkParams(typing_extensions.TypedDict):
     type: typing.Literal["chunk"]
     data: str
     step_time: float
+    flush_id: typing_extensions.NotRequired[FlushId]
     context_id: typing_extensions.NotRequired[ContextId]
     status_code: int
     done: bool

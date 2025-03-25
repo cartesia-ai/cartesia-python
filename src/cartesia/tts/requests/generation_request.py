@@ -51,3 +51,8 @@ class GenerationRequestParams(typing_extensions.TypedDict):
     """
     Whether to return phoneme-level timestamps.
     """
+
+    use_original_timestamps: typing_extensions.NotRequired[bool]
+    """
+    Whether to use the original transcript for timestamps.
+    """
