@@ -20,5 +20,5 @@ class GetVoicesResponseParams(typing_extensions.TypedDict):
 
     next_page: typing_extensions.NotRequired[VoiceId]
     """
-    (Deprecated - use `starting_after` instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
+    (Deprecated - use the id of the last Voice in the current response instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
     """

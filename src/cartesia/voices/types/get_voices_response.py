@@ -21,7 +21,7 @@ class GetVoicesResponse(UniversalBaseModel):
 
     next_page: typing.Optional[VoiceId] = pydantic.Field(default=None)
     """
-    (Deprecated - use `starting_after` instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
+    (Deprecated - use the id of the last Voice in the current response instead.) An ID that can be passed as `starting_after` to get the next page of Voices.
     """
 
     if IS_PYDANTIC_V2:

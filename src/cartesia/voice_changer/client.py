@@ -51,8 +51,10 @@ class VoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
+
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -129,8 +131,10 @@ class VoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
+
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -228,8 +232,10 @@ class AsyncVoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
+
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -314,8 +320,10 @@ class AsyncVoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
+
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
