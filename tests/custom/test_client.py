@@ -1447,6 +1447,7 @@ async def test_continuation_phoneme_timestamps_async():
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             add_phoneme_timestamps=True,
+            continue_=True,
         )
         
     await ctx.no_more_inputs()
