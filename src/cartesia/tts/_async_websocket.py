@@ -69,6 +69,7 @@ class _AsyncTTSContext:
         stream: bool = True,
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
+        use_original_timestamps: bool = False,
         continue_: bool = False,
         flush: bool = False,
     ) -> None:
@@ -106,6 +107,8 @@ class _AsyncTTSContext:
             request_body["add_timestamps"] = add_timestamps
         if add_phoneme_timestamps:
             request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
+        if use_original_timestamps:
+            request_body["use_original_timestamps"] = use_original_timestamps
         if continue_:
             request_body["continue"] = continue_
         if flush:
@@ -367,6 +370,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         stream: bool = True,
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
+        use_original_timestamps: bool = False,
     ):
         """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
@@ -385,6 +389,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
             continue_=False,
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
+            use_original_timestamps=use_original_timestamps,
         )
 
         generator = ctx.receive()

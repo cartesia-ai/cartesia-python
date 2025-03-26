@@ -67,6 +67,8 @@ class _TTSContext:
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
+        add_phoneme_timestamps: bool = False,
+        use_original_timestamps: bool = False,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -102,6 +104,10 @@ class _TTSContext:
             request_body["stream"] = stream
         if add_timestamps:
             request_body["add_timestamps"] = add_timestamps
+        if add_phoneme_timestamps:
+            request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
+        if use_original_timestamps:
+            request_body["use_original_timestamps"] = use_original_timestamps
 
         if (
             "context_id" in request_body
@@ -354,6 +360,7 @@ class TtsWebsocket:
         stream: bool = True,
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
+        use_original_timestamps: bool = False,
     ):
         """Send a request to the WebSocket to generate audio.
 
@@ -384,6 +391,7 @@ class TtsWebsocket:
             "stream": stream,
             "add_timestamps": add_timestamps,
             "add_phoneme_timestamps": add_phoneme_timestamps,
+            "use_original_timestamps": use_original_timestamps,
         }
         generator = self._websocket_generator(request_body)
 

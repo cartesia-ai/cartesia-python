@@ -524,9 +524,9 @@ def _validate_timestamps(all_words: List[str], all_starts: List[float], all_ends
         assert all_ends[i] <= all_starts[i + 1], "Word end time is after next word's start time"
         assert all_starts[i] <= all_ends[i], "Word start time is after its end time"
 
-
+@pytest.mark.parametrize("use_original_timestamps", [True, False])
 @pytest.mark.asyncio
-async def test_ws_timestamps():
+async def test_ws_timestamps(use_original_timestamps: bool):
     logger.info("Testing WebSocket with timestamps")
     transcript = SAMPLE_TRANSCRIPT
 
@@ -538,6 +538,7 @@ async def test_ws_timestamps():
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         model_id=DEFAULT_MODEL_ID,
         add_timestamps=True,
+        use_original_timestamps=use_original_timestamps,
         stream=True,
     )
     has_wordtimestamps = False
@@ -599,7 +600,8 @@ def test_continuation_sync(stream: bool):
         ws.close()
 
 
-def test_continuation_timestamps():
+@pytest.mark.parametrize("use_original_timestamps", [True, False])
+def test_continuation_timestamps(use_original_timestamps: bool):
     logger.info("Testing continuations with timestamps")
     client = create_client()
     transcripts = ["Hello, world!", "I'''m generating audio on Cartesia."]
@@ -613,6 +615,7 @@ def test_continuation_timestamps():
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},  # type: ignore
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,  # type: ignore
         add_timestamps=True,
+        use_original_timestamps=use_original_timestamps,
     )
 
     has_wordtimestamps = False
@@ -638,7 +641,6 @@ def test_continuation_timestamps():
     _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     ws.close()
-
 
 @pytest.mark.asyncio
 async def test_continuation_async():
@@ -824,9 +826,9 @@ async def test_continuation_incorrect_context_id():
         await ws.close()
         await async_client.close()
 
-
+@pytest.mark.parametrize("use_original_timestamps", [True, False])
 @pytest.mark.asyncio
-async def test_continuation_same_context():
+async def test_continuation_same_context(use_original_timestamps: bool):
     logger.info("Testing continuations with same context")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -844,6 +846,7 @@ async def test_continuation_same_context():
                 output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
                 add_timestamps=True,
+                use_original_timestamps=use_original_timestamps,
             )
 
         # Send again on the same context
@@ -855,6 +858,7 @@ async def test_continuation_same_context():
                 output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
                 add_timestamps=True,
+                use_original_timestamps=use_original_timestamps,
             )
 
         await ctx.no_more_inputs()
@@ -1283,15 +1287,14 @@ def test_multilingual(resources: _Resources, language: str):
     complete_audio = b"".join(chunks)
     _validate_audio_response(complete_audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
-
-def _validate_phoneme_timestamps(phonemes: List[str], starts: List[float], ends: List[float], transcript: str):
+# TODO: Add validation against phonemized transcript
+def _validate_phoneme_timestamps(phonemes: List[str], starts: List[float], ends: List[float]):
     """Helper method to validate phoneme timestamps against a transcript.
 
     Args:
         phonemes: List of phonemes from timestamps
         starts: List of start times
         ends: List of end times
-        transcript: Original transcript text
     """
     # Verify timestamps
     assert len(phonemes) > 0, "Expected phonemes in timestamps, got none"
@@ -1337,7 +1340,7 @@ def test_ws_phoneme_timestamps():
             chunks.append(out.audio)
 
     assert has_phoneme_timestamps, "No phoneme timestamps found"
-    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends, transcript)
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends)
 
     # Verify audio
     audio = b"".join(chunks)
@@ -1346,6 +1349,44 @@ def test_ws_phoneme_timestamps():
     # Close the websocket
     ws.close()
 
+def test_continuation_phoneme_timestamps():
+    logger.info("Testing continuations with phoneme timestamps")
+    client = create_client()
+    ws = client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    ctx = ws.context(context_id)
+    transcripts = ["Hello, world!", "I'm generating audio on Cartesia."]
+
+    output_generate = ctx.send(
+        model_id=DEFAULT_MODEL_ID,
+        transcript=chunk_generator(transcripts),
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+        add_phoneme_timestamps=True,
+    )
+
+    has_phoneme_timestamps = False
+    chunks = []
+    all_phonemes = []
+    all_starts = []
+    all_ends = []
+    for out in output_generate:
+        has_phoneme_timestamps |= out.phoneme_timestamps is not None
+        _validate_schema(out)
+        if out.phoneme_timestamps is not None:
+            all_phonemes.extend(out.phoneme_timestamps.phonemes)
+            all_starts.extend(out.phoneme_timestamps.start)
+            all_ends.extend(out.phoneme_timestamps.end)
+        if out.audio is not None:
+            chunks.append(out.audio)
+    
+    assert has_phoneme_timestamps, "No phoneme timestamps found"
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends)
+
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    ws.close()
 
 @pytest.mark.asyncio
 async def test_ws_phoneme_timestamps_async():
@@ -1380,7 +1421,7 @@ async def test_ws_phoneme_timestamps_async():
             chunks.append(out.audio)
 
     assert has_phoneme_timestamps, "No phoneme timestamps found"
-    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends, transcript)
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends)
 
     # Verify audio
     audio = b"".join(chunks)
@@ -1389,3 +1430,47 @@ async def test_ws_phoneme_timestamps_async():
     # Close the websocket
     await ws.close()
     await async_client.close()
+
+@pytest.mark.asyncio
+async def test_continuation_phoneme_timestamps_async():
+    logger.info("Testing continuations with phoneme timestamps (async)")
+    client = create_async_client()
+    ws = await client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    ctx = ws.context(context_id)
+    transcripts = ["Hello, world!", "I'm generating audio on Cartesia."]
+
+    for transcript in transcripts:
+        await ctx.send(
+            model_id=DEFAULT_MODEL_ID,
+            transcript=transcript,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+            add_phoneme_timestamps=True,
+            continue_=True,
+        )
+        
+    await ctx.no_more_inputs()
+
+    has_phoneme_timestamps = False
+    chunks = []
+    all_phonemes = []
+    all_starts = []
+    all_ends = []
+    async for out in ctx.receive():
+        has_phoneme_timestamps |= out.phoneme_timestamps is not None
+        _validate_schema(out)
+        if out.phoneme_timestamps is not None:
+            all_phonemes.extend(out.phoneme_timestamps.phonemes)
+            all_starts.extend(out.phoneme_timestamps.start)
+            all_ends.extend(out.phoneme_timestamps.end)
+        if out.audio is not None:
+            chunks.append(out.audio)
+
+    assert has_phoneme_timestamps, "No phoneme timestamps found"
+    _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends)
+
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    await ws.close()
