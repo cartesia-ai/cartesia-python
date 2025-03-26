@@ -805,9 +805,27 @@ objects, starting with `voice_abc123`, your subsequent call can include
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">create</a>(...)</code></summary>
+<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">clone</a>(...)</code></summary>
 <dl>
 <dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
+
+Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
+
+Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+</dd>
+</dl>
+</dd>
+</dl>
 
 #### 🔌 Usage
 
@@ -823,10 +841,13 @@ from cartesia import Cartesia
 client = Cartesia(
     api_key="YOUR_API_KEY",
 )
-client.voices.create(
-    name="name",
-    description="description",
-    embedding=[1.1, 1.1],
+client.voices.clone(
+    name="A high-similarity cloned voice",
+    description="Copied from Cartesia docs",
+    mode="similarity",
+    language="en",
+    transcript="A transcript of the words spoken in the audio clip.",
+    enhance=False,
 )
 
 ```
@@ -843,7 +864,18 @@ client.voices.create(
 <dl>
 <dd>
 
+**clip:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **name:** `str` — The name of the voice.
+
     
 </dd>
 </dl>
@@ -851,7 +883,8 @@ client.voices.create(
 <dl>
 <dd>
 
-**description:** `str` — The description of the voice.
+**language:** `SupportedLanguage` — The language of the voice.
+
     
 </dd>
 </dl>
@@ -859,7 +892,8 @@ client.voices.create(
 <dl>
 <dd>
 
-**embedding:** `Embedding` 
+**mode:** `CloneMode` — Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
+
     
 </dd>
 </dl>
@@ -867,7 +901,26 @@ client.voices.create(
 <dl>
 <dd>
 
-**language:** `typing.Optional[SupportedLanguage]` 
+**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — A description for the voice.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**transcript:** `typing.Optional[str]` — Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+
     
 </dd>
 </dl>
@@ -1077,6 +1130,20 @@ client.voices.get(
 <dl>
 <dd>
 
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create a new voice from an existing voice localized to a new language and dialect.
+</dd>
+</dl>
+</dd>
+</dl>
+
 #### 🔌 Usage
 
 <dl>
@@ -1092,9 +1159,12 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.voices.localize(
-    embedding=[1.1, 1.1],
-    language="en",
-    original_speaker_gender="male",
+    voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+    name="Sarah Peninsular Spanish",
+    description="Sarah Voice in Peninsular Spanish",
+    language="es",
+    original_speaker_gender="female",
+    dialect="pe",
 )
 
 ```
@@ -1111,7 +1181,23 @@ client.voices.localize(
 <dl>
 <dd>
 
-**embedding:** `Embedding` 
+**voice_id:** `str` — The ID of the voice to localize.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — The name of the new localized voice.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `str` — The description of the new localized voice.
     
 </dd>
 </dl>
@@ -1211,7 +1297,7 @@ client.voices.mix(
 </dl>
 </details>
 
-<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">clone</a>(...)</code></summary>
+<details><summary><code>client.voices.<a href="src/cartesia/voices/client.py">create</a>(...)</code></summary>
 <dl>
 <dd>
 
@@ -1223,9 +1309,7 @@ client.voices.mix(
 <dl>
 <dd>
 
-Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
-Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
-Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
 </dd>
 </dl>
 </dd>
@@ -1245,13 +1329,10 @@ from cartesia import Cartesia
 client = Cartesia(
     api_key="YOUR_API_KEY",
 )
-client.voices.clone(
-    name="A high-similarity cloned voice",
-    description="Copied from Cartesia docs",
-    mode="similarity",
-    language="en",
-    transcript="A transcript of the words spoken in the audio clip.",
-    enhance=False,
+client.voices.create(
+    name="name",
+    description="description",
+    embedding=[1.1, 1.1],
 )
 
 ```
@@ -1268,18 +1349,7 @@ client.voices.clone(
 <dl>
 <dd>
 
-**clip:** `from __future__ import annotations
-
-core.File` — See core.File for more documentation
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **name:** `str` — The name of the voice.
-
     
 </dd>
 </dl>
@@ -1287,8 +1357,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**language:** `SupportedLanguage` — The language of the voice.
-
+**description:** `str` — The description of the voice.
     
 </dd>
 </dl>
@@ -1296,8 +1365,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**mode:** `CloneMode` — Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-
+**embedding:** `Embedding` 
     
 </dd>
 </dl>
@@ -1305,8 +1373,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
+**language:** `typing.Optional[SupportedLanguage]` 
     
 </dd>
 </dl>
@@ -1314,17 +1381,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**description:** `typing.Optional[str]` — A description for the voice.
-
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**transcript:** `typing.Optional[str]` — Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
+**base_voice_id:** `typing.Optional[BaseVoiceId]` 
     
 </dd>
 </dl>

@@ -11,19 +11,20 @@ from .types.get_voices_response import GetVoicesResponse
 from ..core.pydantic_utilities import parse_obj_as
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
-from ..embedding.types.embedding import Embedding
+from .. import core
 from ..tts.types.supported_language import SupportedLanguage
+from .types.clone_mode import CloneMode
+from .types.voice_metadata import VoiceMetadata
 from .types.voice_id import VoiceId
 from ..core.jsonable_encoder import jsonable_encoder
 from .types.localize_target_language import LocalizeTargetLanguage
 from .types.gender import Gender
 from .requests.localize_dialect import LocalizeDialectParams
-from .types.embedding_response import EmbeddingResponse
 from ..core.serialization import convert_and_respect_annotation_metadata
 from .requests.mix_voice_specifier import MixVoiceSpecifierParams
-from .. import core
-from .types.clone_mode import CloneMode
-from .types.voice_metadata import VoiceMetadata
+from .types.embedding_response import EmbeddingResponse
+from ..embedding.types.embedding import Embedding
+from .types.base_voice_id import BaseVoiceId
 from ..core.client_wrapper import AsyncClientWrapper
 from ..core.pagination import AsyncPager
 
@@ -140,34 +141,60 @@ class VoicesClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def create(
+    def clone(
         self,
         *,
+        clip: core.File,
         name: str,
-        description: str,
-        embedding: Embedding,
-        language: typing.Optional[SupportedLanguage] = OMIT,
+        language: SupportedLanguage,
+        mode: CloneMode,
+        enhance: bool,
+        description: typing.Optional[str] = OMIT,
+        transcript: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
+    ) -> VoiceMetadata:
         """
+        Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
+
+        Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
+
+        Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+
         Parameters
         ----------
+        clip : core.File
+            See core.File for more documentation
+
         name : str
             The name of the voice.
 
-        description : str
-            The description of the voice.
 
-        embedding : Embedding
+        language : SupportedLanguage
+            The language of the voice.
 
-        language : typing.Optional[SupportedLanguage]
+
+        mode : CloneMode
+            Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
+
+
+        enhance : bool
+            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+
+
+        description : typing.Optional[str]
+            A description for the voice.
+
+
+        transcript : typing.Optional[str]
+            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Voice
+        VoiceMetadata
 
         Examples
         --------
@@ -176,20 +203,27 @@ class VoicesClient:
         client = Cartesia(
             api_key="YOUR_API_KEY",
         )
-        client.voices.create(
-            name="name",
-            description="description",
-            embedding=[1.1, 1.1],
+        client.voices.clone(
+            name="A high-stability cloned voice",
+            description="Copied from Cartesia docs",
+            mode="stability",
+            language="en",
+            enhance=True,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "voices/",
+            "voices/clone",
             method="POST",
-            json={
+            data={
                 "name": name,
                 "description": description,
-                "embedding": embedding,
                 "language": language,
+                "mode": mode,
+                "enhance": enhance,
+                "transcript": transcript,
+            },
+            files={
+                "clip": clip,
             },
             request_options=request_options,
             omit=OMIT,
@@ -197,9 +231,9 @@ class VoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    Voice,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=Voice,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -349,16 +383,27 @@ class VoicesClient:
     def localize(
         self,
         *,
-        embedding: Embedding,
+        voice_id: str,
+        name: str,
+        description: str,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
         dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
+    ) -> VoiceMetadata:
         """
+        Create a new voice from an existing voice localized to a new language and dialect.
+
         Parameters
         ----------
-        embedding : Embedding
+        voice_id : str
+            The ID of the voice to localize.
+
+        name : str
+            The name of the new localized voice.
+
+        description : str
+            The description of the new localized voice.
 
         language : LocalizeTargetLanguage
 
@@ -371,7 +416,7 @@ class VoicesClient:
 
         Returns
         -------
-        EmbeddingResponse
+        VoiceMetadata
 
         Examples
         --------
@@ -381,16 +426,21 @@ class VoicesClient:
             api_key="YOUR_API_KEY",
         )
         client.voices.localize(
-            embedding=[1.1, 1.1],
-            language="en",
-            original_speaker_gender="male",
+            voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+            name="Sarah Peninsular Spanish",
+            description="Sarah Voice in Peninsular Spanish",
+            language="es",
+            original_speaker_gender="female",
+            dialect="pe",
         )
         """
         _response = self._client_wrapper.httpx_client.request(
             "voices/localize",
             method="POST",
             json={
-                "embedding": embedding,
+                "voice_id": voice_id,
+                "name": name,
+                "description": description,
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
@@ -403,9 +453,9 @@ class VoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    EmbeddingResponse,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -468,58 +518,39 @@ class VoicesClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    def clone(
+    def create(
         self,
         *,
-        clip: core.File,
         name: str,
-        language: SupportedLanguage,
-        mode: CloneMode,
-        enhance: bool,
-        description: typing.Optional[str] = OMIT,
-        transcript: typing.Optional[str] = OMIT,
+        description: str,
+        embedding: Embedding,
+        language: typing.Optional[SupportedLanguage] = OMIT,
+        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> VoiceMetadata:
+    ) -> Voice:
         """
-        Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
-        Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
-        Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+        Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
 
         Parameters
         ----------
-        clip : core.File
-            See core.File for more documentation
-
         name : str
             The name of the voice.
 
+        description : str
+            The description of the voice.
 
-        language : SupportedLanguage
-            The language of the voice.
+        embedding : Embedding
 
+        language : typing.Optional[SupportedLanguage]
 
-        mode : CloneMode
-            Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-
-
-        enhance : bool
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
-
-        description : typing.Optional[str]
-            A description for the voice.
-
-
-        transcript : typing.Optional[str]
-            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
+        base_voice_id : typing.Optional[BaseVoiceId]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        VoiceMetadata
+        Voice
 
         Examples
         --------
@@ -528,27 +559,21 @@ class VoicesClient:
         client = Cartesia(
             api_key="YOUR_API_KEY",
         )
-        client.voices.clone(
-            name="A high-stability cloned voice",
-            description="Copied from Cartesia docs",
-            mode="stability",
-            language="en",
-            enhance=True,
+        client.voices.create(
+            name="name",
+            description="description",
+            embedding=[1.1, 1.1],
         )
         """
         _response = self._client_wrapper.httpx_client.request(
-            "voices/clone",
+            "voices/",
             method="POST",
-            data={
+            json={
                 "name": name,
                 "description": description,
+                "embedding": embedding,
                 "language": language,
-                "mode": mode,
-                "enhance": enhance,
-                "transcript": transcript,
-            },
-            files={
-                "clip": clip,
+                "base_voice_id": base_voice_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -556,9 +581,9 @@ class VoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    VoiceMetadata,
+                    Voice,
                     parse_obj_as(
-                        type_=VoiceMetadata,  # type: ignore
+                        type_=Voice,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -685,34 +710,60 @@ class AsyncVoicesClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def create(
+    async def clone(
         self,
         *,
+        clip: core.File,
         name: str,
-        description: str,
-        embedding: Embedding,
-        language: typing.Optional[SupportedLanguage] = OMIT,
+        language: SupportedLanguage,
+        mode: CloneMode,
+        enhance: bool,
+        description: typing.Optional[str] = OMIT,
+        transcript: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Voice:
+    ) -> VoiceMetadata:
         """
+        Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
+
+        Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
+
+        Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+
         Parameters
         ----------
+        clip : core.File
+            See core.File for more documentation
+
         name : str
             The name of the voice.
 
-        description : str
-            The description of the voice.
 
-        embedding : Embedding
+        language : SupportedLanguage
+            The language of the voice.
 
-        language : typing.Optional[SupportedLanguage]
+
+        mode : CloneMode
+            Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
+
+
+        enhance : bool
+            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+
+
+        description : typing.Optional[str]
+            A description for the voice.
+
+
+        transcript : typing.Optional[str]
+            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Voice
+        VoiceMetadata
 
         Examples
         --------
@@ -726,23 +777,30 @@ class AsyncVoicesClient:
 
 
         async def main() -> None:
-            await client.voices.create(
-                name="name",
-                description="description",
-                embedding=[1.1, 1.1],
+            await client.voices.clone(
+                name="A high-stability cloned voice",
+                description="Copied from Cartesia docs",
+                mode="stability",
+                language="en",
+                enhance=True,
             )
 
 
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "voices/",
+            "voices/clone",
             method="POST",
-            json={
+            data={
                 "name": name,
                 "description": description,
-                "embedding": embedding,
                 "language": language,
+                "mode": mode,
+                "enhance": enhance,
+                "transcript": transcript,
+            },
+            files={
+                "clip": clip,
             },
             request_options=request_options,
             omit=OMIT,
@@ -750,9 +808,9 @@ class AsyncVoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    Voice,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=Voice,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -926,16 +984,27 @@ class AsyncVoicesClient:
     async def localize(
         self,
         *,
-        embedding: Embedding,
+        voice_id: str,
+        name: str,
+        description: str,
         language: LocalizeTargetLanguage,
         original_speaker_gender: Gender,
         dialect: typing.Optional[LocalizeDialectParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> EmbeddingResponse:
+    ) -> VoiceMetadata:
         """
+        Create a new voice from an existing voice localized to a new language and dialect.
+
         Parameters
         ----------
-        embedding : Embedding
+        voice_id : str
+            The ID of the voice to localize.
+
+        name : str
+            The name of the new localized voice.
+
+        description : str
+            The description of the new localized voice.
 
         language : LocalizeTargetLanguage
 
@@ -948,7 +1017,7 @@ class AsyncVoicesClient:
 
         Returns
         -------
-        EmbeddingResponse
+        VoiceMetadata
 
         Examples
         --------
@@ -963,9 +1032,12 @@ class AsyncVoicesClient:
 
         async def main() -> None:
             await client.voices.localize(
-                embedding=[1.1, 1.1],
-                language="en",
-                original_speaker_gender="male",
+                voice_id="694f9389-aac1-45b6-b726-9d9369183238",
+                name="Sarah Peninsular Spanish",
+                description="Sarah Voice in Peninsular Spanish",
+                language="es",
+                original_speaker_gender="female",
+                dialect="pe",
             )
 
 
@@ -975,7 +1047,9 @@ class AsyncVoicesClient:
             "voices/localize",
             method="POST",
             json={
-                "embedding": embedding,
+                "voice_id": voice_id,
+                "name": name,
+                "description": description,
                 "language": language,
                 "original_speaker_gender": original_speaker_gender,
                 "dialect": convert_and_respect_annotation_metadata(
@@ -988,9 +1062,9 @@ class AsyncVoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    EmbeddingResponse,
+                    VoiceMetadata,
                     parse_obj_as(
-                        type_=EmbeddingResponse,  # type: ignore
+                        type_=VoiceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1061,58 +1135,39 @@ class AsyncVoicesClient:
             raise ApiError(status_code=_response.status_code, body=_response.text)
         raise ApiError(status_code=_response.status_code, body=_response_json)
 
-    async def clone(
+    async def create(
         self,
         *,
-        clip: core.File,
         name: str,
-        language: SupportedLanguage,
-        mode: CloneMode,
-        enhance: bool,
-        description: typing.Optional[str] = OMIT,
-        transcript: typing.Optional[str] = OMIT,
+        description: str,
+        embedding: Embedding,
+        language: typing.Optional[SupportedLanguage] = OMIT,
+        base_voice_id: typing.Optional[BaseVoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> VoiceMetadata:
+    ) -> Voice:
         """
-        Clone a voice from an audio clip. This endpoint has two modes, stability and similarity.
-        Similarity mode clones are more similar to the source clip, but may reproduce background noise. For these, use an audio clip about 5 seconds long.
-        Stability mode clones are more stable, but may not sound as similar to the source clip. For these, use an audio clip 10-20 seconds long.
+        Create voice from raw features. If you'd like to clone a voice from an audio file, please use Clone Voice instead.
 
         Parameters
         ----------
-        clip : core.File
-            See core.File for more documentation
-
         name : str
             The name of the voice.
 
+        description : str
+            The description of the voice.
 
-        language : SupportedLanguage
-            The language of the voice.
+        embedding : Embedding
 
+        language : typing.Optional[SupportedLanguage]
 
-        mode : CloneMode
-            Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-
-
-        enhance : bool
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
-
-        description : typing.Optional[str]
-            A description for the voice.
-
-
-        transcript : typing.Optional[str]
-            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
-
+        base_voice_id : typing.Optional[BaseVoiceId]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        VoiceMetadata
+        Voice
 
         Examples
         --------
@@ -1126,30 +1181,24 @@ class AsyncVoicesClient:
 
 
         async def main() -> None:
-            await client.voices.clone(
-                name="A high-stability cloned voice",
-                description="Copied from Cartesia docs",
-                mode="stability",
-                language="en",
-                enhance=True,
+            await client.voices.create(
+                name="name",
+                description="description",
+                embedding=[1.1, 1.1],
             )
 
 
         asyncio.run(main())
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "voices/clone",
+            "voices/",
             method="POST",
-            data={
+            json={
                 "name": name,
                 "description": description,
+                "embedding": embedding,
                 "language": language,
-                "mode": mode,
-                "enhance": enhance,
-                "transcript": transcript,
-            },
-            files={
-                "clip": clip,
+                "base_voice_id": base_voice_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -1157,9 +1206,9 @@ class AsyncVoicesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return typing.cast(
-                    VoiceMetadata,
+                    Voice,
                     parse_obj_as(
-                        type_=VoiceMetadata,  # type: ignore
+                        type_=Voice,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
