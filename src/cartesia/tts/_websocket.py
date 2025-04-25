@@ -69,6 +69,7 @@ class _TTSContext:
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
+        max_buffer_delay_ms: int = None,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -108,6 +109,8 @@ class _TTSContext:
             request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
         if use_original_timestamps:
             request_body["use_original_timestamps"] = use_original_timestamps
+        if max_buffer_delay_ms:
+            request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
 
         if (
             "context_id" in request_body
