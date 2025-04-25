@@ -579,7 +579,8 @@ def chunk_generator(transcripts):
 
 
 @pytest.mark.parametrize("stream", [True, False])
-def test_continuation_sync(stream: bool):
+@pytest.mark.parametrize("max_buffer_delay_ms", [None, 1000])
+def test_continuation_sync(stream: bool, max_buffer_delay_ms: int):
     logger.info("Testing sync continuations")
     client = create_client()
     ws = client.tts.websocket()
@@ -593,6 +594,7 @@ def test_continuation_sync(stream: bool):
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             stream=stream,
+            max_buffer_delay_ms=max_buffer_delay_ms,
         )
         audio = b"".join(out.audio for out in output_generate)
         _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
@@ -643,7 +645,8 @@ def test_continuation_timestamps(use_original_timestamps: bool):
     ws.close()
 
 @pytest.mark.asyncio
-async def test_continuation_async():
+@pytest.mark.parametrize("max_buffer_delay_ms", [None, 1000])
+async def test_continuation_async(max_buffer_delay_ms: int):
     logger.info("Testing async continuations")
     async_client = create_async_client()
     ws = await async_client.tts.websocket()
@@ -658,6 +661,7 @@ async def test_continuation_async():
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
                 continue_=True,
+                max_buffer_delay_ms=max_buffer_delay_ms,
             )
 
         await ctx.no_more_inputs()
@@ -708,6 +712,32 @@ async def test_continuation_incorrect_transcript():
         await async_client.close()
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize("max_buffer_delay_ms", [-100, 2000])
+async def test_continuation_incorrect_buffer_delay(max_buffer_delay_ms: int):
+    logger.info("Testing continuations with incorrect buffer delay")
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+    context_id = str(uuid.uuid4())
+    try:
+        with pytest.raises(RuntimeError):
+            ctx = ws.context(context_id)
+            await ctx.send(
+                model_id=DEFAULT_MODEL_ID,
+                transcript="Hello, world!",
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+                max_buffer_delay_ms=max_buffer_delay_ms,
+            )
+            await ctx.no_more_inputs()
+            async for _ in ctx.receive():
+                pass
+    except Exception as e:
+        logger.info("Caught unexpected exception", e)
+    finally:
+        await ws.close()
+        await async_client.close()
+        
 @pytest.mark.asyncio
 async def test_continuation_incorrect_voice_id():
     logger.info("Testing continuations with incorrect voice_id")
