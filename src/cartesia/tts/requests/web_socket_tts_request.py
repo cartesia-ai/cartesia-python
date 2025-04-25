@@ -10,7 +10,7 @@ from ...core.serialization import FieldMetadata
 class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
     output_format: typing_extensions.NotRequired[OutputFormatParams]
@@ -23,3 +23,4 @@ class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     add_phoneme_timestamps: typing_extensions.NotRequired[bool]
     continue_: typing_extensions.NotRequired[typing_extensions.Annotated[bool, FieldMetadata(alias="continue")]]
     context_id: typing_extensions.NotRequired[str]
+    text_cfg: typing_extensions.NotRequired[float]

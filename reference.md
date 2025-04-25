@@ -46,6 +46,86 @@ client.api_status.get()
 </dl>
 </details>
 
+## Auth
+<details><summary><code>client.auth.<a href="src/cartesia/auth/client.py">access_token</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a new Access Token for the client. These tokens are short-lived and should be used to make requests to the API from authenticated clients.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.auth.access_token(
+    grants={"tts": True},
+    expires_in=60,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**grants:** `TokenGrantParams` — The permissions to be granted via the token.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expires_in:** `typing.Optional[int]` — The number of seconds the token will be valid for since the time of generation. The maximum is 1 hour (3600 seconds).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Infill
 <details><summary><code>client.infill.<a href="src/cartesia/infill/client.py">bytes</a>(...)</code></summary>
 <dl>
@@ -290,7 +370,7 @@ client.tts.bytes(
 <dl>
 <dd>
 
-**model_id:** `str` — The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
+**model_id:** `str` — The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     
 </dd>
 </dl>
@@ -334,6 +414,20 @@ client.tts.bytes(
 
 The maximum duration of the audio in seconds. You do not usually need to specify this.
 If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**text_cfg:** `typing.Optional[float]` 
+
+The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
+
+Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
+
+This parameter is only supported for `sonic-2` models.
     
 </dd>
 </dl>
@@ -399,7 +493,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**model_id:** `str` — The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
+**model_id:** `str` — The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     
 </dd>
 </dl>
@@ -443,6 +537,20 @@ for chunk in response:
 
 The maximum duration of the audio in seconds. You do not usually need to specify this.
 If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**text_cfg:** `typing.Optional[float]` 
+
+The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
+
+Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
+
+This parameter is only supported for `sonic-2` models.
     
 </dd>
 </dl>
@@ -901,7 +1009,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**enhance:** `bool` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+**description:** `typing.Optional[str]` — A description for the voice.
 
     
 </dd>
@@ -910,7 +1018,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**description:** `typing.Optional[str]` — A description for the voice.
+**enhance:** `typing.Optional[bool]` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
 
     
 </dd>

@@ -13,7 +13,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 class WebSocketTtsRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-sonic/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
     output_format: typing.Optional[OutputFormat] = None
@@ -26,6 +26,7 @@ class WebSocketTtsRequest(UniversalBaseModel):
     add_phoneme_timestamps: typing.Optional[bool] = None
     continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
     context_id: typing.Optional[str] = None
+    text_cfg: typing.Optional[float] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

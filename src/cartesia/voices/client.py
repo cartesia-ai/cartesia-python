@@ -148,8 +148,8 @@ class VoicesClient:
         name: str,
         language: SupportedLanguage,
         mode: CloneMode,
-        enhance: bool,
         description: typing.Optional[str] = OMIT,
+        enhance: typing.Optional[bool] = OMIT,
         transcript: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> VoiceMetadata:
@@ -177,12 +177,12 @@ class VoicesClient:
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
 
-        enhance : bool
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
-
         description : typing.Optional[str]
             A description for the voice.
+
+
+        enhance : typing.Optional[bool]
+            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
 
 
         transcript : typing.Optional[str]
@@ -717,8 +717,8 @@ class AsyncVoicesClient:
         name: str,
         language: SupportedLanguage,
         mode: CloneMode,
-        enhance: bool,
         description: typing.Optional[str] = OMIT,
+        enhance: typing.Optional[bool] = OMIT,
         transcript: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> VoiceMetadata:
@@ -746,12 +746,12 @@ class AsyncVoicesClient:
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
 
-        enhance : bool
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
-
-
         description : typing.Optional[str]
             A description for the voice.
+
+
+        enhance : typing.Optional[bool]
+            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
 
 
         transcript : typing.Optional[str]
