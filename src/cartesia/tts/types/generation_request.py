@@ -50,6 +50,15 @@ class GenerationRequest(UniversalBaseModel):
     If not specified, this defaults to `false`.
     """
 
+    max_buffer_delay_ms: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The maximum time in milliseconds to buffer text before starting generation. Values between [0, 1000]ms are supported. Defaults to 0 (no buffering).
+    
+    When set, the model will buffer incoming text chunks until it's confident it has enough context to generate high-quality speech, or the buffer delay elapses, whichever comes first. Without this option set, the model will kick off generations immediately, ceding control of buffering to the user.
+    
+    Use this to balance responsiveness with higher quality speech generation, which often benefits from having more context.
+    """
+
     flush: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to flush the context.

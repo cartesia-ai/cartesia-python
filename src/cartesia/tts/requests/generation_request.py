@@ -46,6 +46,15 @@ class GenerationRequestParams(typing_extensions.TypedDict):
     If not specified, this defaults to `false`.
     """
 
+    max_buffer_delay_ms: typing_extensions.NotRequired[int]
+    """
+    The maximum time in milliseconds to buffer text before starting generation. Values between [0, 1000]ms are supported. Defaults to 0 (no buffering).
+    
+    When set, the model will buffer incoming text chunks until it's confident it has enough context to generate high-quality speech, or the buffer delay elapses, whichever comes first. Without this option set, the model will kick off generations immediately, ceding control of buffering to the user.
+    
+    Use this to balance responsiveness with higher quality speech generation, which often benefits from having more context.
+    """
+
     flush: typing_extensions.NotRequired[bool]
     """
     Whether to flush the context.
