@@ -63,13 +63,13 @@ class _TTSContext:
         output_format: OutputFormatParams,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
+        max_buffer_delay_ms: Optional[int] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
-        max_buffer_delay_ms: int = None,
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
