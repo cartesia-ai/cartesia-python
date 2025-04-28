@@ -63,6 +63,7 @@ class _TTSContext:
         output_format: OutputFormatParams,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
+        max_buffer_delay_ms: Optional[int] = None,
         duration: Optional[int] = None,
         language: Optional[str] = None,
         stream: bool = True,
@@ -108,6 +109,8 @@ class _TTSContext:
             request_body["add_phoneme_timestamps"] = add_phoneme_timestamps
         if use_original_timestamps:
             request_body["use_original_timestamps"] = use_original_timestamps
+        if max_buffer_delay_ms:
+            request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
 
         if (
             "context_id" in request_body

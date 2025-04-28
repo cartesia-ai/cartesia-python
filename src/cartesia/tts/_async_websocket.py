@@ -71,6 +71,7 @@ class _AsyncTTSContext:
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
         continue_: bool = False,
+        max_buffer_delay_ms: Optional[int] = None,
         flush: bool = False,
     ) -> None:
         """Send audio generation requests to the WebSocket. The response can be received using the `receive` method.
@@ -111,6 +112,8 @@ class _AsyncTTSContext:
             request_body["use_original_timestamps"] = use_original_timestamps
         if continue_:
             request_body["continue"] = continue_
+        if max_buffer_delay_ms:
+            request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
         if flush:
             request_body["flush"] = flush
 
