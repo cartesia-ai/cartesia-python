@@ -7,6 +7,7 @@ from .output_format import OutputFormat
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
 import typing_extensions
 from ...core.serialization import FieldMetadata
+from .model_speed import ModelSpeed
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -27,7 +28,7 @@ class WebSocketTtsRequest(UniversalBaseModel):
     continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
     context_id: typing.Optional[str] = None
     max_buffer_delay_ms: typing.Optional[int] = None
-    text_cfg: typing.Optional[float] = None
+    speed: typing.Optional[ModelSpeed] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

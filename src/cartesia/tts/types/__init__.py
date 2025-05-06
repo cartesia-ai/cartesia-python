@@ -6,6 +6,7 @@ from .controls import Controls
 from .emotion import Emotion
 from .flush_id import FlushId
 from .generation_request import GenerationRequest
+from .model_speed import ModelSpeed
 from .mp_3_output_format import Mp3OutputFormat
 from .natural_specifier import NaturalSpecifier
 from .numerical_specifier import NumericalSpecifier
@@ -50,6 +51,7 @@ __all__ = [
     "Emotion",
     "FlushId",
     "GenerationRequest",
+    "ModelSpeed",
     "Mp3OutputFormat",
     "NaturalSpecifier",
     "NumericalSpecifier",

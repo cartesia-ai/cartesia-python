@@ -6,6 +6,7 @@ from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
 import typing
 from .supported_language import SupportedLanguage
 from .output_format import OutputFormat
+from .model_speed import ModelSpeed
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -25,14 +26,7 @@ class TtsRequest(UniversalBaseModel):
     If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
     """
 
-    text_cfg: typing.Optional[float] = pydantic.Field(default=None)
-    """
-    The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-    
-    Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-    
-    This parameter is only supported for `sonic-2` models.
-    """
+    speed: typing.Optional[ModelSpeed] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

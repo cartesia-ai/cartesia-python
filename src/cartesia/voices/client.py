@@ -14,8 +14,8 @@ from ..core.api_error import ApiError
 from .. import core
 from ..tts.types.supported_language import SupportedLanguage
 from .types.clone_mode import CloneMode
-from .types.voice_metadata import VoiceMetadata
 from .types.voice_id import VoiceId
+from .types.voice_metadata import VoiceMetadata
 from ..core.jsonable_encoder import jsonable_encoder
 from .types.localize_target_language import LocalizeTargetLanguage
 from .types.gender import Gender
@@ -150,7 +150,7 @@ class VoicesClient:
         mode: CloneMode,
         description: typing.Optional[str] = OMIT,
         enhance: typing.Optional[bool] = OMIT,
-        transcript: typing.Optional[str] = OMIT,
+        base_voice_id: typing.Optional[VoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> VoiceMetadata:
         """
@@ -182,11 +182,11 @@ class VoicesClient:
 
 
         enhance : typing.Optional[bool]
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+            Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
 
 
-        transcript : typing.Optional[str]
-            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+        base_voice_id : typing.Optional[VoiceId]
+            Optional base voice ID that the cloned voice is derived from.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -208,7 +208,6 @@ class VoicesClient:
             description="Copied from Cartesia docs",
             mode="stability",
             language="en",
-            enhance=True,
         )
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -220,7 +219,7 @@ class VoicesClient:
                 "language": language,
                 "mode": mode,
                 "enhance": enhance,
-                "transcript": transcript,
+                "base_voice_id": base_voice_id,
             },
             files={
                 "clip": clip,
@@ -719,7 +718,7 @@ class AsyncVoicesClient:
         mode: CloneMode,
         description: typing.Optional[str] = OMIT,
         enhance: typing.Optional[bool] = OMIT,
-        transcript: typing.Optional[str] = OMIT,
+        base_voice_id: typing.Optional[VoiceId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> VoiceMetadata:
         """
@@ -751,11 +750,11 @@ class AsyncVoicesClient:
 
 
         enhance : typing.Optional[bool]
-            Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+            Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
 
 
-        transcript : typing.Optional[str]
-            Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+        base_voice_id : typing.Optional[VoiceId]
+            Optional base voice ID that the cloned voice is derived from.
 
 
         request_options : typing.Optional[RequestOptions]
@@ -782,7 +781,6 @@ class AsyncVoicesClient:
                 description="Copied from Cartesia docs",
                 mode="stability",
                 language="en",
-                enhance=True,
             )
 
 
@@ -797,7 +795,7 @@ class AsyncVoicesClient:
                 "language": language,
                 "mode": mode,
                 "enhance": enhance,
-                "transcript": transcript,
+                "base_voice_id": base_voice_id,
             },
             files={
                 "clip": clip,

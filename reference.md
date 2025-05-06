@@ -421,13 +421,7 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dl>
 <dd>
 
-**text_cfg:** `typing.Optional[float]` 
-
-The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-This parameter is only supported for `sonic-2` models.
+**speed:** `typing.Optional[ModelSpeed]` 
     
 </dd>
 </dl>
@@ -544,13 +538,7 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dl>
 <dd>
 
-**text_cfg:** `typing.Optional[float]` 
-
-The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-This parameter is only supported for `sonic-2` models.
+**speed:** `typing.Optional[ModelSpeed]` 
     
 </dd>
 </dl>
@@ -954,8 +942,6 @@ client.voices.clone(
     description="Copied from Cartesia docs",
     mode="similarity",
     language="en",
-    transcript="A transcript of the words spoken in the audio clip.",
-    enhance=False,
 )
 
 ```
@@ -1018,7 +1004,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**enhance:** `typing.Optional[bool]` — Whether to enhance the clip to improve its quality before cloning. Useful if the clip has background noise.
+**enhance:** `typing.Optional[bool]` — Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
 
     
 </dd>
@@ -1027,7 +1013,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**transcript:** `typing.Optional[str]` — Optional transcript of the words spoken in the audio clip. Only used for similarity mode.
+**base_voice_id:** `typing.Optional[VoiceId]` — Optional base voice ID that the cloned voice is derived from.
 
     
 </dd>

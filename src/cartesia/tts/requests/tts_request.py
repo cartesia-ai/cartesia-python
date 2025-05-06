@@ -5,6 +5,7 @@ from .tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 import typing_extensions
 from ..types.supported_language import SupportedLanguage
 from .output_format import OutputFormatParams
+from ..types.model_speed import ModelSpeed
 
 
 class TtsRequestParams(typing_extensions.TypedDict):
@@ -23,11 +24,4 @@ class TtsRequestParams(typing_extensions.TypedDict):
     If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
     """
 
-    text_cfg: typing_extensions.NotRequired[float]
-    """
-    The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-    
-    Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-    
-    This parameter is only supported for `sonic-2` models.
-    """
+    speed: typing_extensions.NotRequired[ModelSpeed]

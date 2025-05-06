@@ -5,6 +5,7 @@ import typing_extensions
 from .output_format import OutputFormatParams
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 from ...core.serialization import FieldMetadata
+from ..types.model_speed import ModelSpeed
 
 
 class WebSocketTtsRequestParams(typing_extensions.TypedDict):
@@ -24,4 +25,4 @@ class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     continue_: typing_extensions.NotRequired[typing_extensions.Annotated[bool, FieldMetadata(alias="continue")]]
     context_id: typing_extensions.NotRequired[str]
     max_buffer_delay_ms: typing_extensions.NotRequired[int]
-    text_cfg: typing_extensions.NotRequired[float]
+    speed: typing_extensions.NotRequired[ModelSpeed]

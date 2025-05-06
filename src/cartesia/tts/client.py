@@ -5,6 +5,7 @@ from ..core.client_wrapper import SyncClientWrapper
 from .requests.tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 from .requests.output_format import OutputFormatParams
 from .types.supported_language import SupportedLanguage
+from .types.model_speed import ModelSpeed
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from json.decoder import JSONDecodeError
@@ -32,7 +33,7 @@ class TtsClient:
         output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
-        text_cfg: typing.Optional[float] = OMIT,
+        speed: typing.Optional[ModelSpeed] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
@@ -53,12 +54,7 @@ class TtsClient:
             The maximum duration of the audio in seconds. You do not usually need to specify this.
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
-        text_cfg : typing.Optional[float]
-            The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-            Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-            This parameter is only supported for `sonic-2` models.
+        speed : typing.Optional[ModelSpeed]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -100,7 +96,7 @@ class TtsClient:
                     object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
-                "text_cfg": text_cfg,
+                "speed": speed,
             },
             request_options=request_options,
             omit=OMIT,
@@ -126,7 +122,7 @@ class TtsClient:
         output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
-        text_cfg: typing.Optional[float] = OMIT,
+        speed: typing.Optional[ModelSpeed] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[WebSocketResponse]:
         """
@@ -147,12 +143,7 @@ class TtsClient:
             The maximum duration of the audio in seconds. You do not usually need to specify this.
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
-        text_cfg : typing.Optional[float]
-            The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-            Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-            This parameter is only supported for `sonic-2` models.
+        speed : typing.Optional[ModelSpeed]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -196,7 +187,7 @@ class TtsClient:
                     object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
-                "text_cfg": text_cfg,
+                "speed": speed,
             },
             request_options=request_options,
             omit=OMIT,
@@ -236,7 +227,7 @@ class AsyncTtsClient:
         output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
-        text_cfg: typing.Optional[float] = OMIT,
+        speed: typing.Optional[ModelSpeed] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
@@ -257,12 +248,7 @@ class AsyncTtsClient:
             The maximum duration of the audio in seconds. You do not usually need to specify this.
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
-        text_cfg : typing.Optional[float]
-            The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-            Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-            This parameter is only supported for `sonic-2` models.
+        speed : typing.Optional[ModelSpeed]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -312,7 +298,7 @@ class AsyncTtsClient:
                     object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
-                "text_cfg": text_cfg,
+                "speed": speed,
             },
             request_options=request_options,
             omit=OMIT,
@@ -338,7 +324,7 @@ class AsyncTtsClient:
         output_format: OutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
-        text_cfg: typing.Optional[float] = OMIT,
+        speed: typing.Optional[ModelSpeed] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[WebSocketResponse]:
         """
@@ -359,12 +345,7 @@ class AsyncTtsClient:
             The maximum duration of the audio in seconds. You do not usually need to specify this.
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
-        text_cfg : typing.Optional[float]
-            The text [classifier-free guidance](https://arxiv.org/abs/2207.12598) value for the request.
-
-            Higher values causes the model to attend more to the text but speed up the generation. Lower values reduce the speaking rate but can increase the risk of hallucinations. The default value is `3.0`. For a slower speaking rate, we recommend values between `2.0` and `3.0`. Values are supported between `1.5` and `3.0`.
-
-            This parameter is only supported for `sonic-2` models.
+        speed : typing.Optional[ModelSpeed]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -416,7 +397,7 @@ class AsyncTtsClient:
                     object_=output_format, annotation=OutputFormatParams, direction="write"
                 ),
                 "duration": duration,
-                "text_cfg": text_cfg,
+                "speed": speed,
             },
             request_options=request_options,
             omit=OMIT,
