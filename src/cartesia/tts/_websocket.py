@@ -154,7 +154,7 @@ class _TTSContext:
                             f"Error generating audio:\n{response_obj.error}"
                         )
                     if isinstance(response_obj, WebSocketResponse_Done):
-                        break
+                        return
                     if (
                         isinstance(response_obj, WebSocketResponse_Chunk)
                         or isinstance(response_obj, WebSocketResponse_Timestamps)
@@ -185,7 +185,7 @@ class _TTSContext:
                                 f"Error generating audio:\n{response_obj.error}"
                             )
                         if isinstance(response_obj, WebSocketResponse_Done):
-                            break
+                            return
                         if (
                             isinstance(response_obj, WebSocketResponse_Chunk)
                             or isinstance(response_obj, WebSocketResponse_Timestamps)
@@ -221,7 +221,7 @@ class _TTSContext:
                 if isinstance(response_obj, WebSocketResponse_Error):
                     raise RuntimeError(f"Error generating audio:\n{response_obj.error}")
                 if isinstance(response_obj, WebSocketResponse_Done):
-                    break
+                    return
                 yield self._websocket._convert_response(
                     response_obj, include_context_id=True
                 )
