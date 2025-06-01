@@ -12,7 +12,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 class Voice(UniversalBaseModel):
     id: VoiceId
-    is_owner: bool = pydantic.Field()
+    is_owner: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether the current user is the owner of the voice.
     """
