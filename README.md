@@ -181,6 +181,50 @@ p.terminate()
 ws.close()  # Close the websocket connection
 ```
 
+## Speech-to-Text (STT) with Websockets
+
+```python
+from cartesia import Cartesia
+import os
+
+client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+
+# Load your audio file as bytes
+with open("path/to/audio.wav", "rb") as f:
+    audio_data = f.read()
+
+# Convert to audio chunks
+chunk_size = 1600
+audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), chunk_size)]
+
+# Create websocket connection
+ws = client.stt.websocket(
+    model="ink-whisper",
+    language="en",
+    encoding="pcm_s16le", 
+    sample_rate=16000,
+)
+
+# Send audio chunks
+for chunk in audio_chunks:
+    ws.send(chunk)
+
+# Finalize and close
+ws.send("finalize")
+ws.send("done")
+
+# Receive transcription results
+for result in ws.receive():
+    if result['type'] == 'transcript':
+        print(f"Transcription: {result['text']}")
+        if result['is_final']:
+            print("Final result received")
+    elif result['type'] == 'done':
+        break
+
+ws.close()
+```
+
 ## Voices
 
 List all available Voices with `client.voices.list`, which returns an iterable that automatically handles pagination:
@@ -326,7 +370,6 @@ new_voice = client.voices.create(
     language="en"
 )
 ```
-
 ### Custom Client
 
 You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
@@ -374,8 +417,9 @@ $ fern generate --group python-sdk --log-level debug --api version-2024-11-13 --
 $ cd ~/cartesia-python
 $ git pull ~/docs/fern/apis/version-2024-11-13/.preview/fern-python-sdk
 $ git commit --amend -m "manually regenerate from docs" # optional
-```
-
-### Automatically generating new SDK releases
+```### Automatically generating new SDK releases
 
 From https://github.com/cartesia-ai/docs click `Actions` then `Release Python SDK`. (Requires permissions.)
+
+
+

@@ -8,6 +8,7 @@ import httpx
 
 from .base_client import AsyncBaseCartesia, BaseCartesia
 from .environment import CartesiaEnvironment
+from .stt.socket_client import AsyncSttClientWithWebsocket, SttClientWithWebsocket
 from .tts.socket_client import AsyncTtsClientWithWebsocket, TtsClientWithWebsocket
 
 
@@ -66,6 +67,7 @@ class Cartesia(BaseCartesia):
             follow_redirects=follow_redirects,
             httpx_client=httpx_client,
         )
+        self.stt = SttClientWithWebsocket(client_wrapper=self._client_wrapper)
         self.tts = TtsClientWithWebsocket(client_wrapper=self._client_wrapper)
 
     def __enter__(self):
@@ -143,6 +145,9 @@ class AsyncCartesia(AsyncBaseCartesia):
         self._session = None
         self._loop = None
         self.max_num_connections = max_num_connections
+        self.stt = AsyncSttClientWithWebsocket(
+            client_wrapper=self._client_wrapper, get_session=self._get_session
+        )
         self.tts = AsyncTtsClientWithWebsocket(
             client_wrapper=self._client_wrapper, get_session=self._get_session
         )
