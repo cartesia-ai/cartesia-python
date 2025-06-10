@@ -177,7 +177,6 @@ class AsyncSttWebsocket(SttWebsocket):
                     
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         raw_data = json.loads(msg.data)
-                        print(f"DEBUG: Received raw response: {raw_data}")
                         
                         # Handle error responses
                         if raw_data.get("type") == "error":

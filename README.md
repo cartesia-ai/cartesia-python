@@ -181,7 +181,7 @@ p.terminate()
 ws.close()  # Close the websocket connection
 ```
 
-## Speech-to-Text (STT) with Websockets
+## Streaming Speech-to-Text (STT) with Websockets
 
 ```python
 from cartesia import Cartesia
@@ -193,19 +193,21 @@ client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
 with open("path/to/audio.wav", "rb") as f:
     audio_data = f.read()
 
-# Convert to audio chunks
-chunk_size = 1600
+# Convert to audio chunks (20ms chunks used here for a streaming example)
+# This chunk size is calculated for 16kHz, 16-bit audio: 16000 * 0.02 * 2 = 640 bytes
+# You can adjust this based on your audio format and desired streaming granularity
+chunk_size = 640
 audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), chunk_size)]
 
 # Create websocket connection
 ws = client.stt.websocket(
     model="ink-whisper",
-    language="en",
-    encoding="pcm_s16le", 
-    sample_rate=16000,
+    language="en",           # Must match the language of your audio
+    encoding="pcm_s16le",    # Must match your audio's encoding format
+    sample_rate=16000,       # Must match your audio's sample rate
 )
 
-# Send audio chunks
+# Send audio chunks (streaming approach)
 for chunk in audio_chunks:
     ws.send(chunk)
 
@@ -417,7 +419,9 @@ $ fern generate --group python-sdk --log-level debug --api version-2024-11-13 --
 $ cd ~/cartesia-python
 $ git pull ~/docs/fern/apis/version-2024-11-13/.preview/fern-python-sdk
 $ git commit --amend -m "manually regenerate from docs" # optional
-```### Automatically generating new SDK releases
+```
+
+### Automatically generating new SDK releases
 
 From https://github.com/cartesia-ai/docs click `Actions` then `Release Python SDK`. (Requires permissions.)
 
