@@ -181,7 +181,7 @@ p.terminate()
 ws.close()  # Close the websocket connection
 ```
 
-## Streaming Speech-to-Text (STT) with Websockets
+## Speech-to-Text (STT) with Websockets
 
 ```python
 from cartesia import Cartesia
@@ -195,7 +195,6 @@ with open("path/to/audio.wav", "rb") as f:
 
 # Convert to audio chunks (20ms chunks used here for a streaming example)
 # This chunk size is calculated for 16kHz, 16-bit audio: 16000 * 0.02 * 2 = 640 bytes
-# You can adjust this based on your audio format and desired streaming granularity
 chunk_size = 640
 audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), chunk_size)]
 
@@ -225,6 +224,116 @@ for result in ws.receive():
         break
 
 ws.close()
+```
+
+### Async Streaming Speech-to-Text (STT) with Websockets
+
+For real-time streaming applications, here's a more practical async example that demonstrates concurrent audio processing and result handling:
+
+```python
+import asyncio
+import os
+from cartesia import AsyncCartesia
+
+async def streaming_stt_example():
+    """
+    Advanced async STT example for real-time streaming applications.
+    This example simulates streaming audio processing with proper error handling.
+    """
+    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+    
+    try:
+        # Create websocket connection
+        ws = await client.stt.websocket(
+            model="ink-whisper",
+            language="en",           # Must match the language of your audio
+            encoding="pcm_s16le",    # Must match your audio's encoding format
+            sample_rate=16000,       # Must match your audio's sample rate
+        )
+        
+        # Simulate streaming audio data (replace with your audio source)
+        async def audio_stream():
+            """Simulate real-time audio streaming - replace with actual audio capture"""
+            # Load audio file for simulation
+            with open("path/to/audio.wav", "rb") as f:
+                audio_data = f.read()
+            
+            # Stream in 100ms chunks (realistic for real-time processing)
+            chunk_size = int(16000 * 0.1 * 2)  # 100ms at 16kHz, 16-bit
+            
+            for i in range(0, len(audio_data), chunk_size):
+                chunk = audio_data[i:i + chunk_size]
+                if chunk:
+                    yield chunk
+                    # Simulate real-time streaming delay
+                    await asyncio.sleep(0.1)
+        
+        # Send audio and receive results concurrently
+        async def send_audio():
+            """Send audio chunks to the STT websocket"""
+            try:
+                async for chunk in audio_stream():
+                    await ws.send(chunk)
+                    print(f"Sent audio chunk of {len(chunk)} bytes")
+                    # Small delay to simulate realtime applications
+                    await asyncio.sleep(0.02)
+                
+                # Signal end of audio stream
+                await ws.send("finalize")
+                await ws.send("done")
+                print("Audio streaming completed")
+                
+            except Exception as e:
+                print(f"Error sending audio: {e}")
+        
+        async def receive_transcripts():
+            """Receive and process transcription results"""
+            full_transcript = ""
+            
+            try:
+                async for result in ws.receive():
+                    if result['type'] == 'transcript':
+                        text = result['text']
+                        is_final = result['is_final']
+                        
+                        if is_final:
+                            # Final result - this text won't change
+                            full_transcript += text + " "
+                            print(f"FINAL: {text}")
+                        else:
+                            # Partial result - may change as more audio is processed
+                            print(f"PARTIAL: {text}")
+                            
+                    elif result['type'] == 'done':
+                        print("Transcription completed")
+                        break
+                        
+            except Exception as e:
+                print(f"Error receiving transcripts: {e}")
+            
+            return full_transcript.strip()
+        
+        print("Starting streaming STT...")
+        
+        # Use asyncio.gather to run audio sending and transcript receiving concurrently
+        _, final_transcript = await asyncio.gather(
+            send_audio(),
+            receive_transcripts()
+        )
+        
+        print(f"\nComplete transcript: {final_transcript}")
+        
+        # Clean up
+        await ws.close()
+        
+    except Exception as e:
+        print(f"STT streaming error: {e}")
+    finally:
+        await client.close()
+
+# Run the example
+if __name__ == "__main__":
+    asyncio.run(streaming_stt_example())
 ```
 
 ## Voices
