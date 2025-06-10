@@ -5,7 +5,7 @@ import typing_extensions
 
 class FlushDoneMessageParams(typing_extensions.TypedDict):
     """
-    Acknowledgment message sent in response to a "finalize" command, indicating that all buffered audio has been flushed and processed.
+    Acknowledgment message sent in response to a `finalize` command, indicating that all buffered audio has been flushed and processed.
     """
 
     request_id: str

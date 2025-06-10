@@ -8,7 +8,7 @@ import typing
 
 class DoneMessage(UniversalBaseModel):
     """
-    Acknowledgment message sent in response to a "done" command, indicating that the session is complete and the WebSocket will close.
+    Acknowledgment message sent in response to a `done` command, indicating that the session is complete and the WebSocket will close.
     """
 
     request_id: str = pydantic.Field()

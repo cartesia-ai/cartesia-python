@@ -25,9 +25,6 @@ from .requests import (
     TranscriptMessageParams,
     TranscriptionResponseParams,
 )
-from .socket_client import AsyncSttClientWithWebsocket, SttClientWithWebsocket
-from ._websocket import SttWebsocket
-from ._async_websocket import AsyncSttWebsocket
 
 __all__ = [
     "DoneMessage",
@@ -51,8 +48,4 @@ __all__ = [
     "TranscriptMessageParams",
     "TranscriptionResponse",
     "TranscriptionResponseParams",
-    "AsyncSttClientWithWebsocket",
-    "SttClientWithWebsocket",
-    "SttWebsocket",
-    "AsyncSttWebsocket",
 ]

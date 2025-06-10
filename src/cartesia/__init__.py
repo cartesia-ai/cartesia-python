@@ -20,8 +20,6 @@ from .datasets import (
 from .embedding import Embedding
 from .environment import CartesiaEnvironment
 from .stt import (
-    AsyncSttClientWithWebsocket,
-    AsyncSttWebsocket,
     DoneMessage,
     DoneMessageParams,
     ErrorMessage,
@@ -38,9 +36,7 @@ from .stt import (
     StreamingTranscriptionResponse_FlushDoneParams,
     StreamingTranscriptionResponse_Transcript,
     StreamingTranscriptionResponse_TranscriptParams,
-    SttClientWithWebsocket,
     SttEncoding,
-    SttWebsocket,
     TranscriptMessage,
     TranscriptMessageParams,
     TranscriptionResponse,
@@ -183,8 +179,6 @@ __all__ = [
     "ApiInfo",
     "ApiInfoParams",
     "AsyncCartesia",
-    "AsyncSttClientWithWebsocket",
-    "AsyncSttWebsocket",
     "BaseVoiceId",
     "CancelContextRequest",
     "CancelContextRequestParams",
@@ -280,9 +274,7 @@ __all__ = [
     "StreamingTranscriptionResponse_FlushDoneParams",
     "StreamingTranscriptionResponse_Transcript",
     "StreamingTranscriptionResponse_TranscriptParams",
-    "SttClientWithWebsocket",
     "SttEncoding",
-    "SttWebsocket",
     "SupportedLanguage",
     "TokenGrant",
     "TokenGrantParams",
