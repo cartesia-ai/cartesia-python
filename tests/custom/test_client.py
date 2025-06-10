@@ -1504,3 +1504,168 @@ async def test_continuation_phoneme_timestamps_async():
     _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
 
     await ws.close()
+
+def _load_test_audio_chunks() -> List[bytes]:
+    """Load test audio file and convert to chunks for STT testing."""
+    audio_path = os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav")
+    
+    import wave
+    with wave.open(audio_path, 'rb') as wav_file:
+        frames = wav_file.readframes(wav_file.getnframes())
+        sample_rate = wav_file.getframerate()
+        channels = wav_file.getnchannels()
+        sample_width = wav_file.getsampwidth()
+        
+        chunk_size_frames = int(0.1 * sample_rate)
+        chunk_size_bytes = chunk_size_frames * channels * sample_width
+        
+        chunks = []
+        for i in range(0, len(frames), chunk_size_bytes):
+            chunk = frames[i:i + chunk_size_bytes]
+            if chunk:
+                chunks.append(chunk)
+        
+        return chunks
+
+
+def _validate_transcript_accuracy(actual_text: str, expected_text: str, min_accuracy: float = 0.7) -> bool:
+    """Validate transcript accuracy by comparing word overlap.
+    
+    Args:
+        actual_text: The transcribed text from STT
+        expected_text: The expected transcript content
+        min_accuracy: Minimum accuracy threshold (0.0 to 1.0)
+    
+    Returns:
+        True if accuracy meets threshold, False otherwise
+    """
+    if not actual_text or not expected_text:
+        return False
+    
+    # Normalize text: lowercase and split into words
+    actual_words = set(actual_text.lower().split())
+    expected_words = set(expected_text.lower().split())
+    
+    if not expected_words:
+        return False
+    
+    # Calculate word overlap accuracy
+    matching_words = actual_words.intersection(expected_words)
+    accuracy = len(matching_words) / len(expected_words)
+    
+    logger.info(f"Transcript accuracy: {accuracy:.2%} (expected: {min_accuracy:.0%})")
+    logger.info(f"Expected: {expected_text}")
+    logger.info(f"Actual: {actual_text}")
+    logger.info(f"Matching words: {matching_words}")
+    
+    return accuracy >= min_accuracy
+
+
+def test_stt_websocket_sync():
+    """Test synchronous STT websocket functionality."""
+    logger.info("Testing STT WebSocket sync")
+    
+    expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
+    
+    with create_client() as client:
+        audio_chunks = _load_test_audio_chunks()
+        
+        # Create websocket connection
+        ws = client.stt.websocket(
+            model="ink-whisper",
+            language="en",
+            encoding="pcm_s16le", 
+            sample_rate=16000,
+        )
+        
+        # Send audio chunks (streaming input)
+        for chunk in audio_chunks:
+            ws.send(chunk)
+        
+        # Finalize and close
+        ws.send("finalize")
+        ws.send("done")
+        
+        # Receive transcription results
+        results = []
+        final_transcript_chunks = []
+        for result in ws.receive():
+            results.append(result)
+            if result['type'] == 'transcript':
+                assert isinstance(result['text'], str)
+                assert isinstance(result['is_final'], bool)
+                logger.info(f"Received transcript: {result['text']}")
+                
+                # Capture final transcript chunks for accuracy validation
+                if result.get('is_final') and result.get('text'):
+                    final_transcript_chunks.append(result['text'])
+            elif result['type'] == 'done':
+                break
+        
+        ws.close()
+        
+        assert len(results) > 0, "No STT results received"
+        transcript_found = any(r['type'] == 'transcript' for r in results)
+        assert transcript_found, "No transcript messages received"
+        
+        # Validate transcript accuracy
+        if final_transcript_chunks:
+            final_transcript = ' '.join(final_transcript_chunks).strip()
+            accuracy_valid = _validate_transcript_accuracy(final_transcript, expected_transcript, min_accuracy=0.7)
+            assert accuracy_valid, f"Transcript accuracy below 70%: '{final_transcript.lower()}' vs expected '{expected_transcript}'"
+
+
+@pytest.mark.asyncio
+async def test_stt_websocket_async():
+    """Test asynchronous STT websocket functionality."""
+    logger.info("Testing STT WebSocket async")
+    
+    expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
+    
+    async with create_async_client() as async_client:
+        audio_chunks = _load_test_audio_chunks()
+        
+        # Create websocket connection
+        ws = await async_client.stt.websocket(
+            model="ink-whisper",
+            language="en",
+            encoding="pcm_s16le",
+            sample_rate=16000,
+        )
+        
+        # Send audio chunks (streaming input)
+        for chunk in audio_chunks:
+            await ws.send(chunk)
+        
+        # Finalize and close
+        await ws.send("finalize")
+        await ws.send("done")
+        
+        # Receive transcription results
+        results = []
+        final_transcript_chunks = []
+        async for result in ws.receive():
+            results.append(result)
+            if result['type'] == 'transcript':
+                assert isinstance(result['text'], str)
+                assert isinstance(result['is_final'], bool)
+                logger.info(f"Received transcript: {result['text']}")
+                
+                # Capture final transcript chunks for accuracy validation
+                if result.get('is_final') and result.get('text'):
+                    final_transcript_chunks.append(result['text'])
+            elif result['type'] == 'done':
+                break
+        
+        await ws.close()
+        
+        assert len(results) > 0, "No STT results received"
+        transcript_found = any(r['type'] == 'transcript' for r in results)
+        assert transcript_found, "No transcript messages received"
+        
+        # Validate transcript accuracy
+        if final_transcript_chunks:
+            final_transcript = ' '.join(final_transcript_chunks).strip()
+            accuracy_valid = _validate_transcript_accuracy(final_transcript, expected_transcript, min_accuracy=0.7)
+            assert accuracy_valid, f"Transcript accuracy below 70%: '{final_transcript.lower()}' vs expected '{expected_transcript}'"
+

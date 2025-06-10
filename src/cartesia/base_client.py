@@ -7,6 +7,7 @@ from .core.client_wrapper import SyncClientWrapper
 from .api_status.client import ApiStatusClient
 from .auth.client import AuthClient
 from .infill.client import InfillClient
+from .stt.socket_client import AsyncSttClientWithWebsocket, SttClientWithWebsocket
 from .tts.client import TtsClient
 from .voice_changer.client import VoiceChangerClient
 from .voices.client import VoicesClient
@@ -80,6 +81,7 @@ class BaseCartesia:
         self.api_status = ApiStatusClient(client_wrapper=self._client_wrapper)
         self.auth = AuthClient(client_wrapper=self._client_wrapper)
         self.infill = InfillClient(client_wrapper=self._client_wrapper)
+        self.stt = SttClientWithWebsocket(client_wrapper=self._client_wrapper)
         self.tts = TtsClient(client_wrapper=self._client_wrapper)
         self.voice_changer = VoiceChangerClient(client_wrapper=self._client_wrapper)
         self.voices = VoicesClient(client_wrapper=self._client_wrapper)
