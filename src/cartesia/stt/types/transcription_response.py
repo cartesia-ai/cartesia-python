@@ -3,6 +3,7 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
 import typing
+from .transcription_word import TranscriptionWord
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -20,6 +21,11 @@ class TranscriptionResponse(UniversalBaseModel):
     duration: typing.Optional[float] = pydantic.Field(default=None)
     """
     The duration of the input audio in seconds.
+    """
+
+    words: typing.Optional[typing.List[TranscriptionWord]] = pydantic.Field(default=None)
+    """
+    Word-level timestamps for batch transcription responses.
     """
 
     if IS_PYDANTIC_V2:

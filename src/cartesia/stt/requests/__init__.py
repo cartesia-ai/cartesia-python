@@ -12,6 +12,7 @@ from .streaming_transcription_response import (
 )
 from .transcript_message import TranscriptMessageParams
 from .transcription_response import TranscriptionResponseParams
+from .transcription_word import TranscriptionWordParams
 
 __all__ = [
     "DoneMessageParams",
@@ -24,4 +25,5 @@ __all__ = [
     "StreamingTranscriptionResponse_TranscriptParams",
     "TranscriptMessageParams",
     "TranscriptionResponseParams",
+    "TranscriptionWordParams",
 ]

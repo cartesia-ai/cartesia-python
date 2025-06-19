@@ -2,4 +2,6 @@
 
 import typing
 
-SttEncoding = typing.Union[typing.Literal["pcm_s16le"], typing.Any]
+SttEncoding = typing.Union[
+    typing.Literal["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"], typing.Any
+]

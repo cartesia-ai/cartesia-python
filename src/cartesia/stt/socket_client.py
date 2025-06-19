@@ -26,15 +26,19 @@ class SttClientWithWebsocket:
     def websocket(self, *, 
                   model: str = "ink-whisper",
                   language: Optional[str] = "en", 
-                  encoding: Optional[str] = "pcm_s16le",
-                  sample_rate: int = 16000):
+                  encoding: str = "pcm_s16le",
+                  sample_rate: int = 16000,
+                  min_volume: Optional[float] = None,
+                  max_silence_duration_secs: Optional[float] = None):
         """Create a WebSocket connection for real-time speech transcription.
 
         Args:
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Returns:
             SttWebsocket: A connected WebSocket client for STT operations.
@@ -51,6 +55,8 @@ class SttClientWithWebsocket:
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
         return ws
 
@@ -60,8 +66,10 @@ class SttClientWithWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: str = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ) -> Generator[Dict[str, Any], None, None]:
         """Transcribe audio chunks using WebSocket.
 
@@ -69,8 +77,10 @@ class SttClientWithWebsocket:
             audio_chunks: Iterator of audio chunks as bytes
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Yields:
             Dictionary containing transcription results, flush_done, done, or error messages
@@ -86,6 +96,8 @@ class SttClientWithWebsocket:
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
         try:
             yield from ws.transcribe(
@@ -94,6 +106,8 @@ class SttClientWithWebsocket:
                 language=language,
                 encoding=encoding,
                 sample_rate=sample_rate,
+                min_volume=min_volume,
+                max_silence_duration_secs=max_silence_duration_secs,
             )
         finally:
             ws.close()
@@ -120,15 +134,19 @@ class AsyncSttClientWithWebsocket:
     async def websocket(self, *,
                         model: str = "ink-whisper",
                         language: Optional[str] = "en",
-                        encoding: Optional[str] = "pcm_s16le", 
-                        sample_rate: int = 16000):
+                        encoding: str = "pcm_s16le", 
+                        sample_rate: int = 16000,
+                        min_volume: Optional[float] = None,
+                        max_silence_duration_secs: Optional[float] = None):
         """Create an async WebSocket connection for real-time speech transcription.
 
         Args:
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Returns:
             AsyncSttWebsocket: A connected async WebSocket client for STT operations.
@@ -146,6 +164,8 @@ class AsyncSttClientWithWebsocket:
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
         return ws
 
@@ -155,8 +175,10 @@ class AsyncSttClientWithWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: str = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ) -> typing.AsyncGenerator[Dict[str, Any], None]:
         """Transcribe audio chunks using async WebSocket.
 
@@ -164,8 +186,10 @@ class AsyncSttClientWithWebsocket:
             audio_chunks: Async iterator of audio chunks as bytes
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Yields:
             Dictionary containing transcription results, flush_done, done, or error messages
@@ -181,6 +205,8 @@ class AsyncSttClientWithWebsocket:
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
         try:
             async for result in ws.transcribe(
@@ -189,6 +215,8 @@ class AsyncSttClientWithWebsocket:
                 language=language,
                 encoding=encoding,
                 sample_rate=sample_rate,
+                min_volume=min_volume,
+                max_silence_duration_secs=max_silence_duration_secs,
             ):
                 yield result
         finally:
