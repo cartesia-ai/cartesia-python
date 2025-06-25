@@ -233,8 +233,17 @@ def test_get_voice_from_id(client: Cartesia):
     # assert voice in voices
     # Instead:
     voices = client.voices.list()
-    assert voice.id in (v.id for v in voices)
-
+    
+    # Convert to list but limit iteration to avoid full pagination of all voices
+    voice_ids = []
+    count = 0
+    for v in voices:
+        voice_ids.append(v.id)
+        count += 1
+        if count >= 50:
+            break
+    
+    assert voice.id in voice_ids
 
 
 @pytest.mark.parametrize("mode", ["similarity", "stability"])
