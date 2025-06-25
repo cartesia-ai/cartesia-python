@@ -11,6 +11,7 @@ from cartesia.stt.types import (
     StreamingTranscriptionResponse_Error,
     StreamingTranscriptionResponse_Transcript,
 )
+from cartesia.stt.types.stt_encoding import SttEncoding
 
 from ..core.pydantic_utilities import parse_obj_as
 from ._websocket import SttWebsocket
@@ -41,7 +42,7 @@ class AsyncSttWebsocket(SttWebsocket):
         self.websocket: Optional[aiohttp.ClientWebSocketResponse] = None
         self._default_model: str = "ink-whisper"
         self._default_language: Optional[str] = "en"
-        self._default_encoding: str = "pcm_s16le"
+        self._default_encoding: SttEncoding = "pcm_s16le"
         self._default_sample_rate: int = 16000
         self._default_min_volume: Optional[float] = None
         self._default_max_silence_duration_secs: Optional[float] = None
@@ -62,7 +63,7 @@ class AsyncSttWebsocket(SttWebsocket):
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,
@@ -185,73 +186,59 @@ class AsyncSttWebsocket(SttWebsocket):
         assert self.websocket is not None, "WebSocket should be connected after connect() call"
 
         try:
-            while True:
-                try:
-                    msg = await asyncio.wait_for(self.websocket.receive(), timeout=self.timeout)
+            async for message in self.websocket:
+                if message.type == aiohttp.WSMsgType.TEXT:
+                    raw_data = json.loads(message.data)
                     
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        raw_data = json.loads(msg.data)
-                        
-                        # Handle error responses
-                        if raw_data.get("type") == "error":
-                            raise RuntimeError(f"Error transcribing audio: {raw_data.get('message', 'Unknown error')}")
-                        
-                        # Handle transcript responses with flexible parsing
-                        if raw_data.get("type") == "transcript":
-                            # Provide defaults for missing required fields
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                                "text": raw_data.get("text", ""),  # Default to empty string if missing
-                                "is_final": raw_data.get("is_final", False),  # Default to False if missing
-                            }
-                            
-                            # Add optional fields if present
-                            if "duration" in raw_data:
-                                result["duration"] = raw_data["duration"]
-                            if "language" in raw_data:
-                                result["language"] = raw_data["language"]
-                            if "words" in raw_data:
-                                result["words"] = raw_data["words"]
-                            
-                            yield result
-                        
-                        # Handle flush_done acknowledgment
-                        elif raw_data.get("type") == "flush_done":
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                            }
-                            yield result
-                        
-                        # Handle done acknowledgment - session complete
-                        elif raw_data.get("type") == "done":
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                            }
-                            yield result
-                            # Session is complete, break out of loop
-                            break
+                    # Handle error responses
+                    if raw_data.get("type") == "error":
+                        raise RuntimeError(f"Error transcribing audio: {raw_data.get('message', 'Unknown error')}")
                     
-                    elif msg.type == aiohttp.WSMsgType.ERROR:
-                        websocket_exception = self.websocket.exception() if self.websocket else None
-                        await self.close()
-                        raise RuntimeError(f"WebSocket error: {websocket_exception}")
+                    # Handle transcript responses with flexible parsing
+                    if raw_data.get("type") == "transcript":
+                        # Provide defaults for missing required fields
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                            "text": raw_data.get("text", ""),  # Default to empty string if missing
+                            "is_final": raw_data.get("is_final", False),  # Default to False if missing
+                        }
+                        
+                        # Add optional fields if present
+                        if "duration" in raw_data:
+                            result["duration"] = raw_data["duration"]
+                        if "language" in raw_data:
+                            result["language"] = raw_data["language"]
+                        if "words" in raw_data:
+                            result["words"] = raw_data["words"]
+                        
+                        yield result
                     
-                    elif msg.type == aiohttp.WSMsgType.CLOSE:
-                        break
+                    # Handle flush_done acknowledgment
+                    elif raw_data.get("type") == "flush_done":
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                        }
+                        yield result
+                    
+                    # Handle done acknowledgment
+                    elif raw_data.get("type") == "done":
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                        }
+                        yield result
+                        break  # Exit the loop when done
                 
-                except asyncio.TimeoutError:
-                    await self.close()
-                    raise RuntimeError("Timeout while waiting for transcription")
-                except Exception as inner_e:
-                    await self.close()
-                    raise RuntimeError(f"Error receiving transcription: {inner_e}")
-                        
+                elif message.type == aiohttp.WSMsgType.ERROR:
+                    error_message = f"WebSocket error: {self.websocket.exception()}"
+                    raise RuntimeError(error_message)
+                elif message.type == aiohttp.WSMsgType.CLOSE:
+                    break  # WebSocket was closed
         except Exception as e:
             await self.close()
-            raise RuntimeError(f"Failed to receive transcription. {e}")
+            raise e
 
     async def transcribe(  # type: ignore[override]
         self,
@@ -259,7 +246,7 @@ class AsyncSttWebsocket(SttWebsocket):
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,

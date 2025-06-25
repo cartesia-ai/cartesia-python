@@ -4,6 +4,7 @@ from typing import Any, Dict, Generator, Optional, Union
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ._async_websocket import AsyncSttWebsocket
 from ._websocket import SttWebsocket
+from .types.stt_encoding import SttEncoding
 
 
 class SttClientWithWebsocket:
@@ -26,7 +27,7 @@ class SttClientWithWebsocket:
     def websocket(self, *, 
                   model: str = "ink-whisper",
                   language: Optional[str] = "en", 
-                  encoding: str = "pcm_s16le",
+                  encoding: SttEncoding = "pcm_s16le",
                   sample_rate: int = 16000,
                   min_volume: Optional[float] = None,
                   max_silence_duration_secs: Optional[float] = None):
@@ -66,7 +67,7 @@ class SttClientWithWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,
@@ -134,7 +135,7 @@ class AsyncSttClientWithWebsocket:
     async def websocket(self, *,
                         model: str = "ink-whisper",
                         language: Optional[str] = "en",
-                        encoding: str = "pcm_s16le", 
+                        encoding: SttEncoding = "pcm_s16le", 
                         sample_rate: int = 16000,
                         min_volume: Optional[float] = None,
                         max_silence_duration_secs: Optional[float] = None):
@@ -175,7 +176,7 @@ class AsyncSttClientWithWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,

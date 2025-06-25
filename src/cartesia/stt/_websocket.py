@@ -14,6 +14,7 @@ from cartesia.stt.types import (
     StreamingTranscriptionResponse_Error,
     StreamingTranscriptionResponse_Transcript,
 )
+from cartesia.stt.types.stt_encoding import SttEncoding
 
 from ..core.pydantic_utilities import parse_obj_as
 
@@ -45,7 +46,7 @@ class SttWebsocket:
         # Store default connection parameters for auto-connect with proper typing
         self._default_model: str = "ink-whisper"
         self._default_language: Optional[str] = "en"
-        self._default_encoding: str = "pcm_s16le"
+        self._default_encoding: SttEncoding = "pcm_s16le"
         self._default_sample_rate: int = 16000
         self._default_min_volume: Optional[float] = None
         self._default_max_silence_duration_secs: Optional[float] = None
@@ -61,7 +62,7 @@ class SttWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,
@@ -224,23 +225,22 @@ class SttWebsocket:
                             }
                             yield result
                         
-                        # Handle done acknowledgment - session complete
+                        # Handle done acknowledgment
                         elif raw_data.get("type") == "done":
                             result = {
                                 "type": raw_data["type"],
                                 "request_id": raw_data.get("request_id", ""),
                             }
                             yield result
-                            # Session is complete, break out of loop
-                            break
-                
-                except Exception as inner_e:
-                    self.close()
-                    raise RuntimeError(f"Error receiving transcription: {inner_e}")
+                            break  # Exit the loop when done
                         
-        except Exception as e:
+                except Exception as e:
+                    if "Connection closed" in str(e) or "no active connection" in str(e):
+                        break  # WebSocket was closed
+                    raise e  # Re-raise other exceptions
+        except KeyboardInterrupt:
             self.close()
-            raise RuntimeError(f"Failed to receive transcription. {e}")
+            raise
 
     def transcribe(
         self,
@@ -248,7 +248,7 @@ class SttWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: str = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,
