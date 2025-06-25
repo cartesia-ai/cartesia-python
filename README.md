@@ -200,12 +200,12 @@ audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), ch
 
 # Create websocket connection with endpointing parameters
 ws = client.stt.websocket(
-    model="ink-whisper",
-    language="en",                       # Language of your audio
+    model="ink-whisper",                 # Model (required)
+    language="en",                       # Language of your audio (required)
     encoding="pcm_s16le",                # Audio encoding format (required)
     sample_rate=16000,                   # Audio sample rate (required)
     min_volume=0.1,                      # Volume threshold for voice activity detection
-    max_silence_duration_secs=2.0,       # Maximum silence duration before endpointing
+    max_silence_duration_secs=0.4,       # Maximum silence duration before endpointing
 )
 
 # Send audio chunks (streaming approach)
@@ -258,12 +258,12 @@ async def streaming_stt_example():
     try:
         # Create websocket connection with voice activity detection
         ws = await client.stt.websocket(
-            model="ink-whisper",
-            language="en",                       # Language of your audio
-            encoding="pcm_s16le",                # Audio encoding format (required)
-            sample_rate=16000,                   # Audio sample rate (required)
-            min_volume=0.15,                     # Volume threshold for voice activity detection
-            max_silence_duration_secs=1.5,       # Maximum silence duration before endpointing
+            model="ink-whisper",             # Model (required)
+            language="en",                   # Language of your audio (required)
+            encoding="pcm_s16le",            # Audio encoding format (required)
+            sample_rate=16000,               # Audio sample rate (required)
+            min_volume=0.15,                 # Volume threshold for voice activity detection
+            max_silence_duration_secs=0.3,   # Maximum silence duration before endpointing
         )
         
         # Simulate streaming audio data (replace with your audio source)
