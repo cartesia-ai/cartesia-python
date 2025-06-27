@@ -11,6 +11,7 @@ from cartesia.stt.types import (
     StreamingTranscriptionResponse_Error,
     StreamingTranscriptionResponse_Transcript,
 )
+from cartesia.stt.types.stt_encoding import SttEncoding
 
 from ..core.pydantic_utilities import parse_obj_as
 from ._websocket import SttWebsocket
@@ -41,8 +42,10 @@ class AsyncSttWebsocket(SttWebsocket):
         self.websocket: Optional[aiohttp.ClientWebSocketResponse] = None
         self._default_model: str = "ink-whisper"
         self._default_language: Optional[str] = "en"
-        self._default_encoding: Optional[str] = "pcm_s16le"
+        self._default_encoding: SttEncoding = "pcm_s16le"
         self._default_sample_rate: int = 16000
+        self._default_min_volume: Optional[float] = None
+        self._default_max_silence_duration_secs: Optional[float] = None
 
     def __del__(self):
         try:
@@ -60,16 +63,20 @@ class AsyncSttWebsocket(SttWebsocket):
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ):
         """Connect to the STT WebSocket with the specified parameters.
 
         Args:
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            model: ID of the model to use for transcription (required)
+            language: The language of the input audio in ISO-639-1 format (defaults to "en")
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Raises:
             RuntimeError: If the connection to the WebSocket fails.
@@ -78,6 +85,8 @@ class AsyncSttWebsocket(SttWebsocket):
         self._default_language = language
         self._default_encoding = encoding
         self._default_sample_rate = sample_rate
+        self._default_min_volume = min_volume
+        self._default_max_silence_duration_secs = max_silence_duration_secs
         
         if self.websocket is None or self._is_websocket_closed():
             route = "stt/websocket"
@@ -87,13 +96,15 @@ class AsyncSttWebsocket(SttWebsocket):
                 "model": model,
                 "api_key": self.api_key,
                 "cartesia_version": self.cartesia_version,
+                "encoding": encoding,
+                "sample_rate": str(sample_rate),
             }
             if language is not None:
                 params["language"] = language
-            if encoding is not None:
-                params["encoding"] = encoding
-            if sample_rate is not None:
-                params["sample_rate"] = str(sample_rate)
+            if min_volume is not None:
+                params["min_volume"] = str(min_volume)
+            if max_silence_duration_secs is not None:
+                params["max_silence_duration_secs"] = str(max_silence_duration_secs)
 
             query_string = "&".join([f"{k}={v}" for k, v in params.items()])
             url = f"{self.ws_url}/{route}?{query_string}"
@@ -143,6 +154,8 @@ class AsyncSttWebsocket(SttWebsocket):
                 language=self._default_language,
                 encoding=self._default_encoding,
                 sample_rate=self._default_sample_rate,
+                min_volume=self._default_min_volume,
+                max_silence_duration_secs=self._default_max_silence_duration_secs,
             )
         
         assert self.websocket is not None, "WebSocket should be connected after connect() call"
@@ -166,76 +179,66 @@ class AsyncSttWebsocket(SttWebsocket):
                 language=self._default_language,
                 encoding=self._default_encoding,
                 sample_rate=self._default_sample_rate,
+                min_volume=self._default_min_volume,
+                max_silence_duration_secs=self._default_max_silence_duration_secs,
             )
 
         assert self.websocket is not None, "WebSocket should be connected after connect() call"
 
         try:
-            while True:
-                try:
-                    msg = await asyncio.wait_for(self.websocket.receive(), timeout=self.timeout)
+            async for message in self.websocket:
+                if message.type == aiohttp.WSMsgType.TEXT:
+                    raw_data = json.loads(message.data)
                     
-                    if msg.type == aiohttp.WSMsgType.TEXT:
-                        raw_data = json.loads(msg.data)
-                        
-                        # Handle error responses
-                        if raw_data.get("type") == "error":
-                            raise RuntimeError(f"Error transcribing audio: {raw_data.get('message', 'Unknown error')}")
-                        
-                        # Handle transcript responses with flexible parsing
-                        if raw_data.get("type") == "transcript":
-                            # Provide defaults for missing required fields
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                                "text": raw_data.get("text", ""),  # Default to empty string if missing
-                                "is_final": raw_data.get("is_final", False),  # Default to False if missing
-                            }
-                            
-                            # Add optional fields if present
-                            if "duration" in raw_data:
-                                result["duration"] = raw_data["duration"]
-                            if "language" in raw_data:
-                                result["language"] = raw_data["language"]
-                            
-                            yield result
-                        
-                        # Handle flush_done acknowledgment
-                        elif raw_data.get("type") == "flush_done":
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                            }
-                            yield result
-                        
-                        # Handle done acknowledgment - session complete
-                        elif raw_data.get("type") == "done":
-                            result = {
-                                "type": raw_data["type"],
-                                "request_id": raw_data.get("request_id", ""),
-                            }
-                            yield result
-                            # Session is complete, break out of loop
-                            break
+                    # Handle error responses
+                    if raw_data.get("type") == "error":
+                        raise RuntimeError(f"Error transcribing audio: {raw_data.get('message', 'Unknown error')}")
                     
-                    elif msg.type == aiohttp.WSMsgType.ERROR:
-                        websocket_exception = self.websocket.exception() if self.websocket else None
-                        await self.close()
-                        raise RuntimeError(f"WebSocket error: {websocket_exception}")
+                    # Handle transcript responses with flexible parsing
+                    if raw_data.get("type") == "transcript":
+                        # Provide defaults for missing required fields
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                            "text": raw_data.get("text", ""),  # Default to empty string if missing
+                            "is_final": raw_data.get("is_final", False),  # Default to False if missing
+                        }
+                        
+                        # Add optional fields if present
+                        if "duration" in raw_data:
+                            result["duration"] = raw_data["duration"]
+                        if "language" in raw_data:
+                            result["language"] = raw_data["language"]
+                        if "words" in raw_data:
+                            result["words"] = raw_data["words"]
+                        
+                        yield result
                     
-                    elif msg.type == aiohttp.WSMsgType.CLOSE:
-                        break
+                    # Handle flush_done acknowledgment
+                    elif raw_data.get("type") == "flush_done":
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                        }
+                        yield result
+                    
+                    # Handle done acknowledgment
+                    elif raw_data.get("type") == "done":
+                        result = {
+                            "type": raw_data["type"],
+                            "request_id": raw_data.get("request_id", ""),
+                        }
+                        yield result
+                        break  # Exit the loop when done
                 
-                except asyncio.TimeoutError:
-                    await self.close()
-                    raise RuntimeError("Timeout while waiting for transcription")
-                except Exception as inner_e:
-                    await self.close()
-                    raise RuntimeError(f"Error receiving transcription: {inner_e}")
-                        
+                elif message.type == aiohttp.WSMsgType.ERROR:
+                    error_message = f"WebSocket error: {self.websocket.exception()}"
+                    raise RuntimeError(error_message)
+                elif message.type == aiohttp.WSMsgType.CLOSE:
+                    break  # WebSocket was closed
         except Exception as e:
             await self.close()
-            raise RuntimeError(f"Failed to receive transcription. {e}")
+            raise e
 
     async def transcribe(  # type: ignore[override]
         self,
@@ -243,17 +246,21 @@ class AsyncSttWebsocket(SttWebsocket):
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """Transcribe audio chunks using the WebSocket.
 
         Args:
             audio_chunks: Async iterator of audio chunks as bytes
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            model: ID of the model to use for transcription (required)
+            language: The language of the input audio in ISO-639-1 format (defaults to "en")
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Yields:
             Dictionary containing transcription results, flush_done, done, or error messages
@@ -263,6 +270,8 @@ class AsyncSttWebsocket(SttWebsocket):
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
 
         try:

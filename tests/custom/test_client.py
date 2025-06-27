@@ -233,8 +233,17 @@ def test_get_voice_from_id(client: Cartesia):
     # assert voice in voices
     # Instead:
     voices = client.voices.list()
-    assert voice.id in (v.id for v in voices)
-
+    
+    # Convert to list but limit iteration to avoid full pagination of all voices
+    voice_ids = []
+    count = 0
+    for v in voices:
+        voice_ids.append(v.id)
+        count += 1
+        if count >= 50:
+            break
+    
+    assert voice.id in voice_ids
 
 
 @pytest.mark.parametrize("mode", ["similarity", "stability"])
@@ -1576,6 +1585,8 @@ def test_stt_websocket_sync():
             language="en",
             encoding="pcm_s16le", 
             sample_rate=16000,
+            min_volume=0.1,
+            max_silence_duration_secs=2.0,
         )
         
         # Send audio chunks (streaming input)
@@ -1589,12 +1600,27 @@ def test_stt_websocket_sync():
         # Receive transcription results
         results = []
         final_transcript_chunks = []
+        word_timestamps_found = False
         for result in ws.receive():
             results.append(result)
             if result['type'] == 'transcript':
                 assert isinstance(result['text'], str)
                 assert isinstance(result['is_final'], bool)
                 logger.info(f"Received transcript: {result['text']}")
+                
+                # Check for word-level timestamps
+                if 'words' in result and result['words']:
+                    word_timestamps_found = True
+                    words = result['words']
+                    assert isinstance(words, list), "Words should be a list"
+                    for word_info in words:
+                        assert 'word' in word_info, "Each word entry should have 'word' field"
+                        assert 'start' in word_info, "Each word entry should have 'start' field"
+                        assert 'end' in word_info, "Each word entry should have 'end' field"
+                        assert isinstance(word_info['start'], (int, float)), "Start time should be numeric"
+                        assert isinstance(word_info['end'], (int, float)), "End time should be numeric"
+                        assert word_info['start'] <= word_info['end'], "Start time should be <= end time"
+                    logger.info(f"Word timestamps found: {len(words)} words")
                 
                 # Capture final transcript chunks for accuracy validation
                 if result.get('is_final') and result.get('text'):
@@ -1607,6 +1633,7 @@ def test_stt_websocket_sync():
         assert len(results) > 0, "No STT results received"
         transcript_found = any(r['type'] == 'transcript' for r in results)
         assert transcript_found, "No transcript messages received"
+        assert word_timestamps_found, "No word-level timestamps found in responses"
         
         # Validate transcript accuracy
         if final_transcript_chunks:
@@ -1631,6 +1658,8 @@ async def test_stt_websocket_async():
             language="en",
             encoding="pcm_s16le",
             sample_rate=16000,
+            min_volume=0.15, 
+            max_silence_duration_secs=1.5,
         )
         
         # Send audio chunks (streaming input)
@@ -1644,12 +1673,27 @@ async def test_stt_websocket_async():
         # Receive transcription results
         results = []
         final_transcript_chunks = []
+        word_timestamps_found = False
         async for result in ws.receive():
             results.append(result)
             if result['type'] == 'transcript':
                 assert isinstance(result['text'], str)
                 assert isinstance(result['is_final'], bool)
                 logger.info(f"Received transcript: {result['text']}")
+                
+                # Check for word-level timestamps
+                if 'words' in result and result['words']:
+                    word_timestamps_found = True
+                    words = result['words']
+                    assert isinstance(words, list), "Words should be a list"
+                    for word_info in words:
+                        assert 'word' in word_info, "Each word entry should have 'word' field"
+                        assert 'start' in word_info, "Each word entry should have 'start' field"
+                        assert 'end' in word_info, "Each word entry should have 'end' field"
+                        assert isinstance(word_info['start'], (int, float)), "Start time should be numeric"
+                        assert isinstance(word_info['end'], (int, float)), "End time should be numeric"
+                        assert word_info['start'] <= word_info['end'], "Start time should be <= end time"
+                    logger.info(f"Word timestamps found: {len(words)} words")
                 
                 # Capture final transcript chunks for accuracy validation
                 if result.get('is_final') and result.get('text'):
@@ -1662,6 +1706,7 @@ async def test_stt_websocket_async():
         assert len(results) > 0, "No STT results received"
         transcript_found = any(r['type'] == 'transcript' for r in results)
         assert transcript_found, "No transcript messages received"
+        assert word_timestamps_found, "No word-level timestamps found in responses"
         
         # Validate transcript accuracy
         if final_transcript_chunks:

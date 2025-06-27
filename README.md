@@ -198,12 +198,14 @@ with open("path/to/audio.wav", "rb") as f:
 chunk_size = 640
 audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), chunk_size)]
 
-# Create websocket connection
+# Create websocket connection with endpointing parameters
 ws = client.stt.websocket(
-    model="ink-whisper",
-    language="en",           # Must match the language of your audio
-    encoding="pcm_s16le",    # Must match your audio's encoding format
-    sample_rate=16000,       # Must match your audio's sample rate
+    model="ink-whisper",                 # Model (required)
+    language="en",                       # Language of your audio (required)
+    encoding="pcm_s16le",                # Audio encoding format (required)
+    sample_rate=16000,                   # Audio sample rate (required)
+    min_volume=0.1,                      # Volume threshold for voice activity detection
+    max_silence_duration_secs=0.4,       # Maximum silence duration before endpointing
 )
 
 # Send audio chunks (streaming approach)
@@ -214,10 +216,20 @@ for chunk in audio_chunks:
 ws.send("finalize")
 ws.send("done")
 
-# Receive transcription results
+# Receive transcription results with word-level timestamps
 for result in ws.receive():
     if result['type'] == 'transcript':
         print(f"Transcription: {result['text']}")
+        
+        # Handle word-level timestamps if available
+        if 'words' in result and result['words']:
+            print("Word-level timestamps:")
+            for word_info in result['words']:
+                word = word_info['word']
+                start = word_info['start']
+                end = word_info['end']
+                print(f"  '{word}': {start:.2f}s - {end:.2f}s")
+        
         if result['is_final']:
             print("Final result received")
     elif result['type'] == 'done':
@@ -238,17 +250,20 @@ from cartesia import AsyncCartesia
 async def streaming_stt_example():
     """
     Advanced async STT example for real-time streaming applications.
-    This example simulates streaming audio processing with proper error handling.
+    This example simulates streaming audio processing with proper error handling
+    and demonstrates the new endpointing and word timestamp features.
     """
     client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
     
     try:
-        # Create websocket connection
+        # Create websocket connection with voice activity detection
         ws = await client.stt.websocket(
-            model="ink-whisper",
-            language="en",           # Must match the language of your audio
-            encoding="pcm_s16le",    # Must match your audio's encoding format
-            sample_rate=16000,       # Must match your audio's sample rate
+            model="ink-whisper",             # Model (required)
+            language="en",                   # Language of your audio (required)
+            encoding="pcm_s16le",            # Audio encoding format (required)
+            sample_rate=16000,               # Audio sample rate (required)
+            min_volume=0.15,                 # Volume threshold for voice activity detection
+            max_silence_duration_secs=0.3,   # Maximum silence duration before endpointing
         )
         
         # Simulate streaming audio data (replace with your audio source)
@@ -287,14 +302,28 @@ async def streaming_stt_example():
                 print(f"Error sending audio: {e}")
         
         async def receive_transcripts():
-            """Receive and process transcription results"""
+            """Receive and process transcription results with word timestamps"""
             full_transcript = ""
+            all_word_timestamps = []
             
             try:
                 async for result in ws.receive():
                     if result['type'] == 'transcript':
                         text = result['text']
                         is_final = result['is_final']
+                        
+                        # Handle word-level timestamps
+                        if 'words' in result and result['words']:
+                            word_timestamps = result['words']
+                            all_word_timestamps.extend(word_timestamps)
+                            
+                            if is_final:
+                                print("Word-level timestamps:")
+                                for word_info in word_timestamps:
+                                    word = word_info['word']
+                                    start = word_info['start']
+                                    end = word_info['end']
+                                    print(f"  '{word}': {start:.2f}s - {end:.2f}s")
                         
                         if is_final:
                             # Final result - this text won't change
@@ -311,17 +340,18 @@ async def streaming_stt_example():
             except Exception as e:
                 print(f"Error receiving transcripts: {e}")
             
-            return full_transcript.strip()
+            return full_transcript.strip(), all_word_timestamps
         
         print("Starting streaming STT...")
         
         # Use asyncio.gather to run audio sending and transcript receiving concurrently
-        _, final_transcript = await asyncio.gather(
+        _, (final_transcript, word_timestamps) = await asyncio.gather(
             send_audio(),
             receive_transcripts()
         )
         
         print(f"\nComplete transcript: {final_transcript}")
+        print(f"Total words with timestamps: {len(word_timestamps)}")
         
         # Clean up
         await ws.close()

@@ -12,6 +12,7 @@ from .types import (
     SttEncoding,
     TranscriptMessage,
     TranscriptionResponse,
+    TranscriptionWord,
 )
 from .requests import (
     DoneMessageParams,
@@ -24,6 +25,7 @@ from .requests import (
     StreamingTranscriptionResponse_TranscriptParams,
     TranscriptMessageParams,
     TranscriptionResponseParams,
+    TranscriptionWordParams,
 )
 
 __all__ = [
@@ -48,4 +50,6 @@ __all__ = [
     "TranscriptMessageParams",
     "TranscriptionResponse",
     "TranscriptionResponseParams",
+    "TranscriptionWord",
+    "TranscriptionWordParams",
 ]

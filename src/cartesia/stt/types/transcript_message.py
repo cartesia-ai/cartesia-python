@@ -3,6 +3,7 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
 import typing
+from .transcription_word import TranscriptionWord
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
@@ -32,6 +33,11 @@ class TranscriptMessage(UniversalBaseModel):
     language: typing.Optional[str] = pydantic.Field(default=None)
     """
     The detected or specified language of the input audio.
+    """
+
+    words: typing.Optional[typing.List[TranscriptionWord]] = pydantic.Field(default=None)
+    """
+    Word-level timestamps showing the start and end time of each word in seconds. Always included in streaming responses.
     """
 
     if IS_PYDANTIC_V2:

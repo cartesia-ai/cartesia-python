@@ -3,6 +3,7 @@
 from __future__ import annotations
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
+from .transcription_word import TranscriptionWord
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
 
@@ -18,6 +19,7 @@ class StreamingTranscriptionResponse_Transcript(UniversalBaseModel):
     is_final: bool
     duration: typing.Optional[float] = None
     language: typing.Optional[str] = None
+    words: typing.Optional[typing.List[TranscriptionWord]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

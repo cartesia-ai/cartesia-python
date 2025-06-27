@@ -2,6 +2,8 @@
 
 import typing_extensions
 import typing_extensions
+import typing
+from .transcription_word import TranscriptionWordParams
 
 
 class TranscriptMessageParams(typing_extensions.TypedDict):
@@ -30,4 +32,9 @@ class TranscriptMessageParams(typing_extensions.TypedDict):
     language: typing_extensions.NotRequired[str]
     """
     The detected or specified language of the input audio.
+    """
+
+    words: typing_extensions.NotRequired[typing.Sequence[TranscriptionWordParams]]
+    """
+    Word-level timestamps showing the start and end time of each word in seconds. Always included in streaming responses.
     """

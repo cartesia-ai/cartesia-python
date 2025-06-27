@@ -14,6 +14,7 @@ from cartesia.stt.types import (
     StreamingTranscriptionResponse_Error,
     StreamingTranscriptionResponse_Transcript,
 )
+from cartesia.stt.types.stt_encoding import SttEncoding
 
 from ..core.pydantic_utilities import parse_obj_as
 
@@ -45,8 +46,10 @@ class SttWebsocket:
         # Store default connection parameters for auto-connect with proper typing
         self._default_model: str = "ink-whisper"
         self._default_language: Optional[str] = "en"
-        self._default_encoding: Optional[str] = "pcm_s16le"
+        self._default_encoding: SttEncoding = "pcm_s16le"
         self._default_sample_rate: int = 16000
+        self._default_min_volume: Optional[float] = None
+        self._default_max_silence_duration_secs: Optional[float] = None
 
     def __del__(self):
         try:
@@ -59,16 +62,20 @@ class SttWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ):
         """Connect to the STT WebSocket with the specified parameters.
 
         Args:
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Raises:
             RuntimeError: If the connection to the WebSocket fails.
@@ -78,6 +85,8 @@ class SttWebsocket:
         self._default_language = language
         self._default_encoding = encoding
         self._default_sample_rate = sample_rate
+        self._default_min_volume = min_volume
+        self._default_max_silence_duration_secs = max_silence_duration_secs
         
         if not IS_WEBSOCKET_SYNC_AVAILABLE:
             raise ImportError(
@@ -89,13 +98,15 @@ class SttWebsocket:
                 "model": model,
                 "api_key": self.api_key,
                 "cartesia_version": self.cartesia_version,
+                "encoding": encoding,
+                "sample_rate": str(sample_rate),
             }
             if language is not None:
                 params["language"] = language
-            if encoding is not None:
-                params["encoding"] = encoding
-            if sample_rate is not None:
-                params["sample_rate"] = str(sample_rate)
+            if min_volume is not None:
+                params["min_volume"] = str(min_volume)
+            if max_silence_duration_secs is not None:
+                params["max_silence_duration_secs"] = str(max_silence_duration_secs)
 
             query_string = "&".join([f"{k}={v}" for k, v in params.items()])
             url = f"{self.ws_url}/{route}?{query_string}"
@@ -143,6 +154,8 @@ class SttWebsocket:
                 language=self._default_language,
                 encoding=self._default_encoding,
                 sample_rate=self._default_sample_rate,
+                min_volume=self._default_min_volume,
+                max_silence_duration_secs=self._default_max_silence_duration_secs,
             )
         
         assert self.websocket is not None, "WebSocket should be connected after connect() call"
@@ -167,6 +180,8 @@ class SttWebsocket:
                 language=self._default_language,
                 encoding=self._default_encoding,
                 sample_rate=self._default_sample_rate,
+                min_volume=self._default_min_volume,
+                max_silence_duration_secs=self._default_max_silence_duration_secs,
             )
 
         assert self.websocket is not None, "WebSocket should be connected after connect() call"
@@ -197,6 +212,8 @@ class SttWebsocket:
                                 result["duration"] = raw_data["duration"]
                             if "language" in raw_data:
                                 result["language"] = raw_data["language"]
+                            if "words" in raw_data:
+                                result["words"] = raw_data["words"]
                             
                             yield result
                         
@@ -208,23 +225,22 @@ class SttWebsocket:
                             }
                             yield result
                         
-                        # Handle done acknowledgment - session complete
+                        # Handle done acknowledgment
                         elif raw_data.get("type") == "done":
                             result = {
                                 "type": raw_data["type"],
                                 "request_id": raw_data.get("request_id", ""),
                             }
                             yield result
-                            # Session is complete, break out of loop
-                            break
-                
-                except Exception as inner_e:
-                    self.close()
-                    raise RuntimeError(f"Error receiving transcription: {inner_e}")
+                            break  # Exit the loop when done
                         
-        except Exception as e:
+                except Exception as e:
+                    if "Connection closed" in str(e) or "no active connection" in str(e):
+                        break  # WebSocket was closed
+                    raise e  # Re-raise other exceptions
+        except KeyboardInterrupt:
             self.close()
-            raise RuntimeError(f"Failed to receive transcription. {e}")
+            raise
 
     def transcribe(
         self,
@@ -232,8 +248,10 @@ class SttWebsocket:
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: Optional[str] = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
     ) -> Generator[Dict[str, Any], None, None]:
         """Transcribe audio chunks using the WebSocket.
 
@@ -241,8 +259,10 @@ class SttWebsocket:
             audio_chunks: Iterator of audio chunks as bytes
             model: ID of the model to use for transcription
             language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data
-            sample_rate: The sample rate of the audio in Hz
+            encoding: The encoding format of the audio data (required)
+            sample_rate: The sample rate of the audio in Hz (required)
+            min_volume: Volume threshold for voice activity detection (0.0-1.0)
+            max_silence_duration_secs: Maximum duration of silence before endpointing
 
         Yields:
             Dictionary containing transcription results, flush_done, done, or error messages
@@ -252,6 +272,8 @@ class SttWebsocket:
             language=language,
             encoding=encoding,
             sample_rate=sample_rate,
+            min_volume=min_volume,
+            max_silence_duration_secs=max_silence_duration_secs,
         )
 
         try:

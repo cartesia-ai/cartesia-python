@@ -2,6 +2,8 @@
 
 import typing_extensions
 import typing_extensions
+import typing
+from .transcription_word import TranscriptionWordParams
 
 
 class TranscriptionResponseParams(typing_extensions.TypedDict):
@@ -18,4 +20,9 @@ class TranscriptionResponseParams(typing_extensions.TypedDict):
     duration: typing_extensions.NotRequired[float]
     """
     The duration of the input audio in seconds.
+    """
+
+    words: typing_extensions.NotRequired[typing.Sequence[TranscriptionWordParams]]
+    """
+    Word-level timestamps for batch transcription responses.
     """

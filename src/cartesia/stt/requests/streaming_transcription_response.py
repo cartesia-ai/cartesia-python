@@ -4,6 +4,7 @@ from __future__ import annotations
 import typing_extensions
 import typing
 import typing_extensions
+from .transcription_word import TranscriptionWordParams
 
 
 class StreamingTranscriptionResponse_TranscriptParams(typing_extensions.TypedDict):
@@ -13,6 +14,7 @@ class StreamingTranscriptionResponse_TranscriptParams(typing_extensions.TypedDic
     is_final: bool
     duration: typing_extensions.NotRequired[float]
     language: typing_extensions.NotRequired[str]
+    words: typing_extensions.NotRequired[typing.Sequence[TranscriptionWordParams]]
 
 
 class StreamingTranscriptionResponse_FlushDoneParams(typing_extensions.TypedDict):
