@@ -209,7 +209,7 @@ class SttClient:
             data={
                 "model": model,
                 "language": language,
-                "timestamp_granularities": timestamp_granularities,
+                "timestamp_granularities[]": timestamp_granularities,
             },
             files={
                 "file": file,
@@ -433,7 +433,7 @@ class AsyncSttClient:
             data={
                 "model": model,
                 "language": language,
-                "timestamp_granularities": timestamp_granularities,
+                "timestamp_granularities[]": timestamp_granularities,
             },
             files={
                 "file": file,

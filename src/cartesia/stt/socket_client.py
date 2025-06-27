@@ -1,19 +1,20 @@
 import typing
-from typing import Any, Dict, Generator, Optional, Union
+from typing import Any, Dict, Generator, Optional
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ._async_websocket import AsyncSttWebsocket
 from ._websocket import SttWebsocket
+from .client import AsyncSttClient, SttClient
 from .types.stt_encoding import SttEncoding
 
 
-class SttClientWithWebsocket:
+class SttClientWithWebsocket(SttClient):
     """
     Extension of STT functionality that supports a synchronous WebSocket STT connection.
     """
 
     def __init__(self, *, client_wrapper: SyncClientWrapper):
-        self._client_wrapper = client_wrapper
+        super().__init__(client_wrapper=client_wrapper)
 
     def _ws_url(self):
         base_url = self._client_wrapper.get_base_url()
@@ -24,13 +25,16 @@ class SttClientWithWebsocket:
             base_url_without_protocol = base_url.split("://")[-1]
             return f"{prefix}://{base_url_without_protocol}"
 
-    def websocket(self, *, 
-                  model: str = "ink-whisper",
-                  language: Optional[str] = "en", 
-                  encoding: SttEncoding = "pcm_s16le",
-                  sample_rate: int = 16000,
-                  min_volume: Optional[float] = None,
-                  max_silence_duration_secs: Optional[float] = None):
+    def websocket(
+        self,
+        *,
+        model: str = "ink-whisper",
+        language: Optional[str] = "en",
+        encoding: SttEncoding = "pcm_s16le",
+        sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
+    ):
         """Create a WebSocket connection for real-time speech transcription.
 
         Args:
@@ -61,7 +65,7 @@ class SttClientWithWebsocket:
         )
         return ws
 
-    def transcribe(
+    def transcribe_stream(
         self,
         audio_chunks: typing.Iterator[bytes],
         *,
@@ -88,8 +92,8 @@ class SttClientWithWebsocket:
 
         Example:
             >>> client = Cartesia(api_key="your-api-key")
-            >>> ws_client = client.stt.websocket()
-            >>> for result in ws_client.transcribe(audio_chunks):
+            >>> ws = client.stt.websocket()
+            >>> for result in ws.transcribe(audio_chunks):
             ...     print(result["text"])
         """
         ws = self.websocket(
@@ -101,26 +105,19 @@ class SttClientWithWebsocket:
             max_silence_duration_secs=max_silence_duration_secs,
         )
         try:
-            yield from ws.transcribe(
-                audio_chunks,
-                model=model,
-                language=language,
-                encoding=encoding,
-                sample_rate=sample_rate,
-                min_volume=min_volume,
-                max_silence_duration_secs=max_silence_duration_secs,
-            )
+            # Note: The websocket instance method is `transcribe`
+            yield from ws.transcribe(audio_chunks)
         finally:
             ws.close()
 
 
-class AsyncSttClientWithWebsocket:
+class AsyncSttClientWithWebsocket(AsyncSttClient):
     """
     Extension of STT functionality that supports an asynchronous WebSocket STT connection.
     """
 
     def __init__(self, *, client_wrapper: AsyncClientWrapper, get_session):
-        self._client_wrapper = client_wrapper
+        super().__init__(client_wrapper=client_wrapper)
         self._get_session = get_session
 
     def _ws_url(self) -> str:
@@ -132,13 +129,16 @@ class AsyncSttClientWithWebsocket:
             base_url_without_protocol = base_url.split("://")[-1]
             return f"{prefix}://{base_url_without_protocol}"
 
-    async def websocket(self, *,
-                        model: str = "ink-whisper",
-                        language: Optional[str] = "en",
-                        encoding: SttEncoding = "pcm_s16le", 
-                        sample_rate: int = 16000,
-                        min_volume: Optional[float] = None,
-                        max_silence_duration_secs: Optional[float] = None):
+    async def websocket(
+        self,
+        *,
+        model: str = "ink-whisper",
+        language: Optional[str] = "en",
+        encoding: SttEncoding = "pcm_s16le",
+        sample_rate: int = 16000,
+        min_volume: Optional[float] = None,
+        max_silence_duration_secs: Optional[float] = None,
+    ):
         """Create an async WebSocket connection for real-time speech transcription.
 
         Args:
@@ -170,7 +170,7 @@ class AsyncSttClientWithWebsocket:
         )
         return ws
 
-    async def transcribe(
+    async def transcribe_stream(
         self,
         audio_chunks: typing.AsyncIterator[bytes],
         *,
@@ -197,8 +197,8 @@ class AsyncSttClientWithWebsocket:
 
         Example:
             >>> client = AsyncCartesia(api_key="your-api-key")
-            >>> ws_client = await client.stt.websocket()
-            >>> async for result in ws_client.transcribe(audio_chunks):
+            >>> ws = await client.stt.websocket()
+            >>> async for result in ws.transcribe(audio_chunks):
             ...     print(result["text"])
         """
         ws = await self.websocket(
@@ -210,15 +210,8 @@ class AsyncSttClientWithWebsocket:
             max_silence_duration_secs=max_silence_duration_secs,
         )
         try:
-            async for result in ws.transcribe(
-                audio_chunks,
-                model=model,
-                language=language,
-                encoding=encoding,
-                sample_rate=sample_rate,
-                min_volume=min_volume,
-                max_silence_duration_secs=max_silence_duration_secs,
-            ):
+            # Note: The websocket instance method is `transcribe`
+            async for result in ws.transcribe(audio_chunks):
                 yield result
         finally:
             await ws.close() 
