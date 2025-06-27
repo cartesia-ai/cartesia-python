@@ -25,7 +25,7 @@ class TranscriptionResponse(UniversalBaseModel):
 
     words: typing.Optional[typing.List[TranscriptionWord]] = pydantic.Field(default=None)
     """
-    Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities`.
+    Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities[]`.
     """
 
     if IS_PYDANTIC_V2:
