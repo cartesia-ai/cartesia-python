@@ -1714,3 +1714,79 @@ async def test_stt_websocket_async():
             accuracy_valid = _validate_transcript_accuracy(final_transcript, expected_transcript, min_accuracy=0.7)
             assert accuracy_valid, f"Transcript accuracy below 70%: '{final_transcript.lower()}' vs expected '{expected_transcript}'"
 
+
+def test_stt_batch_transcription():
+    """Test batch STT transcription with word timestamps."""
+    logger.info("Testing STT batch transcription")
+    
+    expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
+    audio_path = os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav")
+    
+    with create_client() as client:
+        # Test batch transcription with word timestamps
+        with open(audio_path, 'rb') as audio_file:
+            response = client.stt.transcribe(
+                file=audio_file,
+                model="ink-whisper",
+                language="en",
+                timestamp_granularities=["word"],
+                encoding="pcm_s16le",
+                sample_rate=16000
+            )
+        
+        # Validate response structure
+        assert hasattr(response, 'text'), "Response should have 'text' field"
+        assert hasattr(response, 'language'), "Response should have 'language' field"
+        assert hasattr(response, 'duration'), "Response should have 'duration' field"
+        assert hasattr(response, 'words'), "Response should have 'words' field for timestamps"
+        
+        # Validate text content
+        assert isinstance(response.text, str), "Text should be a string"
+        assert len(response.text.strip()) > 0, "Text should not be empty"
+        logger.info(f"Transcribed text: {response.text}")
+        
+        # Validate language
+        if response.language:
+            assert response.language == "en", f"Expected language 'en', got '{response.language}'"
+        
+        # Validate duration
+        if response.duration:
+            assert isinstance(response.duration, (int, float)), "Duration should be numeric"
+            assert response.duration > 0, "Duration should be positive"
+            assert response.duration < 10, "Duration should be reasonable for test file"
+            logger.info(f"Audio duration: {response.duration:.2f}s")
+        
+        # Validate word timestamps
+        if response.words:
+            assert isinstance(response.words, list), "Words should be a list"
+            assert len(response.words) > 0, "Should have word timestamps"
+            
+            for word_info in response.words:
+                assert hasattr(word_info, 'word'), "Each word entry should have 'word' field"
+                assert hasattr(word_info, 'start'), "Each word entry should have 'start' field"
+                assert hasattr(word_info, 'end'), "Each word entry should have 'end' field"
+                assert isinstance(word_info.word, str), "Word should be a string"
+                assert isinstance(word_info.start, (int, float)), "Start time should be numeric"
+                assert isinstance(word_info.end, (int, float)), "End time should be numeric"
+                assert word_info.start <= word_info.end, "Start time should be <= end time"
+                assert word_info.start >= 0, "Start time should be non-negative"
+            
+            # Validate timestamp ordering
+            for i in range(len(response.words) - 1):
+                current_word = response.words[i]
+                next_word = response.words[i + 1]
+                assert current_word.start <= next_word.start, "Word start times should be in order"
+            
+            logger.info(f"Word timestamps found: {len(response.words)} words")
+            
+            # Log sample timestamps for verification
+            sample_words = response.words[:3] if len(response.words) >= 3 else response.words
+            for word_info in sample_words:
+                logger.info(f"  '{word_info.word}': {word_info.start:.2f}s - {word_info.end:.2f}s")
+        else:
+            logger.warning("No word timestamps returned (this may indicate an API issue)")
+        
+        # Validate transcript accuracy
+        accuracy_valid = _validate_transcript_accuracy(response.text, expected_transcript, min_accuracy=0.7)
+        assert accuracy_valid, f"Transcript accuracy below 70%: '{response.text.lower()}' vs expected '{expected_transcript}'"
+
