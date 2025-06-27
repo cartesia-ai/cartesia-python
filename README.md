@@ -342,7 +342,7 @@ async def streaming_stt_example():
             
             return full_transcript.strip(), all_word_timestamps
         
-        print("Starting streaming STT with voice activity detection...")
+        print("Starting streaming STT...")
         
         # Use asyncio.gather to run audio sending and transcript receiving concurrently
         _, (final_transcript, word_timestamps) = await asyncio.gather(

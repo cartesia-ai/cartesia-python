@@ -71,8 +71,8 @@ class AsyncSttWebsocket(SttWebsocket):
         """Connect to the STT WebSocket with the specified parameters.
 
         Args:
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
+            model: ID of the model to use for transcription (required)
+            language: The language of the input audio in ISO-639-1 format (defaults to "en")
             encoding: The encoding format of the audio data (required)
             sample_rate: The sample rate of the audio in Hz (required)
             min_volume: Volume threshold for voice activity detection (0.0-1.0)
@@ -255,8 +255,8 @@ class AsyncSttWebsocket(SttWebsocket):
 
         Args:
             audio_chunks: Async iterator of audio chunks as bytes
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
+            model: ID of the model to use for transcription (required)
+            language: The language of the input audio in ISO-639-1 format (defaults to "en")
             encoding: The encoding format of the audio data (required)
             sample_rate: The sample rate of the audio in Hz (required)
             min_volume: Volume threshold for voice activity detection (0.0-1.0)
