@@ -325,6 +325,251 @@ Supported levels are: lowest, low, (omit), high, highest.
 </dl>
 </details>
 
+## Stt
+<details><summary><code>client.stt.<a href="src/cartesia/stt/client.py">transcribe</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Transcribes audio files into text using Cartesia's Speech-to-Text API.
+
+Upload an audio file and receive a complete transcription response. Supports arbitrarily long audio files with automatic intelligent chunking for longer audio.
+
+**Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm
+
+**Response format:** Returns JSON with transcribed text, duration, and language. Include `timestamp_granularities: ["word"]` to get word-level timestamps.
+ 
+**Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of audio processed.
+
+<Note>
+For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](/api-reference/stt/migrate-from-open-ai).
+</Note>
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia(
+    api_key="YOUR_API_KEY",
+)
+client.stt.transcribe(
+    model="ink-whisper",
+    language="en",
+    timestamp_granularities=["word"],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**file:** `from __future__ import annotations
+
+core.File` — See core.File for more documentation
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**model:** `str` — ID of the model to use for transcription. Use `ink-whisper` for the latest Cartesia Whisper model.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**encoding:** `typing.Optional[SttEncoding]` 
+
+The encoding format to process the audio as. If not specified, the audio file will be decoded automatically.
+
+**Supported formats:**
+- `pcm_s16le` - 16-bit signed integer PCM, little-endian (recommended for best performance)
+- `pcm_s32le` - 32-bit signed integer PCM, little-endian
+- `pcm_f16le` - 16-bit floating point PCM, little-endian
+- `pcm_f32le` - 32-bit floating point PCM, little-endian
+- `pcm_mulaw` - 8-bit μ-law encoded PCM
+- `pcm_alaw` - 8-bit A-law encoded PCM
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sample_rate:** `typing.Optional[int]` — The sample rate of the audio in Hz. 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**language:** `typing.Optional[str]` 
+
+The language of the input audio in ISO-639-1 format. Defaults to `en`.
+
+<Accordion title="Supported languages">
+  - `en` (English)
+  - `zh` (Chinese)
+  - `de` (German)
+  - `es` (Spanish)
+  - `ru` (Russian)
+  - `ko` (Korean)
+  - `fr` (French)
+  - `ja` (Japanese)
+  - `pt` (Portuguese)
+  - `tr` (Turkish)
+  - `pl` (Polish)
+  - `ca` (Catalan)
+  - `nl` (Dutch)
+  - `ar` (Arabic)
+  - `sv` (Swedish)
+  - `it` (Italian)
+  - `id` (Indonesian)
+  - `hi` (Hindi)
+  - `fi` (Finnish)
+  - `vi` (Vietnamese)
+  - `he` (Hebrew)
+  - `uk` (Ukrainian)
+  - `el` (Greek)
+  - `ms` (Malay)
+  - `cs` (Czech)
+  - `ro` (Romanian)
+  - `da` (Danish)
+  - `hu` (Hungarian)
+  - `ta` (Tamil)
+  - `no` (Norwegian)
+  - `th` (Thai)
+  - `ur` (Urdu)
+  - `hr` (Croatian)
+  - `bg` (Bulgarian)
+  - `lt` (Lithuanian)
+  - `la` (Latin)
+  - `mi` (Maori)
+  - `ml` (Malayalam)
+  - `cy` (Welsh)
+  - `sk` (Slovak)
+  - `te` (Telugu)
+  - `fa` (Persian)
+  - `lv` (Latvian)
+  - `bn` (Bengali)
+  - `sr` (Serbian)
+  - `az` (Azerbaijani)
+  - `sl` (Slovenian)
+  - `kn` (Kannada)
+  - `et` (Estonian)
+  - `mk` (Macedonian)
+  - `br` (Breton)
+  - `eu` (Basque)
+  - `is` (Icelandic)
+  - `hy` (Armenian)
+  - `ne` (Nepali)
+  - `mn` (Mongolian)
+  - `bs` (Bosnian)
+  - `kk` (Kazakh)
+  - `sq` (Albanian)
+  - `sw` (Swahili)
+  - `gl` (Galician)
+  - `mr` (Marathi)
+  - `pa` (Punjabi)
+  - `si` (Sinhala)
+  - `km` (Khmer)
+  - `sn` (Shona)
+  - `yo` (Yoruba)
+  - `so` (Somali)
+  - `af` (Afrikaans)
+  - `oc` (Occitan)
+  - `ka` (Georgian)
+  - `be` (Belarusian)
+  - `tg` (Tajik)
+  - `sd` (Sindhi)
+  - `gu` (Gujarati)
+  - `am` (Amharic)
+  - `yi` (Yiddish)
+  - `lo` (Lao)
+  - `uz` (Uzbek)
+  - `fo` (Faroese)
+  - `ht` (Haitian Creole)
+  - `ps` (Pashto)
+  - `tk` (Turkmen)
+  - `nn` (Nynorsk)
+  - `mt` (Maltese)
+  - `sa` (Sanskrit)
+  - `lb` (Luxembourgish)
+  - `my` (Myanmar)
+  - `bo` (Tibetan)
+  - `tl` (Tagalog)
+  - `mg` (Malagasy)
+  - `as` (Assamese)
+  - `tt` (Tatar)
+  - `haw` (Hawaiian)
+  - `ln` (Lingala)
+  - `ha` (Hausa)
+  - `ba` (Bashkir)
+  - `jw` (Javanese)
+  - `su` (Sundanese)
+  - `yue` (Cantonese)
+</Accordion>
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**timestamp_granularities:** `typing.Optional[typing.List[TimestampGranularity]]` — The timestamp granularities to populate for this transcription. Currently only `word` level timestamps are supported.
+
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Tts
 <details><summary><code>client.tts.<a href="src/cartesia/tts/client.py">bytes</a>(...)</code></summary>
 <dl>
