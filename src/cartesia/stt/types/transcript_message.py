@@ -32,7 +32,7 @@ class TranscriptMessage(UniversalBaseModel):
 
     language: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The detected or specified language of the input audio.
+    The specified language of the input audio.
     """
 
     words: typing.Optional[typing.List[TranscriptionWord]] = pydantic.Field(default=None)

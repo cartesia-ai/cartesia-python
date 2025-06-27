@@ -11,6 +11,7 @@ from .streaming_transcription_response import (
     StreamingTranscriptionResponse_Transcript,
 )
 from .stt_encoding import SttEncoding
+from .timestamp_granularity import TimestampGranularity
 from .transcript_message import TranscriptMessage
 from .transcription_response import TranscriptionResponse
 from .transcription_word import TranscriptionWord
@@ -25,6 +26,7 @@ __all__ = [
     "StreamingTranscriptionResponse_FlushDone",
     "StreamingTranscriptionResponse_Transcript",
     "SttEncoding",
+    "TimestampGranularity",
     "TranscriptMessage",
     "TranscriptionResponse",
     "TranscriptionWord",
