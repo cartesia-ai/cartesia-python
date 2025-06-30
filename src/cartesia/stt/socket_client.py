@@ -29,7 +29,7 @@ class SttClientWithWebsocket(SttClient):
         self,
         *,
         model: str = "ink-whisper",
-        language: Optional[str] = "en",
+        language: Optional[str] = "en", 
         encoding: SttEncoding = "pcm_s16le",
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
@@ -47,6 +47,12 @@ class SttClientWithWebsocket(SttClient):
 
         Returns:
             SttWebsocket: A connected WebSocket client for STT operations.
+            
+        Example:
+            >>> client = Cartesia(api_key="your-api-key")
+            >>> ws = client.stt.websocket()
+            >>> for result in ws.transcribe(audio_chunks):
+            ...     print(result["text"])
         """
         client_headers = self._client_wrapper.get_headers()
         ws = SttWebsocket(
@@ -64,51 +70,6 @@ class SttClientWithWebsocket(SttClient):
             max_silence_duration_secs=max_silence_duration_secs,
         )
         return ws
-
-    def transcribe_stream(
-        self,
-        audio_chunks: typing.Iterator[bytes],
-        *,
-        model: str = "ink-whisper",
-        language: Optional[str] = "en",
-        encoding: SttEncoding = "pcm_s16le",
-        sample_rate: int = 16000,
-        min_volume: Optional[float] = None,
-        max_silence_duration_secs: Optional[float] = None,
-    ) -> Generator[Dict[str, Any], None, None]:
-        """Transcribe audio chunks using WebSocket.
-
-        Args:
-            audio_chunks: Iterator of audio chunks as bytes
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data (required)
-            sample_rate: The sample rate of the audio in Hz (required)
-            min_volume: Volume threshold for voice activity detection (0.0-1.0)
-            max_silence_duration_secs: Maximum duration of silence before endpointing
-
-        Yields:
-            Dictionary containing transcription results, flush_done, done, or error messages
-
-        Example:
-            >>> client = Cartesia(api_key="your-api-key")
-            >>> ws = client.stt.websocket()
-            >>> for result in ws.transcribe(audio_chunks):
-            ...     print(result["text"])
-        """
-        ws = self.websocket(
-            model=model,
-            language=language,
-            encoding=encoding,
-            sample_rate=sample_rate,
-            min_volume=min_volume,
-            max_silence_duration_secs=max_silence_duration_secs,
-        )
-        try:
-            # Note: The websocket instance method is `transcribe`
-            yield from ws.transcribe(audio_chunks)
-        finally:
-            ws.close()
 
 
 class AsyncSttClientWithWebsocket(AsyncSttClient):
@@ -134,7 +95,7 @@ class AsyncSttClientWithWebsocket(AsyncSttClient):
         *,
         model: str = "ink-whisper",
         language: Optional[str] = "en",
-        encoding: SttEncoding = "pcm_s16le",
+        encoding: SttEncoding = "pcm_s16le", 
         sample_rate: int = 16000,
         min_volume: Optional[float] = None,
         max_silence_duration_secs: Optional[float] = None,
@@ -151,6 +112,12 @@ class AsyncSttClientWithWebsocket(AsyncSttClient):
 
         Returns:
             AsyncSttWebsocket: A connected async WebSocket client for STT operations.
+            
+        Example:
+            >>> client = AsyncCartesia(api_key="your-api-key")
+            >>> ws = await client.stt.websocket()
+            >>> async for result in ws.transcribe(audio_chunks):
+            ...     print(result["text"])
         """
         client_headers = self._client_wrapper.get_headers()
         ws = AsyncSttWebsocket(
@@ -168,50 +135,4 @@ class AsyncSttClientWithWebsocket(AsyncSttClient):
             min_volume=min_volume,
             max_silence_duration_secs=max_silence_duration_secs,
         )
-        return ws
-
-    async def transcribe_stream(
-        self,
-        audio_chunks: typing.AsyncIterator[bytes],
-        *,
-        model: str = "ink-whisper",
-        language: Optional[str] = "en",
-        encoding: SttEncoding = "pcm_s16le",
-        sample_rate: int = 16000,
-        min_volume: Optional[float] = None,
-        max_silence_duration_secs: Optional[float] = None,
-    ) -> typing.AsyncGenerator[Dict[str, Any], None]:
-        """Transcribe audio chunks using async WebSocket.
-
-        Args:
-            audio_chunks: Async iterator of audio chunks as bytes
-            model: ID of the model to use for transcription
-            language: The language of the input audio in ISO-639-1 format
-            encoding: The encoding format of the audio data (required)
-            sample_rate: The sample rate of the audio in Hz (required)
-            min_volume: Volume threshold for voice activity detection (0.0-1.0)
-            max_silence_duration_secs: Maximum duration of silence before endpointing
-
-        Yields:
-            Dictionary containing transcription results, flush_done, done, or error messages
-
-        Example:
-            >>> client = AsyncCartesia(api_key="your-api-key")
-            >>> ws = await client.stt.websocket()
-            >>> async for result in ws.transcribe(audio_chunks):
-            ...     print(result["text"])
-        """
-        ws = await self.websocket(
-            model=model,
-            language=language,
-            encoding=encoding,
-            sample_rate=sample_rate,
-            min_volume=min_volume,
-            max_silence_duration_secs=max_silence_duration_secs,
-        )
-        try:
-            # Note: The websocket instance method is `transcribe`
-            async for result in ws.transcribe(audio_chunks):
-                yield result
-        finally:
-            await ws.close() 
+        return ws 
