@@ -389,7 +389,6 @@ with open("path/to/audio.wav", "rb") as audio_file:
 
 # Access transcription results
 print(f"Transcribed text: {response.text}")
-print(f"Language detected: {response.language}")
 print(f"Audio duration: {response.duration:.2f} seconds")
 
 # Process word-level timestamps if requested
@@ -431,6 +430,8 @@ async def transcribe_file():
 
 asyncio.run(transcribe_file())
 ```
+
+> **Note:** Batch STT also supports OpenAI's audio transcriptions format for easy migration from OpenAI Whisper. See our [migration guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai) for details.
 
 ## Voices
 
