@@ -366,6 +366,73 @@ if __name__ == "__main__":
     asyncio.run(streaming_stt_example())
 ```
 
+## Batch Speech-to-Text (STT)
+
+For processing pre-recorded audio files, use the batch STT API which supports uploading complete audio files for transcription:
+
+```python
+from cartesia import Cartesia
+import os
+
+client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+
+# Transcribe an audio file with word-level timestamps
+with open("path/to/audio.wav", "rb") as audio_file:
+    response = client.stt.transcribe(
+        file=audio_file,                    # Audio file to transcribe
+        model="ink-whisper",                # STT model (required)
+        language="en",                      # Language of the audio (optional)
+        timestamp_granularities=["word"],   # Include word-level timestamps (optional)
+        encoding="pcm_s16le",               # Audio encoding (optional)
+        sample_rate=16000,                  # Audio sample rate (optional)
+    )
+
+# Access transcription results
+print(f"Transcribed text: {response.text}")
+print(f"Audio duration: {response.duration:.2f} seconds")
+
+# Process word-level timestamps if requested
+if response.words:
+    print("\nWord-level timestamps:")
+    for word_info in response.words:
+        word = word_info.word
+        start = word_info.start
+        end = word_info.end
+        print(f"  '{word}': {start:.2f}s - {end:.2f}s")
+```
+
+### Async Batch STT
+
+```python
+import asyncio
+from cartesia import AsyncCartesia
+import os
+
+async def transcribe_file():
+    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
+    
+    with open("path/to/audio.wav", "rb") as audio_file:
+        response = await client.stt.transcribe(
+            file=audio_file,
+            model="ink-whisper",
+            language="en",
+            timestamp_granularities=["word"],
+        )
+    
+    print(f"Transcribed text: {response.text}")
+    
+    # Process word timestamps
+    if response.words:
+        for word_info in response.words:
+            print(f"'{word_info.word}': {word_info.start:.2f}s - {word_info.end:.2f}s")
+    
+    await client.close()
+
+asyncio.run(transcribe_file())
+```
+
+> **Note:** Batch STT also supports OpenAI's audio transcriptions format for easy migration from OpenAI Whisper. See our [migration guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai) for details.
+
 ## Voices
 
 List all available Voices with `client.voices.list`, which returns an iterable that automatically handles pagination:

@@ -31,7 +31,7 @@ class TranscriptMessageParams(typing_extensions.TypedDict):
 
     language: typing_extensions.NotRequired[str]
     """
-    The detected or specified language of the input audio.
+    The specified language of the input audio.
     """
 
     words: typing_extensions.NotRequired[typing.Sequence[TranscriptionWordParams]]

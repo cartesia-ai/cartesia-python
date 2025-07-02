@@ -15,7 +15,7 @@ class TranscriptionResponse(UniversalBaseModel):
 
     language: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The detected or specified language of the input audio.
+    The specified language of the input audio.
     """
 
     duration: typing.Optional[float] = pydantic.Field(default=None)
@@ -25,7 +25,7 @@ class TranscriptionResponse(UniversalBaseModel):
 
     words: typing.Optional[typing.List[TranscriptionWord]] = pydantic.Field(default=None)
     """
-    Word-level timestamps for batch transcription responses.
+    Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities[]`.
     """
 
     if IS_PYDANTIC_V2:
