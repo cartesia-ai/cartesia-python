@@ -3,10 +3,10 @@
 from __future__ import annotations
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
-from .flush_id import FlushId
 from .context_id import ContextId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from .flush_id import FlushId
 from .word_timestamps import WordTimestamps
 from .phoneme_timestamps import PhonemeTimestamps
 
@@ -15,7 +15,6 @@ class WebSocketResponse_Chunk(UniversalBaseModel):
     type: typing.Literal["chunk"] = "chunk"
     data: str
     step_time: float
-    flush_id: typing.Optional[FlushId] = None
     context_id: typing.Optional[ContextId] = None
     status_code: int
     done: bool

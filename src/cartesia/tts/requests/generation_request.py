@@ -55,15 +55,15 @@ class GenerationRequestParams(typing_extensions.TypedDict):
 
     add_timestamps: typing_extensions.NotRequired[bool]
     """
-    Whether to return word-level timestamps.
+    Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
     """
 
     add_phoneme_timestamps: typing_extensions.NotRequired[bool]
     """
-    Whether to return phoneme-level timestamps.
+    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
-    use_original_timestamps: typing_extensions.NotRequired[bool]
+    use_normalized_timestamps: typing_extensions.NotRequired[bool]
     """
-    Whether to use the original transcript for timestamps.
+    Whether to use normalized timestamps (True) or original timestamps (False).
     """

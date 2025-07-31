@@ -24,5 +24,5 @@ class TranscriptionResponseParams(typing_extensions.TypedDict):
 
     words: typing_extensions.NotRequired[typing.Sequence[TranscriptionWordParams]]
     """
-    Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities`.
+    Word-level timestamps showing the start and end time of each word. Only included when `[word]` is passed into `timestamp_granularities[]`.
     """

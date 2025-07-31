@@ -22,7 +22,7 @@ class AuthClient:
     def access_token(
         self,
         *,
-        grants: TokenGrantParams,
+        grants: typing.Optional[TokenGrantParams] = OMIT,
         expires_in: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> TokenResponse:
@@ -31,8 +31,8 @@ class AuthClient:
 
         Parameters
         ----------
-        grants : TokenGrantParams
-            The permissions to be granted via the token.
+        grants : typing.Optional[TokenGrantParams]
+            The permissions to be granted via the token. Both TTS and STT grants are optional - specify only the capabilities you need.
 
         expires_in : typing.Optional[int]
             The number of seconds the token will be valid for since the time of generation. The maximum is 1 hour (3600 seconds).
@@ -52,7 +52,7 @@ class AuthClient:
             api_key="YOUR_API_KEY",
         )
         client.auth.access_token(
-            grants={"tts": True},
+            grants={"tts": True, "stt": True},
             expires_in=60,
         )
         """
@@ -90,7 +90,7 @@ class AsyncAuthClient:
     async def access_token(
         self,
         *,
-        grants: TokenGrantParams,
+        grants: typing.Optional[TokenGrantParams] = OMIT,
         expires_in: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> TokenResponse:
@@ -99,8 +99,8 @@ class AsyncAuthClient:
 
         Parameters
         ----------
-        grants : TokenGrantParams
-            The permissions to be granted via the token.
+        grants : typing.Optional[TokenGrantParams]
+            The permissions to be granted via the token. Both TTS and STT grants are optional - specify only the capabilities you need.
 
         expires_in : typing.Optional[int]
             The number of seconds the token will be valid for since the time of generation. The maximum is 1 hour (3600 seconds).
@@ -125,7 +125,7 @@ class AsyncAuthClient:
 
         async def main() -> None:
             await client.auth.access_token(
-                grants={"tts": True},
+                grants={"tts": True, "stt": True},
                 expires_in=60,
             )
 

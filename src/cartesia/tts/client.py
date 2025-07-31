@@ -10,6 +10,8 @@ from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
+from .requests.sse_output_format import SseOutputFormatParams
+from .types.context_id import ContextId
 from .types.web_socket_response import WebSocketResponse
 import httpx_sse
 from ..core.pydantic_utilities import parse_obj_as
@@ -119,10 +121,14 @@ class TtsClient:
         model_id: str,
         transcript: str,
         voice: TtsRequestVoiceSpecifierParams,
-        output_format: OutputFormatParams,
+        output_format: SseOutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        add_timestamps: typing.Optional[bool] = OMIT,
+        add_phoneme_timestamps: typing.Optional[bool] = OMIT,
+        use_normalized_timestamps: typing.Optional[bool] = OMIT,
+        context_id: typing.Optional[ContextId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[WebSocketResponse]:
         """
@@ -135,7 +141,7 @@ class TtsClient:
 
         voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormatParams
+        output_format : SseOutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -144,6 +150,18 @@ class TtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        add_timestamps : typing.Optional[bool]
+            Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
+
+        add_phoneme_timestamps : typing.Optional[bool]
+            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+
+        use_normalized_timestamps : typing.Optional[bool]
+            Whether to use normalized timestamps (True) or original timestamps (False).
+
+        context_id : typing.Optional[ContextId]
+            Optional context ID for this request.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -165,9 +183,9 @@ class TtsClient:
             voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
             language="en",
             output_format={
+                "container": "raw",
                 "sample_rate": 44100,
                 "encoding": "pcm_f32le",
-                "container": "raw",
             },
         )
         for chunk in response:
@@ -184,10 +202,14 @@ class TtsClient:
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormatParams, direction="write"
+                    object_=output_format, annotation=SseOutputFormatParams, direction="write"
                 ),
                 "duration": duration,
                 "speed": speed,
+                "add_timestamps": add_timestamps,
+                "add_phoneme_timestamps": add_phoneme_timestamps,
+                "use_normalized_timestamps": use_normalized_timestamps,
+                "context_id": context_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -321,10 +343,14 @@ class AsyncTtsClient:
         model_id: str,
         transcript: str,
         voice: TtsRequestVoiceSpecifierParams,
-        output_format: OutputFormatParams,
+        output_format: SseOutputFormatParams,
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        add_timestamps: typing.Optional[bool] = OMIT,
+        add_phoneme_timestamps: typing.Optional[bool] = OMIT,
+        use_normalized_timestamps: typing.Optional[bool] = OMIT,
+        context_id: typing.Optional[ContextId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[WebSocketResponse]:
         """
@@ -337,7 +363,7 @@ class AsyncTtsClient:
 
         voice : TtsRequestVoiceSpecifierParams
 
-        output_format : OutputFormatParams
+        output_format : SseOutputFormatParams
 
         language : typing.Optional[SupportedLanguage]
 
@@ -346,6 +372,18 @@ class AsyncTtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        add_timestamps : typing.Optional[bool]
+            Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
+
+        add_phoneme_timestamps : typing.Optional[bool]
+            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+
+        use_normalized_timestamps : typing.Optional[bool]
+            Whether to use normalized timestamps (True) or original timestamps (False).
+
+        context_id : typing.Optional[ContextId]
+            Optional context ID for this request.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -372,9 +410,9 @@ class AsyncTtsClient:
                 voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
                 language="en",
                 output_format={
+                    "container": "raw",
                     "sample_rate": 44100,
                     "encoding": "pcm_f32le",
-                    "container": "raw",
                 },
             )
             async for chunk in response:
@@ -394,10 +432,14 @@ class AsyncTtsClient:
                 ),
                 "language": language,
                 "output_format": convert_and_respect_annotation_metadata(
-                    object_=output_format, annotation=OutputFormatParams, direction="write"
+                    object_=output_format, annotation=SseOutputFormatParams, direction="write"
                 ),
                 "duration": duration,
                 "speed": speed,
+                "add_timestamps": add_timestamps,
+                "add_phoneme_timestamps": add_phoneme_timestamps,
+                "use_normalized_timestamps": use_normalized_timestamps,
+                "context_id": context_id,
             },
             request_options=request_options,
             omit=OMIT,

@@ -80,7 +80,7 @@ client = Cartesia(
     api_key="YOUR_API_KEY",
 )
 client.auth.access_token(
-    grants={"tts": True},
+    grants={"stt": True},
     expires_in=60,
 )
 
@@ -98,7 +98,7 @@ client.auth.access_token(
 <dl>
 <dd>
 
-**grants:** `TokenGrantParams` — The permissions to be granted via the token.
+**grants:** `typing.Optional[TokenGrantParams]` — The permissions to be granted via the token. Both TTS and STT grants are optional - specify only the capabilities you need.
     
 </dd>
 </dl>
@@ -710,10 +710,11 @@ response = client.tts.sse(
     voice={"mode": "id", "id": "694f9389-aac1-45b6-b726-9d9369183238"},
     language="en",
     output_format={
+        "container": "raw",
         "sample_rate": 44100,
         "encoding": "pcm_f32le",
-        "container": "raw",
     },
+    add_timestamps=True,
 )
 for chunk in response:
     yield chunk
@@ -756,7 +757,7 @@ for chunk in response:
 <dl>
 <dd>
 
-**output_format:** `OutputFormatParams` 
+**output_format:** `SseOutputFormatParams` 
     
 </dd>
 </dl>
@@ -784,6 +785,38 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dd>
 
 **speed:** `typing.Optional[ModelSpeed]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**add_timestamps:** `typing.Optional[bool]` — Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**add_phoneme_timestamps:** `typing.Optional[bool]` — Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**use_normalized_timestamps:** `typing.Optional[bool]` — Whether to use normalized timestamps (True) or original timestamps (False).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**context_id:** `typing.Optional[ContextId]` — Optional context ID for this request.
     
 </dd>
 </dl>

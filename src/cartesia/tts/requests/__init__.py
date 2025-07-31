@@ -8,10 +8,12 @@ from .output_format import OutputFormatParams, OutputFormat_Mp3Params, OutputFor
 from .phoneme_timestamps import PhonemeTimestampsParams
 from .raw_output_format import RawOutputFormatParams
 from .speed import SpeedParams
+from .sse_output_format import SseOutputFormatParams
 from .tts_request import TtsRequestParams
 from .tts_request_embedding_specifier import TtsRequestEmbeddingSpecifierParams
 from .tts_request_id_specifier import TtsRequestIdSpecifierParams
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
+from .ttssse_request import TtssseRequestParams
 from .wav_output_format import WavOutputFormatParams
 from .web_socket_base_response import WebSocketBaseResponseParams
 from .web_socket_chunk_response import WebSocketChunkResponseParams
@@ -48,10 +50,12 @@ __all__ = [
     "PhonemeTimestampsParams",
     "RawOutputFormatParams",
     "SpeedParams",
+    "SseOutputFormatParams",
     "TtsRequestEmbeddingSpecifierParams",
     "TtsRequestIdSpecifierParams",
     "TtsRequestParams",
     "TtsRequestVoiceSpecifierParams",
+    "TtssseRequestParams",
     "WavOutputFormatParams",
     "WebSocketBaseResponseParams",
     "WebSocketChunkResponseParams",

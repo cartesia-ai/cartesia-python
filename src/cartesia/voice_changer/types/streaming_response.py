@@ -3,7 +3,6 @@
 from __future__ import annotations
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
-from ...tts.types.flush_id import FlushId
 from ...tts.types.context_id import ContextId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
@@ -13,7 +12,6 @@ class StreamingResponse_Chunk(UniversalBaseModel):
     type: typing.Literal["chunk"] = "chunk"
     data: str
     step_time: float
-    flush_id: typing.Optional[FlushId] = None
     context_id: typing.Optional[ContextId] = None
     status_code: int
     done: bool

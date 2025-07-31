@@ -2,26 +2,32 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-import typing
-from .output_format import OutputFormat
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
-import typing_extensions
-from ...core.serialization import FieldMetadata
+import typing
+from .supported_language import SupportedLanguage
+from .sse_output_format import SseOutputFormat
 from .model_speed import ModelSpeed
+from .context_id import ContextId
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
-class WebSocketTtsRequest(UniversalBaseModel):
+class TtssseRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
     The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
-    output_format: typing.Optional[OutputFormat] = None
-    transcript: typing.Optional[str] = None
+    transcript: str
     voice: TtsRequestVoiceSpecifier
-    duration: typing.Optional[int] = None
-    language: typing.Optional[str] = None
+    language: typing.Optional[SupportedLanguage] = None
+    output_format: SseOutputFormat
+    duration: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    The maximum duration of the audio in seconds. You do not usually need to specify this.
+    If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
+    """
+
+    speed: typing.Optional[ModelSpeed] = None
     add_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
@@ -32,11 +38,15 @@ class WebSocketTtsRequest(UniversalBaseModel):
     Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
-    use_normalized_timestamps: typing.Optional[bool] = None
-    continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
-    context_id: typing.Optional[str] = None
-    max_buffer_delay_ms: typing.Optional[int] = None
-    speed: typing.Optional[ModelSpeed] = None
+    use_normalized_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether to use normalized timestamps (True) or original timestamps (False).
+    """
+
+    context_id: typing.Optional[ContextId] = pydantic.Field(default=None)
+    """
+    Optional context ID for this request.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

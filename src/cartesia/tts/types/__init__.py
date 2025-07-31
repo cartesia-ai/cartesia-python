@@ -15,11 +15,13 @@ from .phoneme_timestamps import PhonemeTimestamps
 from .raw_encoding import RawEncoding
 from .raw_output_format import RawOutputFormat
 from .speed import Speed
+from .sse_output_format import SseOutputFormat
 from .supported_language import SupportedLanguage
 from .tts_request import TtsRequest
 from .tts_request_embedding_specifier import TtsRequestEmbeddingSpecifier
 from .tts_request_id_specifier import TtsRequestIdSpecifier
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
+from .ttssse_request import TtssseRequest
 from .wav_output_format import WavOutputFormat
 from .web_socket_base_response import WebSocketBaseResponse
 from .web_socket_chunk_response import WebSocketChunkResponse
@@ -63,11 +65,13 @@ __all__ = [
     "RawEncoding",
     "RawOutputFormat",
     "Speed",
+    "SseOutputFormat",
     "SupportedLanguage",
     "TtsRequest",
     "TtsRequestEmbeddingSpecifier",
     "TtsRequestIdSpecifier",
     "TtsRequestVoiceSpecifier",
+    "TtssseRequest",
     "WavOutputFormat",
     "WebSocketBaseResponse",
     "WebSocketChunkResponse",
