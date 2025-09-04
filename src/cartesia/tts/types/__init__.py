@@ -4,7 +4,9 @@ from .cancel_context_request import CancelContextRequest
 from .context_id import ContextId
 from .controls import Controls
 from .emotion import Emotion
+from .experimental_model_controls import ExperimentalModelControls
 from .flush_id import FlushId
+from .generation_config import GenerationConfig
 from .generation_request import GenerationRequest
 from .model_speed import ModelSpeed
 from .mp_3_output_format import Mp3OutputFormat
@@ -51,7 +53,9 @@ __all__ = [
     "ContextId",
     "Controls",
     "Emotion",
+    "ExperimentalModelControls",
     "FlushId",
+    "GenerationConfig",
     "GenerationRequest",
     "ModelSpeed",
     "Mp3OutputFormat",

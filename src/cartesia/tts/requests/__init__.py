@@ -2,6 +2,8 @@
 
 from .cancel_context_request import CancelContextRequestParams
 from .controls import ControlsParams
+from .experimental_model_controls import ExperimentalModelControlsParams
+from .generation_config import GenerationConfigParams
 from .generation_request import GenerationRequestParams
 from .mp_3_output_format import Mp3OutputFormatParams
 from .output_format import OutputFormatParams, OutputFormat_Mp3Params, OutputFormat_RawParams, OutputFormat_WavParams
@@ -41,6 +43,8 @@ from .word_timestamps import WordTimestampsParams
 __all__ = [
     "CancelContextRequestParams",
     "ControlsParams",
+    "ExperimentalModelControlsParams",
+    "GenerationConfigParams",
     "GenerationRequestParams",
     "Mp3OutputFormatParams",
     "OutputFormatParams",

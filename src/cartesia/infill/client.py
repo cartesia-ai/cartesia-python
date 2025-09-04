@@ -83,16 +83,13 @@ class InfillClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         voice_experimental_controls_speed : typing.Optional[Speed]
             Either a number between -1.0 and 1.0 or a natural language description of speed.
 
             If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
 
         voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
             An array of emotion:level tags.
@@ -100,7 +97,6 @@ class InfillClient:
             Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
 
             Supported levels are: lowest, low, (omit), high, highest.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -230,16 +226,13 @@ class AsyncInfillClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         voice_experimental_controls_speed : typing.Optional[Speed]
             Either a number between -1.0 and 1.0 or a natural language description of speed.
 
             If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
 
         voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
             An array of emotion:level tags.
@@ -247,7 +240,6 @@ class AsyncInfillClient:
             Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
 
             Supported levels are: lowest, low, (omit), high, highest.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.

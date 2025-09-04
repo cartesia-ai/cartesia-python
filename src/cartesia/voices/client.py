@@ -168,26 +168,20 @@ class VoicesClient:
         name : str
             The name of the voice.
 
-
         language : SupportedLanguage
             The language of the voice.
-
 
         mode : CloneMode
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
-
         description : typing.Optional[str]
             A description for the voice.
-
 
         enhance : typing.Optional[bool]
             Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
 
-
         base_voice_id : typing.Optional[VoiceId]
             Optional base voice ID that the cloned voice is derived from.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -736,26 +730,20 @@ class AsyncVoicesClient:
         name : str
             The name of the voice.
 
-
         language : SupportedLanguage
             The language of the voice.
-
 
         mode : CloneMode
             Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
 
-
         description : typing.Optional[str]
             A description for the voice.
-
 
         enhance : typing.Optional[bool]
             Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
 
-
         base_voice_id : typing.Optional[VoiceId]
             Optional base voice ID that the cloned voice is derived from.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
