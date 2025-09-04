@@ -6,13 +6,14 @@ import typing_extensions
 from ..types.supported_language import SupportedLanguage
 from .sse_output_format import SseOutputFormatParams
 from ..types.model_speed import ModelSpeed
+import typing
 from ..types.context_id import ContextId
 
 
 class TtssseRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
     transcript: str
@@ -33,12 +34,17 @@ class TtssseRequestParams(typing_extensions.TypedDict):
 
     add_phoneme_timestamps: typing_extensions.NotRequired[bool]
     """
-    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
     use_normalized_timestamps: typing_extensions.NotRequired[bool]
     """
     Whether to use normalized timestamps (True) or original timestamps (False).
+    """
+
+    pronunciation_dict_ids: typing_extensions.NotRequired[typing.Sequence[str]]
+    """
+    A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
     """
 
     context_id: typing_extensions.NotRequired[ContextId]

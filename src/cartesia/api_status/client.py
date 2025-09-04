@@ -30,7 +30,7 @@ class ApiStatusClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.api_status.get()
         """
@@ -75,7 +75,7 @@ class AsyncApiStatusClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 

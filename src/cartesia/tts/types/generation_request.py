@@ -2,8 +2,8 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-import typing
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
+import typing
 from .supported_language import SupportedLanguage
 from .web_socket_raw_output_format import WebSocketRawOutputFormat
 from .model_speed import ModelSpeed
@@ -16,12 +16,12 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 class GenerationRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
-    transcript: typing.Optional[typing.Any] = pydantic.Field(default=None)
+    transcript: str = pydantic.Field()
     """
-    The transcript to generate speech for. This can be a string or an iterator over strings.
+    The transcript to generate speech for.
     """
 
     voice: TtsRequestVoiceSpecifier
@@ -70,6 +70,11 @@ class GenerationRequest(UniversalBaseModel):
     use_normalized_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to use normalized timestamps (True) or original timestamps (False).
+    """
+
+    pronunciation_dict_ids: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
     """
 
     if IS_PYDANTIC_V2:

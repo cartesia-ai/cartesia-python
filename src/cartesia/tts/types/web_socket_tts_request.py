@@ -14,7 +14,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 class WebSocketTtsRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
     output_format: typing.Optional[OutputFormat] = None
@@ -29,10 +29,15 @@ class WebSocketTtsRequest(UniversalBaseModel):
 
     add_phoneme_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
     use_normalized_timestamps: typing.Optional[bool] = None
+    pronunciation_dict_ids: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
+    """
+
     continue_: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="continue")] = None
     context_id: typing.Optional[str] = None
     max_buffer_delay_ms: typing.Optional[int] = None

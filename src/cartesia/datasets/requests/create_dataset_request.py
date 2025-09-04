@@ -4,4 +4,16 @@ import typing_extensions
 
 
 class CreateDatasetRequestParams(typing_extensions.TypedDict):
+    """
+    Request to create a new dataset
+    """
+
     name: str
+    """
+    Name for the new dataset
+    """
+
+    description: str
+    """
+    Optional description for the dataset
+    """

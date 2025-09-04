@@ -2,10 +2,8 @@
 
 import typing_extensions
 from ..types.raw_encoding import RawEncoding
-import typing_extensions
 
 
 class RawOutputFormatParams(typing_extensions.TypedDict):
     encoding: RawEncoding
     sample_rate: int
-    bit_rate: typing_extensions.NotRequired[int]

@@ -51,10 +51,8 @@ class VoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -68,7 +66,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.voice_changer.bytes(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -131,10 +129,8 @@ class VoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -148,7 +144,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         response = client.voice_changer.sse(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -232,10 +228,8 @@ class AsyncVoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -251,7 +245,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 
@@ -320,10 +314,8 @@ class AsyncVoiceChangerClient:
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
 
-
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -339,7 +331,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 

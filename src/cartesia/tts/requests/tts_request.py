@@ -6,12 +6,14 @@ import typing_extensions
 from ..types.supported_language import SupportedLanguage
 from .output_format import OutputFormatParams
 from ..types.model_speed import ModelSpeed
+import typing
+from .generation_config import GenerationConfigParams
 
 
 class TtsRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
     transcript: str
@@ -25,3 +27,14 @@ class TtsRequestParams(typing_extensions.TypedDict):
     """
 
     speed: typing_extensions.NotRequired[ModelSpeed]
+    save: typing_extensions.NotRequired[bool]
+    """
+    Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
+    """
+
+    pronunciation_dict_ids: typing_extensions.NotRequired[typing.Sequence[str]]
+    """
+    A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
+    """
+
+    generation_config: typing_extensions.NotRequired[GenerationConfigParams]

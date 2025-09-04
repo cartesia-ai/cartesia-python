@@ -6,6 +6,7 @@ from .requests.tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 from .requests.output_format import OutputFormatParams
 from .types.supported_language import SupportedLanguage
 from .types.model_speed import ModelSpeed
+from .requests.generation_config import GenerationConfigParams
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from json.decoder import JSONDecodeError
@@ -36,13 +37,16 @@ class TtsClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        save: typing.Optional[bool] = OMIT,
+        pronunciation_dict_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
         Parameters
         ----------
         model_id : str
-            The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+            The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
 
         transcript : str
 
@@ -58,6 +62,14 @@ class TtsClient:
 
         speed : typing.Optional[ModelSpeed]
 
+        save : typing.Optional[bool]
+            Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
+
+        pronunciation_dict_ids : typing.Optional[typing.Sequence[str]]
+            A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
+
+        generation_config : typing.Optional[GenerationConfigParams]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -70,7 +82,7 @@ class TtsClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.tts.bytes(
             model_id="sonic-2",
@@ -99,6 +111,11 @@ class TtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "save": save,
+                "pronunciation_dict_ids": pronunciation_dict_ids,
+                "generation_config": convert_and_respect_annotation_metadata(
+                    object_=generation_config, annotation=GenerationConfigParams, direction="write"
+                ),
             },
             request_options=request_options,
             omit=OMIT,
@@ -128,6 +145,7 @@ class TtsClient:
         add_timestamps: typing.Optional[bool] = OMIT,
         add_phoneme_timestamps: typing.Optional[bool] = OMIT,
         use_normalized_timestamps: typing.Optional[bool] = OMIT,
+        pronunciation_dict_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         context_id: typing.Optional[ContextId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[WebSocketResponse]:
@@ -135,7 +153,7 @@ class TtsClient:
         Parameters
         ----------
         model_id : str
-            The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+            The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
 
         transcript : str
 
@@ -155,10 +173,13 @@ class TtsClient:
             Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
 
         add_phoneme_timestamps : typing.Optional[bool]
-            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
 
         use_normalized_timestamps : typing.Optional[bool]
             Whether to use normalized timestamps (True) or original timestamps (False).
+
+        pronunciation_dict_ids : typing.Optional[typing.Sequence[str]]
+            A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
 
         context_id : typing.Optional[ContextId]
             Optional context ID for this request.
@@ -175,7 +196,7 @@ class TtsClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         response = client.tts.sse(
             model_id="sonic-2",
@@ -209,6 +230,7 @@ class TtsClient:
                 "add_timestamps": add_timestamps,
                 "add_phoneme_timestamps": add_phoneme_timestamps,
                 "use_normalized_timestamps": use_normalized_timestamps,
+                "pronunciation_dict_ids": pronunciation_dict_ids,
                 "context_id": context_id,
             },
             request_options=request_options,
@@ -250,13 +272,16 @@ class AsyncTtsClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        save: typing.Optional[bool] = OMIT,
+        pronunciation_dict_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
         Parameters
         ----------
         model_id : str
-            The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+            The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
 
         transcript : str
 
@@ -272,6 +297,14 @@ class AsyncTtsClient:
 
         speed : typing.Optional[ModelSpeed]
 
+        save : typing.Optional[bool]
+            Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
+
+        pronunciation_dict_ids : typing.Optional[typing.Sequence[str]]
+            A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
+
+        generation_config : typing.Optional[GenerationConfigParams]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -286,7 +319,7 @@ class AsyncTtsClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 
@@ -321,6 +354,11 @@ class AsyncTtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "save": save,
+                "pronunciation_dict_ids": pronunciation_dict_ids,
+                "generation_config": convert_and_respect_annotation_metadata(
+                    object_=generation_config, annotation=GenerationConfigParams, direction="write"
+                ),
             },
             request_options=request_options,
             omit=OMIT,
@@ -350,6 +388,7 @@ class AsyncTtsClient:
         add_timestamps: typing.Optional[bool] = OMIT,
         add_phoneme_timestamps: typing.Optional[bool] = OMIT,
         use_normalized_timestamps: typing.Optional[bool] = OMIT,
+        pronunciation_dict_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         context_id: typing.Optional[ContextId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[WebSocketResponse]:
@@ -357,7 +396,7 @@ class AsyncTtsClient:
         Parameters
         ----------
         model_id : str
-            The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+            The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
 
         transcript : str
 
@@ -377,10 +416,13 @@ class AsyncTtsClient:
             Whether to return word-level timestamps. If `false` (default), no word timestamps will be produced at all. If `true`, the server will return timestamp events containing word-level timing information.
 
         add_phoneme_timestamps : typing.Optional[bool]
-            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
+            Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
 
         use_normalized_timestamps : typing.Optional[bool]
             Whether to use normalized timestamps (True) or original timestamps (False).
+
+        pronunciation_dict_ids : typing.Optional[typing.Sequence[str]]
+            A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
 
         context_id : typing.Optional[ContextId]
             Optional context ID for this request.
@@ -399,7 +441,7 @@ class AsyncTtsClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 
@@ -439,6 +481,7 @@ class AsyncTtsClient:
                 "add_timestamps": add_timestamps,
                 "add_phoneme_timestamps": add_phoneme_timestamps,
                 "use_normalized_timestamps": use_normalized_timestamps,
+                "pronunciation_dict_ids": pronunciation_dict_ids,
                 "context_id": context_id,
             },
             request_options=request_options,

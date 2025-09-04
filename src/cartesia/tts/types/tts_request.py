@@ -7,13 +7,14 @@ import typing
 from .supported_language import SupportedLanguage
 from .output_format import OutputFormat
 from .model_speed import ModelSpeed
+from .generation_config import GenerationConfig
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class TtsRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
     transcript: str
@@ -27,6 +28,17 @@ class TtsRequest(UniversalBaseModel):
     """
 
     speed: typing.Optional[ModelSpeed] = None
+    save: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
+    """
+
+    pronunciation_dict_ids: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
+    """
+    A list of pronunciation dict IDs to use for the generation. This will be applied in addition to the pinned pronunciation dict, which will be treated as the first element of the list. If there are conflicts with dict items, the latest dict will take precedence.
+    """
+
+    generation_config: typing.Optional[GenerationConfig] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

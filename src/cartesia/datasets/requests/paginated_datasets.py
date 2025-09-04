@@ -6,5 +6,16 @@ from .dataset import DatasetParams
 
 
 class PaginatedDatasetsParams(typing_extensions.TypedDict):
+    """
+    Paginated list of datasets
+    """
+
     data: typing.Sequence[DatasetParams]
+    """
+    List of dataset objects
+    """
+
     has_more: bool
+    """
+    Whether there are more datasets available
+    """
