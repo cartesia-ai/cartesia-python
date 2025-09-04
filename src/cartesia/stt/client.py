@@ -54,7 +54,6 @@ class SttClient:
         model : str
             ID of the model to use for transcription. Use `ink-whisper` for the latest Cartesia Whisper model.
 
-
         encoding : typing.Optional[SttEncoding]
             The encoding format to process the audio as. If not specified, the audio file will be decoded automatically.
 
@@ -175,10 +174,8 @@ class SttClient:
               - `yue` (Cantonese)
             </Accordion>
 
-
         timestamp_granularities : typing.Optional[typing.List[TimestampGranularity]]
             The timestamp granularities to populate for this transcription. Currently only `word` level timestamps are supported.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -270,7 +267,6 @@ class AsyncSttClient:
         model : str
             ID of the model to use for transcription. Use `ink-whisper` for the latest Cartesia Whisper model.
 
-
         encoding : typing.Optional[SttEncoding]
             The encoding format to process the audio as. If not specified, the audio file will be decoded automatically.
 
@@ -391,10 +387,8 @@ class AsyncSttClient:
               - `yue` (Cantonese)
             </Accordion>
 
-
         timestamp_granularities : typing.Optional[typing.List[TimestampGranularity]]
             The timestamp granularities to populate for this transcription. Currently only `word` level timestamps are supported.
-
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

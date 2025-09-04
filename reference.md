@@ -268,7 +268,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -277,7 +276,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -290,7 +288,6 @@ core.File` — See core.File for more documentation
 Either a number between -1.0 and 1.0 or a natural language description of speed.
 
 If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
     
 </dd>
 </dl>
@@ -305,7 +302,6 @@ An array of emotion:level tags.
 Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
 
 Supported levels are: lowest, low, (omit), high, highest.
-
     
 </dd>
 </dl>
@@ -401,7 +397,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **model:** `str` — ID of the model to use for transcription. Use `ink-whisper` for the latest Cartesia Whisper model.
-
     
 </dd>
 </dl>
@@ -541,7 +536,6 @@ The language of the input audio in ISO-639-1 format. Defaults to `en`.
   - `su` (Sundanese)
   - `yue` (Cantonese)
 </Accordion>
-
     
 </dd>
 </dl>
@@ -550,7 +544,6 @@ The language of the input audio in ISO-639-1 format. Defaults to `en`.
 <dd>
 
 **timestamp_granularities:** `typing.Optional[typing.List[TimestampGranularity]]` — The timestamp granularities to populate for this transcription. Currently only `word` level timestamps are supported.
-
     
 </dd>
 </dl>
@@ -667,6 +660,14 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dd>
 
 **speed:** `typing.Optional[ModelSpeed]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**generation_config:** `typing.Optional[GenerationConfigParams]` 
     
 </dd>
 </dl>
@@ -927,7 +928,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -936,7 +936,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -1032,7 +1031,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_encoding:** `typing.Optional[RawEncoding]` — Required for `raw` and `wav` containers.
-
     
 </dd>
 </dl>
@@ -1041,7 +1039,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **output_format_bit_rate:** `typing.Optional[int]` — Required for `mp3` containers.
-
     
 </dd>
 </dl>
@@ -1247,7 +1244,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **name:** `str` — The name of the voice.
-
     
 </dd>
 </dl>
@@ -1256,7 +1252,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **language:** `SupportedLanguage` — The language of the voice.
-
     
 </dd>
 </dl>
@@ -1265,7 +1260,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **mode:** `CloneMode` — Tradeoff between similarity and stability. Similarity clones sound more like the source clip, but may reproduce background noise. Stability clones always sound like a studio recording, but may not sound as similar to the source clip.
-
     
 </dd>
 </dl>
@@ -1274,7 +1268,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **description:** `typing.Optional[str]` — A description for the voice.
-
     
 </dd>
 </dl>
@@ -1283,7 +1276,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **enhance:** `typing.Optional[bool]` — Whether to apply AI enhancements to the clip to reduce background noise. This leads to cleaner generated speech at the cost of reduced similarity to the source clip.
-
     
 </dd>
 </dl>
@@ -1292,7 +1284,6 @@ core.File` — See core.File for more documentation
 <dd>
 
 **base_voice_id:** `typing.Optional[VoiceId]` — Optional base voice ID that the cloned voice is derived from.
-
     
 </dd>
 </dl>

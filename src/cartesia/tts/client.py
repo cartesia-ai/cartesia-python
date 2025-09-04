@@ -6,6 +6,7 @@ from .requests.tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 from .requests.output_format import OutputFormatParams
 from .types.supported_language import SupportedLanguage
 from .types.model_speed import ModelSpeed
+from .requests.generation_config import GenerationConfigParams
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from json.decoder import JSONDecodeError
@@ -36,6 +37,7 @@ class TtsClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
@@ -57,6 +59,8 @@ class TtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        generation_config : typing.Optional[GenerationConfigParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -99,6 +103,9 @@ class TtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "generation_config": convert_and_respect_annotation_metadata(
+                    object_=generation_config, annotation=GenerationConfigParams, direction="write"
+                ),
             },
             request_options=request_options,
             omit=OMIT,
@@ -250,6 +257,7 @@ class AsyncTtsClient:
         language: typing.Optional[SupportedLanguage] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
@@ -271,6 +279,8 @@ class AsyncTtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        generation_config : typing.Optional[GenerationConfigParams]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -321,6 +331,9 @@ class AsyncTtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "generation_config": convert_and_respect_annotation_metadata(
+                    object_=generation_config, annotation=GenerationConfigParams, direction="write"
+                ),
             },
             request_options=request_options,
             omit=OMIT,
