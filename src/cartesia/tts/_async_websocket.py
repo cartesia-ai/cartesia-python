@@ -50,7 +50,6 @@ class _AsyncTTSContext:
         self._context_id = context_id
         self._websocket = websocket
         self.timeout = timeout
-        self._error = None
 
     @property
     def context_id(self) -> str:
@@ -338,27 +337,28 @@ class AsyncTtsWebsocket(TtsWebsocket):
 
     async def close(self):
         """This method closes the websocket connection. *Highly* recommended to call this method when done."""
-        if self.websocket is not None and not self._is_websocket_closed():
-            await self.websocket.close()
-        if self._processing_task:
-            self._processing_task.cancel()
-            try:
-                self._processing_task = None
-            except asyncio.CancelledError:
-                pass
-            except TypeError as e:
-                # Ignore the error if the task is already canceled.
-                # For some reason we are getting None responses
-                # TODO: This needs to be fixed - we need to think about why we are getting None responses.
-                if "Received message 256:None" not in str(e):
-                    raise e
+        self._closing = True
+        try:
+            if self._processing_task:
+                self._processing_task.cancel()
+                try:
+                    await self._processing_task
+                except asyncio.CancelledError:
+                    pass
+                finally:
+                    self._processing_task = None
 
-        for context_id in list(self._context_queues.keys()):
-            self._remove_context(context_id)
+            if self.websocket is not None and not self._is_websocket_closed():
+                await self.websocket.close()
 
-        self._context_queues.clear()
-        self._processing_task = None
-        self.websocket = None
+            for context_id in list(self._context_queues.keys()):
+                self._remove_context(context_id)
+
+            self._context_queues.clear()
+            self._processing_task = None
+            self.websocket = None
+        finally:
+            self._closing = False
 
     async def send(
         self,
@@ -444,6 +444,16 @@ class AsyncTtsWebsocket(TtsWebsocket):
             ),
         )
 
+    def _is_close_error(self, e: TypeError) -> bool:
+        # TODO: This method checks the error string, but should check the code directly if/when aiohttp
+        # adds the code as a field to the error
+        exception_str = str(e)
+        return (
+            f"{aiohttp.WSMsgType.CLOSING}:None" in exception_str
+            or f"{aiohttp.WSMsgType.CLOSED}:None" in exception_str
+            or f"{aiohttp.WSMsgType.CLOSE}:1000" in exception_str
+        )
+
     async def _process_responses(self):
         try:
             while True:
@@ -453,8 +463,13 @@ class AsyncTtsWebsocket(TtsWebsocket):
                 flush_id = response.get("flush_id", -1)
                 if context_id in self._context_queues:
                     await self._context_queues[context_id][flush_id].put(response)
-        except Exception as e:
-            self._error = e
+        except TypeError as e:
+            # If the WebSocket is closing and the error is a close error, ignore it.
+            if self._closing and self._is_close_error(e):
+                return
+            # Otherwise, if this is a close error, raise a more clear error.
+            if self._is_close_error(e):
+                raise RuntimeError(f"WebSocket closed unexpectedly: {e}")
             raise e
 
     async def _get_message(

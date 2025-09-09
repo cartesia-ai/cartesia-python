@@ -46,7 +46,6 @@ class _TTSContext:
     def __init__(self, context_id: str, websocket: "TtsWebsocket"):
         self._context_id = context_id
         self._websocket = websocket
-        self._error = None
 
     def __del__(self):
         self._close()
