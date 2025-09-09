@@ -667,14 +667,6 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dl>
 <dd>
 
-**generation_config:** `typing.Optional[GenerationConfigParams]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
     
 </dd>
