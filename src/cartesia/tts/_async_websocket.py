@@ -291,6 +291,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         self.websocket = None
         self._context_queues: Dict[str, List[asyncio.Queue]] = {}
         self._processing_task: Optional[asyncio.Task] = None
+        self._closing = False
 
     def __del__(self):
         try:
