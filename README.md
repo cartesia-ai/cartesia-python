@@ -513,6 +513,7 @@ async def main():
             all_ends.extend(out.word_timestamps.end)       # End time for each word (seconds)
 
     await ws.close()
+    await client.close()
 
 asyncio.run(main())
 ```
