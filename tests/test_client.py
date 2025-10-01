@@ -37,7 +37,7 @@ from noah_testing._base_client import (
 from .utils import update_env
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
-my_access_token = "My My Access Token"
+auth_token = "My Auth Token"
 
 
 def _get_params(client: BaseClient[Any, Any]) -> dict[str, str]:
@@ -59,7 +59,7 @@ def _get_open_connections(client: NoahTesting | AsyncNoahTesting) -> int:
 
 
 class TestNoahTesting:
-    client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+    client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response(self, respx_mock: MockRouter) -> None:
@@ -85,9 +85,9 @@ class TestNoahTesting:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
 
-        copied = self.client.copy(my_access_token="another My My Access Token")
-        assert copied.my_access_token == "another My My Access Token"
-        assert self.client.my_access_token == "My My Access Token"
+        copied = self.client.copy(auth_token="another My Auth Token")
+        assert copied.auth_token == "another My Auth Token"
+        assert self.client.auth_token == "My Auth Token"
 
     def test_copy_default_options(self) -> None:
         # options that have a default are overridden correctly
@@ -107,10 +107,7 @@ class TestNoahTesting:
 
     def test_copy_default_headers(self) -> None:
         client = NoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
 
@@ -144,10 +141,7 @@ class TestNoahTesting:
 
     def test_copy_default_query(self) -> None:
         client = NoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_query={"foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
 
@@ -273,10 +267,7 @@ class TestNoahTesting:
 
     def test_client_timeout_option(self) -> None:
         client = NoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            timeout=httpx.Timeout(0),
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -287,10 +278,7 @@ class TestNoahTesting:
         # custom timeout given to the httpx client should be used
         with httpx.Client(timeout=None) as http_client:
             client = NoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -300,10 +288,7 @@ class TestNoahTesting:
         # no timeout given to the httpx client should not use the httpx default
         with httpx.Client() as http_client:
             client = NoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -313,10 +298,7 @@ class TestNoahTesting:
         # explicitly passing the default timeout currently results in it being ignored
         with httpx.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
             client = NoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -328,17 +310,14 @@ class TestNoahTesting:
             async with httpx.AsyncClient() as http_client:
                 NoahTesting(
                     base_url=base_url,
-                    my_access_token=my_access_token,
+                    auth_token=auth_token,
                     _strict_response_validation=True,
                     http_client=cast(Any, http_client),
                 )
 
     def test_default_headers_option(self) -> None:
         client = NoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
@@ -346,7 +325,7 @@ class TestNoahTesting:
 
         client2 = NoahTesting(
             base_url=base_url,
-            my_access_token=my_access_token,
+            auth_token=auth_token,
             _strict_response_validation=True,
             default_headers={
                 "X-Foo": "stainless",
@@ -358,15 +337,15 @@ class TestNoahTesting:
         assert request.headers.get("x-stainless-lang") == "my-overriding-header"
 
     def test_validate_headers(self) -> None:
-        client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("Authorization") == f"Bearer {my_access_token}"
+        assert request.headers.get("Authorization") == f"Bearer {auth_token}"
 
-        client2 = NoahTesting(base_url=base_url, my_access_token=None, _strict_response_validation=True)
+        client2 = NoahTesting(base_url=base_url, auth_token=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either my_access_token or api_key to be set. Or for one of the `Authorization` or `X-API-Key` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -378,7 +357,7 @@ class TestNoahTesting:
     def test_default_query_option(self) -> None:
         client = NoahTesting(
             base_url=base_url,
-            my_access_token=my_access_token,
+            auth_token=auth_token,
             _strict_response_validation=True,
             default_query={"query_param": "bar"},
         )
@@ -581,7 +560,7 @@ class TestNoahTesting:
 
     def test_base_url_setter(self) -> None:
         client = NoahTesting(
-            base_url="https://example.com/from_init", my_access_token=my_access_token, _strict_response_validation=True
+            base_url="https://example.com/from_init", auth_token=auth_token, _strict_response_validation=True
         )
         assert client.base_url == "https://example.com/from_init/"
 
@@ -591,20 +570,18 @@ class TestNoahTesting:
 
     def test_base_url_env(self) -> None:
         with update_env(NOAH_TESTING_BASE_URL="http://localhost:5000/from/env"):
-            client = NoahTesting(my_access_token=my_access_token, _strict_response_validation=True)
+            client = NoahTesting(auth_token=auth_token, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
             NoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             NoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.Client(),
             ),
@@ -625,13 +602,11 @@ class TestNoahTesting:
         "client",
         [
             NoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             NoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.Client(),
             ),
@@ -652,13 +627,11 @@ class TestNoahTesting:
         "client",
         [
             NoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             NoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.Client(),
             ),
@@ -676,7 +649,7 @@ class TestNoahTesting:
         assert request.url == "https://myapi.com/foo"
 
     def test_copied_client_does_not_close_http(self) -> None:
-        client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         assert not client.is_closed()
 
         copied = client.copy()
@@ -687,7 +660,7 @@ class TestNoahTesting:
         assert not client.is_closed()
 
     def test_client_context_manager(self) -> None:
-        client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         with client as c2:
             assert c2 is client
             assert not c2.is_closed()
@@ -709,10 +682,7 @@ class TestNoahTesting:
     def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
             NoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                max_retries=cast(Any, None),
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
     @pytest.mark.respx(base_url=base_url)
@@ -722,14 +692,12 @@ class TestNoahTesting:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = NoahTesting(
-            base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True
-        )
+        strict_client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             strict_client.get("/foo", cast_to=Model)
 
-        client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=False)
+        client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=False)
 
         response = client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -757,7 +725,7 @@ class TestNoahTesting:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     def test_parse_retry_after_header(self, remaining_retries: int, retry_after: str, timeout: float) -> None:
-        client = NoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = NoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
@@ -911,7 +879,7 @@ class TestNoahTesting:
 
 
 class TestAsyncNoahTesting:
-    client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+    client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.asyncio
@@ -939,9 +907,9 @@ class TestAsyncNoahTesting:
         copied = self.client.copy()
         assert id(copied) != id(self.client)
 
-        copied = self.client.copy(my_access_token="another My My Access Token")
-        assert copied.my_access_token == "another My My Access Token"
-        assert self.client.my_access_token == "My My Access Token"
+        copied = self.client.copy(auth_token="another My Auth Token")
+        assert copied.auth_token == "another My Auth Token"
+        assert self.client.auth_token == "My Auth Token"
 
     def test_copy_default_options(self) -> None:
         # options that have a default are overridden correctly
@@ -961,10 +929,7 @@ class TestAsyncNoahTesting:
 
     def test_copy_default_headers(self) -> None:
         client = AsyncNoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
 
@@ -998,10 +963,7 @@ class TestAsyncNoahTesting:
 
     def test_copy_default_query(self) -> None:
         client = AsyncNoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_query={"foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
 
@@ -1127,10 +1089,7 @@ class TestAsyncNoahTesting:
 
     async def test_client_timeout_option(self) -> None:
         client = AsyncNoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            timeout=httpx.Timeout(0),
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1141,10 +1100,7 @@ class TestAsyncNoahTesting:
         # custom timeout given to the httpx client should be used
         async with httpx.AsyncClient(timeout=None) as http_client:
             client = AsyncNoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1154,10 +1110,7 @@ class TestAsyncNoahTesting:
         # no timeout given to the httpx client should not use the httpx default
         async with httpx.AsyncClient() as http_client:
             client = AsyncNoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1167,10 +1120,7 @@ class TestAsyncNoahTesting:
         # explicitly passing the default timeout currently results in it being ignored
         async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
             client = AsyncNoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                http_client=http_client,
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, http_client=http_client
             )
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1182,17 +1132,14 @@ class TestAsyncNoahTesting:
             with httpx.Client() as http_client:
                 AsyncNoahTesting(
                     base_url=base_url,
-                    my_access_token=my_access_token,
+                    auth_token=auth_token,
                     _strict_response_validation=True,
                     http_client=cast(Any, http_client),
                 )
 
     def test_default_headers_option(self) -> None:
         client = AsyncNoahTesting(
-            base_url=base_url,
-            my_access_token=my_access_token,
-            _strict_response_validation=True,
-            default_headers={"X-Foo": "bar"},
+            base_url=base_url, auth_token=auth_token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
@@ -1200,7 +1147,7 @@ class TestAsyncNoahTesting:
 
         client2 = AsyncNoahTesting(
             base_url=base_url,
-            my_access_token=my_access_token,
+            auth_token=auth_token,
             _strict_response_validation=True,
             default_headers={
                 "X-Foo": "stainless",
@@ -1212,15 +1159,15 @@ class TestAsyncNoahTesting:
         assert request.headers.get("x-stainless-lang") == "my-overriding-header"
 
     def test_validate_headers(self) -> None:
-        client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
-        assert request.headers.get("Authorization") == f"Bearer {my_access_token}"
+        assert request.headers.get("Authorization") == f"Bearer {auth_token}"
 
-        client2 = AsyncNoahTesting(base_url=base_url, my_access_token=None, _strict_response_validation=True)
+        client2 = AsyncNoahTesting(base_url=base_url, auth_token=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either my_access_token or api_key to be set. Or for one of the `Authorization` or `X-API-Key` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -1232,7 +1179,7 @@ class TestAsyncNoahTesting:
     def test_default_query_option(self) -> None:
         client = AsyncNoahTesting(
             base_url=base_url,
-            my_access_token=my_access_token,
+            auth_token=auth_token,
             _strict_response_validation=True,
             default_query={"query_param": "bar"},
         )
@@ -1435,7 +1382,7 @@ class TestAsyncNoahTesting:
 
     def test_base_url_setter(self) -> None:
         client = AsyncNoahTesting(
-            base_url="https://example.com/from_init", my_access_token=my_access_token, _strict_response_validation=True
+            base_url="https://example.com/from_init", auth_token=auth_token, _strict_response_validation=True
         )
         assert client.base_url == "https://example.com/from_init/"
 
@@ -1445,20 +1392,18 @@ class TestAsyncNoahTesting:
 
     def test_base_url_env(self) -> None:
         with update_env(NOAH_TESTING_BASE_URL="http://localhost:5000/from/env"):
-            client = AsyncNoahTesting(my_access_token=my_access_token, _strict_response_validation=True)
+            client = AsyncNoahTesting(auth_token=auth_token, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
             AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             AsyncNoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.AsyncClient(),
             ),
@@ -1479,13 +1424,11 @@ class TestAsyncNoahTesting:
         "client",
         [
             AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             AsyncNoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.AsyncClient(),
             ),
@@ -1506,13 +1449,11 @@ class TestAsyncNoahTesting:
         "client",
         [
             AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
+                base_url="http://localhost:5000/custom/path/", auth_token=auth_token, _strict_response_validation=True
             ),
             AsyncNoahTesting(
                 base_url="http://localhost:5000/custom/path/",
-                my_access_token=my_access_token,
+                auth_token=auth_token,
                 _strict_response_validation=True,
                 http_client=httpx.AsyncClient(),
             ),
@@ -1530,7 +1471,7 @@ class TestAsyncNoahTesting:
         assert request.url == "https://myapi.com/foo"
 
     async def test_copied_client_does_not_close_http(self) -> None:
-        client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         assert not client.is_closed()
 
         copied = client.copy()
@@ -1542,7 +1483,7 @@ class TestAsyncNoahTesting:
         assert not client.is_closed()
 
     async def test_client_context_manager(self) -> None:
-        client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
         async with client as c2:
             assert c2 is client
             assert not c2.is_closed()
@@ -1565,10 +1506,7 @@ class TestAsyncNoahTesting:
     async def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
             AsyncNoahTesting(
-                base_url=base_url,
-                my_access_token=my_access_token,
-                _strict_response_validation=True,
-                max_retries=cast(Any, None),
+                base_url=base_url, auth_token=auth_token, _strict_response_validation=True, max_retries=cast(Any, None)
             )
 
     @pytest.mark.respx(base_url=base_url)
@@ -1579,14 +1517,12 @@ class TestAsyncNoahTesting:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = AsyncNoahTesting(
-            base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True
-        )
+        strict_client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             await strict_client.get("/foo", cast_to=Model)
 
-        client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=False)
+        client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=False)
 
         response = await client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -1615,7 +1551,7 @@ class TestAsyncNoahTesting:
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     @pytest.mark.asyncio
     async def test_parse_retry_after_header(self, remaining_retries: int, retry_after: str, timeout: float) -> None:
-        client = AsyncNoahTesting(base_url=base_url, my_access_token=my_access_token, _strict_response_validation=True)
+        client = AsyncNoahTesting(base_url=base_url, auth_token=auth_token, _strict_response_validation=True)
 
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)

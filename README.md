@@ -31,7 +31,7 @@ The full API of this library can be found in [api.md](api.md).
 from noah_testing import NoahTesting
 
 client = NoahTesting(
-    my_access_token="My My Access Token",
+    auth_token="My Auth Token",
 )
 
 agents = client.agents.list()
@@ -47,7 +47,7 @@ import asyncio
 from noah_testing import AsyncNoahTesting
 
 client = AsyncNoahTesting(
-    my_access_token="My My Access Token",
+    auth_token="My Auth Token",
 )
 
 
@@ -82,7 +82,7 @@ from noah_testing import AsyncNoahTesting
 
 async def main() -> None:
     async with AsyncNoahTesting(
-        my_access_token="My My Access Token",
+        auth_token="My Auth Token",
         http_client=DefaultAioHttpClient(),
     ) as client:
         agents = await client.agents.list()

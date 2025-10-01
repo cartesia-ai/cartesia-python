@@ -70,14 +70,12 @@ class NoahTesting(SyncAPIClient):
     with_streaming_response: NoahTestingWithStreamedResponse
 
     # client options
-    my_access_token: str | None
-    api_key: str | None
+    auth_token: str | None
 
     def __init__(
         self,
         *,
-        my_access_token: str | None = None,
-        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -97,15 +95,8 @@ class NoahTesting(SyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous NoahTesting client instance.
-
-        This automatically infers the `api_key` argument from the `CARTESIA_API_KEY` environment variable if it is not provided.
-        """
-        self.my_access_token = my_access_token
-
-        if api_key is None:
-            api_key = os.environ.get("CARTESIA_API_KEY")
-        self.api_key = api_key
+        """Construct a new synchronous NoahTesting client instance."""
+        self.auth_token = auth_token
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -144,21 +135,10 @@ class NoahTesting(SyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._bearer_auth, **self._api_key}
-
-    @property
-    def _bearer_auth(self) -> dict[str, str]:
-        my_access_token = self.my_access_token
-        if my_access_token is None:
+        auth_token = self.auth_token
+        if auth_token is None:
             return {}
-        return {"Authorization": f"Bearer {my_access_token}"}
-
-    @property
-    def _api_key(self) -> dict[str, str]:
-        api_key = self.api_key
-        if api_key is None:
-            return {}
-        return {"X-API-Key": api_key}
+        return {"Authorization": f"Bearer {auth_token}"}
 
     @property
     @override
@@ -171,25 +151,19 @@ class NoahTesting(SyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.my_access_token and headers.get("Authorization"):
+        if self.auth_token and headers.get("Authorization"):
             return
         if isinstance(custom_headers.get("Authorization"), Omit):
             return
 
-        if self.api_key and headers.get("X-API-Key"):
-            return
-        if isinstance(custom_headers.get("X-API-Key"), Omit):
-            return
-
         raise TypeError(
-            '"Could not resolve authentication method. Expected either my_access_token or api_key to be set. Or for one of the `Authorization` or `X-API-Key` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
-        my_access_token: str | None = None,
-        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -223,8 +197,7 @@ class NoahTesting(SyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            my_access_token=my_access_token or self.my_access_token,
-            api_key=api_key or self.api_key,
+            auth_token=auth_token or self.auth_token,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -306,14 +279,12 @@ class AsyncNoahTesting(AsyncAPIClient):
     with_streaming_response: AsyncNoahTestingWithStreamedResponse
 
     # client options
-    my_access_token: str | None
-    api_key: str | None
+    auth_token: str | None
 
     def __init__(
         self,
         *,
-        my_access_token: str | None = None,
-        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -333,15 +304,8 @@ class AsyncNoahTesting(AsyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new async AsyncNoahTesting client instance.
-
-        This automatically infers the `api_key` argument from the `CARTESIA_API_KEY` environment variable if it is not provided.
-        """
-        self.my_access_token = my_access_token
-
-        if api_key is None:
-            api_key = os.environ.get("CARTESIA_API_KEY")
-        self.api_key = api_key
+        """Construct a new async AsyncNoahTesting client instance."""
+        self.auth_token = auth_token
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -380,21 +344,10 @@ class AsyncNoahTesting(AsyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._bearer_auth, **self._api_key}
-
-    @property
-    def _bearer_auth(self) -> dict[str, str]:
-        my_access_token = self.my_access_token
-        if my_access_token is None:
+        auth_token = self.auth_token
+        if auth_token is None:
             return {}
-        return {"Authorization": f"Bearer {my_access_token}"}
-
-    @property
-    def _api_key(self) -> dict[str, str]:
-        api_key = self.api_key
-        if api_key is None:
-            return {}
-        return {"X-API-Key": api_key}
+        return {"Authorization": f"Bearer {auth_token}"}
 
     @property
     @override
@@ -407,25 +360,19 @@ class AsyncNoahTesting(AsyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.my_access_token and headers.get("Authorization"):
+        if self.auth_token and headers.get("Authorization"):
             return
         if isinstance(custom_headers.get("Authorization"), Omit):
             return
 
-        if self.api_key and headers.get("X-API-Key"):
-            return
-        if isinstance(custom_headers.get("X-API-Key"), Omit):
-            return
-
         raise TypeError(
-            '"Could not resolve authentication method. Expected either my_access_token or api_key to be set. Or for one of the `Authorization` or `X-API-Key` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
-        my_access_token: str | None = None,
-        api_key: str | None = None,
+        auth_token: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -459,8 +406,7 @@ class AsyncNoahTesting(AsyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            my_access_token=my_access_token or self.my_access_token,
-            api_key=api_key or self.api_key,
+            auth_token=auth_token or self.auth_token,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
