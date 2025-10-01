@@ -127,18 +127,16 @@ class TestVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_method_list(self, client: NoahTesting) -> None:
-        voice = client.voices.list(
-            gender="masculine",
-        )
+        voice = client.voices.list()
         assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_method_list_with_all_params(self, client: NoahTesting) -> None:
         voice = client.voices.list(
-            gender="masculine",
             ending_before="ending_before",
             expand=["is_starred"],
+            gender="masculine",
             is_owner=True,
             is_starred=True,
             limit=0,
@@ -149,9 +147,7 @@ class TestVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_raw_response_list(self, client: NoahTesting) -> None:
-        response = client.voices.with_raw_response.list(
-            gender="masculine",
-        )
+        response = client.voices.with_raw_response.list()
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -161,9 +157,7 @@ class TestVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_streaming_response_list(self, client: NoahTesting) -> None:
-        with client.voices.with_streaming_response.list(
-            gender="masculine",
-        ) as response:
+        with client.voices.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -426,18 +420,16 @@ class TestAsyncVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
-        voice = await async_client.voices.list(
-            gender="masculine",
-        )
+        voice = await async_client.voices.list()
         assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncNoahTesting) -> None:
         voice = await async_client.voices.list(
-            gender="masculine",
             ending_before="ending_before",
             expand=["is_starred"],
+            gender="masculine",
             is_owner=True,
             is_starred=True,
             limit=0,
@@ -448,9 +440,7 @@ class TestAsyncVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncNoahTesting) -> None:
-        response = await async_client.voices.with_raw_response.list(
-            gender="masculine",
-        )
+        response = await async_client.voices.with_raw_response.list()
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -460,9 +450,7 @@ class TestAsyncVoices:
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncNoahTesting) -> None:
-        async with async_client.voices.with_streaming_response.list(
-            gender="masculine",
-        ) as response:
+        async with async_client.voices.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import List, Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Literal, TypedDict
 
 from .gender_presentation import GenderPresentation
 
@@ -11,9 +11,6 @@ __all__ = ["VoiceListParams"]
 
 
 class VoiceListParams(TypedDict, total=False):
-    gender: Required[Optional[GenderPresentation]]
-    """The gender presentation of the voices to return."""
-
     ending_before: Optional[str]
     """A cursor to use in pagination.
 
@@ -25,6 +22,9 @@ class VoiceListParams(TypedDict, total=False):
 
     expand: Optional[List[Literal["is_starred"]]]
     """Additional fields to include in the response."""
+
+    gender: Optional[GenderPresentation]
+    """The gender presentation of the voices to return."""
 
     is_owner: Optional[bool]
     """Whether to only return voices owned by the current user."""

@@ -146,9 +146,9 @@ class VoicesResource(SyncAPIResource):
     def list(
         self,
         *,
-        gender: Optional[GenderPresentation],
         ending_before: Optional[str] | Omit = omit,
         expand: Optional[List[Literal["is_starred"]]] | Omit = omit,
+        gender: Optional[GenderPresentation] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         is_starred: Optional[bool] | Omit = omit,
         limit: Optional[int] | Omit = omit,
@@ -160,18 +160,19 @@ class VoicesResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SyncCursorIDPage[Voice]:
-        """
-        List Voices
+        """List Voices
 
         Args:
-          gender: The gender presentation of the voices to return.
+          ending_before: A cursor to use in pagination.
 
-          ending_before: A cursor to use in pagination. `ending_before` is a Voice ID that defines your
+        `ending_before` is a Voice ID that defines your
               place in the list. For example, if you make a /voices request and receive 100
               objects, starting with `voice_abc123`, your subsequent call can include
               `ending_before=voice_abc123` to fetch the previous page of the list.
 
           expand: Additional fields to include in the response.
+
+          gender: The gender presentation of the voices to return.
 
           is_owner: Whether to only return voices owned by the current user.
 
@@ -202,9 +203,9 @@ class VoicesResource(SyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
-                        "gender": gender,
                         "ending_before": ending_before,
                         "expand": expand,
+                        "gender": gender,
                         "is_owner": is_owner,
                         "is_starred": is_starred,
                         "limit": limit,
@@ -494,9 +495,9 @@ class AsyncVoicesResource(AsyncAPIResource):
     def list(
         self,
         *,
-        gender: Optional[GenderPresentation],
         ending_before: Optional[str] | Omit = omit,
         expand: Optional[List[Literal["is_starred"]]] | Omit = omit,
+        gender: Optional[GenderPresentation] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         is_starred: Optional[bool] | Omit = omit,
         limit: Optional[int] | Omit = omit,
@@ -508,18 +509,19 @@ class AsyncVoicesResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncPaginator[Voice, AsyncCursorIDPage[Voice]]:
-        """
-        List Voices
+        """List Voices
 
         Args:
-          gender: The gender presentation of the voices to return.
+          ending_before: A cursor to use in pagination.
 
-          ending_before: A cursor to use in pagination. `ending_before` is a Voice ID that defines your
+        `ending_before` is a Voice ID that defines your
               place in the list. For example, if you make a /voices request and receive 100
               objects, starting with `voice_abc123`, your subsequent call can include
               `ending_before=voice_abc123` to fetch the previous page of the list.
 
           expand: Additional fields to include in the response.
+
+          gender: The gender presentation of the voices to return.
 
           is_owner: Whether to only return voices owned by the current user.
 
@@ -550,9 +552,9 @@ class AsyncVoicesResource(AsyncAPIResource):
                 timeout=timeout,
                 query=maybe_transform(
                     {
-                        "gender": gender,
                         "ending_before": ending_before,
                         "expand": expand,
+                        "gender": gender,
                         "is_owner": is_owner,
                         "is_starred": is_starred,
                         "limit": limit,
