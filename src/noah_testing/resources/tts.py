@@ -12,10 +12,18 @@ from .._utils import maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
+    BinaryAPIResponse,
+    AsyncBinaryAPIResponse,
+    StreamedBinaryAPIResponse,
+    AsyncStreamedBinaryAPIResponse,
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
+    to_custom_raw_response_wrapper,
     async_to_streamed_response_wrapper,
+    to_custom_streamed_response_wrapper,
+    async_to_custom_raw_response_wrapper,
+    async_to_custom_streamed_response_wrapper,
 )
 from .._base_client import make_request_options
 from ..types.model_speed import ModelSpeed
@@ -64,7 +72,7 @@ class TtsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> BinaryAPIResponse:
         """
         Text to Speech (Bytes)
 
@@ -108,7 +116,7 @@ class TtsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         return self._post(
             "/tts/bytes",
             body=maybe_transform(
@@ -129,7 +137,7 @@ class TtsResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=BinaryAPIResponse,
         )
 
     def synthesize_sse(
@@ -269,7 +277,7 @@ class AsyncTtsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncBinaryAPIResponse:
         """
         Text to Speech (Bytes)
 
@@ -313,7 +321,7 @@ class AsyncTtsResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         return await self._post(
             "/tts/bytes",
             body=await async_maybe_transform(
@@ -334,7 +342,7 @@ class AsyncTtsResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=AsyncBinaryAPIResponse,
         )
 
     async def synthesize_sse(
@@ -439,8 +447,9 @@ class TtsResourceWithRawResponse:
     def __init__(self, tts: TtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = to_raw_response_wrapper(
+        self.synthesize_bytes = to_custom_raw_response_wrapper(
             tts.synthesize_bytes,
+            BinaryAPIResponse,
         )
         self.synthesize_sse = to_raw_response_wrapper(
             tts.synthesize_sse,
@@ -451,8 +460,9 @@ class AsyncTtsResourceWithRawResponse:
     def __init__(self, tts: AsyncTtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = async_to_raw_response_wrapper(
+        self.synthesize_bytes = async_to_custom_raw_response_wrapper(
             tts.synthesize_bytes,
+            AsyncBinaryAPIResponse,
         )
         self.synthesize_sse = async_to_raw_response_wrapper(
             tts.synthesize_sse,
@@ -463,8 +473,9 @@ class TtsResourceWithStreamingResponse:
     def __init__(self, tts: TtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = to_streamed_response_wrapper(
+        self.synthesize_bytes = to_custom_streamed_response_wrapper(
             tts.synthesize_bytes,
+            StreamedBinaryAPIResponse,
         )
         self.synthesize_sse = to_streamed_response_wrapper(
             tts.synthesize_sse,
@@ -475,8 +486,9 @@ class AsyncTtsResourceWithStreamingResponse:
     def __init__(self, tts: AsyncTtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = async_to_streamed_response_wrapper(
+        self.synthesize_bytes = async_to_custom_streamed_response_wrapper(
             tts.synthesize_bytes,
+            AsyncStreamedBinaryAPIResponse,
         )
         self.synthesize_sse = async_to_streamed_response_wrapper(
             tts.synthesize_sse,

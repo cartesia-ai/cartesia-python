@@ -198,7 +198,7 @@ from noah_testing.types import ModelSpeed, RawOutputFormat, VoiceSpecifier
 
 Methods:
 
-- <code title="post /tts/bytes">client.tts.<a href="./src/noah_testing/resources/tts.py">synthesize_bytes</a>(\*\*<a href="src/noah_testing/types/tt_synthesize_bytes_params.py">params</a>) -> None</code>
+- <code title="post /tts/bytes">client.tts.<a href="./src/noah_testing/resources/tts.py">synthesize_bytes</a>(\*\*<a href="src/noah_testing/types/tt_synthesize_bytes_params.py">params</a>) -> BinaryAPIResponse</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/noah_testing/resources/tts.py">synthesize_sse</a>(\*\*<a href="src/noah_testing/types/tt_synthesize_sse_params.py">params</a>) -> None</code>
 
 # VoiceChanger
