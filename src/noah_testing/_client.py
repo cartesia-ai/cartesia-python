@@ -130,7 +130,7 @@ class NoahTesting(SyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="repeat")
+        return Querystring(array_format="brackets")
 
     @property
     @override
@@ -339,7 +339,7 @@ class AsyncNoahTesting(AsyncAPIClient):
     @property
     @override
     def qs(self) -> Querystring:
-        return Querystring(array_format="repeat")
+        return Querystring(array_format="brackets")
 
     @property
     @override
