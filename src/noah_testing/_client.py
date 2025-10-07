@@ -147,6 +147,7 @@ class NoahTesting(SyncAPIClient):
             **super().default_headers,
             "X-Stainless-Async": "false",
             "cartesia-version": "2025-04-16",
+            "foo": "bar",
             **self._custom_headers,
         }
 
@@ -357,6 +358,7 @@ class AsyncNoahTesting(AsyncAPIClient):
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
             "cartesia-version": "2025-04-16",
+            "foo": "bar",
             **self._custom_headers,
         }
 
