@@ -286,25 +286,6 @@ On timeout, an `APITimeoutError` is thrown.
 
 Note that requests that time out are [retried twice by default](#retries).
 
-## Default Headers
-
-We automatically send the following headers with all requests.
-
-| Header             | Value        |
-| ------------------ | ------------ |
-| `cartesia-version` | `2025-04-16` |
-| `foo`              | `bar`        |
-
-If you need to, you can override these headers by setting default headers per-request or on the client object.
-
-```python
-from noah_testing import NoahTesting
-
-client = NoahTesting(
-    default_headers={"cartesia-version": "My-Custom-Value"},
-)
-```
-
 ## Advanced
 
 ### Logging
