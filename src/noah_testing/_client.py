@@ -41,6 +41,7 @@ from ._base_client import (
 )
 from .resources.agents import agents
 from .resources.datasets import datasets
+from .resources.access_token import AccessTokenResource, AsyncAccessTokenResource
 from .types.get_status_response import GetStatusResponse
 
 __all__ = [
@@ -70,12 +71,14 @@ class NoahTesting(SyncAPIClient):
     with_streaming_response: NoahTestingWithStreamedResponse
 
     # client options
-    auth_token: str | None
+    access_token: str | None
+    api_key: str | None
 
     def __init__(
         self,
         *,
-        auth_token: str | None = None,
+        access_token: str | None = None,
+        api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -96,7 +99,9 @@ class NoahTesting(SyncAPIClient):
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new synchronous NoahTesting client instance."""
-        self.auth_token = auth_token
+        self.access_token = access_token
+
+        self.api_key = api_key
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -115,7 +120,7 @@ class NoahTesting(SyncAPIClient):
         )
 
         self.agents = agents.AgentsResource(self)
-        self.access_token = access_token.AccessTokenResource(self)
+        self.access_token = AccessTokenResource(self)
         self.datasets = datasets.DatasetsResource(self)
         self.fine_tunes = fine_tunes.FineTunesResource(self)
         self.infill = infill.InfillResource(self)
@@ -135,10 +140,21 @@ class NoahTesting(SyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        auth_token = self.auth_token
-        if auth_token is None:
+        return {**self._token_auth, **self._api_key_auth}
+
+    @property
+    def _token_auth(self) -> dict[str, str]:
+        access_token = self.access_token
+        if access_token is None:
             return {}
-        return {"Authorization": f"Bearer {auth_token}"}
+        return {"Authorization": f"Bearer {access_token}"}
+
+    @property
+    def _api_key_auth(self) -> dict[str, str]:
+        api_key = self.api_key
+        if api_key is None:
+            return {}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -152,19 +168,25 @@ class NoahTesting(SyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.auth_token and headers.get("Authorization"):
+        if self.access_token and headers.get("Authorization"):
+            return
+        if isinstance(custom_headers.get("Authorization"), Omit):
+            return
+
+        if self.api_key and headers.get("Authorization"):
             return
         if isinstance(custom_headers.get("Authorization"), Omit):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected either access_token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
-        auth_token: str | None = None,
+        access_token: str | None = None,
+        api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -198,7 +220,8 @@ class NoahTesting(SyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            auth_token=auth_token or self.auth_token,
+            access_token=access_token or self.access_token,
+            api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -280,12 +303,14 @@ class AsyncNoahTesting(AsyncAPIClient):
     with_streaming_response: AsyncNoahTestingWithStreamedResponse
 
     # client options
-    auth_token: str | None
+    access_token: str | None
+    api_key: str | None
 
     def __init__(
         self,
         *,
-        auth_token: str | None = None,
+        access_token: str | None = None,
+        api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
@@ -306,7 +331,9 @@ class AsyncNoahTesting(AsyncAPIClient):
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new async AsyncNoahTesting client instance."""
-        self.auth_token = auth_token
+        self.access_token = access_token
+
+        self.api_key = api_key
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -325,7 +352,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         )
 
         self.agents = agents.AsyncAgentsResource(self)
-        self.access_token = access_token.AsyncAccessTokenResource(self)
+        self.access_token = AsyncAccessTokenResource(self)
         self.datasets = datasets.AsyncDatasetsResource(self)
         self.fine_tunes = fine_tunes.AsyncFineTunesResource(self)
         self.infill = infill.AsyncInfillResource(self)
@@ -345,10 +372,21 @@ class AsyncNoahTesting(AsyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        auth_token = self.auth_token
-        if auth_token is None:
+        return {**self._token_auth, **self._api_key_auth}
+
+    @property
+    def _token_auth(self) -> dict[str, str]:
+        access_token = self.access_token
+        if access_token is None:
             return {}
-        return {"Authorization": f"Bearer {auth_token}"}
+        return {"Authorization": f"Bearer {access_token}"}
+
+    @property
+    def _api_key_auth(self) -> dict[str, str]:
+        api_key = self.api_key
+        if api_key is None:
+            return {}
+        return {"Authorization": f"Bearer {api_key}"}
 
     @property
     @override
@@ -362,19 +400,25 @@ class AsyncNoahTesting(AsyncAPIClient):
 
     @override
     def _validate_headers(self, headers: Headers, custom_headers: Headers) -> None:
-        if self.auth_token and headers.get("Authorization"):
+        if self.access_token and headers.get("Authorization"):
+            return
+        if isinstance(custom_headers.get("Authorization"), Omit):
+            return
+
+        if self.api_key and headers.get("Authorization"):
             return
         if isinstance(custom_headers.get("Authorization"), Omit):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected the auth_token to be set. Or for the `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected either access_token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
-        auth_token: str | None = None,
+        access_token: str | None = None,
+        api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -408,7 +452,8 @@ class AsyncNoahTesting(AsyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            auth_token=auth_token or self.auth_token,
+            access_token=access_token or self.access_token,
+            api_key=api_key or self.api_key,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
