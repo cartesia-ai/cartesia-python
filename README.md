@@ -30,7 +30,9 @@ The full API of this library can be found in [api.md](api.md).
 ```python
 from noah_testing import NoahTesting
 
-client = NoahTesting()
+client = NoahTesting(
+    api_key="My API Key",
+)
 
 agents = client.agents.list()
 print(agents.summaries)
@@ -44,7 +46,9 @@ Simply import `AsyncNoahTesting` instead of `NoahTesting` and use `await` with e
 import asyncio
 from noah_testing import AsyncNoahTesting
 
-client = AsyncNoahTesting()
+client = AsyncNoahTesting(
+    api_key="My API Key",
+)
 
 
 async def main() -> None:
@@ -78,6 +82,7 @@ from noah_testing import AsyncNoahTesting
 
 async def main() -> None:
     async with AsyncNoahTesting(
+        api_key="My API Key",
         http_client=DefaultAioHttpClient(),
     ) as client:
         agents = await client.agents.list()
