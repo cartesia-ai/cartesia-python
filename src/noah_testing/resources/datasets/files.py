@@ -16,8 +16,7 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ...pagination import SyncCursorIDPage, AsyncCursorIDPage
-from ..._base_client import AsyncPaginator, make_request_options
+from ..._base_client import make_request_options
 from ...types.datasets import file_list_params, file_upload_params
 from ...types.datasets.file_list_response import FileListResponse
 
@@ -57,7 +56,7 @@ class FilesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncCursorIDPage[FileListResponse]:
+    ) -> FileListResponse:
         """
         Paginated list of files in a dataset
 
@@ -84,9 +83,8 @@ class FilesResource(SyncAPIResource):
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return self._get_api_list(
+        return self._get(
             f"/datasets/{id}/files",
-            page=SyncCursorIDPage[FileListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -101,7 +99,7 @@ class FilesResource(SyncAPIResource):
                     file_list_params.FileListParams,
                 ),
             ),
-            model=FileListResponse,
+            cast_to=FileListResponse,
         )
 
     def delete(
@@ -213,7 +211,7 @@ class AsyncFilesResource(AsyncAPIResource):
         """
         return AsyncFilesResourceWithStreamingResponse(self)
 
-    def list(
+    async def list(
         self,
         id: str,
         *,
@@ -226,7 +224,7 @@ class AsyncFilesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[FileListResponse, AsyncCursorIDPage[FileListResponse]]:
+    ) -> FileListResponse:
         """
         Paginated list of files in a dataset
 
@@ -253,15 +251,14 @@ class AsyncFilesResource(AsyncAPIResource):
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return self._get_api_list(
+        return await self._get(
             f"/datasets/{id}/files",
-            page=AsyncCursorIDPage[FileListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
+                query=await async_maybe_transform(
                     {
                         "ending_before": ending_before,
                         "limit": limit,
@@ -270,7 +267,7 @@ class AsyncFilesResource(AsyncAPIResource):
                     file_list_params.FileListParams,
                 ),
             ),
-            model=FileListResponse,
+            cast_to=FileListResponse,
         )
 
     async def delete(

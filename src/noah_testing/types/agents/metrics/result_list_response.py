@@ -9,10 +9,10 @@ from pydantic import Field as FieldInfo
 from ...._models import BaseModel
 from ..agent_transcript import AgentTranscript
 
-__all__ = ["ResultListResponse"]
+__all__ = ["ResultListResponse", "Data"]
 
 
-class ResultListResponse(BaseModel):
+class Data(BaseModel):
     id: str
     """The unique identifier for the metric result."""
 
@@ -54,3 +54,17 @@ class ResultListResponse(BaseModel):
 
     value: Optional[object] = None
     """The value of the metric result."""
+
+
+class ResultListResponse(BaseModel):
+    data: List[Data]
+    """List of metric results."""
+
+    has_more: bool
+    """
+    Whether there are more metric results to fetch (using `starting_after=id`, where
+    id is the ID of the last MetricResult in the current response).
+    """
+
+    next_page: Optional[str] = None
+    """The cursor for the next page of results."""

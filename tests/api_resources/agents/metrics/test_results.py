@@ -9,7 +9,6 @@ import pytest
 
 from tests.utils import assert_matches_type
 from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
 from noah_testing.types.agents.metrics import ResultListResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -22,7 +21,7 @@ class TestResults:
     @parametrize
     def test_method_list(self, client: NoahTesting) -> None:
         result = client.agents.metrics.results.list()
-        assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -36,7 +35,7 @@ class TestResults:
             metric_id="metric_id",
             starting_after="starting_after",
         )
-        assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -46,7 +45,7 @@ class TestResults:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         result = response.parse()
-        assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -56,7 +55,7 @@ class TestResults:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             result = response.parse()
-            assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
+            assert_matches_type(ResultListResponse, result, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -112,7 +111,7 @@ class TestAsyncResults:
     @parametrize
     async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
         result = await async_client.agents.metrics.results.list()
-        assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -126,7 +125,7 @@ class TestAsyncResults:
             metric_id="metric_id",
             starting_after="starting_after",
         )
-        assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -136,7 +135,7 @@ class TestAsyncResults:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         result = await response.parse()
-        assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
+        assert_matches_type(ResultListResponse, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -146,7 +145,7 @@ class TestAsyncResults:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             result = await response.parse()
-            assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
+            assert_matches_type(ResultListResponse, result, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

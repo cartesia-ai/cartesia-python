@@ -11,8 +11,8 @@ from tests.utils import assert_matches_type
 from noah_testing import NoahTesting, AsyncNoahTesting
 from noah_testing.types import (
     PronunciationDict,
+    PronunciationDictListResponse,
 )
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -171,7 +171,7 @@ class TestPronunciationDicts:
     @parametrize
     def test_method_list(self, client: NoahTesting) -> None:
         pronunciation_dict = client.pronunciation_dicts.list()
-        assert_matches_type(SyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -181,7 +181,7 @@ class TestPronunciationDicts:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(SyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -191,7 +191,7 @@ class TestPronunciationDicts:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         pronunciation_dict = response.parse()
-        assert_matches_type(SyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -201,7 +201,7 @@ class TestPronunciationDicts:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             pronunciation_dict = response.parse()
-            assert_matches_type(SyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+            assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -488,7 +488,7 @@ class TestAsyncPronunciationDicts:
     @parametrize
     async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
         pronunciation_dict = await async_client.pronunciation_dicts.list()
-        assert_matches_type(AsyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -498,7 +498,7 @@ class TestAsyncPronunciationDicts:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(AsyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -508,7 +508,7 @@ class TestAsyncPronunciationDicts:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         pronunciation_dict = await response.parse()
-        assert_matches_type(AsyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+        assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -518,7 +518,7 @@ class TestAsyncPronunciationDicts:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             pronunciation_dict = await response.parse()
-            assert_matches_type(AsyncCursorIDPage[PronunciationDict], pronunciation_dict, path=["response"])
+            assert_matches_type(PronunciationDictListResponse, pronunciation_dict, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

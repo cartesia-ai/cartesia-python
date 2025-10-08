@@ -10,10 +10,10 @@ import pytest
 from tests.utils import assert_matches_type
 from noah_testing import NoahTesting, AsyncNoahTesting
 from noah_testing.types import (
-    Voice,
     FineTune,
+    FineTuneListResponse,
+    FineTuneListVoicesResponse,
 )
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -113,7 +113,7 @@ class TestFineTunes:
     @parametrize
     def test_method_list(self, client: NoahTesting) -> None:
         fine_tune = client.fine_tunes.list()
-        assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -123,7 +123,7 @@ class TestFineTunes:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -133,7 +133,7 @@ class TestFineTunes:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         fine_tune = response.parse()
-        assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -143,7 +143,7 @@ class TestFineTunes:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             fine_tune = response.parse()
-            assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
+            assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -195,7 +195,7 @@ class TestFineTunes:
         fine_tune = client.fine_tunes.list_voices(
             id="id",
         )
-        assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -206,7 +206,7 @@ class TestFineTunes:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -218,7 +218,7 @@ class TestFineTunes:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         fine_tune = response.parse()
-        assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -230,7 +230,7 @@ class TestFineTunes:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             fine_tune = response.parse()
-            assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
+            assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -340,7 +340,7 @@ class TestAsyncFineTunes:
     @parametrize
     async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
         fine_tune = await async_client.fine_tunes.list()
-        assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -350,7 +350,7 @@ class TestAsyncFineTunes:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -360,7 +360,7 @@ class TestAsyncFineTunes:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         fine_tune = await response.parse()
-        assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -370,7 +370,7 @@ class TestAsyncFineTunes:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             fine_tune = await response.parse()
-            assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
+            assert_matches_type(FineTuneListResponse, fine_tune, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -422,7 +422,7 @@ class TestAsyncFineTunes:
         fine_tune = await async_client.fine_tunes.list_voices(
             id="id",
         )
-        assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -433,7 +433,7 @@ class TestAsyncFineTunes:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -445,7 +445,7 @@ class TestAsyncFineTunes:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         fine_tune = await response.parse()
-        assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
+        assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -457,7 +457,7 @@ class TestAsyncFineTunes:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             fine_tune = await response.parse()
-            assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
+            assert_matches_type(FineTuneListVoicesResponse, fine_tune, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

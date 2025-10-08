@@ -7,7 +7,7 @@ from typing import Optional
 import httpx
 
 from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
-from ..._utils import maybe_transform
+from ..._utils import maybe_transform, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -16,10 +16,10 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ...pagination import SyncCursorIDPage, AsyncCursorIDPage
-from ..._base_client import AsyncPaginator, make_request_options
+from ..._base_client import make_request_options
 from ...types.agents import call_list_params
 from ...types.agents.agent_call import AgentCall
+from ...types.agents.call_list_response import CallListResponse
 
 __all__ = ["CallsResource", "AsyncCallsResource"]
 
@@ -91,7 +91,7 @@ class CallsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncCursorIDPage[AgentCall]:
+    ) -> CallListResponse:
         """
         Lists calls sorted by start time in descending order for a specific agent.
         `agent_id` is required and if you want to include `transcript` in the response,
@@ -118,9 +118,8 @@ class CallsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get_api_list(
+        return self._get(
             "/agents/calls",
-            page=SyncCursorIDPage[AgentCall],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -137,7 +136,7 @@ class CallsResource(SyncAPIResource):
                     call_list_params.CallListParams,
                 ),
             ),
-            model=AgentCall,
+            cast_to=CallListResponse,
         )
 
     def download_audio(
@@ -230,7 +229,7 @@ class AsyncCallsResource(AsyncAPIResource):
             cast_to=AgentCall,
         )
 
-    def list(
+    async def list(
         self,
         *,
         agent_id: str,
@@ -244,7 +243,7 @@ class AsyncCallsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[AgentCall, AsyncCursorIDPage[AgentCall]]:
+    ) -> CallListResponse:
         """
         Lists calls sorted by start time in descending order for a specific agent.
         `agent_id` is required and if you want to include `transcript` in the response,
@@ -271,15 +270,14 @@ class AsyncCallsResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get_api_list(
+        return await self._get(
             "/agents/calls",
-            page=AsyncCursorIDPage[AgentCall],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform(
+                query=await async_maybe_transform(
                     {
                         "agent_id": agent_id,
                         "ending_before": ending_before,
@@ -290,7 +288,7 @@ class AsyncCallsResource(AsyncAPIResource):
                     call_list_params.CallListParams,
                 ),
             ),
-            model=AgentCall,
+            cast_to=CallListResponse,
         )
 
     async def download_audio(
