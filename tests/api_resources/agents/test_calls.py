@@ -9,7 +9,8 @@ import pytest
 
 from tests.utils import assert_matches_type
 from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.types.agents import AgentCall, CallListResponse
+from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
+from noah_testing.types.agents import AgentCall
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -65,7 +66,7 @@ class TestCalls:
         call = client.agents.calls.list(
             agent_id="agent_id",
         )
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(SyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -77,7 +78,7 @@ class TestCalls:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(SyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -89,7 +90,7 @@ class TestCalls:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         call = response.parse()
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(SyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -101,7 +102,7 @@ class TestCalls:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             call = response.parse()
-            assert_matches_type(CallListResponse, call, path=["response"])
+            assert_matches_type(SyncCursorIDPage[AgentCall], call, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -201,7 +202,7 @@ class TestAsyncCalls:
         call = await async_client.agents.calls.list(
             agent_id="agent_id",
         )
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(AsyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -213,7 +214,7 @@ class TestAsyncCalls:
             limit=0,
             starting_after="starting_after",
         )
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(AsyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -225,7 +226,7 @@ class TestAsyncCalls:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         call = await response.parse()
-        assert_matches_type(CallListResponse, call, path=["response"])
+        assert_matches_type(AsyncCursorIDPage[AgentCall], call, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -237,7 +238,7 @@ class TestAsyncCalls:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             call = await response.parse()
-            assert_matches_type(CallListResponse, call, path=["response"])
+            assert_matches_type(AsyncCursorIDPage[AgentCall], call, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 

@@ -16,7 +16,8 @@ from ...._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ...._base_client import make_request_options
+from ....pagination import SyncCursorIDPage, AsyncCursorIDPage
+from ...._base_client import AsyncPaginator, make_request_options
 from ....types.agents.metrics import result_list_params, result_export_params
 from ....types.agents.metrics.result_list_response import ResultListResponse
 
@@ -59,7 +60,7 @@ class ResultsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> ResultListResponse:
+    ) -> SyncCursorIDPage[ResultListResponse]:
         """Paginated list of metric results.
 
         Filter results using the query parameters,
@@ -95,8 +96,9 @@ class ResultsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get(
+        return self._get_api_list(
             "/agents/metrics/results",
+            page=SyncCursorIDPage[ResultListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -115,7 +117,7 @@ class ResultsResource(SyncAPIResource):
                     result_list_params.ResultListParams,
                 ),
             ),
-            cast_to=ResultListResponse,
+            model=ResultListResponse,
         )
 
     def export(
@@ -218,7 +220,7 @@ class AsyncResultsResource(AsyncAPIResource):
         """
         return AsyncResultsResourceWithStreamingResponse(self)
 
-    async def list(
+    def list(
         self,
         *,
         agent_id: Optional[str] | Omit = omit,
@@ -234,7 +236,7 @@ class AsyncResultsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> ResultListResponse:
+    ) -> AsyncPaginator[ResultListResponse, AsyncCursorIDPage[ResultListResponse]]:
         """Paginated list of metric results.
 
         Filter results using the query parameters,
@@ -270,14 +272,15 @@ class AsyncResultsResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return await self._get(
+        return self._get_api_list(
             "/agents/metrics/results",
+            page=AsyncCursorIDPage[ResultListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "agent_id": agent_id,
                         "call_id": call_id,
@@ -290,7 +293,7 @@ class AsyncResultsResource(AsyncAPIResource):
                     result_list_params.ResultListParams,
                 ),
             ),
-            cast_to=ResultListResponse,
+            model=ResultListResponse,
         )
 
     async def export(

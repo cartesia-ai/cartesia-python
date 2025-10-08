@@ -17,10 +17,10 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .._base_client import make_request_options
+from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
+from ..types.voice import Voice
+from .._base_client import AsyncPaginator, make_request_options
 from ..types.fine_tune import FineTune
-from ..types.fine_tune_list_response import FineTuneListResponse
-from ..types.fine_tune_list_voices_response import FineTuneListVoicesResponse
 
 __all__ = ["FineTunesResource", "AsyncFineTunesResource"]
 
@@ -145,7 +145,7 @@ class FineTunesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FineTuneListResponse:
+    ) -> SyncCursorIDPage[FineTune]:
         """
         Paginated list of all fine-tunes for the authenticated user
 
@@ -170,8 +170,9 @@ class FineTunesResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get(
+        return self._get_api_list(
             "/fine-tunes/",
+            page=SyncCursorIDPage[FineTune],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -186,7 +187,7 @@ class FineTunesResource(SyncAPIResource):
                     fine_tune_list_params.FineTuneListParams,
                 ),
             ),
-            cast_to=FineTuneListResponse,
+            model=FineTune,
         )
 
     def delete(
@@ -236,7 +237,7 @@ class FineTunesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FineTuneListVoicesResponse:
+    ) -> SyncCursorIDPage[Voice]:
         """
         List all voices created from a fine-tune
 
@@ -263,8 +264,9 @@ class FineTunesResource(SyncAPIResource):
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return self._get(
+        return self._get_api_list(
             f"/fine-tunes/{id}/voices",
+            page=SyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -279,7 +281,7 @@ class FineTunesResource(SyncAPIResource):
                     fine_tune_list_voices_params.FineTuneListVoicesParams,
                 ),
             ),
-            cast_to=FineTuneListVoicesResponse,
+            model=Voice,
         )
 
 
@@ -391,7 +393,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
             cast_to=FineTune,
         )
 
-    async def list(
+    def list(
         self,
         *,
         ending_before: Optional[str] | Omit = omit,
@@ -403,7 +405,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FineTuneListResponse:
+    ) -> AsyncPaginator[FineTune, AsyncCursorIDPage[FineTune]]:
         """
         Paginated list of all fine-tunes for the authenticated user
 
@@ -428,14 +430,15 @@ class AsyncFineTunesResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return await self._get(
+        return self._get_api_list(
             "/fine-tunes/",
+            page=AsyncCursorIDPage[FineTune],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "ending_before": ending_before,
                         "limit": limit,
@@ -444,7 +447,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
                     fine_tune_list_params.FineTuneListParams,
                 ),
             ),
-            cast_to=FineTuneListResponse,
+            model=FineTune,
         )
 
     async def delete(
@@ -481,7 +484,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
             cast_to=NoneType,
         )
 
-    async def list_voices(
+    def list_voices(
         self,
         id: str,
         *,
@@ -494,7 +497,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> FineTuneListVoicesResponse:
+    ) -> AsyncPaginator[Voice, AsyncCursorIDPage[Voice]]:
         """
         List all voices created from a fine-tune
 
@@ -521,14 +524,15 @@ class AsyncFineTunesResource(AsyncAPIResource):
         """
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return await self._get(
+        return self._get_api_list(
             f"/fine-tunes/{id}/voices",
+            page=AsyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "ending_before": ending_before,
                         "limit": limit,
@@ -537,7 +541,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
                     fine_tune_list_voices_params.FineTuneListVoicesParams,
                 ),
             ),
-            cast_to=FineTuneListVoicesResponse,
+            model=Voice,
         )
 
 

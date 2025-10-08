@@ -25,9 +25,9 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ..._base_client import make_request_options
+from ...pagination import SyncCursorIDPage, AsyncCursorIDPage
+from ..._base_client import AsyncPaginator, make_request_options
 from ...types.dataset import Dataset
-from ...types.dataset_list_response import DatasetListResponse
 
 __all__ = ["DatasetsResource", "AsyncDatasetsResource"]
 
@@ -191,7 +191,7 @@ class DatasetsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> DatasetListResponse:
+    ) -> SyncCursorIDPage[Dataset]:
         """Paginated list of datasets
 
         Args:
@@ -217,8 +217,9 @@ class DatasetsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get(
+        return self._get_api_list(
             "/datasets/",
+            page=SyncCursorIDPage[Dataset],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -233,7 +234,7 @@ class DatasetsResource(SyncAPIResource):
                     dataset_list_params.DatasetListParams,
                 ),
             ),
-            cast_to=DatasetListResponse,
+            model=Dataset,
         )
 
     def delete(
@@ -418,7 +419,7 @@ class AsyncDatasetsResource(AsyncAPIResource):
             cast_to=NoneType,
         )
 
-    async def list(
+    def list(
         self,
         *,
         ending_before: Optional[str] | Omit = omit,
@@ -430,7 +431,7 @@ class AsyncDatasetsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> DatasetListResponse:
+    ) -> AsyncPaginator[Dataset, AsyncCursorIDPage[Dataset]]:
         """Paginated list of datasets
 
         Args:
@@ -456,14 +457,15 @@ class AsyncDatasetsResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return await self._get(
+        return self._get_api_list(
             "/datasets/",
+            page=AsyncCursorIDPage[Dataset],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "ending_before": ending_before,
                         "limit": limit,
@@ -472,7 +474,7 @@ class AsyncDatasetsResource(AsyncAPIResource):
                     dataset_list_params.DatasetListParams,
                 ),
             ),
-            cast_to=DatasetListResponse,
+            model=Dataset,
         )
 
     async def delete(

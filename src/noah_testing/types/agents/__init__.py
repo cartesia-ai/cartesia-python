@@ -7,7 +7,6 @@ from .agent_call import AgentCall as AgentCall
 from .deployment import Deployment as Deployment
 from .agent_transcript import AgentTranscript as AgentTranscript
 from .call_list_params import CallListParams as CallListParams
-from .call_list_response import CallListResponse as CallListResponse
 from .metric_list_params import MetricListParams as MetricListParams
 from .metric_create_params import MetricCreateParams as MetricCreateParams
 from .metric_list_response import MetricListResponse as MetricListResponse

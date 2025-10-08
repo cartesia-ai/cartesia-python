@@ -25,12 +25,12 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
+from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
-from .._base_client import make_request_options
+from .._base_client import AsyncPaginator, make_request_options
 from ..types.voice_metadata import VoiceMetadata
 from ..types.supported_language import SupportedLanguage
 from ..types.gender_presentation import GenderPresentation
-from ..types.voice_list_response import VoiceListResponse
 
 __all__ = ["VoicesResource", "AsyncVoicesResource"]
 
@@ -159,7 +159,7 @@ class VoicesResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> VoiceListResponse:
+    ) -> SyncCursorIDPage[Voice]:
         """List Voices
 
         Args:
@@ -193,8 +193,9 @@ class VoicesResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return self._get(
+        return self._get_api_list(
             "/voices/",
+            page=SyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -213,7 +214,7 @@ class VoicesResource(SyncAPIResource):
                     voice_list_params.VoiceListParams,
                 ),
             ),
-            cast_to=VoiceListResponse,
+            model=Voice,
         )
 
     def delete(
@@ -491,7 +492,7 @@ class AsyncVoicesResource(AsyncAPIResource):
             cast_to=Voice,
         )
 
-    async def list(
+    def list(
         self,
         *,
         ending_before: Optional[str] | Omit = omit,
@@ -507,7 +508,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> VoiceListResponse:
+    ) -> AsyncPaginator[Voice, AsyncCursorIDPage[Voice]]:
         """List Voices
 
         Args:
@@ -541,14 +542,15 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        return await self._get(
+        return self._get_api_list(
             "/voices/",
+            page=AsyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform(
+                query=maybe_transform(
                     {
                         "ending_before": ending_before,
                         "expand": expand,
@@ -561,7 +563,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                     voice_list_params.VoiceListParams,
                 ),
             ),
-            cast_to=VoiceListResponse,
+            model=Voice,
         )
 
     async def delete(

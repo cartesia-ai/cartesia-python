@@ -37,13 +37,13 @@ Methods:
 Types:
 
 ```python
-from noah_testing.types.agents import AgentCall, AgentTranscript, CallListResponse
+from noah_testing.types.agents import AgentCall, AgentTranscript
 ```
 
 Methods:
 
 - <code title="get /agents/calls/{call_id}">client.agents.calls.<a href="./src/noah_testing/resources/agents/calls.py">retrieve</a>(call_id) -> <a href="./src/noah_testing/types/agents/agent_call.py">AgentCall</a></code>
-- <code title="get /agents/calls">client.agents.calls.<a href="./src/noah_testing/resources/agents/calls.py">list</a>(\*\*<a href="src/noah_testing/types/agents/call_list_params.py">params</a>) -> <a href="./src/noah_testing/types/agents/call_list_response.py">CallListResponse</a></code>
+- <code title="get /agents/calls">client.agents.calls.<a href="./src/noah_testing/resources/agents/calls.py">list</a>(\*\*<a href="src/noah_testing/types/agents/call_list_params.py">params</a>) -> <a href="./src/noah_testing/types/agents/agent_call.py">SyncCursorIDPage[AgentCall]</a></code>
 - <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/noah_testing/resources/agents/calls.py">download_audio</a>(call_id) -> None</code>
 
 ## Metrics
@@ -72,7 +72,7 @@ from noah_testing.types.agents.metrics import ResultListResponse
 
 Methods:
 
-- <code title="get /agents/metrics/results">client.agents.metrics.results.<a href="./src/noah_testing/resources/agents/metrics/results.py">list</a>(\*\*<a href="src/noah_testing/types/agents/metrics/result_list_params.py">params</a>) -> <a href="./src/noah_testing/types/agents/metrics/result_list_response.py">ResultListResponse</a></code>
+- <code title="get /agents/metrics/results">client.agents.metrics.results.<a href="./src/noah_testing/resources/agents/metrics/results.py">list</a>(\*\*<a href="src/noah_testing/types/agents/metrics/result_list_params.py">params</a>) -> <a href="./src/noah_testing/types/agents/metrics/result_list_response.py">SyncCursorIDPage[ResultListResponse]</a></code>
 - <code title="get /agents/metrics/results/export">client.agents.metrics.results.<a href="./src/noah_testing/resources/agents/metrics/results.py">export</a>(\*\*<a href="src/noah_testing/types/agents/metrics/result_export_params.py">params</a>) -> None</code>
 
 ## Deployments
@@ -105,7 +105,7 @@ Methods:
 Types:
 
 ```python
-from noah_testing.types import Dataset, DatasetListResponse
+from noah_testing.types import Dataset
 ```
 
 Methods:
@@ -113,7 +113,7 @@ Methods:
 - <code title="post /datasets/">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">create</a>(\*\*<a href="src/noah_testing/types/dataset_create_params.py">params</a>) -> <a href="./src/noah_testing/types/dataset.py">Dataset</a></code>
 - <code title="get /datasets/{id}">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">retrieve</a>(id) -> <a href="./src/noah_testing/types/dataset.py">Dataset</a></code>
 - <code title="patch /datasets/{id}">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">update</a>(id, \*\*<a href="src/noah_testing/types/dataset_update_params.py">params</a>) -> None</code>
-- <code title="get /datasets/">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">list</a>(\*\*<a href="src/noah_testing/types/dataset_list_params.py">params</a>) -> <a href="./src/noah_testing/types/dataset_list_response.py">DatasetListResponse</a></code>
+- <code title="get /datasets/">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">list</a>(\*\*<a href="src/noah_testing/types/dataset_list_params.py">params</a>) -> <a href="./src/noah_testing/types/dataset.py">SyncCursorIDPage[Dataset]</a></code>
 - <code title="delete /datasets/{id}">client.datasets.<a href="./src/noah_testing/resources/datasets/datasets.py">delete</a>(id) -> None</code>
 
 ## Files
@@ -126,7 +126,7 @@ from noah_testing.types.datasets import FileListResponse
 
 Methods:
 
-- <code title="get /datasets/{id}/files">client.datasets.files.<a href="./src/noah_testing/resources/datasets/files.py">list</a>(id, \*\*<a href="src/noah_testing/types/datasets/file_list_params.py">params</a>) -> <a href="./src/noah_testing/types/datasets/file_list_response.py">FileListResponse</a></code>
+- <code title="get /datasets/{id}/files">client.datasets.files.<a href="./src/noah_testing/resources/datasets/files.py">list</a>(id, \*\*<a href="src/noah_testing/types/datasets/file_list_params.py">params</a>) -> <a href="./src/noah_testing/types/datasets/file_list_response.py">SyncCursorIDPage[FileListResponse]</a></code>
 - <code title="delete /datasets/{id}/files/{fileID}">client.datasets.files.<a href="./src/noah_testing/resources/datasets/files.py">delete</a>(file_id, \*, id) -> None</code>
 - <code title="post /datasets/{id}/files">client.datasets.files.<a href="./src/noah_testing/resources/datasets/files.py">upload</a>(id, \*\*<a href="src/noah_testing/types/datasets/file_upload_params.py">params</a>) -> None</code>
 
@@ -135,16 +135,16 @@ Methods:
 Types:
 
 ```python
-from noah_testing.types import FineTune, FineTuneListResponse, FineTuneListVoicesResponse
+from noah_testing.types import FineTune
 ```
 
 Methods:
 
 - <code title="post /fine-tunes/">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">create</a>(\*\*<a href="src/noah_testing/types/fine_tune_create_params.py">params</a>) -> <a href="./src/noah_testing/types/fine_tune.py">FineTune</a></code>
 - <code title="get /fine-tunes/{id}">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">retrieve</a>(id) -> <a href="./src/noah_testing/types/fine_tune.py">FineTune</a></code>
-- <code title="get /fine-tunes/">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">list</a>(\*\*<a href="src/noah_testing/types/fine_tune_list_params.py">params</a>) -> <a href="./src/noah_testing/types/fine_tune_list_response.py">FineTuneListResponse</a></code>
+- <code title="get /fine-tunes/">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">list</a>(\*\*<a href="src/noah_testing/types/fine_tune_list_params.py">params</a>) -> <a href="./src/noah_testing/types/fine_tune.py">SyncCursorIDPage[FineTune]</a></code>
 - <code title="delete /fine-tunes/{id}">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">delete</a>(id) -> None</code>
-- <code title="get /fine-tunes/{id}/voices">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">list_voices</a>(id, \*\*<a href="src/noah_testing/types/fine_tune_list_voices_params.py">params</a>) -> <a href="./src/noah_testing/types/fine_tune_list_voices_response.py">FineTuneListVoicesResponse</a></code>
+- <code title="get /fine-tunes/{id}/voices">client.fine_tunes.<a href="./src/noah_testing/resources/fine_tunes.py">list_voices</a>(id, \*\*<a href="src/noah_testing/types/fine_tune_list_voices_params.py">params</a>) -> <a href="./src/noah_testing/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 
 # Infill
 
@@ -163,11 +163,7 @@ Methods:
 Types:
 
 ```python
-from noah_testing.types import (
-    PronunciationDict,
-    PronunciationDictItem,
-    PronunciationDictListResponse,
-)
+from noah_testing.types import PronunciationDict, PronunciationDictItem
 ```
 
 Methods:
@@ -175,7 +171,7 @@ Methods:
 - <code title="post /pronunciation-dicts/">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">create</a>(\*\*<a href="src/noah_testing/types/pronunciation_dict_create_params.py">params</a>) -> <a href="./src/noah_testing/types/pronunciation_dict.py">PronunciationDict</a></code>
 - <code title="get /pronunciation-dicts/{id}">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">retrieve</a>(id) -> <a href="./src/noah_testing/types/pronunciation_dict.py">PronunciationDict</a></code>
 - <code title="patch /pronunciation-dicts/{id}">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">update</a>(id, \*\*<a href="src/noah_testing/types/pronunciation_dict_update_params.py">params</a>) -> <a href="./src/noah_testing/types/pronunciation_dict.py">PronunciationDict</a></code>
-- <code title="get /pronunciation-dicts/">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">list</a>(\*\*<a href="src/noah_testing/types/pronunciation_dict_list_params.py">params</a>) -> <a href="./src/noah_testing/types/pronunciation_dict_list_response.py">PronunciationDictListResponse</a></code>
+- <code title="get /pronunciation-dicts/">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">list</a>(\*\*<a href="src/noah_testing/types/pronunciation_dict_list_params.py">params</a>) -> <a href="./src/noah_testing/types/pronunciation_dict.py">SyncCursorIDPage[PronunciationDict]</a></code>
 - <code title="delete /pronunciation-dicts/{id}">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">delete</a>(id) -> None</code>
 - <code title="post /pronunciation-dicts/{id}/pin">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">pin</a>(id) -> None</code>
 - <code title="post /pronunciation-dicts/{id}/unpin">client.pronunciation_dicts.<a href="./src/noah_testing/resources/pronunciation_dicts.py">unpin</a>(id) -> None</code>
@@ -217,20 +213,14 @@ Methods:
 Types:
 
 ```python
-from noah_testing.types import (
-    GenderPresentation,
-    SupportedLanguage,
-    Voice,
-    VoiceMetadata,
-    VoiceListResponse,
-)
+from noah_testing.types import GenderPresentation, SupportedLanguage, Voice, VoiceMetadata
 ```
 
 Methods:
 
 - <code title="get /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">retrieve</a>(id) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
 - <code title="patch /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">update</a>(id, \*\*<a href="src/noah_testing/types/voice_update_params.py">params</a>) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
-- <code title="get /voices/">client.voices.<a href="./src/noah_testing/resources/voices.py">list</a>(\*\*<a href="src/noah_testing/types/voice_list_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_list_response.py">VoiceListResponse</a></code>
+- <code title="get /voices/">client.voices.<a href="./src/noah_testing/resources/voices.py">list</a>(\*\*<a href="src/noah_testing/types/voice_list_params.py">params</a>) -> <a href="./src/noah_testing/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 - <code title="delete /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">delete</a>(id) -> None</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/noah_testing/resources/voices.py">clone</a>(\*\*<a href="src/noah_testing/types/voice_clone_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
 - <code title="post /voices/localize">client.voices.<a href="./src/noah_testing/resources/voices.py">localize</a>(\*\*<a href="src/noah_testing/types/voice_localize_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>

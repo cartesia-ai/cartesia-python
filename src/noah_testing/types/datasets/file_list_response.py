@@ -1,13 +1,11 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import List
-
 from ..._models import BaseModel
 
-__all__ = ["FileListResponse", "Data"]
+__all__ = ["FileListResponse"]
 
 
-class Data(BaseModel):
+class FileListResponse(BaseModel):
     id: str
     """Unique identifier for the file"""
 
@@ -19,11 +17,3 @@ class Data(BaseModel):
 
     size: int
     """Size of the file in bytes"""
-
-
-class FileListResponse(BaseModel):
-    data: List[Data]
-    """List of file objects"""
-
-    has_more: bool
-    """Whether there are more files available"""
