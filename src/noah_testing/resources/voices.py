@@ -151,7 +151,6 @@ class VoicesResource(SyncAPIResource):
         gender: Optional[GenderPresentation] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         is_starred: Optional[bool] | Omit = omit,
-        language: Optional[str] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         starting_after: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -178,8 +177,6 @@ class VoicesResource(SyncAPIResource):
           is_owner: Whether to only return voices owned by the current user.
 
           is_starred: Whether to only return starred voices.
-
-          language: The language of the voice.
 
           limit: The number of Voices to return per page, ranging between 1 and 100.
 
@@ -211,7 +208,6 @@ class VoicesResource(SyncAPIResource):
                         "gender": gender,
                         "is_owner": is_owner,
                         "is_starred": is_starred,
-                        "language": language,
                         "limit": limit,
                         "starting_after": starting_after,
                     },
@@ -504,7 +500,6 @@ class AsyncVoicesResource(AsyncAPIResource):
         gender: Optional[GenderPresentation] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         is_starred: Optional[bool] | Omit = omit,
-        language: Optional[str] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         starting_after: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -531,8 +526,6 @@ class AsyncVoicesResource(AsyncAPIResource):
           is_owner: Whether to only return voices owned by the current user.
 
           is_starred: Whether to only return starred voices.
-
-          language: The language of the voice.
 
           limit: The number of Voices to return per page, ranging between 1 and 100.
 
@@ -564,7 +557,6 @@ class AsyncVoicesResource(AsyncAPIResource):
                         "gender": gender,
                         "is_owner": is_owner,
                         "is_starred": is_starred,
-                        "language": language,
                         "limit": limit,
                         "starting_after": starting_after,
                     },

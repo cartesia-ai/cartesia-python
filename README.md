@@ -114,9 +114,7 @@ client = NoahTesting()
 
 all_voices = []
 # Automatically fetches more pages as needed.
-for voice in client.voices.list(
-    language="en",
-):
+for voice in client.voices.list():
     # Do something with voice here
     all_voices.append(voice)
 print(all_voices)
@@ -134,9 +132,7 @@ client = AsyncNoahTesting()
 async def main() -> None:
     all_voices = []
     # Iterate through items across all pages, issuing requests as needed.
-    async for voice in client.voices.list(
-        language="en",
-    ):
+    async for voice in client.voices.list():
         all_voices.append(voice)
     print(all_voices)
 
@@ -147,9 +143,7 @@ asyncio.run(main())
 Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
 
 ```python
-first_page = await client.voices.list(
-    language="en",
-)
+first_page = await client.voices.list()
 if first_page.has_next_page():
     print(f"will fetch next page using these details: {first_page.next_page_info()}")
     next_page = await first_page.get_next_page()
@@ -161,9 +155,7 @@ if first_page.has_next_page():
 Or just work directly with the returned data:
 
 ```python
-first_page = await client.voices.list(
-    language="en",
-)
+first_page = await client.voices.list()
 
 print(f"next page cursor: {first_page.starting_after}")  # => "next page cursor: ..."
 for voice in first_page.data:
