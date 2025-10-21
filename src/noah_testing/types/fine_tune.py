@@ -22,7 +22,7 @@ class FineTune(BaseModel):
     language: str
     """Language code of the fine-tune"""
 
-    api_model_id: str = FieldInfo(alias="model_id")
+    llm_model_id: str = FieldInfo(alias="model_id")
     """Base model identifier to fine-tune from"""
 
     name: str
