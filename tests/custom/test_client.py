@@ -61,7 +61,7 @@ EXPERIMENTAL_VOICE_CONTROLS = {
 }
 EXPERIMENTAL_VOICE_CONTROLS_2 = {"speed": 0.4, "emotion": []}
 
-SAMPLE_VOICE_NAME = "Southern Woman"
+SAMPLE_VOICE_NAME = "Caroline - Southern Woman"
 SAMPLE_VOICE_ID = "f9836c6e-a0bd-460e-9d3c-f7299fa60f94"
 SAMPLE_VOICE_SPEC = TtsRequestIdSpecifierParams(mode="id", id=SAMPLE_VOICE_ID)
 SAMPLE_TRANSCRIPT = "Hello, world! I'm generating audio on Cartesia."
