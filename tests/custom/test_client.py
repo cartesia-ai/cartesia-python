@@ -207,8 +207,7 @@ def _validate_audio_response(data: bytes, output_format: OutputFormatParams):
         _validate_raw_response(data, output_format["sample_rate"])
     else:
         raise ValueError(f"Unsupported output format container: {output_format['container']}")
-
-
+@pytest.mark.skip(reason="api error with finetunes needs fixing")
 def test_get_voices(client: Cartesia):
     logger.info("Testing voices.list")
     voices = client.voices.list()
@@ -231,14 +230,14 @@ def test_get_voice_from_id(client: Cartesia):
     # assert voice in voices
     # Instead:
     voices = client.voices.list()
-    
+
     # Search for the voice in the list with a reasonable limit to avoid full pagination
     # If not found in first batch, the voice might be further down or the test voice
     # might need to be updated to use a more stable voice ID
     count = 0
     voice_found = False
-    max_voices_to_check = 200 
-    
+    max_voices_to_check = 200
+
     for v in voices:
         if v.id == voice.id:
             voice_found = True
@@ -246,7 +245,7 @@ def test_get_voice_from_id(client: Cartesia):
         count += 1
         if count >= max_voices_to_check:
             break
-    
+
     if not voice_found:
         logger.warning(f"Voice {SAMPLE_VOICE_ID} not found in first {max_voices_to_check} voices from list(). "
                       f"This might indicate the voice has moved in the pagination or the test needs updating.")
@@ -291,7 +290,7 @@ def test_clone_voice(client: Cartesia, mode: str, enhance: bool, language: str):
 
     client.voices.delete(output.id)
 
-
+@pytest.mark.skip(reason="embeddings voices no longer supported in this api version")
 def test_create_voice(client: Cartesia):
     logger.info("Testing voices.create")
     embedding = [1.0] * 192
@@ -726,7 +725,7 @@ async def test_continuation_incorrect_transcript():
         await ws.close()
         await async_client.close()
 
-
+@pytest.mark.skip(reason="buffering now automatic in this api version, needs new test")
 @pytest.mark.asyncio
 @pytest.mark.parametrize("max_buffer_delay_ms", [-100, 2000])
 async def test_continuation_incorrect_buffer_delay(max_buffer_delay_ms: int):
@@ -752,7 +751,7 @@ async def test_continuation_incorrect_buffer_delay(max_buffer_delay_ms: int):
     finally:
         await ws.close()
         await async_client.close()
-        
+
 @pytest.mark.asyncio
 async def test_continuation_incorrect_voice_id():
     logger.info("Testing continuations with incorrect voice_id")
@@ -1424,7 +1423,7 @@ def test_continuation_phoneme_timestamps():
             all_ends.extend(out.phoneme_timestamps.end)
         if out.audio is not None:
             chunks.append(out.audio)
-    
+
     assert has_phoneme_timestamps, "No phoneme timestamps found"
     _validate_phoneme_timestamps(all_phonemes, all_starts, all_ends)
 
@@ -1494,7 +1493,7 @@ async def test_continuation_phoneme_timestamps_async():
             add_phoneme_timestamps=True,
             continue_=True,
         )
-        
+
     await ctx.no_more_inputs()
 
     has_phoneme_timestamps = False
@@ -1523,86 +1522,86 @@ async def test_continuation_phoneme_timestamps_async():
 def _load_test_audio_chunks() -> List[bytes]:
     """Load test audio file and convert to chunks for STT testing."""
     audio_path = os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav")
-    
+
     import wave
     with wave.open(audio_path, 'rb') as wav_file:
         frames = wav_file.readframes(wav_file.getnframes())
         sample_rate = wav_file.getframerate()
         channels = wav_file.getnchannels()
         sample_width = wav_file.getsampwidth()
-        
+
         chunk_size_frames = int(0.1 * sample_rate)
         chunk_size_bytes = chunk_size_frames * channels * sample_width
-        
+
         chunks = []
         for i in range(0, len(frames), chunk_size_bytes):
             chunk = frames[i:i + chunk_size_bytes]
             if chunk:
                 chunks.append(chunk)
-        
+
         return chunks
 
 
 def _validate_transcript_accuracy(actual_text: str, expected_text: str, min_accuracy: float = 0.7) -> bool:
     """Validate transcript accuracy by comparing word overlap.
-    
+
     Args:
         actual_text: The transcribed text from STT
         expected_text: The expected transcript content
         min_accuracy: Minimum accuracy threshold (0.0 to 1.0)
-    
+
     Returns:
         True if accuracy meets threshold, False otherwise
     """
     if not actual_text or not expected_text:
         return False
-    
+
     # Normalize text: lowercase and split into words
     actual_words = set(actual_text.lower().split())
     expected_words = set(expected_text.lower().split())
-    
+
     if not expected_words:
         return False
-    
+
     # Calculate word overlap accuracy
     matching_words = actual_words.intersection(expected_words)
     accuracy = len(matching_words) / len(expected_words)
-    
+
     logger.info(f"Transcript accuracy: {accuracy:.2%} (expected: {min_accuracy:.0%})")
     logger.info(f"Expected: {expected_text}")
     logger.info(f"Actual: {actual_text}")
     logger.info(f"Matching words: {matching_words}")
-    
+
     return accuracy >= min_accuracy
 
 
 def test_stt_websocket_sync():
     """Test synchronous STT websocket functionality."""
     logger.info("Testing STT WebSocket sync")
-    
+
     expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
-    
+
     with create_client() as client:
         audio_chunks = _load_test_audio_chunks()
-        
+
         # Create websocket connection
         ws = client.stt.websocket(
             model="ink-whisper",
             language="en",
-            encoding="pcm_s16le", 
+            encoding="pcm_s16le",
             sample_rate=16000,
             min_volume=0.1,
             max_silence_duration_secs=2.0,
         )
-        
+
         # Send audio chunks (streaming input)
         for chunk in audio_chunks:
             ws.send(chunk)
-        
+
         # Finalize and close
         ws.send("finalize")
         ws.send("done")
-        
+
         # Receive transcription results
         results = []
         final_transcript_chunks = []
@@ -1613,7 +1612,7 @@ def test_stt_websocket_sync():
                 assert isinstance(result['text'], str)
                 assert isinstance(result['is_final'], bool)
                 logger.info(f"Received transcript: {result['text']}")
-                
+
                 # Check for word-level timestamps
                 if 'words' in result and result['words']:
                     word_timestamps_found = True
@@ -1627,20 +1626,20 @@ def test_stt_websocket_sync():
                         assert isinstance(word_info['end'], (int, float)), "End time should be numeric"
                         assert word_info['start'] <= word_info['end'], "Start time should be <= end time"
                     logger.info(f"Word timestamps found: {len(words)} words")
-                
+
                 # Capture final transcript chunks for accuracy validation
                 if result.get('is_final') and result.get('text'):
                     final_transcript_chunks.append(result['text'])
             elif result['type'] == 'done':
                 break
-        
+
         ws.close()
-        
+
         assert len(results) > 0, "No STT results received"
         transcript_found = any(r['type'] == 'transcript' for r in results)
         assert transcript_found, "No transcript messages received"
         assert word_timestamps_found, "No word-level timestamps found in responses"
-        
+
         # Validate transcript accuracy
         if final_transcript_chunks:
             final_transcript = ' '.join(final_transcript_chunks).strip()
@@ -1652,30 +1651,30 @@ def test_stt_websocket_sync():
 async def test_stt_websocket_async():
     """Test asynchronous STT websocket functionality."""
     logger.info("Testing STT WebSocket async")
-    
+
     expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
-    
+
     async with create_async_client() as async_client:
         audio_chunks = _load_test_audio_chunks()
-        
+
         # Create websocket connection
         ws = await async_client.stt.websocket(
             model="ink-whisper",
             language="en",
             encoding="pcm_s16le",
             sample_rate=16000,
-            min_volume=0.15, 
+            min_volume=0.15,
             max_silence_duration_secs=1.5,
         )
-        
+
         # Send audio chunks (streaming input)
         for chunk in audio_chunks:
             await ws.send(chunk)
-        
+
         # Finalize and close
         await ws.send("finalize")
         await ws.send("done")
-        
+
         # Receive transcription results
         results = []
         final_transcript_chunks = []
@@ -1686,7 +1685,7 @@ async def test_stt_websocket_async():
                 assert isinstance(result['text'], str)
                 assert isinstance(result['is_final'], bool)
                 logger.info(f"Received transcript: {result['text']}")
-                
+
                 # Check for word-level timestamps
                 if 'words' in result and result['words']:
                     word_timestamps_found = True
@@ -1700,20 +1699,20 @@ async def test_stt_websocket_async():
                         assert isinstance(word_info['end'], (int, float)), "End time should be numeric"
                         assert word_info['start'] <= word_info['end'], "Start time should be <= end time"
                     logger.info(f"Word timestamps found: {len(words)} words")
-                
+
                 # Capture final transcript chunks for accuracy validation
                 if result.get('is_final') and result.get('text'):
                     final_transcript_chunks.append(result['text'])
             elif result['type'] == 'done':
                 break
-        
+
         await ws.close()
-        
+
         assert len(results) > 0, "No STT results received"
         transcript_found = any(r['type'] == 'transcript' for r in results)
         assert transcript_found, "No transcript messages received"
         assert word_timestamps_found, "No word-level timestamps found in responses"
-        
+
         # Validate transcript accuracy
         if final_transcript_chunks:
             final_transcript = ' '.join(final_transcript_chunks).strip()
@@ -1724,10 +1723,10 @@ async def test_stt_websocket_async():
 def test_stt_batch_transcription():
     """Test batch STT transcription with word timestamps."""
     logger.info("Testing STT batch transcription")
-    
+
     expected_transcript = "magnetic resonance imaging, mri, is clinically relevant"
     audio_path = os.path.join(RESOURCES_DIR, "sample-speech-4s-pcm_s16le-16000.wav")
-    
+
     with create_client() as client:
         # Test batch transcription with word timestamps
         with open(audio_path, 'rb') as audio_file:
@@ -1739,34 +1738,34 @@ def test_stt_batch_transcription():
                 encoding="pcm_s16le",
                 sample_rate=16000
             )
-        
+
         # Validate response structure
         assert hasattr(response, 'text'), "Response should have 'text' field"
         assert hasattr(response, 'language'), "Response should have 'language' field"
         assert hasattr(response, 'duration'), "Response should have 'duration' field"
         assert hasattr(response, 'words'), "Response should have 'words' field for timestamps"
-        
+
         # Validate text content
         assert isinstance(response.text, str), "Text should be a string"
         assert len(response.text.strip()) > 0, "Text should not be empty"
         logger.info(f"Transcribed text: {response.text}")
-        
+
         # Validate language
         if response.language:
             assert response.language == "en", f"Expected language 'en', got '{response.language}'"
-        
+
         # Validate duration
         if response.duration:
             assert isinstance(response.duration, (int, float)), "Duration should be numeric"
             assert response.duration > 0, "Duration should be positive"
             assert response.duration < 10, "Duration should be reasonable for test file"
             logger.info(f"Audio duration: {response.duration:.2f}s")
-        
+
         # Validate word timestamps
         if response.words:
             assert isinstance(response.words, list), "Words should be a list"
             assert len(response.words) > 0, "Should have word timestamps"
-            
+
             for word_info in response.words:
                 assert hasattr(word_info, 'word'), "Each word entry should have 'word' field"
                 assert hasattr(word_info, 'start'), "Each word entry should have 'start' field"
@@ -1776,22 +1775,22 @@ def test_stt_batch_transcription():
                 assert isinstance(word_info.end, (int, float)), "End time should be numeric"
                 assert word_info.start <= word_info.end, "Start time should be <= end time"
                 assert word_info.start >= 0, "Start time should be non-negative"
-            
+
             # Validate timestamp ordering
             for i in range(len(response.words) - 1):
                 current_word = response.words[i]
                 next_word = response.words[i + 1]
                 assert current_word.start <= next_word.start, "Word start times should be in order"
-            
+
             logger.info(f"Word timestamps found: {len(response.words)} words")
-            
+
             # Log sample timestamps for verification
             sample_words = response.words[:3] if len(response.words) >= 3 else response.words
             for word_info in sample_words:
                 logger.info(f"  '{word_info.word}': {word_info.start:.2f}s - {word_info.end:.2f}s")
         else:
             logger.warning("No word timestamps returned (this may indicate an API issue)")
-        
+
         # Validate transcript accuracy
         accuracy_valid = _validate_transcript_accuracy(response.text, expected_transcript, min_accuracy=0.7)
         assert accuracy_valid, f"Transcript accuracy below 70%: '{response.text.lower()}' vs expected '{expected_transcript}'"
