@@ -9,3 +9,6 @@ class SseOutputFormatParams(typing_extensions.TypedDict):
     container: typing.Literal["raw"]
     encoding: RawEncoding
     sample_rate: int
+    """
+    The sample rate of the audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
+    """

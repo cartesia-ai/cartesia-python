@@ -259,7 +259,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**output_format_sample_rate:** `int` — The sample rate of the output audio
+**output_format_sample_rate:** `int` — The sample rate of the output audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
     
 </dd>
 </dl>
@@ -911,7 +911,7 @@ core.File` — See core.File for more documentation
 <dl>
 <dd>
 
-**output_format_sample_rate:** `int` 
+**output_format_sample_rate:** `int` — The sample rate of the output audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
     
 </dd>
 </dl>
