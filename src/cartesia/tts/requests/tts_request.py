@@ -6,7 +6,6 @@ import typing_extensions
 from ..types.supported_language import SupportedLanguage
 from .output_format import OutputFormatParams
 from ..types.model_speed import ModelSpeed
-from .generation_config import GenerationConfigParams
 
 
 class TtsRequestParams(typing_extensions.TypedDict):
@@ -26,4 +25,3 @@ class TtsRequestParams(typing_extensions.TypedDict):
     """
 
     speed: typing_extensions.NotRequired[ModelSpeed]
-    generation_config: typing_extensions.NotRequired[GenerationConfigParams]

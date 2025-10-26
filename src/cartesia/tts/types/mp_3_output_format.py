@@ -7,7 +7,11 @@ import typing
 
 
 class Mp3OutputFormat(UniversalBaseModel):
-    sample_rate: int
+    sample_rate: int = pydantic.Field()
+    """
+    The sample rate of the audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
+    """
+
     bit_rate: int = pydantic.Field()
     """
     The bit rate of the audio in bits per second. Supported bit rates are 32000, 64000, 96000, 128000, 192000.

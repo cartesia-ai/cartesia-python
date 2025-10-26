@@ -47,6 +47,7 @@ class VoiceChangerClient:
         output_format_container : OutputFormatContainer
 
         output_format_sample_rate : int
+            The sample rate of the output audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
 
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.
@@ -224,6 +225,7 @@ class AsyncVoiceChangerClient:
         output_format_container : OutputFormatContainer
 
         output_format_sample_rate : int
+            The sample rate of the output audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
 
         output_format_encoding : typing.Optional[RawEncoding]
             Required for `raw` and `wav` containers.

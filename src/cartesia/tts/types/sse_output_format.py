@@ -3,14 +3,17 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
 from .raw_encoding import RawEncoding
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class SseOutputFormat(UniversalBaseModel):
     container: typing.Literal["raw"] = "raw"
     encoding: RawEncoding
-    sample_rate: int
+    sample_rate: int = pydantic.Field()
+    """
+    The sample rate of the audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
