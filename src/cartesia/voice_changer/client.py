@@ -67,7 +67,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            token="YOUR_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         client.voice_changer.bytes(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -145,7 +145,7 @@ class VoiceChangerClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            token="YOUR_TOKEN",
+            api_key="YOUR_API_KEY",
         )
         response = client.voice_changer.sse(
             voice_id="694f9389-aac1-45b6-b726-9d9369183238",
@@ -247,7 +247,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            token="YOUR_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 
@@ -333,7 +333,7 @@ class AsyncVoiceChangerClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            token="YOUR_TOKEN",
+            api_key="YOUR_API_KEY",
         )
 
 

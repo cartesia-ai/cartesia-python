@@ -5,8 +5,6 @@ from .dataset import DatasetParams
 from .dataset_file import DatasetFileParams
 from .paginated_dataset_files import PaginatedDatasetFilesParams
 from .paginated_datasets import PaginatedDatasetsParams
-from .s_3_upload_params_response import S3UploadParamsResponseParams
-from .update_dataset_request import UpdateDatasetRequestParams
 
 __all__ = [
     "CreateDatasetRequestParams",
@@ -14,6 +12,4 @@ __all__ = [
     "DatasetParams",
     "PaginatedDatasetFilesParams",
     "PaginatedDatasetsParams",
-    "S3UploadParamsResponseParams",
-    "UpdateDatasetRequestParams",
 ]

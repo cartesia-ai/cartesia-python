@@ -2,9 +2,9 @@
 
 import typing_extensions
 from ..types.voice_id import VoiceId
-import typing_extensions
-from ..types.gender_presentation import GenderPresentation
 import datetime as dt
+import typing_extensions
+from ...embedding.types.embedding import Embedding
 from ...tts.types.supported_language import SupportedLanguage
 
 
@@ -13,11 +13,6 @@ class VoiceParams(typing_extensions.TypedDict):
     is_owner: bool
     """
     Whether the current user is the owner of the voice.
-    """
-
-    is_public: bool
-    """
-    Whether the voice is publicly accessible.
     """
 
     name: str
@@ -30,14 +25,14 @@ class VoiceParams(typing_extensions.TypedDict):
     The description of the voice.
     """
 
-    gender: typing_extensions.NotRequired[GenderPresentation]
-    """
-    The gender of the voice, if specified.
-    """
-
     created_at: dt.datetime
     """
     The date and time the voice was created.
+    """
+
+    embedding: typing_extensions.NotRequired[Embedding]
+    """
+    The vector embedding of the voice. Only included when `expand` includes `embedding`.
     """
 
     is_starred: typing_extensions.NotRequired[bool]

@@ -12,7 +12,7 @@ from ..types.model_speed import ModelSpeed
 class TtsRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
     transcript: str
@@ -27,12 +27,3 @@ class TtsRequestParams(typing_extensions.TypedDict):
     """
 
     speed: typing_extensions.NotRequired[ModelSpeed]
-    save: typing_extensions.NotRequired[bool]
-    """
-    Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
-    """
-
-    pronunciation_dict_id: typing_extensions.NotRequired[str]
-    """
-    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
-    """

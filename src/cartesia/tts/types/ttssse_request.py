@@ -15,7 +15,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 class TtssseRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
     transcript: str
@@ -37,17 +37,12 @@ class TtssseRequest(UniversalBaseModel):
 
     add_phoneme_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
+    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
     use_normalized_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to use normalized timestamps (True) or original timestamps (False).
-    """
-
-    pronunciation_dict_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
     """
 
     context_id: typing.Optional[ContextId] = pydantic.Field(default=None)

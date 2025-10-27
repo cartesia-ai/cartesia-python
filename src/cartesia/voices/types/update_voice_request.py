@@ -2,9 +2,8 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-import typing
-from .gender_presentation import GenderPresentation
 from ...core.pydantic_utilities import IS_PYDANTIC_V2
+import typing
 
 
 class UpdateVoiceRequest(UniversalBaseModel):
@@ -17,8 +16,6 @@ class UpdateVoiceRequest(UniversalBaseModel):
     """
     The description of the voice.
     """
-
-    gender: typing.Optional[GenderPresentation] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -6,16 +6,5 @@ from .dataset_file import DatasetFileParams
 
 
 class PaginatedDatasetFilesParams(typing_extensions.TypedDict):
-    """
-    Paginated list of files in a dataset
-    """
-
     data: typing.Sequence[DatasetFileParams]
-    """
-    List of file objects
-    """
-
     has_more: bool
-    """
-    Whether there are more files available
-    """

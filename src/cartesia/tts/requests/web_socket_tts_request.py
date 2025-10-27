@@ -12,7 +12,7 @@ from ..types.model_speed import ModelSpeed
 class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
     """
 
     output_format: typing_extensions.NotRequired[OutputFormatParams]
@@ -28,15 +28,10 @@ class WebSocketTtsRequestParams(typing_extensions.TypedDict):
 
     add_phoneme_timestamps: typing_extensions.NotRequired[bool]
     """
-    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced. If `true`, the server will return timestamp events containing phoneme-level timing information.
+    Whether to return phoneme-level timestamps. If `false` (default), no phoneme timestamps will be produced - if `add_timestamps` is `true`, the produced timestamps will be word timestamps instead. If `true`, the server will return timestamp events containing phoneme-level timing information.
     """
 
     use_normalized_timestamps: typing_extensions.NotRequired[bool]
-    pronunciation_dict_id: typing_extensions.NotRequired[str]
-    """
-    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
-    """
-
     continue_: typing_extensions.NotRequired[typing_extensions.Annotated[bool, FieldMetadata(alias="continue")]]
     context_id: typing_extensions.NotRequired[str]
     max_buffer_delay_ms: typing_extensions.NotRequired[int]

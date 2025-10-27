@@ -2,19 +2,26 @@
 
 from .cancel_context_request import CancelContextRequest
 from .context_id import ContextId
+from .controls import Controls
 from .emotion import Emotion
+from .emotion_deprecated import EmotionDeprecated
 from .flush_id import FlushId
 from .generation_config import GenerationConfig
 from .generation_request import GenerationRequest
 from .model_speed import ModelSpeed
 from .mp_3_output_format import Mp3OutputFormat
+from .natural_specifier import NaturalSpecifier
+from .numerical_specifier import NumericalSpecifier
 from .output_format import OutputFormat, OutputFormat_Mp3, OutputFormat_Raw, OutputFormat_Wav
 from .phoneme_timestamps import PhonemeTimestamps
 from .raw_encoding import RawEncoding
 from .raw_output_format import RawOutputFormat
+from .speed import Speed
 from .sse_output_format import SseOutputFormat
 from .supported_language import SupportedLanguage
 from .tts_request import TtsRequest
+from .tts_request_embedding_specifier import TtsRequestEmbeddingSpecifier
+from .tts_request_id_specifier import TtsRequestIdSpecifier
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
 from .ttssse_request import TtssseRequest
 from .wav_output_format import WavOutputFormat
@@ -44,12 +51,16 @@ from .word_timestamps import WordTimestamps
 __all__ = [
     "CancelContextRequest",
     "ContextId",
+    "Controls",
     "Emotion",
+    "EmotionDeprecated",
     "FlushId",
     "GenerationConfig",
     "GenerationRequest",
     "ModelSpeed",
     "Mp3OutputFormat",
+    "NaturalSpecifier",
+    "NumericalSpecifier",
     "OutputFormat",
     "OutputFormat_Mp3",
     "OutputFormat_Raw",
@@ -57,9 +68,12 @@ __all__ = [
     "PhonemeTimestamps",
     "RawEncoding",
     "RawOutputFormat",
+    "Speed",
     "SseOutputFormat",
     "SupportedLanguage",
     "TtsRequest",
+    "TtsRequestEmbeddingSpecifier",
+    "TtsRequestIdSpecifier",
     "TtsRequestVoiceSpecifier",
     "TtssseRequest",
     "WavOutputFormat",

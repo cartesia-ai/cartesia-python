@@ -2,4 +2,4 @@
 
 import typing
 
-VoiceExpandOptions = typing.Union[typing.Literal["is_starred"], typing.Any]
+VoiceExpandOptions = typing.Union[typing.Literal["embedding", "is_starred"], typing.Any]

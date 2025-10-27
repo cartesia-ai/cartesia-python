@@ -3,8 +3,8 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 from .raw_encoding import RawEncoding
 import pydantic
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import typing
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class RawOutputFormat(UniversalBaseModel):
@@ -13,6 +13,8 @@ class RawOutputFormat(UniversalBaseModel):
     """
     The sample rate of the audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
     """
+
+    bit_rate: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
