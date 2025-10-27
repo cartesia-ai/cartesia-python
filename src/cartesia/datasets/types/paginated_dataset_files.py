@@ -3,13 +3,24 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
 from .dataset_file import DatasetFile
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class PaginatedDatasetFiles(UniversalBaseModel):
-    data: typing.List[DatasetFile]
-    has_more: bool
+    """
+    Paginated list of files in a dataset
+    """
+
+    data: typing.List[DatasetFile] = pydantic.Field()
+    """
+    List of file objects
+    """
+
+    has_more: bool = pydantic.Field()
+    """
+    Whether there are more files available
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

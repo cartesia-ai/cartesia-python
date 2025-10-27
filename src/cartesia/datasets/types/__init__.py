@@ -3,15 +3,17 @@
 from .create_dataset_request import CreateDatasetRequest
 from .dataset import Dataset
 from .dataset_file import DatasetFile
-from .file_purpose import FilePurpose
 from .paginated_dataset_files import PaginatedDatasetFiles
 from .paginated_datasets import PaginatedDatasets
+from .s_3_upload_params_response import S3UploadParamsResponse
+from .update_dataset_request import UpdateDatasetRequest
 
 __all__ = [
     "CreateDatasetRequest",
     "Dataset",
     "DatasetFile",
-    "FilePurpose",
     "PaginatedDatasetFiles",
     "PaginatedDatasets",
+    "S3UploadParamsResponse",
+    "UpdateDatasetRequest",
 ]

@@ -4,21 +4,18 @@ from __future__ import annotations
 import typing_extensions
 import typing
 from ..types.raw_encoding import RawEncoding
-import typing_extensions
 
 
 class OutputFormat_RawParams(typing_extensions.TypedDict):
     container: typing.Literal["raw"]
     encoding: RawEncoding
     sample_rate: int
-    bit_rate: typing_extensions.NotRequired[int]
 
 
 class OutputFormat_WavParams(typing_extensions.TypedDict):
     container: typing.Literal["wav"]
     encoding: RawEncoding
     sample_rate: int
-    bit_rate: typing_extensions.NotRequired[int]
 
 
 class OutputFormat_Mp3Params(typing_extensions.TypedDict):

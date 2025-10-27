@@ -3,13 +3,24 @@
 from ...core.pydantic_utilities import UniversalBaseModel
 import typing
 from .dataset import Dataset
-from ...core.pydantic_utilities import IS_PYDANTIC_V2
 import pydantic
+from ...core.pydantic_utilities import IS_PYDANTIC_V2
 
 
 class PaginatedDatasets(UniversalBaseModel):
-    data: typing.List[Dataset]
-    has_more: bool
+    """
+    Paginated list of datasets
+    """
+
+    data: typing.List[Dataset] = pydantic.Field()
+    """
+    List of dataset objects
+    """
+
+    has_more: bool = pydantic.Field()
+    """
+    Whether there are more datasets available
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

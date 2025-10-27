@@ -12,7 +12,6 @@ class OutputFormat_Raw(UniversalBaseModel):
     container: typing.Literal["raw"] = "raw"
     encoding: RawEncoding
     sample_rate: int
-    bit_rate: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -28,7 +27,6 @@ class OutputFormat_Wav(UniversalBaseModel):
     container: typing.Literal["wav"] = "wav"
     encoding: RawEncoding
     sample_rate: int
-    bit_rate: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

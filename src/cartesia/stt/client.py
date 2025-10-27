@@ -189,7 +189,7 @@ class SttClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.stt.transcribe(
             model="ink-whisper",
@@ -404,7 +404,7 @@ class AsyncSttClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 

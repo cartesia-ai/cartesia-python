@@ -4,6 +4,26 @@ import typing_extensions
 
 
 class DatasetFileParams(typing_extensions.TypedDict):
+    """
+    File stored in a dataset
+    """
+
     id: str
+    """
+    Unique identifier for the file
+    """
+
     filename: str
+    """
+    Original filename
+    """
+
     created_at: str
+    """
+    Timestamp when the file was created
+    """
+
+    size: int
+    """
+    Size of the file in bytes
+    """

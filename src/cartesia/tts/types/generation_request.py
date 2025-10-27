@@ -2,10 +2,11 @@
 
 from ...core.pydantic_utilities import UniversalBaseModel
 import pydantic
-import typing
 from .tts_request_voice_specifier import TtsRequestVoiceSpecifier
+import typing
 from .supported_language import SupportedLanguage
 from .web_socket_raw_output_format import WebSocketRawOutputFormat
+from .generation_config import GenerationConfig
 from .model_speed import ModelSpeed
 from .context_id import ContextId
 import typing_extensions
@@ -16,17 +17,18 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2
 class GenerationRequest(UniversalBaseModel):
     model_id: str = pydantic.Field()
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
-    transcript: typing.Optional[typing.Any] = pydantic.Field(default=None)
+    transcript: str = pydantic.Field()
     """
-    The transcript to generate speech for. This can be a string or an iterator over strings.
+    The transcript to generate speech for.
     """
 
     voice: TtsRequestVoiceSpecifier
     language: typing.Optional[SupportedLanguage] = None
     output_format: WebSocketRawOutputFormat
+    generation_config: typing.Optional[GenerationConfig] = None
     duration: typing.Optional[float] = pydantic.Field(default=None)
     """
     The maximum duration of the audio in seconds. You do not usually need to specify this.
@@ -70,6 +72,11 @@ class GenerationRequest(UniversalBaseModel):
     use_normalized_timestamps: typing.Optional[bool] = pydantic.Field(default=None)
     """
     Whether to use normalized timestamps (True) or original timestamps (False).
+    """
+
+    pronunciation_dict_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
     """
 
     if IS_PYDANTIC_V2:

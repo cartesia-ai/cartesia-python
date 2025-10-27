@@ -5,8 +5,6 @@ from ..core.client_wrapper import SyncClientWrapper
 from .. import core
 from ..voice_changer.types.output_format_container import OutputFormatContainer
 from ..tts.types.raw_encoding import RawEncoding
-from ..tts.types.speed import Speed
-from ..tts.types.emotion import Emotion
 from ..core.request_options import RequestOptions
 from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
@@ -33,8 +31,6 @@ class InfillClient:
         output_format_sample_rate: int,
         output_format_encoding: typing.Optional[RawEncoding] = OMIT,
         output_format_bit_rate: typing.Optional[int] = OMIT,
-        voice_experimental_controls_speed: typing.Optional[Speed] = OMIT,
-        voice_experimental_controls_emotion: typing.Optional[typing.List[Emotion]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
@@ -86,18 +82,6 @@ class InfillClient:
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
 
-        voice_experimental_controls_speed : typing.Optional[Speed]
-            Either a number between -1.0 and 1.0 or a natural language description of speed.
-
-            If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
-        voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
-            An array of emotion:level tags.
-
-            Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
-
-            Supported levels are: lowest, low, (omit), high, highest.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -110,7 +94,7 @@ class InfillClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.infill.bytes(
             model_id="sonic-2",
@@ -120,8 +104,6 @@ class InfillClient:
             output_format_container="mp3",
             output_format_sample_rate=44100,
             output_format_bit_rate=128000,
-            voice_experimental_controls_speed="slowest",
-            voice_experimental_controls_emotion=["surprise:high", "curiosity:high"],
         )
         """
         with self._client_wrapper.httpx_client.stream(
@@ -136,8 +118,6 @@ class InfillClient:
                 "output_format[sample_rate]": output_format_sample_rate,
                 "output_format[encoding]": output_format_encoding,
                 "output_format[bit_rate]": output_format_bit_rate,
-                "voice[__experimental_controls][speed]": voice_experimental_controls_speed,
-                "voice[__experimental_controls][emotion][]": voice_experimental_controls_emotion,
             },
             files={
                 "left_audio": left_audio,
@@ -176,8 +156,6 @@ class AsyncInfillClient:
         output_format_sample_rate: int,
         output_format_encoding: typing.Optional[RawEncoding] = OMIT,
         output_format_bit_rate: typing.Optional[int] = OMIT,
-        voice_experimental_controls_speed: typing.Optional[Speed] = OMIT,
-        voice_experimental_controls_emotion: typing.Optional[typing.List[Emotion]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
@@ -229,18 +207,6 @@ class AsyncInfillClient:
         output_format_bit_rate : typing.Optional[int]
             Required for `mp3` containers.
 
-        voice_experimental_controls_speed : typing.Optional[Speed]
-            Either a number between -1.0 and 1.0 or a natural language description of speed.
-
-            If you specify a number, 0.0 is the default speed, -1.0 is the slowest speed, and 1.0 is the fastest speed.
-
-        voice_experimental_controls_emotion : typing.Optional[typing.List[Emotion]]
-            An array of emotion:level tags.
-
-            Supported emotions are: anger, positivity, surprise, sadness, and curiosity.
-
-            Supported levels are: lowest, low, (omit), high, highest.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -255,7 +221,7 @@ class AsyncInfillClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 
@@ -268,8 +234,6 @@ class AsyncInfillClient:
                 output_format_container="mp3",
                 output_format_sample_rate=44100,
                 output_format_bit_rate=128000,
-                voice_experimental_controls_speed="slowest",
-                voice_experimental_controls_emotion=["surprise:high", "curiosity:high"],
             )
 
 
@@ -287,8 +251,6 @@ class AsyncInfillClient:
                 "output_format[sample_rate]": output_format_sample_rate,
                 "output_format[encoding]": output_format_encoding,
                 "output_format[bit_rate]": output_format_bit_rate,
-                "voice[__experimental_controls][speed]": voice_experimental_controls_speed,
-                "voice[__experimental_controls][emotion][]": voice_experimental_controls_emotion,
             },
             files={
                 "left_audio": left_audio,

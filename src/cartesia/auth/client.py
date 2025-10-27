@@ -49,7 +49,7 @@ class AuthClient:
         from cartesia import Cartesia
 
         client = Cartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
         client.auth.access_token(
             grants={"tts": True, "stt": True},
@@ -119,7 +119,7 @@ class AsyncAuthClient:
         from cartesia import AsyncCartesia
 
         client = AsyncCartesia(
-            api_key="YOUR_API_KEY",
+            token="YOUR_TOKEN",
         )
 
 

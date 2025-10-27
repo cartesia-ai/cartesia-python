@@ -5,19 +5,21 @@ from .tts_request_voice_specifier import TtsRequestVoiceSpecifierParams
 import typing_extensions
 from ..types.supported_language import SupportedLanguage
 from .output_format import OutputFormatParams
+from .generation_config import GenerationConfigParams
 from ..types.model_speed import ModelSpeed
 
 
 class TtsRequestParams(typing_extensions.TypedDict):
     model_id: str
     """
-    The ID of the model to use for the generation. See [Models](/build-with-cartesia/models) for available models.
+    The ID of the model to use for the generation. See [Models](/build-with-cartesia/tts-models) for available models.
     """
 
     transcript: str
     voice: TtsRequestVoiceSpecifierParams
     language: typing_extensions.NotRequired[SupportedLanguage]
     output_format: OutputFormatParams
+    generation_config: typing_extensions.NotRequired[GenerationConfigParams]
     duration: typing_extensions.NotRequired[float]
     """
     The maximum duration of the audio in seconds. You do not usually need to specify this.
@@ -25,3 +27,12 @@ class TtsRequestParams(typing_extensions.TypedDict):
     """
 
     speed: typing_extensions.NotRequired[ModelSpeed]
+    save: typing_extensions.NotRequired[bool]
+    """
+    Whether to save the generated audio file. When true, the response will include a `Cartesia-File-ID` header.
+    """
+
+    pronunciation_dict_id: typing_extensions.NotRequired[str]
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    """

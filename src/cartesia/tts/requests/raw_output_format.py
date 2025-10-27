@@ -2,7 +2,6 @@
 
 import typing_extensions
 from ..types.raw_encoding import RawEncoding
-import typing_extensions
 
 
 class RawOutputFormatParams(typing_extensions.TypedDict):
@@ -11,5 +10,3 @@ class RawOutputFormatParams(typing_extensions.TypedDict):
     """
     The sample rate of the audio in Hz. Supported sample rates are 8000, 16000, 22050, 24000, 44100, 48000.
     """
-
-    bit_rate: typing_extensions.NotRequired[int]
