@@ -60,7 +60,7 @@ class _TTSContext:
         model_id: str,
         transcript: typing.Generator[str, None, None],
         output_format: OutputFormatParams,
-        generation_config: Optional[GenerationConfigParams],
+        generation_config: Optional[GenerationConfigParams] = None,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         max_buffer_delay_ms: Optional[int] = None,
@@ -92,11 +92,6 @@ class _TTSContext:
             "model_id": model_id,
             "transcript": transcript,
             "output_format": output_format,
-            "generation_config": (
-                generation_config
-                if isinstance(generation_config, dict)
-                else generation_config.dict()
-            ),
             "voice": voice,
             "context_id": self._context_id,
         }
@@ -117,6 +112,11 @@ class _TTSContext:
         if max_buffer_delay_ms:
             request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
 
+        if generation_config is not None:
+            if isinstance(generation_config, dict):
+                request_body["generation_config"] = generation_config
+            else:
+                request_body["generation_config"] = generation_config.dict()
         if (
             "context_id" in request_body
             and request_body["context_id"] is not None

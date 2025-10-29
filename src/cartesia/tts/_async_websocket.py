@@ -61,7 +61,7 @@ class _AsyncTTSContext:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        generation_config: Optional[GenerationConfigParams],
+        generation_config: Optional[GenerationConfigParams] = None,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
@@ -94,11 +94,6 @@ class _AsyncTTSContext:
                 else output_format.dict()
             ),
             "voice": (voice if isinstance(voice, dict) else voice.dict()),
-            "generation_config": (
-                generation_config
-                if isinstance(generation_config, dict)
-                else generation_config.dict()
-            ),
             "context_id": self._context_id,
         }
         if context_id is not None:
@@ -121,6 +116,12 @@ class _AsyncTTSContext:
             request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
         if flush:
             request_body["flush"] = flush
+
+        if generation_config is not None:
+            if isinstance(generation_config, dict):
+                request_body["generation_config"] = generation_config
+            else:
+                request_body["generation_config"] = generation_config.dict()
 
         if (
             "context_id" in request_body
