@@ -60,7 +60,7 @@ class _TTSContext:
         model_id: str,
         transcript: typing.Generator[str, None, None],
         output_format: OutputFormatParams,
-        generation_config: GenerationConfigParams,
+        generation_config: Optional[GenerationConfigParams],
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         max_buffer_delay_ms: Optional[int] = None,

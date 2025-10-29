@@ -61,7 +61,7 @@ class _AsyncTTSContext:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
-        generation_config: GenerationConfigParams,
+        generation_config: Optional[GenerationConfigParams],
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
