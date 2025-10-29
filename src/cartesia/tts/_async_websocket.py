@@ -8,7 +8,7 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union
 
 import aiohttp
 
-from cartesia.tts.requests import TtsRequestVoiceSpecifierParams
+from cartesia.tts.requests import GenerationConfigParams, TtsRequestVoiceSpecifierParams
 from cartesia.tts.requests.output_format import OutputFormatParams
 from cartesia.tts.types import (
     WebSocketResponse,
@@ -61,6 +61,7 @@ class _AsyncTTSContext:
         model_id: str,
         transcript: str,
         output_format: OutputFormatParams,
+        generation_config: GenerationConfigParams,
         voice: TtsRequestVoiceSpecifierParams,
         context_id: Optional[str] = None,
         duration: Optional[int] = None,
@@ -93,6 +94,11 @@ class _AsyncTTSContext:
                 else output_format.dict()
             ),
             "voice": (voice if isinstance(voice, dict) else voice.dict()),
+            "generation_config": (
+                generation_config
+                if isinstance(generation_config, dict)
+                else generation_config.dict()
+            ),
             "context_id": self._context_id,
         }
         if context_id is not None:
@@ -315,10 +321,10 @@ class AsyncTtsWebsocket(TtsWebsocket):
                 # Extract status code if available
                 status_code = None
                 error_message = str(e)
-                
+
                 if hasattr(e, 'status') and e.status is not None:
                     status_code = e.status
-                
+
                     # Create a meaningful error message based on status code
                     if status_code == 402:
                         error_message = "Payment required. Your API key may have insufficient credits or permissions."
@@ -328,7 +334,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
                         error_message = "Forbidden. You don't have permission to access this resource."
                     elif status_code == 404:
                         error_message = "Not found. The requested resource doesn't exist."
-                    
+
                     raise RuntimeError(f"Failed to connect to WebSocket.\nStatus: {status_code}. Error message: {error_message}")
                 else:
                     raise RuntimeError(f"Failed to connect to WebSocket at {url}. {e}")
