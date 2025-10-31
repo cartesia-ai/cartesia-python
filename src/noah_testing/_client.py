@@ -30,7 +30,17 @@ from ._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .resources import stt, tts, infill, voices, fine_tunes, access_token, voice_changer, pronunciation_dicts
+from .resources import (
+    stt,
+    tts,
+    infill,
+    voices,
+    fine_tunes,
+    access_token,
+    my_websocket,
+    voice_changer,
+    pronunciation_dicts,
+)
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -66,6 +76,7 @@ class NoahTesting(SyncAPIClient):
     tts: tts.TtsResource
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
+    my_websocket: my_websocket.MyWebsocketResource
     with_raw_response: NoahTestingWithRawResponse
     with_streaming_response: NoahTestingWithStreamedResponse
 
@@ -73,12 +84,21 @@ class NoahTesting(SyncAPIClient):
     token: str | None
     api_key: str | None
 
+    websocket_base_url: str | httpx.URL | None
+    """Base URL for WebSocket connections.
+
+    If not specified, the default base URL will be used, with 'wss://' replacing the
+    'http://' or 'https://' scheme. For example: 'http://example.com' becomes
+    'wss://example.com'
+    """
+
     def __init__(
         self,
         *,
         token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -101,6 +121,8 @@ class NoahTesting(SyncAPIClient):
         self.token = token
 
         self.api_key = api_key
+
+        self.websocket_base_url = websocket_base_url
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -128,6 +150,7 @@ class NoahTesting(SyncAPIClient):
         self.tts = tts.TtsResource(self)
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
+        self.my_websocket = my_websocket.MyWebsocketResource(self)
         self.with_raw_response = NoahTestingWithRawResponse(self)
         self.with_streaming_response = NoahTestingWithStreamedResponse(self)
 
@@ -186,6 +209,7 @@ class NoahTesting(SyncAPIClient):
         *,
         token: str | None = None,
         api_key: str | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -221,6 +245,7 @@ class NoahTesting(SyncAPIClient):
         return self.__class__(
             token=token or self.token,
             api_key=api_key or self.api_key,
+            websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -298,6 +323,7 @@ class AsyncNoahTesting(AsyncAPIClient):
     tts: tts.AsyncTtsResource
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
+    my_websocket: my_websocket.AsyncMyWebsocketResource
     with_raw_response: AsyncNoahTestingWithRawResponse
     with_streaming_response: AsyncNoahTestingWithStreamedResponse
 
@@ -305,12 +331,21 @@ class AsyncNoahTesting(AsyncAPIClient):
     token: str | None
     api_key: str | None
 
+    websocket_base_url: str | httpx.URL | None
+    """Base URL for WebSocket connections.
+
+    If not specified, the default base URL will be used, with 'wss://' replacing the
+    'http://' or 'https://' scheme. For example: 'http://example.com' becomes
+    'wss://example.com'
+    """
+
     def __init__(
         self,
         *,
         token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -333,6 +368,8 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.token = token
 
         self.api_key = api_key
+
+        self.websocket_base_url = websocket_base_url
 
         if base_url is None:
             base_url = os.environ.get("NOAH_TESTING_BASE_URL")
@@ -360,6 +397,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.tts = tts.AsyncTtsResource(self)
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
+        self.my_websocket = my_websocket.AsyncMyWebsocketResource(self)
         self.with_raw_response = AsyncNoahTestingWithRawResponse(self)
         self.with_streaming_response = AsyncNoahTestingWithStreamedResponse(self)
 
@@ -418,6 +456,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         *,
         token: str | None = None,
         api_key: str | None = None,
+        websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -453,6 +492,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         return self.__class__(
             token=token or self.token,
             api_key=api_key or self.api_key,
+            websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,

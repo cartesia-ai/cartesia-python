@@ -64,6 +64,7 @@ from .access_token import (
     AccessTokenResourceWithStreamingResponse,
     AsyncAccessTokenResourceWithStreamingResponse,
 )
+from .my_websocket import MyWebsocketResource, AsyncMyWebsocketResource
 from .voice_changer import (
     VoiceChangerResource,
     AsyncVoiceChangerResource,
@@ -142,4 +143,6 @@ __all__ = [
     "AsyncVoicesResourceWithRawResponse",
     "VoicesResourceWithStreamingResponse",
     "AsyncVoicesResourceWithStreamingResponse",
+    "MyWebsocketResource",
+    "AsyncMyWebsocketResource",
 ]

@@ -224,3 +224,11 @@ Methods:
 - <code title="delete /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">delete</a>(id) -> None</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/noah_testing/resources/voices.py">clone</a>(\*\*<a href="src/noah_testing/types/voice_clone_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
 - <code title="post /voices/localize">client.voices.<a href="./src/noah_testing/resources/voices.py">localize</a>(\*\*<a href="src/noah_testing/types/voice_localize_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
+
+# MyWebsocket
+
+Types:
+
+```python
+from noah_testing.types import WebsocketClientEvent, WebsocketResponse
+```
