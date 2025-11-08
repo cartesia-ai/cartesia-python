@@ -69,3 +69,8 @@ class GenerationRequestParams(typing_extensions.TypedDict):
     """
     Whether to use normalized timestamps (True) or original timestamps (False).
     """
+
+    pronunciation_dict_id: typing_extensions.NotRequired[str]
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    """
