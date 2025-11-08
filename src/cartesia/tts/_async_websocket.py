@@ -72,7 +72,7 @@ class _AsyncTTSContext:
         use_original_timestamps: bool = False,
         continue_: bool = False,
         max_buffer_delay_ms: Optional[int] = None,
-        pronunciation_dict_id: Optional[str],
+        pronunciation_dict_id: Optional[str] = None,
         flush: bool = False,
     ) -> None:
         """Send audio generation requests to the WebSocket. The response can be received using the `receive` method.

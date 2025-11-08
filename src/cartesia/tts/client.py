@@ -39,7 +39,7 @@ class TtsClient:
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-        pronunciation_dict_id: typing.Optional[str]
+        pronunciation_dict_id: typing.Optional[str] = None
     ) -> typing.Iterator[bytes]:
         """
         Parameters
