@@ -70,7 +70,7 @@ class _TTSContext:
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
-        pronunciation_dict_id: Optional[str]
+        pronunciation_dict_id: Optional[str] = None
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
