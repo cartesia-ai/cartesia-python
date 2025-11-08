@@ -70,6 +70,7 @@ class _TTSContext:
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
+        pronunciation_dict_id: Optional[str]
     ) -> Generator[bytes, None, None]:
         """Send audio generation requests to the WebSocket and yield responses.
 
@@ -111,6 +112,8 @@ class _TTSContext:
             request_body["use_original_timestamps"] = use_original_timestamps
         if max_buffer_delay_ms:
             request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
+        if pronunciation_dict_id:
+            request_body["pronunciation_dict_id"] = pronunciation_dict_id
 
         if generation_config is not None:
             if isinstance(generation_config, dict):
