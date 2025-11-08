@@ -675,6 +675,14 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dl>
 <dd>
 
+**pronunciation_dict_id:** `typing.Optional[str]` — A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
     
 </dd>
@@ -826,6 +834,14 @@ If the duration is not appropriate for the length of the transcript, the output 
 <dd>
 
 **context_id:** `typing.Optional[ContextId]` — Optional context ID for this request.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pronunciation_dict_id:** `typing.Optional[str]` — A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
     
 </dd>
 </dl>

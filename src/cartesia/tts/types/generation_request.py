@@ -74,6 +74,11 @@ class GenerationRequest(UniversalBaseModel):
     Whether to use normalized timestamps (True) or original timestamps (False).
     """
 
+    pronunciation_dict_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

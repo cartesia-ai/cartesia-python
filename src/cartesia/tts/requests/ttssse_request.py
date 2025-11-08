@@ -47,3 +47,8 @@ class TtssseRequestParams(typing_extensions.TypedDict):
     """
     Optional context ID for this request.
     """
+
+    pronunciation_dict_id: typing_extensions.NotRequired[str]
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    """

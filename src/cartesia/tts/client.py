@@ -38,6 +38,7 @@ class TtsClient:
         generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        pronunciation_dict_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
@@ -61,6 +62,9 @@ class TtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        pronunciation_dict_id : typing.Optional[str]
+            A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -106,6 +110,7 @@ class TtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "pronunciation_dict_id": pronunciation_dict_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -137,6 +142,7 @@ class TtsClient:
         add_phoneme_timestamps: typing.Optional[bool] = OMIT,
         use_normalized_timestamps: typing.Optional[bool] = OMIT,
         context_id: typing.Optional[ContextId] = OMIT,
+        pronunciation_dict_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[WebSocketResponse]:
         """
@@ -172,6 +178,9 @@ class TtsClient:
 
         context_id : typing.Optional[ContextId]
             Optional context ID for this request.
+
+        pronunciation_dict_id : typing.Optional[str]
+            A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -223,6 +232,7 @@ class TtsClient:
                 "add_phoneme_timestamps": add_phoneme_timestamps,
                 "use_normalized_timestamps": use_normalized_timestamps,
                 "context_id": context_id,
+                "pronunciation_dict_id": pronunciation_dict_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -264,6 +274,7 @@ class AsyncTtsClient:
         generation_config: typing.Optional[GenerationConfigParams] = OMIT,
         duration: typing.Optional[float] = OMIT,
         speed: typing.Optional[ModelSpeed] = OMIT,
+        pronunciation_dict_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
@@ -287,6 +298,9 @@ class AsyncTtsClient:
             If the duration is not appropriate for the length of the transcript, the output audio may be truncated.
 
         speed : typing.Optional[ModelSpeed]
+
+        pronunciation_dict_id : typing.Optional[str]
+            A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -340,6 +354,7 @@ class AsyncTtsClient:
                 ),
                 "duration": duration,
                 "speed": speed,
+                "pronunciation_dict_id": pronunciation_dict_id,
             },
             request_options=request_options,
             omit=OMIT,
@@ -371,6 +386,7 @@ class AsyncTtsClient:
         add_phoneme_timestamps: typing.Optional[bool] = OMIT,
         use_normalized_timestamps: typing.Optional[bool] = OMIT,
         context_id: typing.Optional[ContextId] = OMIT,
+        pronunciation_dict_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[WebSocketResponse]:
         """
@@ -406,6 +422,9 @@ class AsyncTtsClient:
 
         context_id : typing.Optional[ContextId]
             Optional context ID for this request.
+
+        pronunciation_dict_id : typing.Optional[str]
+            A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -465,6 +484,7 @@ class AsyncTtsClient:
                 "add_phoneme_timestamps": add_phoneme_timestamps,
                 "use_normalized_timestamps": use_normalized_timestamps,
                 "context_id": context_id,
+                "pronunciation_dict_id": pronunciation_dict_id,
             },
             request_options=request_options,
             omit=OMIT,
