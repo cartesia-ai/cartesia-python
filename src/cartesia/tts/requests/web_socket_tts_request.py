@@ -36,3 +36,7 @@ class WebSocketTtsRequestParams(typing_extensions.TypedDict):
     context_id: typing_extensions.NotRequired[str]
     max_buffer_delay_ms: typing_extensions.NotRequired[int]
     speed: typing_extensions.NotRequired[ModelSpeed]
+    pronunciation_dict_id: typing_extensions.NotRequired[str]
+    """
+    A pronunciation dict ID to use for the generation. This will be applied to this TTS generation only.
+    """
