@@ -431,6 +431,29 @@ def test_sse_err():
         pass
 
 
+def test_sse_pronunciation_dict(resources: _Resources):
+    logger.info("Testing SSE with pronunciation_dict_id parameter")
+    client = resources.client
+    transcript = SAMPLE_TRANSCRIPT
+
+    output_generate = client.tts.sse(
+        transcript=transcript,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+        model_id=DEFAULT_MODEL_ID,
+        pronunciation_dict_id=None,  # Test with None to verify parameter acceptance
+    )
+
+    chunks = []
+    for response in output_generate:
+        assert isinstance(response, WebSocketResponse_Chunk)
+        audio_bytes = base64.b64decode(response.data)
+        chunks.append(audio_bytes)
+
+    data = b"".join(chunks)
+    _validate_audio_response(data, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+
 @pytest.mark.parametrize("output_format", TEST_RAW_OUTPUT_FORMATS)
 @pytest.mark.parametrize("stream", [True, False])
 def test_ws_sync(resources: _Resources, output_format: OutputFormatParams, stream: bool):
@@ -574,6 +597,40 @@ async def test_ws_timestamps(use_original_timestamps: bool):
 
     assert has_wordtimestamps, "No word timestamps found"
     _validate_timestamps(all_words, all_starts, all_ends, transcript)
+
+    # Verify audio
+    audio = b"".join(chunks)
+    _validate_audio_response(audio, DEFAULT_OUTPUT_FORMAT_PARAMS)
+
+    # Close the websocket
+    await ws.close()
+    await async_client.close()
+
+
+@pytest.mark.asyncio
+async def test_ws_pronunciation_dict():
+    logger.info("Testing WebSocket with pronunciation_dict_id parameter")
+    transcript = SAMPLE_TRANSCRIPT
+
+    async_client = create_async_client()
+    ws = await async_client.tts.websocket()
+
+    # Test that pronunciation_dict_id parameter can be passed
+    # Using None as we don't have a real pronunciation dict ID for testing
+    output_generate = await ws.send(
+        transcript=transcript,
+        voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+        output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
+        model_id=DEFAULT_MODEL_ID,
+        pronunciation_dict_id=None,  # Test with None to verify parameter acceptance
+        stream=True,
+    )
+
+    chunks = []
+    async for out in output_generate:
+        _validate_schema(out)
+        if out.audio is not None:
+            chunks.append(out.audio)
 
     # Verify audio
     audio = b"".join(chunks)
@@ -1364,6 +1421,7 @@ def test_ws_phoneme_timestamps():
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
         add_phoneme_timestamps=True,
+        add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
         stream=True,
     )
     has_phoneme_timestamps = False
@@ -1407,6 +1465,7 @@ def test_continuation_phoneme_timestamps():
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         add_phoneme_timestamps=True,
+        add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
     )
 
     has_phoneme_timestamps = False
@@ -1445,6 +1504,7 @@ async def test_ws_phoneme_timestamps_async():
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
         add_phoneme_timestamps=True,
+        add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
         stream=True,
     )
     has_phoneme_timestamps = False
@@ -1491,6 +1551,7 @@ async def test_continuation_phoneme_timestamps_async():
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             add_phoneme_timestamps=True,
+            add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
             continue_=True,
         )
 

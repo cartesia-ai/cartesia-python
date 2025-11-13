@@ -72,6 +72,7 @@ class _AsyncTTSContext:
         use_original_timestamps: bool = False,
         continue_: bool = False,
         max_buffer_delay_ms: Optional[int] = None,
+        pronunciation_dict_id: Optional[str] = None,
         flush: bool = False,
     ) -> None:
         """Send audio generation requests to the WebSocket. The response can be received using the `receive` method.
@@ -116,6 +117,8 @@ class _AsyncTTSContext:
             request_body["max_buffer_delay_ms"] = max_buffer_delay_ms
         if flush:
             request_body["flush"] = flush
+        if pronunciation_dict_id:
+            request_body["pronunciation_dict_id"] = pronunciation_dict_id
 
         if generation_config is not None:
             if isinstance(generation_config, dict):
@@ -383,6 +386,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
+        pronunciation_dict_id: Optional[str] = None,
     ):
         """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
@@ -403,6 +407,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             use_original_timestamps=use_original_timestamps,
+            pronunciation_dict_id=pronunciation_dict_id,
         )
 
         generator = ctx.receive()
