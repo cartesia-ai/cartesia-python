@@ -386,6 +386,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
         add_timestamps: bool = False,
         add_phoneme_timestamps: bool = False,
         use_original_timestamps: bool = False,
+        pronunciation_dict_id: Optional[str] = None,
     ):
         """See :meth:`_WebSocket.send` for details."""
         if context_id is None:
@@ -406,6 +407,7 @@ class AsyncTtsWebsocket(TtsWebsocket):
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             use_original_timestamps=use_original_timestamps,
+            pronunciation_dict_id=pronunciation_dict_id,
         )
 
         generator = ctx.receive()
