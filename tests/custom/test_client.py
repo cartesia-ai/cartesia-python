@@ -1465,6 +1465,7 @@ def test_continuation_phoneme_timestamps():
         voice={"mode": "id", "id": SAMPLE_VOICE_ID},
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         add_phoneme_timestamps=True,
+        add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
     )
 
     has_phoneme_timestamps = False
@@ -1503,6 +1504,7 @@ async def test_ws_phoneme_timestamps_async():
         output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
         model_id=DEFAULT_MODEL_ID,
         add_phoneme_timestamps=True,
+        add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
         stream=True,
     )
     has_phoneme_timestamps = False
@@ -1549,6 +1551,7 @@ async def test_continuation_phoneme_timestamps_async():
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT_PARAMS,
             add_phoneme_timestamps=True,
+            add_timestamps=True, # workaround, currently you need both add_timestamps and add_phoneme_timestamps to get phoneme timestamps
             continue_=True,
         )
 
