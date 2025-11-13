@@ -1,6 +1,5 @@
 [project]
 name = "cartesia"
-version = "2.0.15"
 
 [tool.poetry]
 name = "cartesia"
