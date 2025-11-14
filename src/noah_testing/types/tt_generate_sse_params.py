@@ -11,10 +11,10 @@ from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 
-__all__ = ["TtSynthesizeSseParams", "OutputFormat"]
+__all__ = ["TtGenerateSseParams", "OutputFormat"]
 
 
-class TtSynthesizeSseParams(TypedDict, total=False):
+class TtGenerateSseParams(TypedDict, total=False):
     model_id: Required[str]
     """The ID of the model to use for the generation.
 

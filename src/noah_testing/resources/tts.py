@@ -6,7 +6,7 @@ from typing import Optional
 
 import httpx
 
-from ..types import ModelSpeed, SupportedLanguage, tt_synthesize_sse_params, tt_synthesize_bytes_params
+from ..types import ModelSpeed, SupportedLanguage, tt_generate_params, tt_generate_sse_params
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, SequenceNotStr, omit, not_given
 from .._utils import maybe_transform, async_maybe_transform
 from .._compat import cached_property
@@ -53,15 +53,15 @@ class TtsResource(SyncAPIResource):
         """
         return TtsResourceWithStreamingResponse(self)
 
-    def synthesize_bytes(
+    def generate(
         self,
         *,
         model_id: str,
-        output_format: tt_synthesize_bytes_params.OutputFormat,
+        output_format: tt_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tt_synthesize_bytes_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[tt_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,
@@ -132,7 +132,7 @@ class TtsResource(SyncAPIResource):
                     "save": save,
                     "speed": speed,
                 },
-                tt_synthesize_bytes_params.TtSynthesizeBytesParams,
+                tt_generate_params.TtGenerateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -140,11 +140,11 @@ class TtsResource(SyncAPIResource):
             cast_to=BinaryAPIResponse,
         )
 
-    def synthesize_sse(
+    def generate_sse(
         self,
         *,
         model_id: str,
-        output_format: tt_synthesize_sse_params.OutputFormat,
+        output_format: tt_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
@@ -229,7 +229,7 @@ class TtsResource(SyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tt_synthesize_sse_params.TtSynthesizeSseParams,
+                tt_generate_sse_params.TtGenerateSseParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -258,15 +258,15 @@ class AsyncTtsResource(AsyncAPIResource):
         """
         return AsyncTtsResourceWithStreamingResponse(self)
 
-    async def synthesize_bytes(
+    async def generate(
         self,
         *,
         model_id: str,
-        output_format: tt_synthesize_bytes_params.OutputFormat,
+        output_format: tt_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tt_synthesize_bytes_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[tt_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,
@@ -337,7 +337,7 @@ class AsyncTtsResource(AsyncAPIResource):
                     "save": save,
                     "speed": speed,
                 },
-                tt_synthesize_bytes_params.TtSynthesizeBytesParams,
+                tt_generate_params.TtGenerateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -345,11 +345,11 @@ class AsyncTtsResource(AsyncAPIResource):
             cast_to=AsyncBinaryAPIResponse,
         )
 
-    async def synthesize_sse(
+    async def generate_sse(
         self,
         *,
         model_id: str,
-        output_format: tt_synthesize_sse_params.OutputFormat,
+        output_format: tt_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
@@ -434,7 +434,7 @@ class AsyncTtsResource(AsyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tt_synthesize_sse_params.TtSynthesizeSseParams,
+                tt_generate_sse_params.TtGenerateSseParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -447,12 +447,12 @@ class TtsResourceWithRawResponse:
     def __init__(self, tts: TtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = to_custom_raw_response_wrapper(
-            tts.synthesize_bytes,
+        self.generate = to_custom_raw_response_wrapper(
+            tts.generate,
             BinaryAPIResponse,
         )
-        self.synthesize_sse = to_raw_response_wrapper(
-            tts.synthesize_sse,
+        self.generate_sse = to_raw_response_wrapper(
+            tts.generate_sse,
         )
 
 
@@ -460,12 +460,12 @@ class AsyncTtsResourceWithRawResponse:
     def __init__(self, tts: AsyncTtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = async_to_custom_raw_response_wrapper(
-            tts.synthesize_bytes,
+        self.generate = async_to_custom_raw_response_wrapper(
+            tts.generate,
             AsyncBinaryAPIResponse,
         )
-        self.synthesize_sse = async_to_raw_response_wrapper(
-            tts.synthesize_sse,
+        self.generate_sse = async_to_raw_response_wrapper(
+            tts.generate_sse,
         )
 
 
@@ -473,12 +473,12 @@ class TtsResourceWithStreamingResponse:
     def __init__(self, tts: TtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = to_custom_streamed_response_wrapper(
-            tts.synthesize_bytes,
+        self.generate = to_custom_streamed_response_wrapper(
+            tts.generate,
             StreamedBinaryAPIResponse,
         )
-        self.synthesize_sse = to_streamed_response_wrapper(
-            tts.synthesize_sse,
+        self.generate_sse = to_streamed_response_wrapper(
+            tts.generate_sse,
         )
 
 
@@ -486,10 +486,10 @@ class AsyncTtsResourceWithStreamingResponse:
     def __init__(self, tts: AsyncTtsResource) -> None:
         self._tts = tts
 
-        self.synthesize_bytes = async_to_custom_streamed_response_wrapper(
-            tts.synthesize_bytes,
+        self.generate = async_to_custom_streamed_response_wrapper(
+            tts.generate,
             AsyncStreamedBinaryAPIResponse,
         )
-        self.synthesize_sse = async_to_streamed_response_wrapper(
-            tts.synthesize_sse,
+        self.generate_sse = async_to_streamed_response_wrapper(
+            tts.generate_sse,
         )

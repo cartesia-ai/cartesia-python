@@ -13,6 +13,7 @@ from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_list_params import VoiceListParams as VoiceListParams
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .supported_language import SupportedLanguage as SupportedLanguage
+from .tt_generate_params import TtGenerateParams as TtGenerateParams
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
 from .agent_list_response import AgentListResponse as AgentListResponse
@@ -28,15 +29,14 @@ from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
 from .stt_transcribe_params import SttTranscribeParams as SttTranscribeParams
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
+from .tt_generate_sse_params import TtGenerateSseParams as TtGenerateSseParams
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
-from .tt_synthesize_sse_params import TtSynthesizeSseParams as TtSynthesizeSseParams
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
-from .tt_synthesize_bytes_params import TtSynthesizeBytesParams as TtSynthesizeBytesParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
 from .websocket_client_event_param import WebsocketClientEventParam as WebsocketClientEventParam

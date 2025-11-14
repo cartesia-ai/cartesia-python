@@ -25,9 +25,9 @@ class TestTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_method_synthesize_bytes(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_method_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = client.tts.synthesize_bytes(
+        tt = client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -46,9 +46,9 @@ class TestTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_method_synthesize_bytes_with_all_params(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_method_generate_with_all_params(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = client.tts.synthesize_bytes(
+        tt = client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -78,10 +78,10 @@ class TestTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_synthesize_bytes(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_raw_response_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        tt = client.tts.with_raw_response.synthesize_bytes(
+        tt = client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -101,9 +101,9 @@ class TestTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_streaming_response_synthesize_bytes(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_streaming_response_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        with client.tts.with_streaming_response.synthesize_bytes(
+        with client.tts.with_streaming_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -126,8 +126,8 @@ class TestTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_synthesize_sse(self, client: NoahTesting) -> None:
-        tt = client.tts.synthesize_sse(
+    def test_method_generate_sse(self, client: NoahTesting) -> None:
+        tt = client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -144,8 +144,8 @@ class TestTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_synthesize_sse_with_all_params(self, client: NoahTesting) -> None:
-        tt = client.tts.synthesize_sse(
+    def test_method_generate_sse_with_all_params(self, client: NoahTesting) -> None:
+        tt = client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -170,8 +170,8 @@ class TestTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_synthesize_sse(self, client: NoahTesting) -> None:
-        response = client.tts.with_raw_response.synthesize_sse(
+    def test_raw_response_generate_sse(self, client: NoahTesting) -> None:
+        response = client.tts.with_raw_response.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -192,8 +192,8 @@ class TestTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_synthesize_sse(self, client: NoahTesting) -> None:
-        with client.tts.with_streaming_response.synthesize_sse(
+    def test_streaming_response_generate_sse(self, client: NoahTesting) -> None:
+        with client.tts.with_streaming_response.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -222,9 +222,9 @@ class TestAsyncTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_method_synthesize_bytes(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
+    async def test_method_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = await async_client.tts.synthesize_bytes(
+        tt = await async_client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -243,11 +243,11 @@ class TestAsyncTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_method_synthesize_bytes_with_all_params(
+    async def test_method_generate_with_all_params(
         self, async_client: AsyncNoahTesting, respx_mock: MockRouter
     ) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = await async_client.tts.synthesize_bytes(
+        tt = await async_client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -277,10 +277,10 @@ class TestAsyncTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_synthesize_bytes(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
+    async def test_raw_response_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        tt = await async_client.tts.with_raw_response.synthesize_bytes(
+        tt = await async_client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -300,11 +300,9 @@ class TestAsyncTts:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_streaming_response_synthesize_bytes(
-        self, async_client: AsyncNoahTesting, respx_mock: MockRouter
-    ) -> None:
+    async def test_streaming_response_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        async with async_client.tts.with_streaming_response.synthesize_bytes(
+        async with async_client.tts.with_streaming_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -327,8 +325,8 @@ class TestAsyncTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_synthesize_sse(self, async_client: AsyncNoahTesting) -> None:
-        tt = await async_client.tts.synthesize_sse(
+    async def test_method_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+        tt = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -345,8 +343,8 @@ class TestAsyncTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_synthesize_sse_with_all_params(self, async_client: AsyncNoahTesting) -> None:
-        tt = await async_client.tts.synthesize_sse(
+    async def test_method_generate_sse_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+        tt = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -371,8 +369,8 @@ class TestAsyncTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_synthesize_sse(self, async_client: AsyncNoahTesting) -> None:
-        response = await async_client.tts.with_raw_response.synthesize_sse(
+    async def test_raw_response_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+        response = await async_client.tts.with_raw_response.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -393,8 +391,8 @@ class TestAsyncTts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_synthesize_sse(self, async_client: AsyncNoahTesting) -> None:
-        async with async_client.tts.with_streaming_response.synthesize_sse(
+    async def test_streaming_response_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+        async with async_client.tts.with_streaming_response.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
