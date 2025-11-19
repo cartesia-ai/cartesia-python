@@ -212,7 +212,7 @@ class AsyncTTSWebsocketResourceConnectionManager:
         else:
             base_url = self.__client._base_url.copy_with(scheme="wss")
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/websockets/connect"
+        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/tts/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     async def __aexit__(
@@ -371,7 +371,7 @@ class TTSWebsocketResourceConnectionManager:
         else:
             base_url = self.__client._base_url.copy_with(scheme="wss")
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/websockets/connect"
+        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/tts/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     def __exit__(
