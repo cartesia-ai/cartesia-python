@@ -30,17 +30,7 @@ from ._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .resources import (
-    stt,
-    tts,
-    infill,
-    voices,
-    fine_tunes,
-    access_token,
-    my_websocket,
-    voice_changer,
-    pronunciation_dicts,
-)
+from .resources import stt, tts, infill, voices, websocket, fine_tunes, access_token, voice_changer, pronunciation_dicts
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -76,7 +66,7 @@ class NoahTesting(SyncAPIClient):
     tts: tts.TTSResource
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
-    my_websocket: my_websocket.MyWebsocketResource
+    websocket: websocket.WebsocketResource
     with_raw_response: NoahTestingWithRawResponse
     with_streaming_response: NoahTestingWithStreamedResponse
 
@@ -150,7 +140,7 @@ class NoahTesting(SyncAPIClient):
         self.tts = tts.TTSResource(self)
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
-        self.my_websocket = my_websocket.MyWebsocketResource(self)
+        self.websocket = websocket.WebsocketResource(self)
         self.with_raw_response = NoahTestingWithRawResponse(self)
         self.with_streaming_response = NoahTestingWithStreamedResponse(self)
 
@@ -323,7 +313,7 @@ class AsyncNoahTesting(AsyncAPIClient):
     tts: tts.AsyncTTSResource
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
-    my_websocket: my_websocket.AsyncMyWebsocketResource
+    websocket: websocket.AsyncWebsocketResource
     with_raw_response: AsyncNoahTestingWithRawResponse
     with_streaming_response: AsyncNoahTestingWithStreamedResponse
 
@@ -397,7 +387,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.tts = tts.AsyncTTSResource(self)
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
-        self.my_websocket = my_websocket.AsyncMyWebsocketResource(self)
+        self.websocket = websocket.AsyncWebsocketResource(self)
         self.with_raw_response = AsyncNoahTestingWithRawResponse(self)
         self.with_streaming_response = AsyncNoahTestingWithStreamedResponse(self)
 

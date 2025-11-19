@@ -225,7 +225,7 @@ Methods:
 - <code title="get /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">get</a>(id) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
 - <code title="post /voices/localize">client.voices.<a href="./src/noah_testing/resources/voices.py">localize</a>(\*\*<a href="src/noah_testing/types/voice_localize_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
 
-# MyWebsocket
+# Websocket
 
 Types:
 

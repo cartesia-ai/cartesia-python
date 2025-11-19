@@ -28,19 +28,19 @@ if TYPE_CHECKING:
 
     from .._client import NoahTesting, AsyncNoahTesting
 
-__all__ = ["MyWebsocketResource", "AsyncMyWebsocketResource"]
+__all__ = ["WebsocketResource", "AsyncWebsocketResource"]
 
 log: logging.Logger = logging.getLogger(__name__)
 
 
-class MyWebsocketResource(SyncAPIResource):
+class WebsocketResource(SyncAPIResource):
     def connect(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebsocketConnectionOptions = {},
-    ) -> MyWebsocketResourceConnectionManager:
-        return MyWebsocketResourceConnectionManager(
+    ) -> WebsocketResourceConnectionManager:
+        return WebsocketResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -48,14 +48,14 @@ class MyWebsocketResource(SyncAPIResource):
         )
 
 
-class AsyncMyWebsocketResource(AsyncAPIResource):
+class AsyncWebsocketResource(AsyncAPIResource):
     def connect(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebsocketConnectionOptions = {},
-    ) -> AsyncMyWebsocketResourceConnectionManager:
-        return AsyncMyWebsocketResourceConnectionManager(
+    ) -> AsyncWebsocketResourceConnectionManager:
+        return AsyncWebsocketResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -63,8 +63,8 @@ class AsyncMyWebsocketResource(AsyncAPIResource):
         )
 
 
-class AsyncMyWebsocketResourceConnection:
-    """Represents a live websocket connection to the MyWebsocket API"""
+class AsyncWebsocketResourceConnection:
+    """Represents a live websocket connection to the Websocket API"""
 
     _connection: AsyncWebsocketConnection
 
@@ -126,9 +126,9 @@ class AsyncMyWebsocketResourceConnection:
         )
 
 
-class AsyncMyWebsocketResourceConnectionManager:
+class AsyncWebsocketResourceConnectionManager:
     """
-    Context manager over a `AsyncMyWebsocketResourceConnection` that is returned by `my_websocket.connect()`
+    Context manager over a `AsyncWebsocketResourceConnection` that is returned by `websocket.connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -140,7 +140,7 @@ class AsyncMyWebsocketResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = await client.my_websocket.connect(...).enter()
+    connection = await client.websocket.connect(...).enter()
     # ...
     await connection.close()
     ```
@@ -155,12 +155,12 @@ class AsyncMyWebsocketResourceConnectionManager:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: AsyncMyWebsocketResourceConnection | None = None
+        self.__connection: AsyncWebsocketResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
 
-    async def __aenter__(self) -> AsyncMyWebsocketResourceConnection:
+    async def __aenter__(self) -> AsyncWebsocketResourceConnection:
         """
         👋 If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -168,7 +168,7 @@ class AsyncMyWebsocketResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = await client.my_websocket.connect(...).enter()
+        connection = await client.websocket.connect(...).enter()
         # ...
         await connection.close()
         ```
@@ -188,7 +188,7 @@ class AsyncMyWebsocketResourceConnectionManager:
         if self.__websocket_connection_options:
             log.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = AsyncMyWebsocketResourceConnection(
+        self.__connection = AsyncWebsocketResourceConnection(
             await connect(
                 str(url),
                 user_agent_header=self.__client.user_agent,
@@ -222,8 +222,8 @@ class AsyncMyWebsocketResourceConnectionManager:
             await self.__connection.close()
 
 
-class MyWebsocketResourceConnection:
-    """Represents a live websocket connection to the MyWebsocket API"""
+class WebsocketResourceConnection:
+    """Represents a live websocket connection to the Websocket API"""
 
     _connection: WebsocketConnection
 
@@ -285,9 +285,9 @@ class MyWebsocketResourceConnection:
         )
 
 
-class MyWebsocketResourceConnectionManager:
+class WebsocketResourceConnectionManager:
     """
-    Context manager over a `MyWebsocketResourceConnection` that is returned by `my_websocket.connect()`
+    Context manager over a `WebsocketResourceConnection` that is returned by `websocket.connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -299,7 +299,7 @@ class MyWebsocketResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = client.my_websocket.connect(...).enter()
+    connection = client.websocket.connect(...).enter()
     # ...
     connection.close()
     ```
@@ -314,12 +314,12 @@ class MyWebsocketResourceConnectionManager:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: MyWebsocketResourceConnection | None = None
+        self.__connection: WebsocketResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
 
-    def __enter__(self) -> MyWebsocketResourceConnection:
+    def __enter__(self) -> WebsocketResourceConnection:
         """
         👋 If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -327,7 +327,7 @@ class MyWebsocketResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = client.my_websocket.connect(...).enter()
+        connection = client.websocket.connect(...).enter()
         # ...
         connection.close()
         ```
@@ -347,7 +347,7 @@ class MyWebsocketResourceConnectionManager:
         if self.__websocket_connection_options:
             log.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = MyWebsocketResourceConnection(
+        self.__connection = WebsocketResourceConnection(
             connect(
                 str(url),
                 user_agent_header=self.__client.user_agent,
