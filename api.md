@@ -201,6 +201,14 @@ Methods:
 - <code title="post /tts/bytes">client.tts.<a href="./src/cartesia/resources/tts.py">generate</a>(\*\*<a href="src/cartesia/types/tts_generate_params.py">params</a>) -> BinaryAPIResponse</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/cartesia/resources/tts.py">generate_sse</a>(\*\*<a href="src/cartesia/types/tts_generate_sse_params.py">params</a>) -> None</code>
 
+# TTSWebsocket
+
+Types:
+
+```python
+from cartesia.types import WebsocketClientEvent, WebsocketResponse
+```
+
 # VoiceChanger
 
 Methods:
