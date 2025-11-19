@@ -9,12 +9,12 @@ from ._client import (
     Client,
     Stream,
     Timeout,
+    Cartesia,
     Transport,
     AsyncClient,
     AsyncStream,
-    NoahTesting,
+    AsyncCartesia,
     RequestOptions,
-    AsyncNoahTesting,
 )
 from ._models import BaseModel
 from ._version import __title__, __version__
@@ -22,13 +22,13 @@ from ._response import APIResponse as APIResponse, AsyncAPIResponse as AsyncAPIR
 from ._constants import DEFAULT_TIMEOUT, DEFAULT_MAX_RETRIES, DEFAULT_CONNECTION_LIMITS
 from ._exceptions import (
     APIError,
+    CartesiaError,
     ConflictError,
     NotFoundError,
     APIStatusError,
     RateLimitError,
     APITimeoutError,
     BadRequestError,
-    NoahTestingError,
     APIConnectionError,
     AuthenticationError,
     InternalServerError,
@@ -51,7 +51,7 @@ __all__ = [
     "not_given",
     "Omit",
     "omit",
-    "NoahTestingError",
+    "CartesiaError",
     "APIError",
     "APIStatusError",
     "APITimeoutError",
@@ -71,8 +71,8 @@ __all__ = [
     "AsyncClient",
     "Stream",
     "AsyncStream",
-    "NoahTesting",
-    "AsyncNoahTesting",
+    "Cartesia",
+    "AsyncCartesia",
     "file_from_path",
     "BaseModel",
     "DEFAULT_TIMEOUT",
@@ -91,12 +91,12 @@ _setup_logging()
 # Update the __module__ attribute for exported symbols so that
 # error messages point to this module instead of the module
 # it was originally defined in, e.g.
-# noah_testing._exceptions.NotFoundError -> noah_testing.NotFoundError
+# cartesia._exceptions.NotFoundError -> cartesia.NotFoundError
 __locals = locals()
 for __name in __all__:
     if not __name.startswith("__"):
         try:
-            __locals[__name].__module__ = "noah_testing"
+            __locals[__name].__module__ = "cartesia"
         except (TypeError, AttributeError):
             # Some of our exported symbols are builtins which we can't set attributes for.
             pass

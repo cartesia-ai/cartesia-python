@@ -4,7 +4,7 @@ from urllib.parse import unquote
 
 import pytest
 
-from noah_testing._qs import Querystring, stringify
+from cartesia._qs import Querystring, stringify
 
 
 def test_empty() -> None:

@@ -7,9 +7,9 @@ import pytest
 import pydantic
 from pydantic import Field
 
-from noah_testing._utils import PropertyInfo
-from noah_testing._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
-from noah_testing._models import DISCRIMINATOR_CACHE, BaseModel, construct_type
+from cartesia._utils import PropertyInfo
+from cartesia._compat import PYDANTIC_V1, parse_obj, model_dump, model_json
+from cartesia._models import DISCRIMINATOR_CACHE, BaseModel, construct_type
 
 
 class BasicModel(BaseModel):

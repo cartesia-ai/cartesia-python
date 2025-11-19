@@ -4,8 +4,8 @@ from typing import Sequence
 
 import pytest
 
-from noah_testing._types import FileTypes
-from noah_testing._utils import extract_files
+from cartesia._types import FileTypes
+from cartesia._utils import extract_files
 
 
 def test_removes_files_from_input() -> None:

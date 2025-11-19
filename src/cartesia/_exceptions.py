@@ -18,11 +18,11 @@ __all__ = [
 ]
 
 
-class NoahTestingError(Exception):
+class CartesiaError(Exception):
     pass
 
 
-class APIError(NoahTestingError):
+class APIError(CartesiaError):
     message: str
     request: httpx.Request
 

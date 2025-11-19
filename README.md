@@ -1,9 +1,9 @@
-# Noah Testing Python API library
+# Cartesia Python API library
 
 <!-- prettier-ignore -->
-[![PyPI version](https://img.shields.io/pypi/v/noah_testing.svg?label=pypi%20(stable))](https://pypi.org/project/noah_testing/)
+[![PyPI version](https://img.shields.io/pypi/v/cartesia.svg?label=pypi%20(stable))](https://pypi.org/project/cartesia/)
 
-The Noah Testing Python library provides convenient access to the Noah Testing REST API from any Python 3.9+
+The Cartesia Python library provides convenient access to the Cartesia REST API from any Python 3.9+
 application. The library includes type definitions for all request params and response fields,
 and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
 
@@ -21,16 +21,16 @@ pip install git+ssh://git@github.com/stainless-sdks/noah-testing-python.git
 ```
 
 > [!NOTE]
-> Once this package is [published to PyPI](https://www.stainless.com/docs/guides/publish), this will become: `pip install noah_testing`
+> Once this package is [published to PyPI](https://www.stainless.com/docs/guides/publish), this will become: `pip install cartesia`
 
 ## Usage
 
 The full API of this library can be found in [api.md](api.md).
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting(
+client = Cartesia(
     api_key="My API Key",
 )
 
@@ -40,13 +40,13 @@ print(agents.summaries)
 
 ## Async usage
 
-Simply import `AsyncNoahTesting` instead of `NoahTesting` and use `await` with each API call:
+Simply import `AsyncCartesia` instead of `Cartesia` and use `await` with each API call:
 
 ```python
 import asyncio
-from noah_testing import AsyncNoahTesting
+from cartesia import AsyncCartesia
 
-client = AsyncNoahTesting(
+client = AsyncCartesia(
     api_key="My API Key",
 )
 
@@ -69,19 +69,19 @@ You can enable this by installing `aiohttp`:
 
 ```sh
 # install from this staging repo
-pip install 'noah_testing[aiohttp] @ git+ssh://git@github.com/stainless-sdks/noah-testing-python.git'
+pip install 'cartesia[aiohttp] @ git+ssh://git@github.com/stainless-sdks/noah-testing-python.git'
 ```
 
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
 
 ```python
 import asyncio
-from noah_testing import DefaultAioHttpClient
-from noah_testing import AsyncNoahTesting
+from cartesia import DefaultAioHttpClient
+from cartesia import AsyncCartesia
 
 
 async def main() -> None:
-    async with AsyncNoahTesting(
+    async with AsyncCartesia(
         api_key="My API Key",
         http_client=DefaultAioHttpClient(),
     ) as client:
@@ -103,14 +103,14 @@ Typed requests and responses provide autocomplete and documentation within your 
 
 ## Pagination
 
-List methods in the Noah Testing API are paginated.
+List methods in the Cartesia API are paginated.
 
 This library provides auto-paginating iterators with each list response, so you do not have to request successive pages manually:
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting()
+client = Cartesia()
 
 all_voices = []
 # Automatically fetches more pages as needed.
@@ -126,9 +126,9 @@ Or, asynchronously:
 
 ```python
 import asyncio
-from noah_testing import AsyncNoahTesting
+from cartesia import AsyncCartesia
 
-client = AsyncNoahTesting()
+client = AsyncCartesia()
 
 
 async def main() -> None:
@@ -177,9 +177,9 @@ for voice in first_page.data:
 Nested parameters are dictionaries, typed using `TypedDict`, for example:
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting()
+client = Cartesia()
 
 access_token = client.access_token.create(
     grants={},
@@ -193,9 +193,9 @@ Request parameters that correspond to file uploads can be passed as `bytes`, or 
 
 ```python
 from pathlib import Path
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting()
+client = Cartesia()
 
 client.datasets.files.upload(
     id="id",
@@ -207,27 +207,27 @@ The async client uses the exact same interface. If you pass a [`PathLike`](https
 
 ## Handling errors
 
-When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `noah_testing.APIConnectionError` is raised.
+When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `cartesia.APIConnectionError` is raised.
 
 When the API returns a non-success status code (that is, 4xx or 5xx
-response), a subclass of `noah_testing.APIStatusError` is raised, containing `status_code` and `response` properties.
+response), a subclass of `cartesia.APIStatusError` is raised, containing `status_code` and `response` properties.
 
-All errors inherit from `noah_testing.APIError`.
+All errors inherit from `cartesia.APIError`.
 
 ```python
-import noah_testing
-from noah_testing import NoahTesting
+import cartesia
+from cartesia import Cartesia
 
-client = NoahTesting()
+client = Cartesia()
 
 try:
     client.agents.list()
-except noah_testing.APIConnectionError as e:
+except cartesia.APIConnectionError as e:
     print("The server could not be reached")
     print(e.__cause__)  # an underlying Exception, likely raised within httpx.
-except noah_testing.RateLimitError as e:
+except cartesia.RateLimitError as e:
     print("A 429 status code was received; we should back off a bit.")
-except noah_testing.APIStatusError as e:
+except cartesia.APIStatusError as e:
     print("Another non-200-range status code was received")
     print(e.status_code)
     print(e.response)
@@ -255,10 +255,10 @@ Connection errors (for example, due to a network connectivity problem), 408 Requ
 You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
 # Configure the default for all requests:
-client = NoahTesting(
+client = Cartesia(
     # default is 2
     max_retries=0,
 )
@@ -273,16 +273,16 @@ By default requests time out after 1 minute. You can configure this with a `time
 which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
 # Configure the default for all requests:
-client = NoahTesting(
+client = Cartesia(
     # 20 seconds (default is 1 minute)
     timeout=20.0,
 )
 
 # More granular control:
-client = NoahTesting(
+client = Cartesia(
     timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
@@ -301,9 +301,9 @@ We automatically send the `cartesia-version` header set to `2025-04-16`.
 If you need to, you can override it by setting default headers per-request or on the client object.
 
 ```python
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting(
+client = Cartesia(
     default_headers={"cartesia-version": "My-Custom-Value"},
 )
 ```
@@ -314,10 +314,10 @@ client = NoahTesting(
 
 We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
 
-You can enable logging by setting the environment variable `NOAH_TESTING_LOG` to `info`.
+You can enable logging by setting the environment variable `CARTESIA_LOG` to `info`.
 
 ```shell
-$ export NOAH_TESTING_LOG=info
+$ export CARTESIA_LOG=info
 ```
 
 Or to `debug` for more verbose logging.
@@ -339,9 +339,9 @@ if response.my_field is None:
 The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
 
 ```py
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-client = NoahTesting()
+client = Cartesia()
 response = client.agents.with_raw_response.list()
 print(response.headers.get('X-My-Header'))
 
@@ -349,9 +349,9 @@ agent = response.parse()  # get the object that `agents.list()` would have retur
 print(agent.summaries)
 ```
 
-These methods return an [`APIResponse`](https://github.com/stainless-sdks/noah-testing-python/tree/main/src/noah_testing/_response.py) object.
+These methods return an [`APIResponse`](https://github.com/stainless-sdks/noah-testing-python/tree/main/src/cartesia/_response.py) object.
 
-The async client returns an [`AsyncAPIResponse`](https://github.com/stainless-sdks/noah-testing-python/tree/main/src/noah_testing/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
+The async client returns an [`AsyncAPIResponse`](https://github.com/stainless-sdks/noah-testing-python/tree/main/src/cartesia/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
 
 #### `.with_streaming_response`
 
@@ -413,10 +413,10 @@ You can directly override the [httpx client](https://www.python-httpx.org/api/#c
 
 ```python
 import httpx
-from noah_testing import NoahTesting, DefaultHttpxClient
+from cartesia import Cartesia, DefaultHttpxClient
 
-client = NoahTesting(
-    # Or use the `NOAH_TESTING_BASE_URL` env var
+client = Cartesia(
+    # Or use the `CARTESIA_BASE_URL` env var
     base_url="http://my.test.server.example.com:8083",
     http_client=DefaultHttpxClient(
         proxy="http://my.test.proxy.example.com",
@@ -436,9 +436,9 @@ client.with_options(http_client=DefaultHttpxClient(...))
 By default the library closes underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__). You can manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
 
 ```py
-from noah_testing import NoahTesting
+from cartesia import Cartesia
 
-with NoahTesting() as client:
+with Cartesia() as client:
   # make requests here
   ...
 
@@ -464,8 +464,8 @@ If you've upgraded to the latest version but aren't seeing any new features you 
 You can determine the version that is being used at runtime with:
 
 ```py
-import noah_testing
-print(noah_testing.__version__)
+import cartesia
+print(cartesia.__version__)
 ```
 
 ## Requirements

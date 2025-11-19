@@ -18,12 +18,12 @@ import pytest
 from respx import MockRouter
 from pydantic import ValidationError
 
-from noah_testing import NoahTesting, AsyncNoahTesting, APIResponseValidationError
-from noah_testing._types import Omit
-from noah_testing._utils import asyncify
-from noah_testing._models import BaseModel, FinalRequestOptions
-from noah_testing._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
-from noah_testing._base_client import (
+from cartesia import Cartesia, AsyncCartesia, APIResponseValidationError
+from cartesia._types import Omit
+from cartesia._utils import asyncify
+from cartesia._models import BaseModel, FinalRequestOptions
+from cartesia._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
+from cartesia._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
     BaseClient,
@@ -50,7 +50,7 @@ def _low_retry_timeout(*_args: Any, **_kwargs: Any) -> float:
     return 0.1
 
 
-def _get_open_connections(client: NoahTesting | AsyncNoahTesting) -> int:
+def _get_open_connections(client: Cartesia | AsyncCartesia) -> int:
     transport = client._client._transport
     assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
 
@@ -58,9 +58,9 @@ def _get_open_connections(client: NoahTesting | AsyncNoahTesting) -> int:
     return len(pool._requests)
 
 
-class TestNoahTesting:
+class TestCartesia:
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_raw_response(self, respx_mock: MockRouter, client: Cartesia) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = client.post("/foo", cast_to=httpx.Response)
@@ -69,7 +69,7 @@ class TestNoahTesting:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_raw_response_for_binary(self, respx_mock: MockRouter, client: Cartesia) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -79,7 +79,7 @@ class TestNoahTesting:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, client: NoahTesting) -> None:
+    def test_copy(self, client: Cartesia) -> None:
         copied = client.copy()
         assert id(copied) != id(client)
 
@@ -87,7 +87,7 @@ class TestNoahTesting:
         assert copied.token == "another My Token"
         assert client.token == "My Token"
 
-    def test_copy_default_options(self, client: NoahTesting) -> None:
+    def test_copy_default_options(self, client: Cartesia) -> None:
         # options that have a default are overridden correctly
         copied = client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -104,7 +104,7 @@ class TestNoahTesting:
         assert isinstance(client.timeout, httpx.Timeout)
 
     def test_copy_default_headers(self) -> None:
-        client = NoahTesting(
+        client = Cartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -139,7 +139,7 @@ class TestNoahTesting:
         client.close()
 
     def test_copy_default_query(self) -> None:
-        client = NoahTesting(
+        client = Cartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -176,7 +176,7 @@ class TestNoahTesting:
 
         client.close()
 
-    def test_copy_signature(self, client: NoahTesting) -> None:
+    def test_copy_signature(self, client: Cartesia) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -193,7 +193,7 @@ class TestNoahTesting:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, client: NoahTesting) -> None:
+    def test_copy_build_request(self, client: Cartesia) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -233,10 +233,10 @@ class TestNoahTesting:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "noah_testing/_legacy_response.py",
-                        "noah_testing/_response.py",
+                        "cartesia/_legacy_response.py",
+                        "cartesia/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
-                        "noah_testing/_compat.py",
+                        "cartesia/_compat.py",
                         # Standard library leaks we don't care about.
                         "/logging/__init__.py",
                     ]
@@ -255,7 +255,7 @@ class TestNoahTesting:
                     print(frame)
             raise AssertionError()
 
-    def test_request_timeout(self, client: NoahTesting) -> None:
+    def test_request_timeout(self, client: Cartesia) -> None:
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -265,7 +265,7 @@ class TestNoahTesting:
         assert timeout == httpx.Timeout(100.0)
 
     def test_client_timeout_option(self) -> None:
-        client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=True, timeout=httpx.Timeout(0))
+        client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True, timeout=httpx.Timeout(0))
 
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -276,9 +276,7 @@ class TestNoahTesting:
     def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         with httpx.Client(timeout=None) as http_client:
-            client = NoahTesting(
-                base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
-            )
+            client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client)
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
             timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -288,9 +286,7 @@ class TestNoahTesting:
 
         # no timeout given to the httpx client should not use the httpx default
         with httpx.Client() as http_client:
-            client = NoahTesting(
-                base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
-            )
+            client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client)
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
             timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -300,9 +296,7 @@ class TestNoahTesting:
 
         # explicitly passing the default timeout currently results in it being ignored
         with httpx.Client(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = NoahTesting(
-                base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
-            )
+            client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client)
 
             request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
             timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
@@ -313,19 +307,19 @@ class TestNoahTesting:
     async def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             async with httpx.AsyncClient() as http_client:
-                NoahTesting(
+                Cartesia(
                     base_url=base_url, token=token, _strict_response_validation=True, http_client=cast(Any, http_client)
                 )
 
     def test_default_headers_option(self) -> None:
-        test_client = NoahTesting(
+        test_client = Cartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = NoahTesting(
+        test_client2 = Cartesia(
             base_url=base_url,
             token=token,
             _strict_response_validation=True,
@@ -342,11 +336,11 @@ class TestNoahTesting:
         test_client2.close()
 
     def test_validate_headers(self) -> None:
-        client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("Authorization") == f"Bearer {token}"
 
-        client2 = NoahTesting(base_url=base_url, token=None, _strict_response_validation=True)
+        client2 = Cartesia(base_url=base_url, token=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
@@ -360,7 +354,7 @@ class TestNoahTesting:
         assert request2.headers.get("Authorization") is None
 
     def test_default_query_option(self) -> None:
-        client = NoahTesting(
+        client = Cartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -379,7 +373,7 @@ class TestNoahTesting:
 
         client.close()
 
-    def test_request_extra_json(self, client: NoahTesting) -> None:
+    def test_request_extra_json(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -413,7 +407,7 @@ class TestNoahTesting:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: NoahTesting) -> None:
+    def test_request_extra_headers(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -435,7 +429,7 @@ class TestNoahTesting:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: NoahTesting) -> None:
+    def test_request_extra_query(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -476,7 +470,7 @@ class TestNoahTesting:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, client: NoahTesting) -> None:
+    def test_multipart_repeating_array(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -506,7 +500,7 @@ class TestNoahTesting:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    def test_basic_union_response(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_basic_union_response(self, respx_mock: MockRouter, client: Cartesia) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -520,7 +514,7 @@ class TestNoahTesting:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    def test_union_response_different_types(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_union_response_different_types(self, respx_mock: MockRouter, client: Cartesia) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -542,7 +536,7 @@ class TestNoahTesting:
         assert response.foo == 1
 
     @pytest.mark.respx(base_url=base_url)
-    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_non_application_json_content_type_for_json_data(self, respx_mock: MockRouter, client: Cartesia) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
         """
@@ -563,7 +557,7 @@ class TestNoahTesting:
         assert response.foo == 2
 
     def test_base_url_setter(self) -> None:
-        client = NoahTesting(base_url="https://example.com/from_init", token=token, _strict_response_validation=True)
+        client = Cartesia(base_url="https://example.com/from_init", token=token, _strict_response_validation=True)
         assert client.base_url == "https://example.com/from_init/"
 
         client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
@@ -573,15 +567,15 @@ class TestNoahTesting:
         client.close()
 
     def test_base_url_env(self) -> None:
-        with update_env(NOAH_TESTING_BASE_URL="http://localhost:5000/from/env"):
-            client = NoahTesting(token=token, _strict_response_validation=True)
+        with update_env(CARTESIA_BASE_URL="http://localhost:5000/from/env"):
+            client = Cartesia(token=token, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
-            NoahTesting(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
-            NoahTesting(
+            Cartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            Cartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -590,7 +584,7 @@ class TestNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_trailing_slash(self, client: NoahTesting) -> None:
+    def test_base_url_trailing_slash(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -604,8 +598,8 @@ class TestNoahTesting:
     @pytest.mark.parametrize(
         "client",
         [
-            NoahTesting(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
-            NoahTesting(
+            Cartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            Cartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -614,7 +608,7 @@ class TestNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_base_url_no_trailing_slash(self, client: NoahTesting) -> None:
+    def test_base_url_no_trailing_slash(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -628,8 +622,8 @@ class TestNoahTesting:
     @pytest.mark.parametrize(
         "client",
         [
-            NoahTesting(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
-            NoahTesting(
+            Cartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            Cartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -638,7 +632,7 @@ class TestNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    def test_absolute_request_url(self, client: NoahTesting) -> None:
+    def test_absolute_request_url(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -650,7 +644,7 @@ class TestNoahTesting:
         client.close()
 
     def test_copied_client_does_not_close_http(self) -> None:
-        test_client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        test_client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -661,7 +655,7 @@ class TestNoahTesting:
         assert not test_client.is_closed()
 
     def test_client_context_manager(self) -> None:
-        test_client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        test_client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True)
         with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -669,7 +663,7 @@ class TestNoahTesting:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    def test_client_response_validation_error(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_client_response_validation_error(self, respx_mock: MockRouter, client: Cartesia) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -682,7 +676,7 @@ class TestNoahTesting:
 
     def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            NoahTesting(base_url=base_url, token=token, _strict_response_validation=True, max_retries=cast(Any, None))
+            Cartesia(base_url=base_url, token=token, _strict_response_validation=True, max_retries=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
@@ -691,12 +685,12 @@ class TestNoahTesting:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        strict_client = Cartesia(base_url=base_url, token=token, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = NoahTesting(base_url=base_url, token=token, _strict_response_validation=False)
+        non_strict_client = Cartesia(base_url=base_url, token=token, _strict_response_validation=False)
 
         response = non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -727,16 +721,16 @@ class TestNoahTesting:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, client: NoahTesting
+        self, remaining_retries: int, retry_after: str, timeout: float, client: Cartesia
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Cartesia) -> None:
         respx_mock.get("/agents/").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
         with pytest.raises(APITimeoutError):
@@ -744,9 +738,9 @@ class TestNoahTesting:
 
         assert _get_open_connections(client) == 0
 
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Cartesia) -> None:
         respx_mock.get("/agents/").mock(return_value=httpx.Response(500))
 
         with pytest.raises(APIStatusError):
@@ -754,12 +748,12 @@ class TestNoahTesting:
         assert _get_open_connections(client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     def test_retries_taken(
         self,
-        client: NoahTesting,
+        client: Cartesia,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -785,10 +779,10 @@ class TestNoahTesting:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_omit_retry_count_header(
-        self, client: NoahTesting, failures_before_success: int, respx_mock: MockRouter
+        self, client: Cartesia, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -808,10 +802,10 @@ class TestNoahTesting:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     def test_overwrite_retry_count_header(
-        self, client: NoahTesting, failures_before_success: int, respx_mock: MockRouter
+        self, client: Cartesia, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = client.with_options(max_retries=4)
 
@@ -853,7 +847,7 @@ class TestNoahTesting:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_follow_redirects(self, respx_mock: MockRouter, client: Cartesia) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -865,7 +859,7 @@ class TestNoahTesting:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: NoahTesting) -> None:
+    def test_follow_redirects_disabled(self, respx_mock: MockRouter, client: Cartesia) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -878,9 +872,9 @@ class TestNoahTesting:
         assert exc_info.value.response.headers["Location"] == f"{base_url}/redirected"
 
 
-class TestAsyncNoahTesting:
+class TestAsyncCartesia:
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         respx_mock.post("/foo").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         response = await async_client.post("/foo", cast_to=httpx.Response)
@@ -889,7 +883,7 @@ class TestAsyncNoahTesting:
         assert response.json() == {"foo": "bar"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_for_binary(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         respx_mock.post("/foo").mock(
             return_value=httpx.Response(200, headers={"Content-Type": "application/binary"}, content='{"foo": "bar"}')
         )
@@ -899,7 +893,7 @@ class TestAsyncNoahTesting:
         assert isinstance(response, httpx.Response)
         assert response.json() == {"foo": "bar"}
 
-    def test_copy(self, async_client: AsyncNoahTesting) -> None:
+    def test_copy(self, async_client: AsyncCartesia) -> None:
         copied = async_client.copy()
         assert id(copied) != id(async_client)
 
@@ -907,7 +901,7 @@ class TestAsyncNoahTesting:
         assert copied.token == "another My Token"
         assert async_client.token == "My Token"
 
-    def test_copy_default_options(self, async_client: AsyncNoahTesting) -> None:
+    def test_copy_default_options(self, async_client: AsyncCartesia) -> None:
         # options that have a default are overridden correctly
         copied = async_client.copy(max_retries=7)
         assert copied.max_retries == 7
@@ -924,7 +918,7 @@ class TestAsyncNoahTesting:
         assert isinstance(async_client.timeout, httpx.Timeout)
 
     async def test_copy_default_headers(self) -> None:
-        client = AsyncNoahTesting(
+        client = AsyncCartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         assert client.default_headers["X-Foo"] == "bar"
@@ -959,7 +953,7 @@ class TestAsyncNoahTesting:
         await client.close()
 
     async def test_copy_default_query(self) -> None:
-        client = AsyncNoahTesting(
+        client = AsyncCartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_query={"foo": "bar"}
         )
         assert _get_params(client)["foo"] == "bar"
@@ -996,7 +990,7 @@ class TestAsyncNoahTesting:
 
         await client.close()
 
-    def test_copy_signature(self, async_client: AsyncNoahTesting) -> None:
+    def test_copy_signature(self, async_client: AsyncCartesia) -> None:
         # ensure the same parameters that can be passed to the client are defined in the `.copy()` method
         init_signature = inspect.signature(
             # mypy doesn't like that we access the `__init__` property.
@@ -1013,7 +1007,7 @@ class TestAsyncNoahTesting:
             assert copy_param is not None, f"copy() signature is missing the {name} param"
 
     @pytest.mark.skipif(sys.version_info >= (3, 10), reason="fails because of a memory leak that started from 3.12")
-    def test_copy_build_request(self, async_client: AsyncNoahTesting) -> None:
+    def test_copy_build_request(self, async_client: AsyncCartesia) -> None:
         options = FinalRequestOptions(method="get", url="/foo")
 
         def build_request(options: FinalRequestOptions) -> None:
@@ -1053,10 +1047,10 @@ class TestAsyncNoahTesting:
                         # to_raw_response_wrapper leaks through the @functools.wraps() decorator.
                         #
                         # removing the decorator fixes the leak for reasons we don't understand.
-                        "noah_testing/_legacy_response.py",
-                        "noah_testing/_response.py",
+                        "cartesia/_legacy_response.py",
+                        "cartesia/_response.py",
                         # pydantic.BaseModel.model_dump || pydantic.BaseModel.dict leak memory for some reason.
-                        "noah_testing/_compat.py",
+                        "cartesia/_compat.py",
                         # Standard library leaks we don't care about.
                         "/logging/__init__.py",
                     ]
@@ -1075,7 +1069,7 @@ class TestAsyncNoahTesting:
                     print(frame)
             raise AssertionError()
 
-    async def test_request_timeout(self, async_client: AsyncNoahTesting) -> None:
+    async def test_request_timeout(self, async_client: AsyncCartesia) -> None:
         request = async_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         timeout = httpx.Timeout(**request.extensions["timeout"])  # type: ignore
         assert timeout == DEFAULT_TIMEOUT
@@ -1087,7 +1081,7 @@ class TestAsyncNoahTesting:
         assert timeout == httpx.Timeout(100.0)
 
     async def test_client_timeout_option(self) -> None:
-        client = AsyncNoahTesting(
+        client = AsyncCartesia(
             base_url=base_url, token=token, _strict_response_validation=True, timeout=httpx.Timeout(0)
         )
 
@@ -1100,7 +1094,7 @@ class TestAsyncNoahTesting:
     async def test_http_client_timeout_option(self) -> None:
         # custom timeout given to the httpx client should be used
         async with httpx.AsyncClient(timeout=None) as http_client:
-            client = AsyncNoahTesting(
+            client = AsyncCartesia(
                 base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1112,7 +1106,7 @@ class TestAsyncNoahTesting:
 
         # no timeout given to the httpx client should not use the httpx default
         async with httpx.AsyncClient() as http_client:
-            client = AsyncNoahTesting(
+            client = AsyncCartesia(
                 base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1124,7 +1118,7 @@ class TestAsyncNoahTesting:
 
         # explicitly passing the default timeout currently results in it being ignored
         async with httpx.AsyncClient(timeout=HTTPX_DEFAULT_TIMEOUT) as http_client:
-            client = AsyncNoahTesting(
+            client = AsyncCartesia(
                 base_url=base_url, token=token, _strict_response_validation=True, http_client=http_client
             )
 
@@ -1137,19 +1131,19 @@ class TestAsyncNoahTesting:
     def test_invalid_http_client(self) -> None:
         with pytest.raises(TypeError, match="Invalid `http_client` arg"):
             with httpx.Client() as http_client:
-                AsyncNoahTesting(
+                AsyncCartesia(
                     base_url=base_url, token=token, _strict_response_validation=True, http_client=cast(Any, http_client)
                 )
 
     async def test_default_headers_option(self) -> None:
-        test_client = AsyncNoahTesting(
+        test_client = AsyncCartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_headers={"X-Foo": "bar"}
         )
         request = test_client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("x-foo") == "bar"
         assert request.headers.get("x-stainless-lang") == "python"
 
-        test_client2 = AsyncNoahTesting(
+        test_client2 = AsyncCartesia(
             base_url=base_url,
             token=token,
             _strict_response_validation=True,
@@ -1166,11 +1160,11 @@ class TestAsyncNoahTesting:
         await test_client2.close()
 
     def test_validate_headers(self) -> None:
-        client = AsyncNoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        client = AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=True)
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
         assert request.headers.get("Authorization") == f"Bearer {token}"
 
-        client2 = AsyncNoahTesting(base_url=base_url, token=None, _strict_response_validation=True)
+        client2 = AsyncCartesia(base_url=base_url, token=None, _strict_response_validation=True)
 
         with pytest.raises(
             TypeError,
@@ -1184,7 +1178,7 @@ class TestAsyncNoahTesting:
         assert request2.headers.get("Authorization") is None
 
     async def test_default_query_option(self) -> None:
-        client = AsyncNoahTesting(
+        client = AsyncCartesia(
             base_url=base_url, token=token, _strict_response_validation=True, default_query={"query_param": "bar"}
         )
         request = client._build_request(FinalRequestOptions(method="get", url="/foo"))
@@ -1203,7 +1197,7 @@ class TestAsyncNoahTesting:
 
         await client.close()
 
-    def test_request_extra_json(self, client: NoahTesting) -> None:
+    def test_request_extra_json(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1237,7 +1231,7 @@ class TestAsyncNoahTesting:
         data = json.loads(request.content.decode("utf-8"))
         assert data == {"foo": "bar", "baz": None}
 
-    def test_request_extra_headers(self, client: NoahTesting) -> None:
+    def test_request_extra_headers(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1259,7 +1253,7 @@ class TestAsyncNoahTesting:
         )
         assert request.headers.get("X-Bar") == "false"
 
-    def test_request_extra_query(self, client: NoahTesting) -> None:
+    def test_request_extra_query(self, client: Cartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1300,7 +1294,7 @@ class TestAsyncNoahTesting:
         params = dict(request.url.params)
         assert params == {"foo": "2"}
 
-    def test_multipart_repeating_array(self, async_client: AsyncNoahTesting) -> None:
+    def test_multipart_repeating_array(self, async_client: AsyncCartesia) -> None:
         request = async_client._build_request(
             FinalRequestOptions.construct(
                 method="post",
@@ -1330,7 +1324,7 @@ class TestAsyncNoahTesting:
         ]
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_basic_union_response(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         class Model1(BaseModel):
             name: str
 
@@ -1344,7 +1338,7 @@ class TestAsyncNoahTesting:
         assert response.foo == "bar"
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_union_response_different_types(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         """Union of objects with the same field name using a different type"""
 
         class Model1(BaseModel):
@@ -1367,7 +1361,7 @@ class TestAsyncNoahTesting:
 
     @pytest.mark.respx(base_url=base_url)
     async def test_non_application_json_content_type_for_json_data(
-        self, respx_mock: MockRouter, async_client: AsyncNoahTesting
+        self, respx_mock: MockRouter, async_client: AsyncCartesia
     ) -> None:
         """
         Response that sets Content-Type to something other than application/json but returns json data
@@ -1389,9 +1383,7 @@ class TestAsyncNoahTesting:
         assert response.foo == 2
 
     async def test_base_url_setter(self) -> None:
-        client = AsyncNoahTesting(
-            base_url="https://example.com/from_init", token=token, _strict_response_validation=True
-        )
+        client = AsyncCartesia(base_url="https://example.com/from_init", token=token, _strict_response_validation=True)
         assert client.base_url == "https://example.com/from_init/"
 
         client.base_url = "https://example.com/from_setter"  # type: ignore[assignment]
@@ -1401,17 +1393,15 @@ class TestAsyncNoahTesting:
         await client.close()
 
     async def test_base_url_env(self) -> None:
-        with update_env(NOAH_TESTING_BASE_URL="http://localhost:5000/from/env"):
-            client = AsyncNoahTesting(token=token, _strict_response_validation=True)
+        with update_env(CARTESIA_BASE_URL="http://localhost:5000/from/env"):
+            client = AsyncCartesia(token=token, _strict_response_validation=True)
             assert client.base_url == "http://localhost:5000/from/env/"
 
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True
-            ),
-            AsyncNoahTesting(
+            AsyncCartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            AsyncCartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -1420,7 +1410,7 @@ class TestAsyncNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_trailing_slash(self, client: AsyncNoahTesting) -> None:
+    async def test_base_url_trailing_slash(self, client: AsyncCartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1434,10 +1424,8 @@ class TestAsyncNoahTesting:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True
-            ),
-            AsyncNoahTesting(
+            AsyncCartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            AsyncCartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -1446,7 +1434,7 @@ class TestAsyncNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_base_url_no_trailing_slash(self, client: AsyncNoahTesting) -> None:
+    async def test_base_url_no_trailing_slash(self, client: AsyncCartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1460,10 +1448,8 @@ class TestAsyncNoahTesting:
     @pytest.mark.parametrize(
         "client",
         [
-            AsyncNoahTesting(
-                base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True
-            ),
-            AsyncNoahTesting(
+            AsyncCartesia(base_url="http://localhost:5000/custom/path/", token=token, _strict_response_validation=True),
+            AsyncCartesia(
                 base_url="http://localhost:5000/custom/path/",
                 token=token,
                 _strict_response_validation=True,
@@ -1472,7 +1458,7 @@ class TestAsyncNoahTesting:
         ],
         ids=["standard", "custom http client"],
     )
-    async def test_absolute_request_url(self, client: AsyncNoahTesting) -> None:
+    async def test_absolute_request_url(self, client: AsyncCartesia) -> None:
         request = client._build_request(
             FinalRequestOptions(
                 method="post",
@@ -1484,7 +1470,7 @@ class TestAsyncNoahTesting:
         await client.close()
 
     async def test_copied_client_does_not_close_http(self) -> None:
-        test_client = AsyncNoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        test_client = AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=True)
         assert not test_client.is_closed()
 
         copied = test_client.copy()
@@ -1496,7 +1482,7 @@ class TestAsyncNoahTesting:
         assert not test_client.is_closed()
 
     async def test_client_context_manager(self) -> None:
-        test_client = AsyncNoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        test_client = AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=True)
         async with test_client as c2:
             assert c2 is test_client
             assert not c2.is_closed()
@@ -1504,9 +1490,7 @@ class TestAsyncNoahTesting:
         assert test_client.is_closed()
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_client_response_validation_error(
-        self, respx_mock: MockRouter, async_client: AsyncNoahTesting
-    ) -> None:
+    async def test_client_response_validation_error(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         class Model(BaseModel):
             foo: str
 
@@ -1519,9 +1503,7 @@ class TestAsyncNoahTesting:
 
     async def test_client_max_retries_validation(self) -> None:
         with pytest.raises(TypeError, match=r"max_retries cannot be None"):
-            AsyncNoahTesting(
-                base_url=base_url, token=token, _strict_response_validation=True, max_retries=cast(Any, None)
-            )
+            AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=True, max_retries=cast(Any, None))
 
     @pytest.mark.respx(base_url=base_url)
     async def test_received_text_for_expected_json(self, respx_mock: MockRouter) -> None:
@@ -1530,12 +1512,12 @@ class TestAsyncNoahTesting:
 
         respx_mock.get("/foo").mock(return_value=httpx.Response(200, text="my-custom-format"))
 
-        strict_client = AsyncNoahTesting(base_url=base_url, token=token, _strict_response_validation=True)
+        strict_client = AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=True)
 
         with pytest.raises(APIResponseValidationError):
             await strict_client.get("/foo", cast_to=Model)
 
-        non_strict_client = AsyncNoahTesting(base_url=base_url, token=token, _strict_response_validation=False)
+        non_strict_client = AsyncCartesia(base_url=base_url, token=token, _strict_response_validation=False)
 
         response = await non_strict_client.get("/foo", cast_to=Model)
         assert isinstance(response, str)  # type: ignore[unreachable]
@@ -1566,17 +1548,17 @@ class TestAsyncNoahTesting:
     )
     @mock.patch("time.time", mock.MagicMock(return_value=1696004797))
     async def test_parse_retry_after_header(
-        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncNoahTesting
+        self, remaining_retries: int, retry_after: str, timeout: float, async_client: AsyncCartesia
     ) -> None:
         headers = httpx.Headers({"retry-after": retry_after})
         options = FinalRequestOptions(method="get", url="/foo", max_retries=3)
         calculated = async_client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_timeout_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncNoahTesting
+        self, respx_mock: MockRouter, async_client: AsyncCartesia
     ) -> None:
         respx_mock.get("/agents/").mock(side_effect=httpx.TimeoutException("Test timeout error"))
 
@@ -1585,10 +1567,10 @@ class TestAsyncNoahTesting:
 
         assert _get_open_connections(async_client) == 0
 
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_retrying_status_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncNoahTesting
+        self, respx_mock: MockRouter, async_client: AsyncCartesia
     ) -> None:
         respx_mock.get("/agents/").mock(return_value=httpx.Response(500))
 
@@ -1597,12 +1579,12 @@ class TestAsyncNoahTesting:
         assert _get_open_connections(async_client) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     @pytest.mark.parametrize("failure_mode", ["status", "exception"])
     async def test_retries_taken(
         self,
-        async_client: AsyncNoahTesting,
+        async_client: AsyncCartesia,
         failures_before_success: int,
         failure_mode: Literal["status", "exception"],
         respx_mock: MockRouter,
@@ -1628,10 +1610,10 @@ class TestAsyncNoahTesting:
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_omit_retry_count_header(
-        self, async_client: AsyncNoahTesting, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncCartesia, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1651,10 +1633,10 @@ class TestAsyncNoahTesting:
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
-    @mock.patch("noah_testing._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
+    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
     async def test_overwrite_retry_count_header(
-        self, async_client: AsyncNoahTesting, failures_before_success: int, respx_mock: MockRouter
+        self, async_client: AsyncCartesia, failures_before_success: int, respx_mock: MockRouter
     ) -> None:
         client = async_client.with_options(max_retries=4)
 
@@ -1700,7 +1682,7 @@ class TestAsyncNoahTesting:
         )
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_follow_redirects(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         # Test that the default follow_redirects=True allows following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})
@@ -1712,7 +1694,7 @@ class TestAsyncNoahTesting:
         assert response.json() == {"status": "ok"}
 
     @pytest.mark.respx(base_url=base_url)
-    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncNoahTesting) -> None:
+    async def test_follow_redirects_disabled(self, respx_mock: MockRouter, async_client: AsyncCartesia) -> None:
         # Test that follow_redirects=False prevents following redirects
         respx_mock.post("/redirect").mock(
             return_value=httpx.Response(302, headers={"Location": f"{base_url}/redirected"})

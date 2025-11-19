@@ -8,15 +8,15 @@ from typing_extensions import Required, Annotated, TypedDict
 
 import pytest
 
-from noah_testing._types import Base64FileInput, omit, not_given
-from noah_testing._utils import (
+from cartesia._types import Base64FileInput, omit, not_given
+from cartesia._utils import (
     PropertyInfo,
     transform as _transform,
     parse_datetime,
     async_transform as _async_transform,
 )
-from noah_testing._compat import PYDANTIC_V1
-from noah_testing._models import BaseModel
+from cartesia._compat import PYDANTIC_V1
+from cartesia._models import BaseModel
 
 _T = TypeVar("_T")
 

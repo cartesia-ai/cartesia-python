@@ -7,17 +7,17 @@ from ._proxy import LazyProxy
 
 
 class ResourcesProxy(LazyProxy[Any]):
-    """A proxy for the `noah_testing.resources` module.
+    """A proxy for the `cartesia.resources` module.
 
-    This is used so that we can lazily import `noah_testing.resources` only when
-    needed *and* so that users can just import `noah_testing` and reference `noah_testing.resources`
+    This is used so that we can lazily import `cartesia.resources` only when
+    needed *and* so that users can just import `cartesia` and reference `cartesia.resources`
     """
 
     @override
     def __load__(self) -> Any:
         import importlib
 
-        mod = importlib.import_module("noah_testing.resources")
+        mod = importlib.import_module("cartesia.resources")
         return mod
 
 

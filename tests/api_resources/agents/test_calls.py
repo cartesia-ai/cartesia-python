@@ -7,10 +7,10 @@ from typing import Any, cast
 
 import pytest
 
+from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
-from noah_testing.types.agents import AgentCall
+from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
+from cartesia.types.agents import AgentCall
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -20,7 +20,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_retrieve(self, client: NoahTesting) -> None:
+    def test_method_retrieve(self, client: Cartesia) -> None:
         call = client.agents.calls.retrieve(
             "call_id",
         )
@@ -28,7 +28,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_retrieve(self, client: NoahTesting) -> None:
+    def test_raw_response_retrieve(self, client: Cartesia) -> None:
         response = client.agents.calls.with_raw_response.retrieve(
             "call_id",
         )
@@ -40,7 +40,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_retrieve(self, client: NoahTesting) -> None:
+    def test_streaming_response_retrieve(self, client: Cartesia) -> None:
         with client.agents.calls.with_streaming_response.retrieve(
             "call_id",
         ) as response:
@@ -54,7 +54,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_retrieve(self, client: NoahTesting) -> None:
+    def test_path_params_retrieve(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `call_id` but received ''"):
             client.agents.calls.with_raw_response.retrieve(
                 "",
@@ -62,7 +62,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list(self, client: NoahTesting) -> None:
+    def test_method_list(self, client: Cartesia) -> None:
         call = client.agents.calls.list(
             agent_id="agent_id",
         )
@@ -70,7 +70,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_list_with_all_params(self, client: Cartesia) -> None:
         call = client.agents.calls.list(
             agent_id="agent_id",
             ending_before="ending_before",
@@ -82,7 +82,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_list(self, client: NoahTesting) -> None:
+    def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.agents.calls.with_raw_response.list(
             agent_id="agent_id",
         )
@@ -94,7 +94,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_list(self, client: NoahTesting) -> None:
+    def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.agents.calls.with_streaming_response.list(
             agent_id="agent_id",
         ) as response:
@@ -108,7 +108,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_download_audio(self, client: NoahTesting) -> None:
+    def test_method_download_audio(self, client: Cartesia) -> None:
         call = client.agents.calls.download_audio(
             "call_id",
         )
@@ -116,7 +116,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_download_audio(self, client: NoahTesting) -> None:
+    def test_raw_response_download_audio(self, client: Cartesia) -> None:
         response = client.agents.calls.with_raw_response.download_audio(
             "call_id",
         )
@@ -128,7 +128,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_download_audio(self, client: NoahTesting) -> None:
+    def test_streaming_response_download_audio(self, client: Cartesia) -> None:
         with client.agents.calls.with_streaming_response.download_audio(
             "call_id",
         ) as response:
@@ -142,7 +142,7 @@ class TestCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_download_audio(self, client: NoahTesting) -> None:
+    def test_path_params_download_audio(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `call_id` but received ''"):
             client.agents.calls.with_raw_response.download_audio(
                 "",
@@ -156,7 +156,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_retrieve(self, async_client: AsyncCartesia) -> None:
         call = await async_client.agents.calls.retrieve(
             "call_id",
         )
@@ -164,7 +164,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_retrieve(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.calls.with_raw_response.retrieve(
             "call_id",
         )
@@ -176,7 +176,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_retrieve(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.calls.with_streaming_response.retrieve(
             "call_id",
         ) as response:
@@ -190,7 +190,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_retrieve(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `call_id` but received ''"):
             await async_client.agents.calls.with_raw_response.retrieve(
                 "",
@@ -198,7 +198,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list(self, async_client: AsyncCartesia) -> None:
         call = await async_client.agents.calls.list(
             agent_id="agent_id",
         )
@@ -206,7 +206,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         call = await async_client.agents.calls.list(
             agent_id="agent_id",
             ending_before="ending_before",
@@ -218,7 +218,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.calls.with_raw_response.list(
             agent_id="agent_id",
         )
@@ -230,7 +230,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.calls.with_streaming_response.list(
             agent_id="agent_id",
         ) as response:
@@ -244,7 +244,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_download_audio(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_download_audio(self, async_client: AsyncCartesia) -> None:
         call = await async_client.agents.calls.download_audio(
             "call_id",
         )
@@ -252,7 +252,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_download_audio(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_download_audio(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.calls.with_raw_response.download_audio(
             "call_id",
         )
@@ -264,7 +264,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_download_audio(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_download_audio(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.calls.with_streaming_response.download_audio(
             "call_id",
         ) as response:
@@ -278,7 +278,7 @@ class TestAsyncCalls:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_download_audio(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_download_audio(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `call_id` but received ''"):
             await async_client.agents.calls.with_raw_response.download_audio(
                 "",

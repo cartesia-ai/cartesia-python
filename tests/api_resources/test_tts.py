@@ -9,8 +9,8 @@ import httpx
 import pytest
 from respx import MockRouter
 
-from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing._response import (
+from cartesia import Cartesia, AsyncCartesia
+from cartesia._response import (
     BinaryAPIResponse,
     AsyncBinaryAPIResponse,
     StreamedBinaryAPIResponse,
@@ -25,7 +25,7 @@ class TestTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_method_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_method_generate(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.generate(
             model_id="model_id",
@@ -46,7 +46,7 @@ class TestTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_method_generate_with_all_params(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_method_generate_with_all_params(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.generate(
             model_id="model_id",
@@ -78,7 +78,7 @@ class TestTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_raw_response_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_raw_response_generate(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         tts = client.tts.with_raw_response.generate(
@@ -101,7 +101,7 @@ class TestTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    def test_streaming_response_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
+    def test_streaming_response_generate(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         with client.tts.with_streaming_response.generate(
             model_id="model_id",
@@ -126,7 +126,7 @@ class TestTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_generate_sse(self, client: NoahTesting) -> None:
+    def test_method_generate_sse(self, client: Cartesia) -> None:
         tts = client.tts.generate_sse(
             model_id="model_id",
             output_format={
@@ -144,7 +144,7 @@ class TestTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_generate_sse_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_generate_sse_with_all_params(self, client: Cartesia) -> None:
         tts = client.tts.generate_sse(
             model_id="model_id",
             output_format={
@@ -170,7 +170,7 @@ class TestTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_generate_sse(self, client: NoahTesting) -> None:
+    def test_raw_response_generate_sse(self, client: Cartesia) -> None:
         response = client.tts.with_raw_response.generate_sse(
             model_id="model_id",
             output_format={
@@ -192,7 +192,7 @@ class TestTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_generate_sse(self, client: NoahTesting) -> None:
+    def test_streaming_response_generate_sse(self, client: Cartesia) -> None:
         with client.tts.with_streaming_response.generate_sse(
             model_id="model_id",
             output_format={
@@ -222,7 +222,7 @@ class TestAsyncTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_method_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
+    async def test_method_generate(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.generate(
             model_id="model_id",
@@ -243,9 +243,7 @@ class TestAsyncTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_method_generate_with_all_params(
-        self, async_client: AsyncNoahTesting, respx_mock: MockRouter
-    ) -> None:
+    async def test_method_generate_with_all_params(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.generate(
             model_id="model_id",
@@ -277,7 +275,7 @@ class TestAsyncTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_raw_response_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
+    async def test_raw_response_generate(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         tts = await async_client.tts.with_raw_response.generate(
@@ -300,7 +298,7 @@ class TestAsyncTTS:
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
-    async def test_streaming_response_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
+    async def test_streaming_response_generate(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         async with async_client.tts.with_streaming_response.generate(
             model_id="model_id",
@@ -325,7 +323,7 @@ class TestAsyncTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_generate_sse(self, async_client: AsyncCartesia) -> None:
         tts = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
@@ -343,7 +341,7 @@ class TestAsyncTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_generate_sse_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_generate_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
         tts = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
@@ -369,7 +367,7 @@ class TestAsyncTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         response = await async_client.tts.with_raw_response.generate_sse(
             model_id="model_id",
             output_format={
@@ -391,7 +389,7 @@ class TestAsyncTTS:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_generate_sse(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         async with async_client.tts.with_streaming_response.generate_sse(
             model_id="model_id",
             output_format={

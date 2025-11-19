@@ -7,10 +7,10 @@ from typing import Any, cast
 
 import pytest
 
+from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
-from noah_testing.types.datasets import FileListResponse
+from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
+from cartesia.types.datasets import FileListResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -20,7 +20,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list(self, client: NoahTesting) -> None:
+    def test_method_list(self, client: Cartesia) -> None:
         file = client.datasets.files.list(
             id="id",
         )
@@ -28,7 +28,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_list_with_all_params(self, client: Cartesia) -> None:
         file = client.datasets.files.list(
             id="id",
             ending_before="ending_before",
@@ -39,7 +39,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_list(self, client: NoahTesting) -> None:
+    def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.datasets.files.with_raw_response.list(
             id="id",
         )
@@ -51,7 +51,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_list(self, client: NoahTesting) -> None:
+    def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.datasets.files.with_streaming_response.list(
             id="id",
         ) as response:
@@ -65,7 +65,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_list(self, client: NoahTesting) -> None:
+    def test_path_params_list(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.datasets.files.with_raw_response.list(
                 id="",
@@ -73,7 +73,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: NoahTesting) -> None:
+    def test_method_delete(self, client: Cartesia) -> None:
         file = client.datasets.files.delete(
             file_id="fileID",
             id="id",
@@ -82,7 +82,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_delete(self, client: NoahTesting) -> None:
+    def test_raw_response_delete(self, client: Cartesia) -> None:
         response = client.datasets.files.with_raw_response.delete(
             file_id="fileID",
             id="id",
@@ -95,7 +95,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_delete(self, client: NoahTesting) -> None:
+    def test_streaming_response_delete(self, client: Cartesia) -> None:
         with client.datasets.files.with_streaming_response.delete(
             file_id="fileID",
             id="id",
@@ -110,7 +110,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_delete(self, client: NoahTesting) -> None:
+    def test_path_params_delete(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.datasets.files.with_raw_response.delete(
                 file_id="fileID",
@@ -125,7 +125,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_upload(self, client: NoahTesting) -> None:
+    def test_method_upload(self, client: Cartesia) -> None:
         file = client.datasets.files.upload(
             id="id",
         )
@@ -133,7 +133,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_upload_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_upload_with_all_params(self, client: Cartesia) -> None:
         file = client.datasets.files.upload(
             id="id",
             file=b"raw file contents",
@@ -143,7 +143,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_upload(self, client: NoahTesting) -> None:
+    def test_raw_response_upload(self, client: Cartesia) -> None:
         response = client.datasets.files.with_raw_response.upload(
             id="id",
         )
@@ -155,7 +155,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_upload(self, client: NoahTesting) -> None:
+    def test_streaming_response_upload(self, client: Cartesia) -> None:
         with client.datasets.files.with_streaming_response.upload(
             id="id",
         ) as response:
@@ -169,7 +169,7 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_upload(self, client: NoahTesting) -> None:
+    def test_path_params_upload(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.datasets.files.with_raw_response.upload(
                 id="",
@@ -183,7 +183,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.list(
             id="id",
         )
@@ -191,7 +191,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.list(
             id="id",
             ending_before="ending_before",
@@ -202,7 +202,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.datasets.files.with_raw_response.list(
             id="id",
         )
@@ -214,7 +214,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.datasets.files.with_streaming_response.list(
             id="id",
         ) as response:
@@ -228,7 +228,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_list(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.datasets.files.with_raw_response.list(
                 id="",
@@ -236,7 +236,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.delete(
             file_id="fileID",
             id="id",
@@ -245,7 +245,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
         response = await async_client.datasets.files.with_raw_response.delete(
             file_id="fileID",
             id="id",
@@ -258,7 +258,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
         async with async_client.datasets.files.with_streaming_response.delete(
             file_id="fileID",
             id="id",
@@ -273,7 +273,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.datasets.files.with_raw_response.delete(
                 file_id="fileID",
@@ -288,7 +288,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_upload(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_upload(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.upload(
             id="id",
         )
@@ -296,7 +296,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_upload_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_upload_with_all_params(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.upload(
             id="id",
             file=b"raw file contents",
@@ -306,7 +306,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_upload(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_upload(self, async_client: AsyncCartesia) -> None:
         response = await async_client.datasets.files.with_raw_response.upload(
             id="id",
         )
@@ -318,7 +318,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_upload(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_upload(self, async_client: AsyncCartesia) -> None:
         async with async_client.datasets.files.with_streaming_response.upload(
             id="id",
         ) as response:
@@ -332,7 +332,7 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_upload(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_upload(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.datasets.files.with_raw_response.upload(
                 id="",

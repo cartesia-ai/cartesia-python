@@ -8,8 +8,8 @@ from typing import Any, TypeVar, Iterator, Sequence, cast
 from datetime import date, datetime
 from typing_extensions import Literal, get_args, get_origin, assert_type
 
-from noah_testing._types import Omit, NoneType
-from noah_testing._utils import (
+from cartesia._types import Omit, NoneType
+from cartesia._utils import (
     is_dict,
     is_list,
     is_list_type,
@@ -19,8 +19,8 @@ from noah_testing._utils import (
     is_annotated_type,
     is_type_alias_type,
 )
-from noah_testing._compat import PYDANTIC_V1, field_outer_type, get_model_fields
-from noah_testing._models import BaseModel
+from cartesia._compat import PYDANTIC_V1, field_outer_type, get_model_fields
+from cartesia._models import BaseModel
 
 BaseModelT = TypeVar("BaseModelT", bound=BaseModel)
 

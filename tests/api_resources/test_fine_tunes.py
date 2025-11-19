@@ -7,13 +7,10 @@ from typing import Any, cast
 
 import pytest
 
+from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.types import (
-    Voice,
-    FineTune,
-)
-from noah_testing.pagination import SyncCursorIDPage, AsyncCursorIDPage
+from cartesia.types import Voice, FineTune
+from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -23,7 +20,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_create(self, client: NoahTesting) -> None:
+    def test_method_create(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.create(
             dataset="dataset",
             description="description",
@@ -35,7 +32,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_create(self, client: NoahTesting) -> None:
+    def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.create(
             dataset="dataset",
             description="description",
@@ -51,7 +48,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_create(self, client: NoahTesting) -> None:
+    def test_streaming_response_create(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.create(
             dataset="dataset",
             description="description",
@@ -69,7 +66,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_retrieve(self, client: NoahTesting) -> None:
+    def test_method_retrieve(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.retrieve(
             "id",
         )
@@ -77,7 +74,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_retrieve(self, client: NoahTesting) -> None:
+    def test_raw_response_retrieve(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.retrieve(
             "id",
         )
@@ -89,7 +86,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_retrieve(self, client: NoahTesting) -> None:
+    def test_streaming_response_retrieve(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.retrieve(
             "id",
         ) as response:
@@ -103,7 +100,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_retrieve(self, client: NoahTesting) -> None:
+    def test_path_params_retrieve(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.fine_tunes.with_raw_response.retrieve(
                 "",
@@ -111,13 +108,13 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list(self, client: NoahTesting) -> None:
+    def test_method_list(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list()
         assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_list_with_all_params(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list(
             ending_before="ending_before",
             limit=0,
@@ -127,7 +124,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_list(self, client: NoahTesting) -> None:
+    def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.list()
 
         assert response.is_closed is True
@@ -137,7 +134,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_list(self, client: NoahTesting) -> None:
+    def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -149,7 +146,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: NoahTesting) -> None:
+    def test_method_delete(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.delete(
             "id",
         )
@@ -157,7 +154,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_delete(self, client: NoahTesting) -> None:
+    def test_raw_response_delete(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.delete(
             "id",
         )
@@ -169,7 +166,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_delete(self, client: NoahTesting) -> None:
+    def test_streaming_response_delete(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.delete(
             "id",
         ) as response:
@@ -183,7 +180,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_delete(self, client: NoahTesting) -> None:
+    def test_path_params_delete(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.fine_tunes.with_raw_response.delete(
                 "",
@@ -191,7 +188,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_voices(self, client: NoahTesting) -> None:
+    def test_method_list_voices(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list_voices(
             id="id",
         )
@@ -199,7 +196,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_voices_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_list_voices_with_all_params(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list_voices(
             id="id",
             ending_before="ending_before",
@@ -210,7 +207,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_list_voices(self, client: NoahTesting) -> None:
+    def test_raw_response_list_voices(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.list_voices(
             id="id",
         )
@@ -222,7 +219,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_list_voices(self, client: NoahTesting) -> None:
+    def test_streaming_response_list_voices(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.list_voices(
             id="id",
         ) as response:
@@ -236,7 +233,7 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_list_voices(self, client: NoahTesting) -> None:
+    def test_path_params_list_voices(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.fine_tunes.with_raw_response.list_voices(
                 id="",
@@ -250,7 +247,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_create(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.create(
             dataset="dataset",
             description="description",
@@ -262,7 +259,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.create(
             dataset="dataset",
             description="description",
@@ -278,7 +275,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.create(
             dataset="dataset",
             description="description",
@@ -296,7 +293,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_retrieve(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.retrieve(
             "id",
         )
@@ -304,7 +301,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_retrieve(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.retrieve(
             "id",
         )
@@ -316,7 +313,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_retrieve(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.retrieve(
             "id",
         ) as response:
@@ -330,7 +327,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_retrieve(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.fine_tunes.with_raw_response.retrieve(
                 "",
@@ -338,13 +335,13 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list()
         assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list(
             ending_before="ending_before",
             limit=0,
@@ -354,7 +351,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.list()
 
         assert response.is_closed is True
@@ -364,7 +361,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -376,7 +373,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.delete(
             "id",
         )
@@ -384,7 +381,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.delete(
             "id",
         )
@@ -396,7 +393,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.delete(
             "id",
         ) as response:
@@ -410,7 +407,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_delete(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.fine_tunes.with_raw_response.delete(
                 "",
@@ -418,7 +415,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_voices(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_voices(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list_voices(
             id="id",
         )
@@ -426,7 +423,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_voices_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_voices_with_all_params(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list_voices(
             id="id",
             ending_before="ending_before",
@@ -437,7 +434,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_list_voices(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_list_voices(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.list_voices(
             id="id",
         )
@@ -449,7 +446,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_list_voices(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_list_voices(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.list_voices(
             id="id",
         ) as response:
@@ -463,7 +460,7 @@ class TestAsyncFineTunes:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_list_voices(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_list_voices(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.fine_tunes.with_raw_response.list_voices(
                 id="",

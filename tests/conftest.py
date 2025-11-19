@@ -10,15 +10,15 @@ import httpx
 import pytest
 from pytest_asyncio import is_async_test
 
-from noah_testing import NoahTesting, AsyncNoahTesting, DefaultAioHttpClient
-from noah_testing._utils import is_dict
+from cartesia import Cartesia, AsyncCartesia, DefaultAioHttpClient
+from cartesia._utils import is_dict
 
 if TYPE_CHECKING:
     from _pytest.fixtures import FixtureRequest  # pyright: ignore[reportPrivateImportUsage]
 
 pytest.register_assert_rewrite("tests.utils")
 
-logging.getLogger("noah_testing").setLevel(logging.DEBUG)
+logging.getLogger("cartesia").setLevel(logging.DEBUG)
 
 
 # automatically add `pytest.mark.asyncio()` to all of our async tests
@@ -49,17 +49,17 @@ token = "My Token"
 
 
 @pytest.fixture(scope="session")
-def client(request: FixtureRequest) -> Iterator[NoahTesting]:
+def client(request: FixtureRequest) -> Iterator[Cartesia]:
     strict = getattr(request, "param", True)
     if not isinstance(strict, bool):
         raise TypeError(f"Unexpected fixture parameter type {type(strict)}, expected {bool}")
 
-    with NoahTesting(base_url=base_url, token=token, _strict_response_validation=strict) as client:
+    with Cartesia(base_url=base_url, token=token, _strict_response_validation=strict) as client:
         yield client
 
 
 @pytest.fixture(scope="session")
-async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncNoahTesting]:
+async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncCartesia]:
     param = getattr(request, "param", True)
 
     # defaults
@@ -78,7 +78,7 @@ async def async_client(request: FixtureRequest) -> AsyncIterator[AsyncNoahTestin
     else:
         raise TypeError(f"Unexpected fixture parameter type {type(param)}, expected bool or dict")
 
-    async with AsyncNoahTesting(
+    async with AsyncCartesia(
         base_url=base_url, token=token, _strict_response_validation=strict, http_client=http_client
     ) as client:
         yield client

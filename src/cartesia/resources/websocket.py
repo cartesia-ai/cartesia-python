@@ -15,7 +15,7 @@ from .._types import Query, Headers
 from .._utils import maybe_transform, async_maybe_transform
 from .._models import construct_type_unchecked
 from .._resource import SyncAPIResource, AsyncAPIResource
-from .._exceptions import NoahTestingError
+from .._exceptions import CartesiaError
 from .._base_client import _merge_mappings
 from ..types.websocket_response import WebsocketResponse
 from ..types.websocket_client_event import WebsocketClientEvent
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from websockets.sync.client import ClientConnection as WebsocketConnection
     from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
 
-    from .._client import NoahTesting, AsyncNoahTesting
+    from .._client import Cartesia, AsyncCartesia
 
 __all__ = ["WebsocketResource", "AsyncWebsocketResource"]
 
@@ -149,7 +149,7 @@ class AsyncWebsocketResourceConnectionManager:
     def __init__(
         self,
         *,
-        client: AsyncNoahTesting,
+        client: AsyncCartesia,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebsocketConnectionOptions,
@@ -176,7 +176,7 @@ class AsyncWebsocketResourceConnectionManager:
         try:
             from websockets.asyncio.client import connect
         except ImportError as exc:
-            raise NoahTestingError("You need to install `noah_testing[websockets]` to use this method") from exc
+            raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
             params={
@@ -308,7 +308,7 @@ class WebsocketResourceConnectionManager:
     def __init__(
         self,
         *,
-        client: NoahTesting,
+        client: Cartesia,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebsocketConnectionOptions,
@@ -335,7 +335,7 @@ class WebsocketResourceConnectionManager:
         try:
             from websockets.sync.client import connect
         except ImportError as exc:
-            raise NoahTestingError("You need to install `noah_testing[websockets]` to use this method") from exc
+            raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
             params={

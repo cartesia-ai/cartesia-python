@@ -7,9 +7,9 @@ from typing import Any, cast
 
 import pytest
 
+from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from noah_testing import NoahTesting, AsyncNoahTesting
-from noah_testing.types.agents import Metric, MetricListResponse
+from cartesia.types.agents import Metric, MetricListResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -19,7 +19,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_create(self, client: NoahTesting) -> None:
+    def test_method_create(self, client: Cartesia) -> None:
         metric = client.agents.metrics.create(
             name="name",
             prompt="prompt",
@@ -28,7 +28,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_create_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_create_with_all_params(self, client: Cartesia) -> None:
         metric = client.agents.metrics.create(
             name="name",
             prompt="prompt",
@@ -38,7 +38,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_create(self, client: NoahTesting) -> None:
+    def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.create(
             name="name",
             prompt="prompt",
@@ -51,7 +51,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_create(self, client: NoahTesting) -> None:
+    def test_streaming_response_create(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.create(
             name="name",
             prompt="prompt",
@@ -66,7 +66,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_retrieve(self, client: NoahTesting) -> None:
+    def test_method_retrieve(self, client: Cartesia) -> None:
         metric = client.agents.metrics.retrieve(
             "metric_id",
         )
@@ -74,7 +74,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_retrieve(self, client: NoahTesting) -> None:
+    def test_raw_response_retrieve(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.retrieve(
             "metric_id",
         )
@@ -86,7 +86,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_retrieve(self, client: NoahTesting) -> None:
+    def test_streaming_response_retrieve(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.retrieve(
             "metric_id",
         ) as response:
@@ -100,7 +100,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_retrieve(self, client: NoahTesting) -> None:
+    def test_path_params_retrieve(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
             client.agents.metrics.with_raw_response.retrieve(
                 "",
@@ -108,13 +108,13 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list(self, client: NoahTesting) -> None:
+    def test_method_list(self, client: Cartesia) -> None:
         metric = client.agents.metrics.list()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list_with_all_params(self, client: NoahTesting) -> None:
+    def test_method_list_with_all_params(self, client: Cartesia) -> None:
         metric = client.agents.metrics.list(
             limit=0,
             starting_after="starting_after",
@@ -123,7 +123,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_list(self, client: NoahTesting) -> None:
+    def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.list()
 
         assert response.is_closed is True
@@ -133,7 +133,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_list(self, client: NoahTesting) -> None:
+    def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -145,7 +145,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_add_to_agent(self, client: NoahTesting) -> None:
+    def test_method_add_to_agent(self, client: Cartesia) -> None:
         metric = client.agents.metrics.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -154,7 +154,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_add_to_agent(self, client: NoahTesting) -> None:
+    def test_raw_response_add_to_agent(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -167,7 +167,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_add_to_agent(self, client: NoahTesting) -> None:
+    def test_streaming_response_add_to_agent(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -182,7 +182,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_add_to_agent(self, client: NoahTesting) -> None:
+    def test_path_params_add_to_agent(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             client.agents.metrics.with_raw_response.add_to_agent(
                 metric_id="metric_id",
@@ -197,7 +197,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_remove_from_agent(self, client: NoahTesting) -> None:
+    def test_method_remove_from_agent(self, client: Cartesia) -> None:
         metric = client.agents.metrics.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -206,7 +206,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_remove_from_agent(self, client: NoahTesting) -> None:
+    def test_raw_response_remove_from_agent(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -219,7 +219,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_remove_from_agent(self, client: NoahTesting) -> None:
+    def test_streaming_response_remove_from_agent(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -234,7 +234,7 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_remove_from_agent(self, client: NoahTesting) -> None:
+    def test_path_params_remove_from_agent(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             client.agents.metrics.with_raw_response.remove_from_agent(
                 metric_id="metric_id",
@@ -255,7 +255,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_create(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.create(
             name="name",
             prompt="prompt",
@@ -264,7 +264,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_create_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_create_with_all_params(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.create(
             name="name",
             prompt="prompt",
@@ -274,7 +274,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.create(
             name="name",
             prompt="prompt",
@@ -287,7 +287,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_create(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.create(
             name="name",
             prompt="prompt",
@@ -302,7 +302,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_retrieve(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.retrieve(
             "metric_id",
         )
@@ -310,7 +310,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_retrieve(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.retrieve(
             "metric_id",
         )
@@ -322,7 +322,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_retrieve(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.retrieve(
             "metric_id",
         ) as response:
@@ -336,7 +336,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_retrieve(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_retrieve(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
             await async_client.agents.metrics.with_raw_response.retrieve(
                 "",
@@ -344,13 +344,13 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.list()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list_with_all_params(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.list(
             limit=0,
             starting_after="starting_after",
@@ -359,7 +359,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.list()
 
         assert response.is_closed is True
@@ -369,7 +369,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.list() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -381,7 +381,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_add_to_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_add_to_agent(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -390,7 +390,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_add_to_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_add_to_agent(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -403,7 +403,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_add_to_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_add_to_agent(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.add_to_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -418,7 +418,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_add_to_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_add_to_agent(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             await async_client.agents.metrics.with_raw_response.add_to_agent(
                 metric_id="metric_id",
@@ -433,7 +433,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_remove_from_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_method_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -442,7 +442,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_remove_from_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_raw_response_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -455,7 +455,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_remove_from_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_streaming_response_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.remove_from_agent(
             metric_id="metric_id",
             agent_id="agent_id",
@@ -470,7 +470,7 @@ class TestAsyncMetrics:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_remove_from_agent(self, async_client: AsyncNoahTesting) -> None:
+    async def test_path_params_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
             await async_client.agents.metrics.with_raw_response.remove_from_agent(
                 metric_id="metric_id",

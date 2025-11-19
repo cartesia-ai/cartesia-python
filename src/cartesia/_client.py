@@ -48,14 +48,14 @@ __all__ = [
     "Transport",
     "ProxiesTypes",
     "RequestOptions",
-    "NoahTesting",
-    "AsyncNoahTesting",
+    "Cartesia",
+    "AsyncCartesia",
     "Client",
     "AsyncClient",
 ]
 
 
-class NoahTesting(SyncAPIClient):
+class Cartesia(SyncAPIClient):
     agents: agents.AgentsResource
     access_token: access_token.AccessTokenResource
     datasets: datasets.DatasetsResource
@@ -67,8 +67,8 @@ class NoahTesting(SyncAPIClient):
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
     websocket: websocket.WebsocketResource
-    with_raw_response: NoahTestingWithRawResponse
-    with_streaming_response: NoahTestingWithStreamedResponse
+    with_raw_response: CartesiaWithRawResponse
+    with_streaming_response: CartesiaWithStreamedResponse
 
     # client options
     token: str | None
@@ -107,7 +107,7 @@ class NoahTesting(SyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new synchronous NoahTesting client instance."""
+        """Construct a new synchronous Cartesia client instance."""
         self.token = token
 
         self.api_key = api_key
@@ -115,7 +115,7 @@ class NoahTesting(SyncAPIClient):
         self.websocket_base_url = websocket_base_url
 
         if base_url is None:
-            base_url = os.environ.get("NOAH_TESTING_BASE_URL")
+            base_url = os.environ.get("CARTESIA_BASE_URL")
         if base_url is None:
             base_url = f"https://api.cartesia.ai"
 
@@ -141,8 +141,8 @@ class NoahTesting(SyncAPIClient):
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
         self.websocket = websocket.WebsocketResource(self)
-        self.with_raw_response = NoahTestingWithRawResponse(self)
-        self.with_streaming_response = NoahTestingWithStreamedResponse(self)
+        self.with_raw_response = CartesiaWithRawResponse(self)
+        self.with_streaming_response = CartesiaWithStreamedResponse(self)
 
     @property
     @override
@@ -302,7 +302,7 @@ class NoahTesting(SyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class AsyncNoahTesting(AsyncAPIClient):
+class AsyncCartesia(AsyncAPIClient):
     agents: agents.AsyncAgentsResource
     access_token: access_token.AsyncAccessTokenResource
     datasets: datasets.AsyncDatasetsResource
@@ -314,8 +314,8 @@ class AsyncNoahTesting(AsyncAPIClient):
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
     websocket: websocket.AsyncWebsocketResource
-    with_raw_response: AsyncNoahTestingWithRawResponse
-    with_streaming_response: AsyncNoahTestingWithStreamedResponse
+    with_raw_response: AsyncCartesiaWithRawResponse
+    with_streaming_response: AsyncCartesiaWithStreamedResponse
 
     # client options
     token: str | None
@@ -354,7 +354,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         # part of our public interface in the future.
         _strict_response_validation: bool = False,
     ) -> None:
-        """Construct a new async AsyncNoahTesting client instance."""
+        """Construct a new async AsyncCartesia client instance."""
         self.token = token
 
         self.api_key = api_key
@@ -362,7 +362,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.websocket_base_url = websocket_base_url
 
         if base_url is None:
-            base_url = os.environ.get("NOAH_TESTING_BASE_URL")
+            base_url = os.environ.get("CARTESIA_BASE_URL")
         if base_url is None:
             base_url = f"https://api.cartesia.ai"
 
@@ -388,8 +388,8 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
         self.websocket = websocket.AsyncWebsocketResource(self)
-        self.with_raw_response = AsyncNoahTestingWithRawResponse(self)
-        self.with_streaming_response = AsyncNoahTestingWithStreamedResponse(self)
+        self.with_raw_response = AsyncCartesiaWithRawResponse(self)
+        self.with_streaming_response = AsyncCartesiaWithStreamedResponse(self)
 
     @property
     @override
@@ -549,8 +549,8 @@ class AsyncNoahTesting(AsyncAPIClient):
         return APIStatusError(err_msg, response=response, body=body)
 
 
-class NoahTestingWithRawResponse:
-    def __init__(self, client: NoahTesting) -> None:
+class CartesiaWithRawResponse:
+    def __init__(self, client: Cartesia) -> None:
         self.agents = agents.AgentsResourceWithRawResponse(client.agents)
         self.access_token = access_token.AccessTokenResourceWithRawResponse(client.access_token)
         self.datasets = datasets.DatasetsResourceWithRawResponse(client.datasets)
@@ -569,8 +569,8 @@ class NoahTestingWithRawResponse:
         )
 
 
-class AsyncNoahTestingWithRawResponse:
-    def __init__(self, client: AsyncNoahTesting) -> None:
+class AsyncCartesiaWithRawResponse:
+    def __init__(self, client: AsyncCartesia) -> None:
         self.agents = agents.AsyncAgentsResourceWithRawResponse(client.agents)
         self.access_token = access_token.AsyncAccessTokenResourceWithRawResponse(client.access_token)
         self.datasets = datasets.AsyncDatasetsResourceWithRawResponse(client.datasets)
@@ -589,8 +589,8 @@ class AsyncNoahTestingWithRawResponse:
         )
 
 
-class NoahTestingWithStreamedResponse:
-    def __init__(self, client: NoahTesting) -> None:
+class CartesiaWithStreamedResponse:
+    def __init__(self, client: Cartesia) -> None:
         self.agents = agents.AgentsResourceWithStreamingResponse(client.agents)
         self.access_token = access_token.AccessTokenResourceWithStreamingResponse(client.access_token)
         self.datasets = datasets.DatasetsResourceWithStreamingResponse(client.datasets)
@@ -609,8 +609,8 @@ class NoahTestingWithStreamedResponse:
         )
 
 
-class AsyncNoahTestingWithStreamedResponse:
-    def __init__(self, client: AsyncNoahTesting) -> None:
+class AsyncCartesiaWithStreamedResponse:
+    def __init__(self, client: AsyncCartesia) -> None:
         self.agents = agents.AsyncAgentsResourceWithStreamingResponse(client.agents)
         self.access_token = access_token.AsyncAccessTokenResourceWithStreamingResponse(client.access_token)
         self.datasets = datasets.AsyncDatasetsResourceWithStreamingResponse(client.datasets)
@@ -629,6 +629,6 @@ class AsyncNoahTestingWithStreamedResponse:
         )
 
 
-Client = NoahTesting
+Client = Cartesia
 
-AsyncClient = AsyncNoahTesting
+AsyncClient = AsyncCartesia

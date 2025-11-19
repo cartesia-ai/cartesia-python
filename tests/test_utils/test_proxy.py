@@ -2,7 +2,7 @@ import operator
 from typing import Any
 from typing_extensions import override
 
-from noah_testing._utils import LazyProxy
+from cartesia._utils import LazyProxy
 
 
 class RecursiveLazyProxy(LazyProxy[Any]):
