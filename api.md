@@ -188,7 +188,7 @@ Methods:
 
 - <code title="post /stt">client.stt.<a href="./src/noah_testing/resources/stt.py">transcribe</a>(\*\*<a href="src/noah_testing/types/stt_transcribe_params.py">params</a>) -> <a href="./src/noah_testing/types/stt_transcribe_response.py">SttTranscribeResponse</a></code>
 
-# Tts
+# TTS
 
 Types:
 
@@ -198,8 +198,8 @@ from noah_testing.types import ModelSpeed, RawOutputFormat, VoiceSpecifier
 
 Methods:
 
-- <code title="post /tts/bytes">client.tts.<a href="./src/noah_testing/resources/tts.py">generate</a>(\*\*<a href="src/noah_testing/types/tt_generate_params.py">params</a>) -> BinaryAPIResponse</code>
-- <code title="post /tts/sse">client.tts.<a href="./src/noah_testing/resources/tts.py">generate_sse</a>(\*\*<a href="src/noah_testing/types/tt_generate_sse_params.py">params</a>) -> None</code>
+- <code title="post /tts/bytes">client.tts.<a href="./src/noah_testing/resources/tts.py">generate</a>(\*\*<a href="src/noah_testing/types/tts_generate_params.py">params</a>) -> BinaryAPIResponse</code>
+- <code title="post /tts/sse">client.tts.<a href="./src/noah_testing/resources/tts.py">generate_sse</a>(\*\*<a href="src/noah_testing/types/tts_generate_sse_params.py">params</a>) -> None</code>
 
 # VoiceChanger
 

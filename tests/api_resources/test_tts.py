@@ -20,14 +20,14 @@ from noah_testing._response import (
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
-class TestTts:
+class TestTTS:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = client.tts.generate(
+        tts = client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -39,16 +39,16 @@ class TestTts:
                 "mode": "id",
             },
         )
-        assert tt.is_closed
-        assert tt.json() == {"foo": "bar"}
-        assert cast(Any, tt.is_closed) is True
-        assert isinstance(tt, BinaryAPIResponse)
+        assert tts.is_closed
+        assert tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, BinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_method_generate_with_all_params(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = client.tts.generate(
+        tts = client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -71,17 +71,17 @@ class TestTts:
             save=True,
             speed="slow",
         )
-        assert tt.is_closed
-        assert tt.json() == {"foo": "bar"}
-        assert cast(Any, tt.is_closed) is True
-        assert isinstance(tt, BinaryAPIResponse)
+        assert tts.is_closed
+        assert tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, BinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     def test_raw_response_generate(self, client: NoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        tt = client.tts.with_raw_response.generate(
+        tts = client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -94,10 +94,10 @@ class TestTts:
             },
         )
 
-        assert tt.is_closed is True
-        assert tt.http_request.headers.get("X-Stainless-Lang") == "python"
-        assert tt.json() == {"foo": "bar"}
-        assert isinstance(tt, BinaryAPIResponse)
+        assert tts.is_closed is True
+        assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert tts.json() == {"foo": "bar"}
+        assert isinstance(tts, BinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
@@ -114,20 +114,20 @@ class TestTts:
                 "id": "id",
                 "mode": "id",
             },
-        ) as tt:
-            assert not tt.is_closed
-            assert tt.http_request.headers.get("X-Stainless-Lang") == "python"
+        ) as tts:
+            assert not tts.is_closed
+            assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            assert tt.json() == {"foo": "bar"}
-            assert cast(Any, tt.is_closed) is True
-            assert isinstance(tt, StreamedBinaryAPIResponse)
+            assert tts.json() == {"foo": "bar"}
+            assert cast(Any, tts.is_closed) is True
+            assert isinstance(tts, StreamedBinaryAPIResponse)
 
-        assert cast(Any, tt.is_closed) is True
+        assert cast(Any, tts.is_closed) is True
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_method_generate_sse(self, client: NoahTesting) -> None:
-        tt = client.tts.generate_sse(
+        tts = client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -140,12 +140,12 @@ class TestTts:
                 "mode": "id",
             },
         )
-        assert tt is None
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     def test_method_generate_sse_with_all_params(self, client: NoahTesting) -> None:
-        tt = client.tts.generate_sse(
+        tts = client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -166,7 +166,7 @@ class TestTts:
             speed="slow",
             use_normalized_timestamps=True,
         )
-        assert tt is None
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -187,8 +187,8 @@ class TestTts:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tt = response.parse()
-        assert tt is None
+        tts = response.parse()
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -209,13 +209,13 @@ class TestTts:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            tt = response.parse()
-            assert tt is None
+            tts = response.parse()
+            assert tts is None
 
         assert cast(Any, response.is_closed) is True
 
 
-class TestAsyncTts:
+class TestAsyncTTS:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
@@ -224,7 +224,7 @@ class TestAsyncTts:
     @pytest.mark.respx(base_url=base_url)
     async def test_method_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = await async_client.tts.generate(
+        tts = await async_client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -236,10 +236,10 @@ class TestAsyncTts:
                 "mode": "id",
             },
         )
-        assert tt.is_closed
-        assert await tt.json() == {"foo": "bar"}
-        assert cast(Any, tt.is_closed) is True
-        assert isinstance(tt, AsyncBinaryAPIResponse)
+        assert tts.is_closed
+        assert await tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, AsyncBinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
@@ -247,7 +247,7 @@ class TestAsyncTts:
         self, async_client: AsyncNoahTesting, respx_mock: MockRouter
     ) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
-        tt = await async_client.tts.generate(
+        tts = await async_client.tts.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -270,17 +270,17 @@ class TestAsyncTts:
             save=True,
             speed="slow",
         )
-        assert tt.is_closed
-        assert await tt.json() == {"foo": "bar"}
-        assert cast(Any, tt.is_closed) is True
-        assert isinstance(tt, AsyncBinaryAPIResponse)
+        assert tts.is_closed
+        assert await tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, AsyncBinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
     async def test_raw_response_generate(self, async_client: AsyncNoahTesting, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        tt = await async_client.tts.with_raw_response.generate(
+        tts = await async_client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
@@ -293,10 +293,10 @@ class TestAsyncTts:
             },
         )
 
-        assert tt.is_closed is True
-        assert tt.http_request.headers.get("X-Stainless-Lang") == "python"
-        assert await tt.json() == {"foo": "bar"}
-        assert isinstance(tt, AsyncBinaryAPIResponse)
+        assert tts.is_closed is True
+        assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert await tts.json() == {"foo": "bar"}
+        assert isinstance(tts, AsyncBinaryAPIResponse)
 
     @parametrize
     @pytest.mark.respx(base_url=base_url)
@@ -313,20 +313,20 @@ class TestAsyncTts:
                 "id": "id",
                 "mode": "id",
             },
-        ) as tt:
-            assert not tt.is_closed
-            assert tt.http_request.headers.get("X-Stainless-Lang") == "python"
+        ) as tts:
+            assert not tts.is_closed
+            assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            assert await tt.json() == {"foo": "bar"}
-            assert cast(Any, tt.is_closed) is True
-            assert isinstance(tt, AsyncStreamedBinaryAPIResponse)
+            assert await tts.json() == {"foo": "bar"}
+            assert cast(Any, tts.is_closed) is True
+            assert isinstance(tts, AsyncStreamedBinaryAPIResponse)
 
-        assert cast(Any, tt.is_closed) is True
+        assert cast(Any, tts.is_closed) is True
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_method_generate_sse(self, async_client: AsyncNoahTesting) -> None:
-        tt = await async_client.tts.generate_sse(
+        tts = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -339,12 +339,12 @@ class TestAsyncTts:
                 "mode": "id",
             },
         )
-        assert tt is None
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
     async def test_method_generate_sse_with_all_params(self, async_client: AsyncNoahTesting) -> None:
-        tt = await async_client.tts.generate_sse(
+        tts = await async_client.tts.generate_sse(
             model_id="model_id",
             output_format={
                 "container": "raw",
@@ -365,7 +365,7 @@ class TestAsyncTts:
             speed="slow",
             use_normalized_timestamps=True,
         )
-        assert tt is None
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -386,8 +386,8 @@ class TestAsyncTts:
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tt = await response.parse()
-        assert tt is None
+        tts = await response.parse()
+        assert tts is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -408,7 +408,7 @@ class TestAsyncTts:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            tt = await response.parse()
-            assert tt is None
+            tts = await response.parse()
+            assert tts is None
 
         assert cast(Any, response.is_closed) is True

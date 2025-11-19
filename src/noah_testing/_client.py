@@ -73,7 +73,7 @@ class NoahTesting(SyncAPIClient):
     infill: infill.InfillResource
     pronunciation_dicts: pronunciation_dicts.PronunciationDictsResource
     stt: stt.SttResource
-    tts: tts.TtsResource
+    tts: tts.TTSResource
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
     my_websocket: my_websocket.MyWebsocketResource
@@ -147,7 +147,7 @@ class NoahTesting(SyncAPIClient):
         self.infill = infill.InfillResource(self)
         self.pronunciation_dicts = pronunciation_dicts.PronunciationDictsResource(self)
         self.stt = stt.SttResource(self)
-        self.tts = tts.TtsResource(self)
+        self.tts = tts.TTSResource(self)
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
         self.my_websocket = my_websocket.MyWebsocketResource(self)
@@ -320,7 +320,7 @@ class AsyncNoahTesting(AsyncAPIClient):
     infill: infill.AsyncInfillResource
     pronunciation_dicts: pronunciation_dicts.AsyncPronunciationDictsResource
     stt: stt.AsyncSttResource
-    tts: tts.AsyncTtsResource
+    tts: tts.AsyncTTSResource
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
     my_websocket: my_websocket.AsyncMyWebsocketResource
@@ -394,7 +394,7 @@ class AsyncNoahTesting(AsyncAPIClient):
         self.infill = infill.AsyncInfillResource(self)
         self.pronunciation_dicts = pronunciation_dicts.AsyncPronunciationDictsResource(self)
         self.stt = stt.AsyncSttResource(self)
-        self.tts = tts.AsyncTtsResource(self)
+        self.tts = tts.AsyncTTSResource(self)
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
         self.my_websocket = my_websocket.AsyncMyWebsocketResource(self)
@@ -570,7 +570,7 @@ class NoahTestingWithRawResponse:
             client.pronunciation_dicts
         )
         self.stt = stt.SttResourceWithRawResponse(client.stt)
-        self.tts = tts.TtsResourceWithRawResponse(client.tts)
+        self.tts = tts.TTSResourceWithRawResponse(client.tts)
         self.voice_changer = voice_changer.VoiceChangerResourceWithRawResponse(client.voice_changer)
         self.voices = voices.VoicesResourceWithRawResponse(client.voices)
 
@@ -590,7 +590,7 @@ class AsyncNoahTestingWithRawResponse:
             client.pronunciation_dicts
         )
         self.stt = stt.AsyncSttResourceWithRawResponse(client.stt)
-        self.tts = tts.AsyncTtsResourceWithRawResponse(client.tts)
+        self.tts = tts.AsyncTTSResourceWithRawResponse(client.tts)
         self.voice_changer = voice_changer.AsyncVoiceChangerResourceWithRawResponse(client.voice_changer)
         self.voices = voices.AsyncVoicesResourceWithRawResponse(client.voices)
 
@@ -610,7 +610,7 @@ class NoahTestingWithStreamedResponse:
             client.pronunciation_dicts
         )
         self.stt = stt.SttResourceWithStreamingResponse(client.stt)
-        self.tts = tts.TtsResourceWithStreamingResponse(client.tts)
+        self.tts = tts.TTSResourceWithStreamingResponse(client.tts)
         self.voice_changer = voice_changer.VoiceChangerResourceWithStreamingResponse(client.voice_changer)
         self.voices = voices.VoicesResourceWithStreamingResponse(client.voices)
 
@@ -630,7 +630,7 @@ class AsyncNoahTestingWithStreamedResponse:
             client.pronunciation_dicts
         )
         self.stt = stt.AsyncSttResourceWithStreamingResponse(client.stt)
-        self.tts = tts.AsyncTtsResourceWithStreamingResponse(client.tts)
+        self.tts = tts.AsyncTTSResourceWithStreamingResponse(client.tts)
         self.voice_changer = voice_changer.AsyncVoiceChangerResourceWithStreamingResponse(client.voice_changer)
         self.voices = voices.AsyncVoicesResourceWithStreamingResponse(client.voices)
 

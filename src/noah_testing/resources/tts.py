@@ -6,7 +6,7 @@ from typing import Optional
 
 import httpx
 
-from ..types import ModelSpeed, SupportedLanguage, tt_generate_params, tt_generate_sse_params
+from ..types import ModelSpeed, SupportedLanguage, tts_generate_params, tts_generate_sse_params
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, SequenceNotStr, omit, not_given
 from .._utils import maybe_transform, async_maybe_transform
 from .._compat import cached_property
@@ -30,38 +30,38 @@ from ..types.model_speed import ModelSpeed
 from ..types.supported_language import SupportedLanguage
 from ..types.voice_specifier_param import VoiceSpecifierParam
 
-__all__ = ["TtsResource", "AsyncTtsResource"]
+__all__ = ["TTSResource", "AsyncTTSResource"]
 
 
-class TtsResource(SyncAPIResource):
+class TTSResource(SyncAPIResource):
     @cached_property
-    def with_raw_response(self) -> TtsResourceWithRawResponse:
+    def with_raw_response(self) -> TTSResourceWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
         For more information, see https://www.github.com/stainless-sdks/noah-testing-python#accessing-raw-response-data-eg-headers
         """
-        return TtsResourceWithRawResponse(self)
+        return TTSResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> TtsResourceWithStreamingResponse:
+    def with_streaming_response(self) -> TTSResourceWithStreamingResponse:
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
         For more information, see https://www.github.com/stainless-sdks/noah-testing-python#with_streaming_response
         """
-        return TtsResourceWithStreamingResponse(self)
+        return TTSResourceWithStreamingResponse(self)
 
     def generate(
         self,
         *,
         model_id: str,
-        output_format: tt_generate_params.OutputFormat,
+        output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tt_generate_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,
@@ -132,7 +132,7 @@ class TtsResource(SyncAPIResource):
                     "save": save,
                     "speed": speed,
                 },
-                tt_generate_params.TtGenerateParams,
+                tts_generate_params.TTSGenerateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -144,7 +144,7 @@ class TtsResource(SyncAPIResource):
         self,
         *,
         model_id: str,
-        output_format: tt_generate_sse_params.OutputFormat,
+        output_format: tts_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
@@ -229,7 +229,7 @@ class TtsResource(SyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tt_generate_sse_params.TtGenerateSseParams,
+                tts_generate_sse_params.TTSGenerateSseParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -238,35 +238,35 @@ class TtsResource(SyncAPIResource):
         )
 
 
-class AsyncTtsResource(AsyncAPIResource):
+class AsyncTTSResource(AsyncAPIResource):
     @cached_property
-    def with_raw_response(self) -> AsyncTtsResourceWithRawResponse:
+    def with_raw_response(self) -> AsyncTTSResourceWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
         For more information, see https://www.github.com/stainless-sdks/noah-testing-python#accessing-raw-response-data-eg-headers
         """
-        return AsyncTtsResourceWithRawResponse(self)
+        return AsyncTTSResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncTtsResourceWithStreamingResponse:
+    def with_streaming_response(self) -> AsyncTTSResourceWithStreamingResponse:
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
         For more information, see https://www.github.com/stainless-sdks/noah-testing-python#with_streaming_response
         """
-        return AsyncTtsResourceWithStreamingResponse(self)
+        return AsyncTTSResourceWithStreamingResponse(self)
 
     async def generate(
         self,
         *,
         model_id: str,
-        output_format: tt_generate_params.OutputFormat,
+        output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tt_generate_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,
@@ -337,7 +337,7 @@ class AsyncTtsResource(AsyncAPIResource):
                     "save": save,
                     "speed": speed,
                 },
-                tt_generate_params.TtGenerateParams,
+                tts_generate_params.TTSGenerateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -349,7 +349,7 @@ class AsyncTtsResource(AsyncAPIResource):
         self,
         *,
         model_id: str,
-        output_format: tt_generate_sse_params.OutputFormat,
+        output_format: tts_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
@@ -434,7 +434,7 @@ class AsyncTtsResource(AsyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tt_generate_sse_params.TtGenerateSseParams,
+                tts_generate_sse_params.TTSGenerateSseParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -443,8 +443,8 @@ class AsyncTtsResource(AsyncAPIResource):
         )
 
 
-class TtsResourceWithRawResponse:
-    def __init__(self, tts: TtsResource) -> None:
+class TTSResourceWithRawResponse:
+    def __init__(self, tts: TTSResource) -> None:
         self._tts = tts
 
         self.generate = to_custom_raw_response_wrapper(
@@ -456,8 +456,8 @@ class TtsResourceWithRawResponse:
         )
 
 
-class AsyncTtsResourceWithRawResponse:
-    def __init__(self, tts: AsyncTtsResource) -> None:
+class AsyncTTSResourceWithRawResponse:
+    def __init__(self, tts: AsyncTTSResource) -> None:
         self._tts = tts
 
         self.generate = async_to_custom_raw_response_wrapper(
@@ -469,8 +469,8 @@ class AsyncTtsResourceWithRawResponse:
         )
 
 
-class TtsResourceWithStreamingResponse:
-    def __init__(self, tts: TtsResource) -> None:
+class TTSResourceWithStreamingResponse:
+    def __init__(self, tts: TTSResource) -> None:
         self._tts = tts
 
         self.generate = to_custom_streamed_response_wrapper(
@@ -482,8 +482,8 @@ class TtsResourceWithStreamingResponse:
         )
 
 
-class AsyncTtsResourceWithStreamingResponse:
-    def __init__(self, tts: AsyncTtsResource) -> None:
+class AsyncTTSResourceWithStreamingResponse:
+    def __init__(self, tts: AsyncTTSResource) -> None:
         self._tts = tts
 
         self.generate = async_to_custom_streamed_response_wrapper(

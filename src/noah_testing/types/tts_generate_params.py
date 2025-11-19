@@ -12,7 +12,7 @@ from .voice_specifier_param import VoiceSpecifierParam
 from .raw_output_format_param import RawOutputFormatParam
 
 __all__ = [
-    "TtGenerateParams",
+    "TTSGenerateParams",
     "OutputFormat",
     "OutputFormatRawOutputFormat",
     "OutputFormatWavOutputFormat",
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class TtGenerateParams(TypedDict, total=False):
+class TTSGenerateParams(TypedDict, total=False):
     model_id: Required[str]
     """The ID of the model to use for the generation.
 

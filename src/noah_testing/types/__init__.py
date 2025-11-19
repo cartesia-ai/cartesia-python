@@ -13,7 +13,6 @@ from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_list_params import VoiceListParams as VoiceListParams
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .supported_language import SupportedLanguage as SupportedLanguage
-from .tt_generate_params import TtGenerateParams as TtGenerateParams
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
 from .agent_list_response import AgentListResponse as AgentListResponse
@@ -21,6 +20,7 @@ from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .dataset_list_params import DatasetListParams as DatasetListParams
 from .gender_presentation import GenderPresentation as GenderPresentation
 from .get_status_response import GetStatusResponse as GetStatusResponse
+from .tts_generate_params import TTSGenerateParams as TTSGenerateParams
 from .voice_update_params import VoiceUpdateParams as VoiceUpdateParams
 from .infill_create_params import InfillCreateParams as InfillCreateParams
 from .dataset_create_params import DatasetCreateParams as DatasetCreateParams
@@ -29,13 +29,13 @@ from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
 from .stt_transcribe_params import SttTranscribeParams as SttTranscribeParams
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
-from .tt_generate_sse_params import TtGenerateSseParams as TtGenerateSseParams
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
+from .tts_generate_sse_params import TTSGenerateSseParams as TTSGenerateSseParams
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
