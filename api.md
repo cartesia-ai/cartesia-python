@@ -218,11 +218,11 @@ from noah_testing.types import GenderPresentation, SupportedLanguage, Voice, Voi
 
 Methods:
 
-- <code title="get /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">retrieve</a>(id) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
 - <code title="patch /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">update</a>(id, \*\*<a href="src/noah_testing/types/voice_update_params.py">params</a>) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
 - <code title="get /voices/">client.voices.<a href="./src/noah_testing/resources/voices.py">list</a>(\*\*<a href="src/noah_testing/types/voice_list_params.py">params</a>) -> <a href="./src/noah_testing/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 - <code title="delete /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">delete</a>(id) -> None</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/noah_testing/resources/voices.py">clone</a>(\*\*<a href="src/noah_testing/types/voice_clone_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
+- <code title="get /voices/{id}">client.voices.<a href="./src/noah_testing/resources/voices.py">get</a>(id) -> <a href="./src/noah_testing/types/voice.py">Voice</a></code>
 - <code title="post /voices/localize">client.voices.<a href="./src/noah_testing/resources/voices.py">localize</a>(\*\*<a href="src/noah_testing/types/voice_localize_params.py">params</a>) -> <a href="./src/noah_testing/types/voice_metadata.py">VoiceMetadata</a></code>
 
 # MyWebsocket

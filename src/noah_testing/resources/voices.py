@@ -55,41 +55,6 @@ class VoicesResource(SyncAPIResource):
         """
         return VoicesResourceWithStreamingResponse(self)
 
-    def retrieve(
-        self,
-        id: str,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> Voice:
-        """
-        Get Voice
-
-        Args:
-          id: The ID of the voice.
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not id:
-            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return self._get(
-            f"/voices/{id}",
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=Voice,
-        )
-
     def update(
         self,
         id: str,
@@ -322,6 +287,41 @@ class VoicesResource(SyncAPIResource):
             cast_to=VoiceMetadata,
         )
 
+    def get(
+        self,
+        id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Get Voice
+
+        Args:
+          id: The ID of the voice.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        return self._get(
+            f"/voices/{id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
+        )
+
     def localize(
         self,
         *,
@@ -405,41 +405,6 @@ class AsyncVoicesResource(AsyncAPIResource):
         For more information, see https://www.github.com/stainless-sdks/noah-testing-python#with_streaming_response
         """
         return AsyncVoicesResourceWithStreamingResponse(self)
-
-    async def retrieve(
-        self,
-        id: str,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> Voice:
-        """
-        Get Voice
-
-        Args:
-          id: The ID of the voice.
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not id:
-            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
-        return await self._get(
-            f"/voices/{id}",
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=Voice,
-        )
 
     async def update(
         self,
@@ -673,6 +638,41 @@ class AsyncVoicesResource(AsyncAPIResource):
             cast_to=VoiceMetadata,
         )
 
+    async def get(
+        self,
+        id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Get Voice
+
+        Args:
+          id: The ID of the voice.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        return await self._get(
+            f"/voices/{id}",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
+        )
+
     async def localize(
         self,
         *,
@@ -741,9 +741,6 @@ class VoicesResourceWithRawResponse:
     def __init__(self, voices: VoicesResource) -> None:
         self._voices = voices
 
-        self.retrieve = to_raw_response_wrapper(
-            voices.retrieve,
-        )
         self.update = to_raw_response_wrapper(
             voices.update,
         )
@@ -756,6 +753,9 @@ class VoicesResourceWithRawResponse:
         self.clone = to_raw_response_wrapper(
             voices.clone,
         )
+        self.get = to_raw_response_wrapper(
+            voices.get,
+        )
         self.localize = to_raw_response_wrapper(
             voices.localize,
         )
@@ -765,9 +765,6 @@ class AsyncVoicesResourceWithRawResponse:
     def __init__(self, voices: AsyncVoicesResource) -> None:
         self._voices = voices
 
-        self.retrieve = async_to_raw_response_wrapper(
-            voices.retrieve,
-        )
         self.update = async_to_raw_response_wrapper(
             voices.update,
         )
@@ -780,6 +777,9 @@ class AsyncVoicesResourceWithRawResponse:
         self.clone = async_to_raw_response_wrapper(
             voices.clone,
         )
+        self.get = async_to_raw_response_wrapper(
+            voices.get,
+        )
         self.localize = async_to_raw_response_wrapper(
             voices.localize,
         )
@@ -789,9 +789,6 @@ class VoicesResourceWithStreamingResponse:
     def __init__(self, voices: VoicesResource) -> None:
         self._voices = voices
 
-        self.retrieve = to_streamed_response_wrapper(
-            voices.retrieve,
-        )
         self.update = to_streamed_response_wrapper(
             voices.update,
         )
@@ -804,6 +801,9 @@ class VoicesResourceWithStreamingResponse:
         self.clone = to_streamed_response_wrapper(
             voices.clone,
         )
+        self.get = to_streamed_response_wrapper(
+            voices.get,
+        )
         self.localize = to_streamed_response_wrapper(
             voices.localize,
         )
@@ -813,9 +813,6 @@ class AsyncVoicesResourceWithStreamingResponse:
     def __init__(self, voices: AsyncVoicesResource) -> None:
         self._voices = voices
 
-        self.retrieve = async_to_streamed_response_wrapper(
-            voices.retrieve,
-        )
         self.update = async_to_streamed_response_wrapper(
             voices.update,
         )
@@ -827,6 +824,9 @@ class AsyncVoicesResourceWithStreamingResponse:
         )
         self.clone = async_to_streamed_response_wrapper(
             voices.clone,
+        )
+        self.get = async_to_streamed_response_wrapper(
+            voices.get,
         )
         self.localize = async_to_streamed_response_wrapper(
             voices.localize,

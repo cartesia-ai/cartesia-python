@@ -23,48 +23,6 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_retrieve(self, client: NoahTesting) -> None:
-        voice = client.voices.retrieve(
-            "id",
-        )
-        assert_matches_type(Voice, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_raw_response_retrieve(self, client: NoahTesting) -> None:
-        response = client.voices.with_raw_response.retrieve(
-            "id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = response.parse()
-        assert_matches_type(Voice, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_streaming_response_retrieve(self, client: NoahTesting) -> None:
-        with client.voices.with_streaming_response.retrieve(
-            "id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = response.parse()
-            assert_matches_type(Voice, voice, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_path_params_retrieve(self, client: NoahTesting) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            client.voices.with_raw_response.retrieve(
-                "",
-            )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     def test_method_update(self, client: NoahTesting) -> None:
         voice = client.voices.update(
             id="id",
@@ -252,6 +210,48 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
+    def test_method_get(self, client: NoahTesting) -> None:
+        voice = client.voices.get(
+            "id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_raw_response_get(self, client: NoahTesting) -> None:
+        response = client.voices.with_raw_response.get(
+            "id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_streaming_response_get(self, client: NoahTesting) -> None:
+        with client.voices.with_streaming_response.get(
+            "id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_path_params_get(self, client: NoahTesting) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            client.voices.with_raw_response.get(
+                "",
+            )
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
     def test_method_localize(self, client: NoahTesting) -> None:
         voice = client.voices.localize(
             description="description",
@@ -314,48 +314,6 @@ class TestAsyncVoices:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_method_retrieve(self, async_client: AsyncNoahTesting) -> None:
-        voice = await async_client.voices.retrieve(
-            "id",
-        )
-        assert_matches_type(Voice, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_raw_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
-        response = await async_client.voices.with_raw_response.retrieve(
-            "id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = await response.parse()
-        assert_matches_type(Voice, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_streaming_response_retrieve(self, async_client: AsyncNoahTesting) -> None:
-        async with async_client.voices.with_streaming_response.retrieve(
-            "id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = await response.parse()
-            assert_matches_type(Voice, voice, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_path_params_retrieve(self, async_client: AsyncNoahTesting) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            await async_client.voices.with_raw_response.retrieve(
-                "",
-            )
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -543,6 +501,48 @@ class TestAsyncVoices:
             assert_matches_type(VoiceMetadata, voice, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_get(self, async_client: AsyncNoahTesting) -> None:
+        voice = await async_client.voices.get(
+            "id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_raw_response_get(self, async_client: AsyncNoahTesting) -> None:
+        response = await async_client.voices.with_raw_response.get(
+            "id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = await response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_streaming_response_get(self, async_client: AsyncNoahTesting) -> None:
+        async with async_client.voices.with_streaming_response.get(
+            "id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = await response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_path_params_get(self, async_client: AsyncNoahTesting) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            await async_client.voices.with_raw_response.get(
+                "",
+            )
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
