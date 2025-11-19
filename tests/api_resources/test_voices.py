@@ -139,6 +139,7 @@ class TestVoices:
             gender="masculine",
             is_owner=True,
             is_starred=True,
+            language="language",
             limit=0,
             starting_after="starting_after",
         )
@@ -432,6 +433,7 @@ class TestAsyncVoices:
             gender="masculine",
             is_owner=True,
             is_starred=True,
+            language="language",
             limit=0,
             starting_after="starting_after",
         )

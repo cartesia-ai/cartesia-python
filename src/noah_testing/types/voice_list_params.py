@@ -32,6 +32,8 @@ class VoiceListParams(TypedDict, total=False):
     is_starred: Optional[bool]
     """Whether to only return starred voices."""
 
+    language: str
+
     limit: Optional[int]
     """The number of Voices to return per page, ranging between 1 and 100."""
 
