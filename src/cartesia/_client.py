@@ -30,7 +30,7 @@ from ._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .resources import stt, tts, infill, voices, websocket, fine_tunes, access_token, voice_changer, pronunciation_dicts
+from .resources import stt, tts, infill, voices, fine_tunes, access_token, voice_changer, pronunciation_dicts
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -66,7 +66,6 @@ class Cartesia(SyncAPIClient):
     tts: tts.TTSResource
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
-    websocket: websocket.WebsocketResource
     with_raw_response: CartesiaWithRawResponse
     with_streaming_response: CartesiaWithStreamedResponse
 
@@ -74,21 +73,12 @@ class Cartesia(SyncAPIClient):
     token: str | None
     api_key: str | None
 
-    websocket_base_url: str | httpx.URL | None
-    """Base URL for WebSocket connections.
-
-    If not specified, the default base URL will be used, with 'wss://' replacing the
-    'http://' or 'https://' scheme. For example: 'http://example.com' becomes
-    'wss://example.com'
-    """
-
     def __init__(
         self,
         *,
         token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -111,8 +101,6 @@ class Cartesia(SyncAPIClient):
         self.token = token
 
         self.api_key = api_key
-
-        self.websocket_base_url = websocket_base_url
 
         if base_url is None:
             base_url = os.environ.get("CARTESIA_BASE_URL")
@@ -140,7 +128,6 @@ class Cartesia(SyncAPIClient):
         self.tts = tts.TTSResource(self)
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
-        self.websocket = websocket.WebsocketResource(self)
         self.with_raw_response = CartesiaWithRawResponse(self)
         self.with_streaming_response = CartesiaWithStreamedResponse(self)
 
@@ -199,7 +186,6 @@ class Cartesia(SyncAPIClient):
         *,
         token: str | None = None,
         api_key: str | None = None,
-        websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.Client | None = None,
@@ -235,7 +221,6 @@ class Cartesia(SyncAPIClient):
         return self.__class__(
             token=token or self.token,
             api_key=api_key or self.api_key,
-            websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,
@@ -313,7 +298,6 @@ class AsyncCartesia(AsyncAPIClient):
     tts: tts.AsyncTTSResource
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
-    websocket: websocket.AsyncWebsocketResource
     with_raw_response: AsyncCartesiaWithRawResponse
     with_streaming_response: AsyncCartesiaWithStreamedResponse
 
@@ -321,21 +305,12 @@ class AsyncCartesia(AsyncAPIClient):
     token: str | None
     api_key: str | None
 
-    websocket_base_url: str | httpx.URL | None
-    """Base URL for WebSocket connections.
-
-    If not specified, the default base URL will be used, with 'wss://' replacing the
-    'http://' or 'https://' scheme. For example: 'http://example.com' becomes
-    'wss://example.com'
-    """
-
     def __init__(
         self,
         *,
         token: str | None = None,
         api_key: str | None = None,
         base_url: str | httpx.URL | None = None,
-        websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         max_retries: int = DEFAULT_MAX_RETRIES,
         default_headers: Mapping[str, str] | None = None,
@@ -358,8 +333,6 @@ class AsyncCartesia(AsyncAPIClient):
         self.token = token
 
         self.api_key = api_key
-
-        self.websocket_base_url = websocket_base_url
 
         if base_url is None:
             base_url = os.environ.get("CARTESIA_BASE_URL")
@@ -387,7 +360,6 @@ class AsyncCartesia(AsyncAPIClient):
         self.tts = tts.AsyncTTSResource(self)
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
-        self.websocket = websocket.AsyncWebsocketResource(self)
         self.with_raw_response = AsyncCartesiaWithRawResponse(self)
         self.with_streaming_response = AsyncCartesiaWithStreamedResponse(self)
 
@@ -446,7 +418,6 @@ class AsyncCartesia(AsyncAPIClient):
         *,
         token: str | None = None,
         api_key: str | None = None,
-        websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
         http_client: httpx.AsyncClient | None = None,
@@ -482,7 +453,6 @@ class AsyncCartesia(AsyncAPIClient):
         return self.__class__(
             token=token or self.token,
             api_key=api_key or self.api_key,
-            websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
             http_client=http_client,

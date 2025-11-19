@@ -9,12 +9,10 @@ from .model_speed import ModelSpeed as ModelSpeed
 from .raw_encoding import RawEncoding as RawEncoding
 from .agent_summary import AgentSummary as AgentSummary
 from .voice_metadata import VoiceMetadata as VoiceMetadata
-from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_list_params import VoiceListParams as VoiceListParams
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
-from .websocket_response import WebsocketResponse as WebsocketResponse
 from .agent_list_response import AgentListResponse as AgentListResponse
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .dataset_list_params import DatasetListParams as DatasetListParams
@@ -29,7 +27,6 @@ from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
 from .stt_transcribe_params import SttTranscribeParams as SttTranscribeParams
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
-from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
@@ -39,8 +36,6 @@ from .tts_generate_sse_params import TTSGenerateSseParams as TTSGenerateSseParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
-from .websocket_client_event_param import WebsocketClientEventParam as WebsocketClientEventParam
-from .websocket_connection_options import WebsocketConnectionOptions as WebsocketConnectionOptions
 from .agent_list_templates_response import AgentListTemplatesResponse as AgentListTemplatesResponse
 from .pronunciation_dict_item_param import PronunciationDictItemParam as PronunciationDictItemParam
 from .pronunciation_dict_list_params import PronunciationDictListParams as PronunciationDictListParams

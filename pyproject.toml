@@ -39,7 +39,6 @@ Repository = "https://github.com/stainless-sdks/noah-testing-python"
 
 [project.optional-dependencies]
 aiohttp = ["aiohttp", "httpx_aiohttp>=0.1.9"]
-websockets = ["websockets >= 13, < 16"]
 
 [tool.rye]
 managed = true

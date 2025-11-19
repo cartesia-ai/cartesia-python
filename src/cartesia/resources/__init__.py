@@ -48,7 +48,6 @@ from .datasets import (
     DatasetsResourceWithStreamingResponse,
     AsyncDatasetsResourceWithStreamingResponse,
 )
-from .websocket import WebsocketResource, AsyncWebsocketResource
 from .fine_tunes import (
     FineTunesResource,
     AsyncFineTunesResource,
@@ -143,6 +142,4 @@ __all__ = [
     "AsyncVoicesResourceWithRawResponse",
     "VoicesResourceWithStreamingResponse",
     "AsyncVoicesResourceWithStreamingResponse",
-    "WebsocketResource",
-    "AsyncWebsocketResource",
 ]
