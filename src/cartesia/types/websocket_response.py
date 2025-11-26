@@ -10,9 +10,15 @@ __all__ = ["WebsocketResponse", "Chunk", "FlushDone", "Done", "Timestamps", "Err
 
 
 class Chunk(BaseModel):
+    data: str
+
     done: bool
 
     status_code: int
+
+    step_time: float
+
+    type: Literal["chunk"]
 
     context_id: Optional[str] = None
     """A unique identifier for the context.
@@ -22,8 +28,6 @@ class Chunk(BaseModel):
     Some customers use unique identifiers from their own systems (such as
     conversation IDs) as context IDs.
     """
-
-    type: Optional[Literal["chunk"]] = None
 
 
 class FlushDone(BaseModel):
