@@ -30,17 +30,7 @@ from ._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .resources import (
-    stt,
-    tts,
-    infill,
-    voices,
-    fine_tunes,
-    access_token,
-    tts_websocket,
-    voice_changer,
-    pronunciation_dicts,
-)
+from .resources import stt, tts, infill, voices, fine_tunes, access_token, voice_changer, pronunciation_dicts
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -74,7 +64,6 @@ class Cartesia(SyncAPIClient):
     pronunciation_dicts: pronunciation_dicts.PronunciationDictsResource
     stt: stt.SttResource
     tts: tts.TTSResource
-    tts_websocket: tts_websocket.TTSWebsocketResource
     voice_changer: voice_changer.VoiceChangerResource
     voices: voices.VoicesResource
     with_raw_response: CartesiaWithRawResponse
@@ -148,7 +137,6 @@ class Cartesia(SyncAPIClient):
         self.pronunciation_dicts = pronunciation_dicts.PronunciationDictsResource(self)
         self.stt = stt.SttResource(self)
         self.tts = tts.TTSResource(self)
-        self.tts_websocket = tts_websocket.TTSWebsocketResource(self)
         self.voice_changer = voice_changer.VoiceChangerResource(self)
         self.voices = voices.VoicesResource(self)
         self.with_raw_response = CartesiaWithRawResponse(self)
@@ -321,7 +309,6 @@ class AsyncCartesia(AsyncAPIClient):
     pronunciation_dicts: pronunciation_dicts.AsyncPronunciationDictsResource
     stt: stt.AsyncSttResource
     tts: tts.AsyncTTSResource
-    tts_websocket: tts_websocket.AsyncTTSWebsocketResource
     voice_changer: voice_changer.AsyncVoiceChangerResource
     voices: voices.AsyncVoicesResource
     with_raw_response: AsyncCartesiaWithRawResponse
@@ -395,7 +382,6 @@ class AsyncCartesia(AsyncAPIClient):
         self.pronunciation_dicts = pronunciation_dicts.AsyncPronunciationDictsResource(self)
         self.stt = stt.AsyncSttResource(self)
         self.tts = tts.AsyncTTSResource(self)
-        self.tts_websocket = tts_websocket.AsyncTTSWebsocketResource(self)
         self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
         self.voices = voices.AsyncVoicesResource(self)
         self.with_raw_response = AsyncCartesiaWithRawResponse(self)

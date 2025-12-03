@@ -64,7 +64,6 @@ from .access_token import (
     AccessTokenResourceWithStreamingResponse,
     AsyncAccessTokenResourceWithStreamingResponse,
 )
-from .tts_websocket import TTSWebsocketResource, AsyncTTSWebsocketResource
 from .voice_changer import (
     VoiceChangerResource,
     AsyncVoiceChangerResource,
@@ -131,8 +130,6 @@ __all__ = [
     "AsyncTTSResourceWithRawResponse",
     "TTSResourceWithStreamingResponse",
     "AsyncTTSResourceWithStreamingResponse",
-    "TTSWebsocketResource",
-    "AsyncTTSWebsocketResource",
     "VoiceChangerResource",
     "AsyncVoiceChangerResource",
     "VoiceChangerResourceWithRawResponse",
