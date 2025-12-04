@@ -11,6 +11,7 @@ from .agent_summary import AgentSummary as AgentSummary
 from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_list_params import VoiceListParams as VoiceListParams
+from .generation_request import GenerationRequest as GenerationRequest
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
@@ -31,11 +32,13 @@ from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
+from .generation_config_param import GenerationConfigParam as GenerationConfigParam
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
 from .tts_generate_sse_params import TTSGenerateSseParams as TTSGenerateSseParams
+from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams

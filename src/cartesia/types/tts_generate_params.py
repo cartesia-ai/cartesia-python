@@ -9,6 +9,7 @@ from .._types import SequenceNotStr
 from .model_speed import ModelSpeed
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
+from .generation_config_param import GenerationConfigParam
 from .raw_output_format_param import RawOutputFormatParam
 
 __all__ = [
@@ -17,8 +18,6 @@ __all__ = [
     "OutputFormatRawOutputFormat",
     "OutputFormatWavOutputFormat",
     "OutputFormatMP3OutputFormat",
-    "GenerationConfig",
-    "GenerationConfigExperimental",
 ]
 
 
@@ -42,7 +41,7 @@ class TTSGenerateParams(TypedDict, total=False):
     the length of the transcript, the output audio may be truncated.
     """
 
-    generation_config: Optional[GenerationConfig]
+    generation_config: Optional[GenerationConfigParam]
     """Configure the various attributes of the generated speech.
 
     These controls are only available for `sonic-3-preview` and will have no effect
@@ -102,32 +101,3 @@ class OutputFormatMP3OutputFormat(TypedDict, total=False):
 
 
 OutputFormat: TypeAlias = Union[OutputFormatRawOutputFormat, OutputFormatWavOutputFormat, OutputFormatMP3OutputFormat]
-
-
-class GenerationConfigExperimental(TypedDict, total=False):
-    accent_localization: Optional[int]
-    """
-    Toggle accent localization: 0 (disabled, default) or 1 (enabled). When enabled,
-    the voice adapts to match the transcript language's accent while preserving
-    vocal characteristics. When disabled, maintains the original voice accent. For
-    more information, see
-    [Localize Voices](/build-with-sonic/capabilities/localize-voices).
-    """
-
-
-class GenerationConfig(TypedDict, total=False):
-    experimental: Optional[GenerationConfigExperimental]
-    """These controls are **experimental** and subject to breaking changes."""
-
-    speed: Optional[float]
-    """Adjust the speed of the generated speech between -1.0 (slower) and 1.0 (faster).
-
-    0.0 is the default speed.
-    """
-
-    volume: Optional[float]
-    """Adjust the volume of the generated speech between -1.0 (softer) and 1.0
-    (louder).
-
-    0.0 is the default volume.
-    """

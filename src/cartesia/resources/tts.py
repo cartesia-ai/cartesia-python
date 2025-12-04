@@ -11,7 +11,12 @@ from typing_extensions import AsyncIterator
 import httpx
 from pydantic import BaseModel
 
-from ..types import ModelSpeed, SupportedLanguage, tts_generate_params, tts_generate_sse_params
+from ..types import (
+    ModelSpeed,
+    SupportedLanguage,
+    tts_generate_params,
+    tts_generate_sse_params,
+)
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, SequenceNotStr, omit, not_given
 from .._utils import maybe_transform, async_maybe_transform
 from .._compat import cached_property
@@ -38,6 +43,7 @@ from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
+from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
@@ -93,7 +99,7 @@ class TTSResource(SyncAPIResource):
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[GenerationConfigParam] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,
@@ -311,7 +317,7 @@ class AsyncTTSResource(AsyncAPIResource):
         transcript: str,
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,
-        generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
+        generation_config: Optional[GenerationConfigParam] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
         save: Optional[bool] | Omit = omit,

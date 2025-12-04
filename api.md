@@ -194,6 +194,8 @@ Types:
 
 ```python
 from cartesia.types import (
+    GenerationConfig,
+    GenerationRequest,
     ModelSpeed,
     RawOutputFormat,
     VoiceSpecifier,
