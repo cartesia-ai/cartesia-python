@@ -547,7 +547,7 @@ class AsyncTTSResourceWithStreamingResponse:
 
 
 class AsyncTTSResourceConnection:
-    """Represents a live websocket connection to the TTS API"""
+    """Represents a live WebSocket connection to the TTS API"""
 
     _connection: AsyncWebsocketConnection
 
@@ -706,7 +706,7 @@ class AsyncTTSResourceConnectionManager:
 
 
 class TTSResourceConnection:
-    """Represents a live websocket connection to the TTS API"""
+    """Represents a live WebSocket connection to the TTS API"""
 
     _connection: WebsocketConnection
 
