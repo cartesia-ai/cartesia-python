@@ -9,6 +9,8 @@ __all__ = ["AgentSummary", "GitRepository", "PhoneNumber"]
 
 
 class GitRepository(BaseModel):
+    """The Git repository associated with the agent."""
+
     account: str
     """The account name associated with the Git repository."""
 
@@ -28,6 +30,8 @@ class PhoneNumber(BaseModel):
 
 
 class AgentSummary(BaseModel):
+    """A summary of essential information about an agent."""
+
     id: str
     """The ID of the agent."""
 

@@ -10,6 +10,8 @@ __all__ = ["FineTune"]
 
 
 class FineTune(BaseModel):
+    """Information about a fine-tune"""
+
     id: str
     """Unique identifier for the fine-tune"""
 

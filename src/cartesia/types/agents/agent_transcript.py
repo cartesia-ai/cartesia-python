@@ -8,6 +8,8 @@ __all__ = ["AgentTranscript", "LogEvent", "LogMetric", "TextChunk", "ToolCall"]
 
 
 class LogEvent(BaseModel):
+    """The log event from user code."""
+
     event: str
     """The event name."""
 
@@ -19,6 +21,8 @@ class LogEvent(BaseModel):
 
 
 class LogMetric(BaseModel):
+    """The log metric from user code."""
+
     name: str
     """The name of the metric."""
 

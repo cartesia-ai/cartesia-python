@@ -9,6 +9,8 @@ __all__ = ["GenerationConfigParam", "Experimental"]
 
 
 class Experimental(TypedDict, total=False):
+    """These controls are **experimental** and subject to breaking changes."""
+
     accent_localization: Optional[int]
     """
     Toggle accent localization: 0 (disabled, default) or 1 (enabled). When enabled,
@@ -20,6 +22,11 @@ class Experimental(TypedDict, total=False):
 
 
 class GenerationConfigParam(TypedDict, total=False):
+    """Configure the various attributes of the generated speech.
+
+    These controls are only available for `sonic-3-preview` and will have no effect on earlier models.
+    """
+
     experimental: Optional[Experimental]
     """These controls are **experimental** and subject to breaking changes."""
 

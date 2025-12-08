@@ -8,6 +8,8 @@ __all__ = ["PronunciationDictItemParam"]
 
 
 class PronunciationDictItemParam(TypedDict, total=False):
+    """A pronunciation dictionary item mapping text to a custom pronunciation"""
+
     alias: Required[str]
     """A phonetic representation or text to be said in place of the original text"""
 

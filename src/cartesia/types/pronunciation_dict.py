@@ -9,6 +9,8 @@ __all__ = ["PronunciationDict"]
 
 
 class PronunciationDict(BaseModel):
+    """A dictionary of text-to-alias mappings"""
+
     id: str
     """Unique identifier for the pronunciation dictionary"""
 

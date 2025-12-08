@@ -10,6 +10,8 @@ __all__ = ["AgentListPhoneNumbersResponse", "AgentListPhoneNumbersResponseItem"]
 
 
 class AgentListPhoneNumbersResponseItem(BaseModel):
+    """A phone number that can be used to make calls to your agent."""
+
     agent_id: str
     """The ID of the agent."""
 

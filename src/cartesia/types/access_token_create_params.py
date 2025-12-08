@@ -23,6 +23,11 @@ class AccessTokenCreateParams(TypedDict, total=False):
 
 
 class Grants(TypedDict, total=False):
+    """The permissions to be granted via the token.
+
+    Both TTS and STT grants are optional - specify only the capabilities you need.
+    """
+
     stt: Optional[bool]
     """The `stt` grant allows the token to be used to access any STT endpoint."""
 

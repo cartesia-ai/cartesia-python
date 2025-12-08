@@ -6,6 +6,8 @@ __all__ = ["FileListResponse"]
 
 
 class FileListResponse(BaseModel):
+    """File stored in a dataset"""
+
     id: str
     """Unique identifier for the file"""
 

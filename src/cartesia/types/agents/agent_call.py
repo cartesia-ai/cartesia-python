@@ -13,6 +13,10 @@ __all__ = ["AgentCall", "TelephonyParams"]
 
 
 class TelephonyParams(BaseModel):
+    """
+    The telephony parameters associated with the call when the call is made via phone.
+    """
+
     from_: str = FieldInfo(alias="from")
     """The phone number of the agent."""
 

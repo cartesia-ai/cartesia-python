@@ -6,6 +6,8 @@ __all__ = ["Dataset"]
 
 
 class Dataset(BaseModel):
+    """A collection of files used for fine-tuning models"""
+
     id: str
     """Unique identifier for the dataset"""
 

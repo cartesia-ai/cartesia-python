@@ -11,6 +11,10 @@ __all__ = ["WebsocketClientEventParam", "CancelContextRequest"]
 
 
 class CancelContextRequest(TypedDict, total=False):
+    """
+    Use this to cancel a context, so that no more messages are generated for that context.
+    """
+
     cancel: Required[Literal[True]]
     """
     Whether to cancel the context, so that no more messages are generated for that
