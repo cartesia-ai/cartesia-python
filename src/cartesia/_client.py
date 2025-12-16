@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 from typing_extensions import Self, override
 
 import httpx
@@ -23,6 +23,7 @@ from ._types import (
     not_given,
 )
 from ._utils import is_given, get_async_library
+from ._compat import cached_property
 from ._version import __version__
 from ._response import (
     to_raw_response_wrapper,
@@ -30,7 +31,6 @@ from ._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .resources import stt, tts, infill, voices, fine_tunes, access_token, voice_changer, pronunciation_dicts
 from ._streaming import Stream as Stream, AsyncStream as AsyncStream
 from ._exceptions import APIStatusError
 from ._base_client import (
@@ -39,9 +39,31 @@ from ._base_client import (
     AsyncAPIClient,
     make_request_options,
 )
-from .resources.agents import agents
-from .resources.datasets import datasets
 from .types.get_status_response import GetStatusResponse
+
+if TYPE_CHECKING:
+    from .resources import (
+        stt,
+        tts,
+        agents,
+        infill,
+        voices,
+        datasets,
+        fine_tunes,
+        access_token,
+        voice_changer,
+        pronunciation_dicts,
+    )
+    from .resources.stt import SttResource, AsyncSttResource
+    from .resources.tts import TTSResource, AsyncTTSResource
+    from .resources.infill import InfillResource, AsyncInfillResource
+    from .resources.voices import VoicesResource, AsyncVoicesResource
+    from .resources.fine_tunes import FineTunesResource, AsyncFineTunesResource
+    from .resources.access_token import AccessTokenResource, AsyncAccessTokenResource
+    from .resources.agents.agents import AgentsResource, AsyncAgentsResource
+    from .resources.voice_changer import VoiceChangerResource, AsyncVoiceChangerResource
+    from .resources.datasets.datasets import DatasetsResource, AsyncDatasetsResource
+    from .resources.pronunciation_dicts import PronunciationDictsResource, AsyncPronunciationDictsResource
 
 __all__ = [
     "Timeout",
@@ -56,19 +78,6 @@ __all__ = [
 
 
 class Cartesia(SyncAPIClient):
-    agents: agents.AgentsResource
-    access_token: access_token.AccessTokenResource
-    datasets: datasets.DatasetsResource
-    fine_tunes: fine_tunes.FineTunesResource
-    infill: infill.InfillResource
-    pronunciation_dicts: pronunciation_dicts.PronunciationDictsResource
-    stt: stt.SttResource
-    tts: tts.TTSResource
-    voice_changer: voice_changer.VoiceChangerResource
-    voices: voices.VoicesResource
-    with_raw_response: CartesiaWithRawResponse
-    with_streaming_response: CartesiaWithStreamedResponse
-
     # client options
     token: str | None
     api_key: str | None
@@ -129,18 +138,73 @@ class Cartesia(SyncAPIClient):
             _strict_response_validation=_strict_response_validation,
         )
 
-        self.agents = agents.AgentsResource(self)
-        self.access_token = access_token.AccessTokenResource(self)
-        self.datasets = datasets.DatasetsResource(self)
-        self.fine_tunes = fine_tunes.FineTunesResource(self)
-        self.infill = infill.InfillResource(self)
-        self.pronunciation_dicts = pronunciation_dicts.PronunciationDictsResource(self)
-        self.stt = stt.SttResource(self)
-        self.tts = tts.TTSResource(self)
-        self.voice_changer = voice_changer.VoiceChangerResource(self)
-        self.voices = voices.VoicesResource(self)
-        self.with_raw_response = CartesiaWithRawResponse(self)
-        self.with_streaming_response = CartesiaWithStreamedResponse(self)
+    @cached_property
+    def agents(self) -> AgentsResource:
+        from .resources.agents import AgentsResource
+
+        return AgentsResource(self)
+
+    @cached_property
+    def access_token(self) -> AccessTokenResource:
+        from .resources.access_token import AccessTokenResource
+
+        return AccessTokenResource(self)
+
+    @cached_property
+    def datasets(self) -> DatasetsResource:
+        from .resources.datasets import DatasetsResource
+
+        return DatasetsResource(self)
+
+    @cached_property
+    def fine_tunes(self) -> FineTunesResource:
+        from .resources.fine_tunes import FineTunesResource
+
+        return FineTunesResource(self)
+
+    @cached_property
+    def infill(self) -> InfillResource:
+        from .resources.infill import InfillResource
+
+        return InfillResource(self)
+
+    @cached_property
+    def pronunciation_dicts(self) -> PronunciationDictsResource:
+        from .resources.pronunciation_dicts import PronunciationDictsResource
+
+        return PronunciationDictsResource(self)
+
+    @cached_property
+    def stt(self) -> SttResource:
+        from .resources.stt import SttResource
+
+        return SttResource(self)
+
+    @cached_property
+    def tts(self) -> TTSResource:
+        from .resources.tts import TTSResource
+
+        return TTSResource(self)
+
+    @cached_property
+    def voice_changer(self) -> VoiceChangerResource:
+        from .resources.voice_changer import VoiceChangerResource
+
+        return VoiceChangerResource(self)
+
+    @cached_property
+    def voices(self) -> VoicesResource:
+        from .resources.voices import VoicesResource
+
+        return VoicesResource(self)
+
+    @cached_property
+    def with_raw_response(self) -> CartesiaWithRawResponse:
+        return CartesiaWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> CartesiaWithStreamedResponse:
+        return CartesiaWithStreamedResponse(self)
 
     @property
     @override
@@ -301,19 +365,6 @@ class Cartesia(SyncAPIClient):
 
 
 class AsyncCartesia(AsyncAPIClient):
-    agents: agents.AsyncAgentsResource
-    access_token: access_token.AsyncAccessTokenResource
-    datasets: datasets.AsyncDatasetsResource
-    fine_tunes: fine_tunes.AsyncFineTunesResource
-    infill: infill.AsyncInfillResource
-    pronunciation_dicts: pronunciation_dicts.AsyncPronunciationDictsResource
-    stt: stt.AsyncSttResource
-    tts: tts.AsyncTTSResource
-    voice_changer: voice_changer.AsyncVoiceChangerResource
-    voices: voices.AsyncVoicesResource
-    with_raw_response: AsyncCartesiaWithRawResponse
-    with_streaming_response: AsyncCartesiaWithStreamedResponse
-
     # client options
     token: str | None
     api_key: str | None
@@ -374,18 +425,73 @@ class AsyncCartesia(AsyncAPIClient):
             _strict_response_validation=_strict_response_validation,
         )
 
-        self.agents = agents.AsyncAgentsResource(self)
-        self.access_token = access_token.AsyncAccessTokenResource(self)
-        self.datasets = datasets.AsyncDatasetsResource(self)
-        self.fine_tunes = fine_tunes.AsyncFineTunesResource(self)
-        self.infill = infill.AsyncInfillResource(self)
-        self.pronunciation_dicts = pronunciation_dicts.AsyncPronunciationDictsResource(self)
-        self.stt = stt.AsyncSttResource(self)
-        self.tts = tts.AsyncTTSResource(self)
-        self.voice_changer = voice_changer.AsyncVoiceChangerResource(self)
-        self.voices = voices.AsyncVoicesResource(self)
-        self.with_raw_response = AsyncCartesiaWithRawResponse(self)
-        self.with_streaming_response = AsyncCartesiaWithStreamedResponse(self)
+    @cached_property
+    def agents(self) -> AsyncAgentsResource:
+        from .resources.agents import AsyncAgentsResource
+
+        return AsyncAgentsResource(self)
+
+    @cached_property
+    def access_token(self) -> AsyncAccessTokenResource:
+        from .resources.access_token import AsyncAccessTokenResource
+
+        return AsyncAccessTokenResource(self)
+
+    @cached_property
+    def datasets(self) -> AsyncDatasetsResource:
+        from .resources.datasets import AsyncDatasetsResource
+
+        return AsyncDatasetsResource(self)
+
+    @cached_property
+    def fine_tunes(self) -> AsyncFineTunesResource:
+        from .resources.fine_tunes import AsyncFineTunesResource
+
+        return AsyncFineTunesResource(self)
+
+    @cached_property
+    def infill(self) -> AsyncInfillResource:
+        from .resources.infill import AsyncInfillResource
+
+        return AsyncInfillResource(self)
+
+    @cached_property
+    def pronunciation_dicts(self) -> AsyncPronunciationDictsResource:
+        from .resources.pronunciation_dicts import AsyncPronunciationDictsResource
+
+        return AsyncPronunciationDictsResource(self)
+
+    @cached_property
+    def stt(self) -> AsyncSttResource:
+        from .resources.stt import AsyncSttResource
+
+        return AsyncSttResource(self)
+
+    @cached_property
+    def tts(self) -> AsyncTTSResource:
+        from .resources.tts import AsyncTTSResource
+
+        return AsyncTTSResource(self)
+
+    @cached_property
+    def voice_changer(self) -> AsyncVoiceChangerResource:
+        from .resources.voice_changer import AsyncVoiceChangerResource
+
+        return AsyncVoiceChangerResource(self)
+
+    @cached_property
+    def voices(self) -> AsyncVoicesResource:
+        from .resources.voices import AsyncVoicesResource
+
+        return AsyncVoicesResource(self)
+
+    @cached_property
+    def with_raw_response(self) -> AsyncCartesiaWithRawResponse:
+        return AsyncCartesiaWithRawResponse(self)
+
+    @cached_property
+    def with_streaming_response(self) -> AsyncCartesiaWithStreamedResponse:
+        return AsyncCartesiaWithStreamedResponse(self)
 
     @property
     @override
@@ -546,83 +652,287 @@ class AsyncCartesia(AsyncAPIClient):
 
 
 class CartesiaWithRawResponse:
+    _client: Cartesia
+
     def __init__(self, client: Cartesia) -> None:
-        self.agents = agents.AgentsResourceWithRawResponse(client.agents)
-        self.access_token = access_token.AccessTokenResourceWithRawResponse(client.access_token)
-        self.datasets = datasets.DatasetsResourceWithRawResponse(client.datasets)
-        self.fine_tunes = fine_tunes.FineTunesResourceWithRawResponse(client.fine_tunes)
-        self.infill = infill.InfillResourceWithRawResponse(client.infill)
-        self.pronunciation_dicts = pronunciation_dicts.PronunciationDictsResourceWithRawResponse(
-            client.pronunciation_dicts
-        )
-        self.stt = stt.SttResourceWithRawResponse(client.stt)
-        self.tts = tts.TTSResourceWithRawResponse(client.tts)
-        self.voice_changer = voice_changer.VoiceChangerResourceWithRawResponse(client.voice_changer)
-        self.voices = voices.VoicesResourceWithRawResponse(client.voices)
+        self._client = client
 
         self.get_status = to_raw_response_wrapper(
             client.get_status,
         )
 
+    @cached_property
+    def agents(self) -> agents.AgentsResourceWithRawResponse:
+        from .resources.agents import AgentsResourceWithRawResponse
+
+        return AgentsResourceWithRawResponse(self._client.agents)
+
+    @cached_property
+    def access_token(self) -> access_token.AccessTokenResourceWithRawResponse:
+        from .resources.access_token import AccessTokenResourceWithRawResponse
+
+        return AccessTokenResourceWithRawResponse(self._client.access_token)
+
+    @cached_property
+    def datasets(self) -> datasets.DatasetsResourceWithRawResponse:
+        from .resources.datasets import DatasetsResourceWithRawResponse
+
+        return DatasetsResourceWithRawResponse(self._client.datasets)
+
+    @cached_property
+    def fine_tunes(self) -> fine_tunes.FineTunesResourceWithRawResponse:
+        from .resources.fine_tunes import FineTunesResourceWithRawResponse
+
+        return FineTunesResourceWithRawResponse(self._client.fine_tunes)
+
+    @cached_property
+    def infill(self) -> infill.InfillResourceWithRawResponse:
+        from .resources.infill import InfillResourceWithRawResponse
+
+        return InfillResourceWithRawResponse(self._client.infill)
+
+    @cached_property
+    def pronunciation_dicts(self) -> pronunciation_dicts.PronunciationDictsResourceWithRawResponse:
+        from .resources.pronunciation_dicts import PronunciationDictsResourceWithRawResponse
+
+        return PronunciationDictsResourceWithRawResponse(self._client.pronunciation_dicts)
+
+    @cached_property
+    def stt(self) -> stt.SttResourceWithRawResponse:
+        from .resources.stt import SttResourceWithRawResponse
+
+        return SttResourceWithRawResponse(self._client.stt)
+
+    @cached_property
+    def tts(self) -> tts.TTSResourceWithRawResponse:
+        from .resources.tts import TTSResourceWithRawResponse
+
+        return TTSResourceWithRawResponse(self._client.tts)
+
+    @cached_property
+    def voice_changer(self) -> voice_changer.VoiceChangerResourceWithRawResponse:
+        from .resources.voice_changer import VoiceChangerResourceWithRawResponse
+
+        return VoiceChangerResourceWithRawResponse(self._client.voice_changer)
+
+    @cached_property
+    def voices(self) -> voices.VoicesResourceWithRawResponse:
+        from .resources.voices import VoicesResourceWithRawResponse
+
+        return VoicesResourceWithRawResponse(self._client.voices)
+
 
 class AsyncCartesiaWithRawResponse:
+    _client: AsyncCartesia
+
     def __init__(self, client: AsyncCartesia) -> None:
-        self.agents = agents.AsyncAgentsResourceWithRawResponse(client.agents)
-        self.access_token = access_token.AsyncAccessTokenResourceWithRawResponse(client.access_token)
-        self.datasets = datasets.AsyncDatasetsResourceWithRawResponse(client.datasets)
-        self.fine_tunes = fine_tunes.AsyncFineTunesResourceWithRawResponse(client.fine_tunes)
-        self.infill = infill.AsyncInfillResourceWithRawResponse(client.infill)
-        self.pronunciation_dicts = pronunciation_dicts.AsyncPronunciationDictsResourceWithRawResponse(
-            client.pronunciation_dicts
-        )
-        self.stt = stt.AsyncSttResourceWithRawResponse(client.stt)
-        self.tts = tts.AsyncTTSResourceWithRawResponse(client.tts)
-        self.voice_changer = voice_changer.AsyncVoiceChangerResourceWithRawResponse(client.voice_changer)
-        self.voices = voices.AsyncVoicesResourceWithRawResponse(client.voices)
+        self._client = client
 
         self.get_status = async_to_raw_response_wrapper(
             client.get_status,
         )
 
+    @cached_property
+    def agents(self) -> agents.AsyncAgentsResourceWithRawResponse:
+        from .resources.agents import AsyncAgentsResourceWithRawResponse
+
+        return AsyncAgentsResourceWithRawResponse(self._client.agents)
+
+    @cached_property
+    def access_token(self) -> access_token.AsyncAccessTokenResourceWithRawResponse:
+        from .resources.access_token import AsyncAccessTokenResourceWithRawResponse
+
+        return AsyncAccessTokenResourceWithRawResponse(self._client.access_token)
+
+    @cached_property
+    def datasets(self) -> datasets.AsyncDatasetsResourceWithRawResponse:
+        from .resources.datasets import AsyncDatasetsResourceWithRawResponse
+
+        return AsyncDatasetsResourceWithRawResponse(self._client.datasets)
+
+    @cached_property
+    def fine_tunes(self) -> fine_tunes.AsyncFineTunesResourceWithRawResponse:
+        from .resources.fine_tunes import AsyncFineTunesResourceWithRawResponse
+
+        return AsyncFineTunesResourceWithRawResponse(self._client.fine_tunes)
+
+    @cached_property
+    def infill(self) -> infill.AsyncInfillResourceWithRawResponse:
+        from .resources.infill import AsyncInfillResourceWithRawResponse
+
+        return AsyncInfillResourceWithRawResponse(self._client.infill)
+
+    @cached_property
+    def pronunciation_dicts(self) -> pronunciation_dicts.AsyncPronunciationDictsResourceWithRawResponse:
+        from .resources.pronunciation_dicts import AsyncPronunciationDictsResourceWithRawResponse
+
+        return AsyncPronunciationDictsResourceWithRawResponse(self._client.pronunciation_dicts)
+
+    @cached_property
+    def stt(self) -> stt.AsyncSttResourceWithRawResponse:
+        from .resources.stt import AsyncSttResourceWithRawResponse
+
+        return AsyncSttResourceWithRawResponse(self._client.stt)
+
+    @cached_property
+    def tts(self) -> tts.AsyncTTSResourceWithRawResponse:
+        from .resources.tts import AsyncTTSResourceWithRawResponse
+
+        return AsyncTTSResourceWithRawResponse(self._client.tts)
+
+    @cached_property
+    def voice_changer(self) -> voice_changer.AsyncVoiceChangerResourceWithRawResponse:
+        from .resources.voice_changer import AsyncVoiceChangerResourceWithRawResponse
+
+        return AsyncVoiceChangerResourceWithRawResponse(self._client.voice_changer)
+
+    @cached_property
+    def voices(self) -> voices.AsyncVoicesResourceWithRawResponse:
+        from .resources.voices import AsyncVoicesResourceWithRawResponse
+
+        return AsyncVoicesResourceWithRawResponse(self._client.voices)
+
 
 class CartesiaWithStreamedResponse:
+    _client: Cartesia
+
     def __init__(self, client: Cartesia) -> None:
-        self.agents = agents.AgentsResourceWithStreamingResponse(client.agents)
-        self.access_token = access_token.AccessTokenResourceWithStreamingResponse(client.access_token)
-        self.datasets = datasets.DatasetsResourceWithStreamingResponse(client.datasets)
-        self.fine_tunes = fine_tunes.FineTunesResourceWithStreamingResponse(client.fine_tunes)
-        self.infill = infill.InfillResourceWithStreamingResponse(client.infill)
-        self.pronunciation_dicts = pronunciation_dicts.PronunciationDictsResourceWithStreamingResponse(
-            client.pronunciation_dicts
-        )
-        self.stt = stt.SttResourceWithStreamingResponse(client.stt)
-        self.tts = tts.TTSResourceWithStreamingResponse(client.tts)
-        self.voice_changer = voice_changer.VoiceChangerResourceWithStreamingResponse(client.voice_changer)
-        self.voices = voices.VoicesResourceWithStreamingResponse(client.voices)
+        self._client = client
 
         self.get_status = to_streamed_response_wrapper(
             client.get_status,
         )
 
+    @cached_property
+    def agents(self) -> agents.AgentsResourceWithStreamingResponse:
+        from .resources.agents import AgentsResourceWithStreamingResponse
+
+        return AgentsResourceWithStreamingResponse(self._client.agents)
+
+    @cached_property
+    def access_token(self) -> access_token.AccessTokenResourceWithStreamingResponse:
+        from .resources.access_token import AccessTokenResourceWithStreamingResponse
+
+        return AccessTokenResourceWithStreamingResponse(self._client.access_token)
+
+    @cached_property
+    def datasets(self) -> datasets.DatasetsResourceWithStreamingResponse:
+        from .resources.datasets import DatasetsResourceWithStreamingResponse
+
+        return DatasetsResourceWithStreamingResponse(self._client.datasets)
+
+    @cached_property
+    def fine_tunes(self) -> fine_tunes.FineTunesResourceWithStreamingResponse:
+        from .resources.fine_tunes import FineTunesResourceWithStreamingResponse
+
+        return FineTunesResourceWithStreamingResponse(self._client.fine_tunes)
+
+    @cached_property
+    def infill(self) -> infill.InfillResourceWithStreamingResponse:
+        from .resources.infill import InfillResourceWithStreamingResponse
+
+        return InfillResourceWithStreamingResponse(self._client.infill)
+
+    @cached_property
+    def pronunciation_dicts(self) -> pronunciation_dicts.PronunciationDictsResourceWithStreamingResponse:
+        from .resources.pronunciation_dicts import PronunciationDictsResourceWithStreamingResponse
+
+        return PronunciationDictsResourceWithStreamingResponse(self._client.pronunciation_dicts)
+
+    @cached_property
+    def stt(self) -> stt.SttResourceWithStreamingResponse:
+        from .resources.stt import SttResourceWithStreamingResponse
+
+        return SttResourceWithStreamingResponse(self._client.stt)
+
+    @cached_property
+    def tts(self) -> tts.TTSResourceWithStreamingResponse:
+        from .resources.tts import TTSResourceWithStreamingResponse
+
+        return TTSResourceWithStreamingResponse(self._client.tts)
+
+    @cached_property
+    def voice_changer(self) -> voice_changer.VoiceChangerResourceWithStreamingResponse:
+        from .resources.voice_changer import VoiceChangerResourceWithStreamingResponse
+
+        return VoiceChangerResourceWithStreamingResponse(self._client.voice_changer)
+
+    @cached_property
+    def voices(self) -> voices.VoicesResourceWithStreamingResponse:
+        from .resources.voices import VoicesResourceWithStreamingResponse
+
+        return VoicesResourceWithStreamingResponse(self._client.voices)
+
 
 class AsyncCartesiaWithStreamedResponse:
+    _client: AsyncCartesia
+
     def __init__(self, client: AsyncCartesia) -> None:
-        self.agents = agents.AsyncAgentsResourceWithStreamingResponse(client.agents)
-        self.access_token = access_token.AsyncAccessTokenResourceWithStreamingResponse(client.access_token)
-        self.datasets = datasets.AsyncDatasetsResourceWithStreamingResponse(client.datasets)
-        self.fine_tunes = fine_tunes.AsyncFineTunesResourceWithStreamingResponse(client.fine_tunes)
-        self.infill = infill.AsyncInfillResourceWithStreamingResponse(client.infill)
-        self.pronunciation_dicts = pronunciation_dicts.AsyncPronunciationDictsResourceWithStreamingResponse(
-            client.pronunciation_dicts
-        )
-        self.stt = stt.AsyncSttResourceWithStreamingResponse(client.stt)
-        self.tts = tts.AsyncTTSResourceWithStreamingResponse(client.tts)
-        self.voice_changer = voice_changer.AsyncVoiceChangerResourceWithStreamingResponse(client.voice_changer)
-        self.voices = voices.AsyncVoicesResourceWithStreamingResponse(client.voices)
+        self._client = client
 
         self.get_status = async_to_streamed_response_wrapper(
             client.get_status,
         )
+
+    @cached_property
+    def agents(self) -> agents.AsyncAgentsResourceWithStreamingResponse:
+        from .resources.agents import AsyncAgentsResourceWithStreamingResponse
+
+        return AsyncAgentsResourceWithStreamingResponse(self._client.agents)
+
+    @cached_property
+    def access_token(self) -> access_token.AsyncAccessTokenResourceWithStreamingResponse:
+        from .resources.access_token import AsyncAccessTokenResourceWithStreamingResponse
+
+        return AsyncAccessTokenResourceWithStreamingResponse(self._client.access_token)
+
+    @cached_property
+    def datasets(self) -> datasets.AsyncDatasetsResourceWithStreamingResponse:
+        from .resources.datasets import AsyncDatasetsResourceWithStreamingResponse
+
+        return AsyncDatasetsResourceWithStreamingResponse(self._client.datasets)
+
+    @cached_property
+    def fine_tunes(self) -> fine_tunes.AsyncFineTunesResourceWithStreamingResponse:
+        from .resources.fine_tunes import AsyncFineTunesResourceWithStreamingResponse
+
+        return AsyncFineTunesResourceWithStreamingResponse(self._client.fine_tunes)
+
+    @cached_property
+    def infill(self) -> infill.AsyncInfillResourceWithStreamingResponse:
+        from .resources.infill import AsyncInfillResourceWithStreamingResponse
+
+        return AsyncInfillResourceWithStreamingResponse(self._client.infill)
+
+    @cached_property
+    def pronunciation_dicts(self) -> pronunciation_dicts.AsyncPronunciationDictsResourceWithStreamingResponse:
+        from .resources.pronunciation_dicts import AsyncPronunciationDictsResourceWithStreamingResponse
+
+        return AsyncPronunciationDictsResourceWithStreamingResponse(self._client.pronunciation_dicts)
+
+    @cached_property
+    def stt(self) -> stt.AsyncSttResourceWithStreamingResponse:
+        from .resources.stt import AsyncSttResourceWithStreamingResponse
+
+        return AsyncSttResourceWithStreamingResponse(self._client.stt)
+
+    @cached_property
+    def tts(self) -> tts.AsyncTTSResourceWithStreamingResponse:
+        from .resources.tts import AsyncTTSResourceWithStreamingResponse
+
+        return AsyncTTSResourceWithStreamingResponse(self._client.tts)
+
+    @cached_property
+    def voice_changer(self) -> voice_changer.AsyncVoiceChangerResourceWithStreamingResponse:
+        from .resources.voice_changer import AsyncVoiceChangerResourceWithStreamingResponse
+
+        return AsyncVoiceChangerResourceWithStreamingResponse(self._client.voice_changer)
+
+    @cached_property
+    def voices(self) -> voices.AsyncVoicesResourceWithStreamingResponse:
+        from .resources.voices import AsyncVoicesResourceWithStreamingResponse
+
+        return AsyncVoicesResourceWithStreamingResponse(self._client.voices)
 
 
 Client = Cartesia
