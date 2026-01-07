@@ -5,11 +5,11 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
-from .._types import SequenceNotStr
 from .model_speed import ModelSpeed
 from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
+from .generation_config_param import GenerationConfigParam
 
 __all__ = ["GenerationRequestParam", "OutputFormat"]
 
@@ -19,7 +19,7 @@ class OutputFormat(TypedDict, total=False):
 
     encoding: Required[RawEncoding]
 
-    sample_rate: Required[int]
+    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
 
 
 _GenerationRequestParamReservedKeywords = TypedDict(
@@ -68,28 +68,29 @@ class GenerationRequestParam(_GenerationRequestParamReservedKeywords, total=Fals
     conversation IDs) as context IDs.
     """
 
-    duration: Optional[float]
-    """The maximum duration of the audio in seconds.
-
-    You do not usually need to specify this. If the duration is not appropriate for
-    the length of the transcript, the output audio may be truncated.
-    """
-
     flush: Optional[bool]
     """Whether to flush the context."""
 
-    language: Optional[SupportedLanguage]
+    generation_config: GenerationConfigParam
+    """Configure the various attributes of the generated speech.
+
+    These are only for `sonic-3` and have no effect on earlier models.
+
+    See
+    [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+    for a guide on this option.
+    """
+
+    language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
 
-    Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-    Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-    Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+    For valid options, see [Models](/build-with-cartesia/tts-models).
     """
 
     max_buffer_delay_ms: Optional[int]
     """The maximum time in milliseconds to buffer text before starting generation.
 
-    Values between [0, 1000]ms are supported. Defaults to 0 (no buffering).
+    Values between [0, 5000]ms are supported. Defaults to 3000ms.
 
     When set, the model will buffer incoming text chunks until it's confident it has
     enough context to generate high-quality speech, or the buffer delay elapses,
@@ -100,20 +101,17 @@ class GenerationRequestParam(_GenerationRequestParamReservedKeywords, total=Fals
     often benefits from having more context.
     """
 
-    pronunciation_dict_ids: Optional[SequenceNotStr[str]]
-    """A list of pronunciation dict IDs to use for the generation.
+    pronunciation_dict_id: Optional[str]
+    """The ID of a pronunciation dictionary to use for the generation.
 
-    This will be applied in addition to the pinned pronunciation dict, which will be
-    treated as the first element of the list. If there are conflicts with dict
-    items, the latest dict will take precedence.
+    Pronunciation dictionaries are supported by `sonic-3` models and newer.
     """
 
-    speed: Optional[ModelSpeed]
-    """> This feature is experimental and may not work for all voices.
+    speed: ModelSpeed
+    """Use `generation_config.speed` for sonic-3. Speed setting for the model.
 
-    Speed setting for the model. Defaults to `normal`.
-
-    Influences the speed of the generated speech. Faster speeds may reduce
+    Defaults to `normal`. This feature is experimental and may not work for all
+    voices. Influences the speed of the generated speech. Faster speeds may reduce
     hallucination rate.
     """
 

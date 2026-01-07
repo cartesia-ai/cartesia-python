@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Optional
-from typing_extensions import TypedDict
+from typing import Union, Optional
+from datetime import datetime
+from typing_extensions import Annotated, TypedDict
+
+from ...._utils import PropertyInfo
 
 __all__ = ["ResultListParams"]
 
@@ -17,6 +20,12 @@ class ResultListParams(TypedDict, total=False):
 
     deployment_id: Optional[str]
     """The ID of the deployment."""
+
+    end_date: Annotated[Union[str, datetime, None], PropertyInfo(format="iso8601")]
+    """Filter metric results created before or at this ISO 8601 date/time (e.g.
+
+    2024-04-30T23:59:59Z).
+    """
 
     ending_before: Optional[str]
     """A cursor to use in pagination.
@@ -32,6 +41,12 @@ class ResultListParams(TypedDict, total=False):
 
     metric_id: Optional[str]
     """The ID of the metric."""
+
+    start_date: Annotated[Union[str, datetime, None], PropertyInfo(format="iso8601")]
+    """Filter metric results created at or after this ISO 8601 date/time (e.g.
+
+    2024-04-01T00:00:00Z).
+    """
 
     starting_after: Optional[str]
     """A cursor to use in pagination.

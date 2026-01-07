@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Union, Optional
+from datetime import datetime
 
 import httpx
 
-from ...._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import maybe_transform, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
@@ -50,9 +51,11 @@ class ResultsResource(SyncAPIResource):
         agent_id: Optional[str] | Omit = omit,
         call_id: Optional[str] | Omit = omit,
         deployment_id: Optional[str] | Omit = omit,
+        end_date: Union[str, datetime, None] | Omit = omit,
         ending_before: Optional[str] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         metric_id: Optional[str] | Omit = omit,
+        start_date: Union[str, datetime, None] | Omit = omit,
         starting_after: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -72,6 +75,9 @@ class ResultsResource(SyncAPIResource):
 
           deployment_id: The ID of the deployment.
 
+          end_date: Filter metric results created before or at this ISO 8601 date/time (e.g.
+              2024-04-30T23:59:59Z).
+
           ending_before: A cursor to use in pagination. `ending_before` is a metric result ID that
               defines your place in the list. For example, if you make a /metrics/results
               request and receive 100 objects, starting with `metric_result_abc123`, your
@@ -81,6 +87,9 @@ class ResultsResource(SyncAPIResource):
           limit: The number of metric results to return per page, ranging between 1 and 100.
 
           metric_id: The ID of the metric.
+
+          start_date: Filter metric results created at or after this ISO 8601 date/time (e.g.
+              2024-04-01T00:00:00Z).
 
           starting_after: A cursor to use in pagination. `starting_after` is a metric result ID that
               defines your place in the list. For example, if you make a /metrics/results
@@ -109,9 +118,11 @@ class ResultsResource(SyncAPIResource):
                         "agent_id": agent_id,
                         "call_id": call_id,
                         "deployment_id": deployment_id,
+                        "end_date": end_date,
                         "ending_before": ending_before,
                         "limit": limit,
                         "metric_id": metric_id,
+                        "start_date": start_date,
                         "starting_after": starting_after,
                     },
                     result_list_params.ResultListParams,
@@ -126,23 +137,21 @@ class ResultsResource(SyncAPIResource):
         agent_id: Optional[str] | Omit = omit,
         call_id: Optional[str] | Omit = omit,
         deployment_id: Optional[str] | Omit = omit,
-        ending_before: Optional[str] | Omit = omit,
-        limit: Optional[int] | Omit = omit,
+        end_date: Union[str, datetime, None] | Omit = omit,
         metric_id: Optional[str] | Omit = omit,
-        starting_after: Optional[str] | Omit = omit,
+        start_date: Union[str, datetime, None] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> str:
         """Export metric results to a CSV file.
 
-        This endpoint is paginated with a default
-        of 10 results per page and maximum of 100 results per page. Information on
-        pagination can be found in the headers `x-has-more`, `x-limit`, and
-        `x-next-page`.
+        This endpoint streams at most 100k results
+        as the CSV file directly to the client. Use the optional filters to narrow down
+        the results to export.
 
         Args:
           agent_id: The ID of the agent.
@@ -151,21 +160,13 @@ class ResultsResource(SyncAPIResource):
 
           deployment_id: The ID of the deployment.
 
-          ending_before: A cursor to use in pagination. `ending_before` is a metric result ID that
-              defines your place in the list. For example, if you make a /metrics/results
-              request and receive 100 objects, starting with `metric_result_abc123`, your
-              subsequent call can include `ending_before=metric_result_abc123` to fetch the
-              previous page of the list.
-
-          limit: The number of metric results to return per page, ranging between 1 and 100.
+          end_date: Filter metric results created before or at this ISO 8601 date/time (e.g.
+              2024-04-30T23:59:59Z).
 
           metric_id: The ID of the metric.
 
-          starting_after: A cursor to use in pagination. `starting_after` is a metric result ID that
-              defines your place in the list. For example, if you make a /metrics/results
-              request and receive 100 objects, ending with `metric_result_abc123`, your
-              subsequent call can include `starting_after=metric_result_abc123` to fetch the
-              next page of the list.
+          start_date: Filter metric results created at or after this ISO 8601 date/time (e.g.
+              2024-04-01T00:00:00Z).
 
           extra_headers: Send extra headers
 
@@ -175,7 +176,7 @@ class ResultsResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/csv", **(extra_headers or {})}
         return self._get(
             "/agents/metrics/results/export",
             options=make_request_options(
@@ -188,15 +189,14 @@ class ResultsResource(SyncAPIResource):
                         "agent_id": agent_id,
                         "call_id": call_id,
                         "deployment_id": deployment_id,
-                        "ending_before": ending_before,
-                        "limit": limit,
+                        "end_date": end_date,
                         "metric_id": metric_id,
-                        "starting_after": starting_after,
+                        "start_date": start_date,
                     },
                     result_export_params.ResultExportParams,
                 ),
             ),
-            cast_to=NoneType,
+            cast_to=str,
         )
 
 
@@ -226,9 +226,11 @@ class AsyncResultsResource(AsyncAPIResource):
         agent_id: Optional[str] | Omit = omit,
         call_id: Optional[str] | Omit = omit,
         deployment_id: Optional[str] | Omit = omit,
+        end_date: Union[str, datetime, None] | Omit = omit,
         ending_before: Optional[str] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         metric_id: Optional[str] | Omit = omit,
+        start_date: Union[str, datetime, None] | Omit = omit,
         starting_after: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -248,6 +250,9 @@ class AsyncResultsResource(AsyncAPIResource):
 
           deployment_id: The ID of the deployment.
 
+          end_date: Filter metric results created before or at this ISO 8601 date/time (e.g.
+              2024-04-30T23:59:59Z).
+
           ending_before: A cursor to use in pagination. `ending_before` is a metric result ID that
               defines your place in the list. For example, if you make a /metrics/results
               request and receive 100 objects, starting with `metric_result_abc123`, your
@@ -257,6 +262,9 @@ class AsyncResultsResource(AsyncAPIResource):
           limit: The number of metric results to return per page, ranging between 1 and 100.
 
           metric_id: The ID of the metric.
+
+          start_date: Filter metric results created at or after this ISO 8601 date/time (e.g.
+              2024-04-01T00:00:00Z).
 
           starting_after: A cursor to use in pagination. `starting_after` is a metric result ID that
               defines your place in the list. For example, if you make a /metrics/results
@@ -285,9 +293,11 @@ class AsyncResultsResource(AsyncAPIResource):
                         "agent_id": agent_id,
                         "call_id": call_id,
                         "deployment_id": deployment_id,
+                        "end_date": end_date,
                         "ending_before": ending_before,
                         "limit": limit,
                         "metric_id": metric_id,
+                        "start_date": start_date,
                         "starting_after": starting_after,
                     },
                     result_list_params.ResultListParams,
@@ -302,23 +312,21 @@ class AsyncResultsResource(AsyncAPIResource):
         agent_id: Optional[str] | Omit = omit,
         call_id: Optional[str] | Omit = omit,
         deployment_id: Optional[str] | Omit = omit,
-        ending_before: Optional[str] | Omit = omit,
-        limit: Optional[int] | Omit = omit,
+        end_date: Union[str, datetime, None] | Omit = omit,
         metric_id: Optional[str] | Omit = omit,
-        starting_after: Optional[str] | Omit = omit,
+        start_date: Union[str, datetime, None] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> str:
         """Export metric results to a CSV file.
 
-        This endpoint is paginated with a default
-        of 10 results per page and maximum of 100 results per page. Information on
-        pagination can be found in the headers `x-has-more`, `x-limit`, and
-        `x-next-page`.
+        This endpoint streams at most 100k results
+        as the CSV file directly to the client. Use the optional filters to narrow down
+        the results to export.
 
         Args:
           agent_id: The ID of the agent.
@@ -327,21 +335,13 @@ class AsyncResultsResource(AsyncAPIResource):
 
           deployment_id: The ID of the deployment.
 
-          ending_before: A cursor to use in pagination. `ending_before` is a metric result ID that
-              defines your place in the list. For example, if you make a /metrics/results
-              request and receive 100 objects, starting with `metric_result_abc123`, your
-              subsequent call can include `ending_before=metric_result_abc123` to fetch the
-              previous page of the list.
-
-          limit: The number of metric results to return per page, ranging between 1 and 100.
+          end_date: Filter metric results created before or at this ISO 8601 date/time (e.g.
+              2024-04-30T23:59:59Z).
 
           metric_id: The ID of the metric.
 
-          starting_after: A cursor to use in pagination. `starting_after` is a metric result ID that
-              defines your place in the list. For example, if you make a /metrics/results
-              request and receive 100 objects, ending with `metric_result_abc123`, your
-              subsequent call can include `starting_after=metric_result_abc123` to fetch the
-              next page of the list.
+          start_date: Filter metric results created at or after this ISO 8601 date/time (e.g.
+              2024-04-01T00:00:00Z).
 
           extra_headers: Send extra headers
 
@@ -351,7 +351,7 @@ class AsyncResultsResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/csv", **(extra_headers or {})}
         return await self._get(
             "/agents/metrics/results/export",
             options=make_request_options(
@@ -364,15 +364,14 @@ class AsyncResultsResource(AsyncAPIResource):
                         "agent_id": agent_id,
                         "call_id": call_id,
                         "deployment_id": deployment_id,
-                        "ending_before": ending_before,
-                        "limit": limit,
+                        "end_date": end_date,
                         "metric_id": metric_id,
-                        "starting_after": starting_after,
+                        "start_date": start_date,
                     },
                     result_export_params.ResultExportParams,
                 ),
             ),
-            cast_to=NoneType,
+            cast_to=str,
         )
 
 

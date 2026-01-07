@@ -31,7 +31,7 @@ class TestTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -52,7 +52,7 @@ class TestTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
                 "container": "raw",
             },
             transcript="transcript",
@@ -60,14 +60,13 @@ class TestTTS:
                 "id": "id",
                 "mode": "id",
             },
-            duration=0,
             generation_config={
-                "experimental": {"accent_localization": 0},
+                "emotion": "neutral",
                 "speed": 0,
                 "volume": 0,
             },
             language="en",
-            pronunciation_dict_ids=["string"],
+            pronunciation_dict_id="pronunciation_dict_id",
             save=True,
             speed="slow",
         )
@@ -85,7 +84,7 @@ class TestTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -107,7 +106,7 @@ class TestTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -132,7 +131,7 @@ class TestTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -150,7 +149,7 @@ class TestTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -160,9 +159,13 @@ class TestTTS:
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
-            duration=0,
+            generation_config={
+                "emotion": "neutral",
+                "speed": 0,
+                "volume": 0,
+            },
             language="en",
-            pronunciation_dict_ids=["string"],
+            pronunciation_dict_id="pronunciation_dict_id",
             speed="slow",
             use_normalized_timestamps=True,
         )
@@ -176,7 +179,7 @@ class TestTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -198,7 +201,7 @@ class TestTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -228,7 +231,7 @@ class TestAsyncTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -249,7 +252,7 @@ class TestAsyncTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
                 "container": "raw",
             },
             transcript="transcript",
@@ -257,14 +260,13 @@ class TestAsyncTTS:
                 "id": "id",
                 "mode": "id",
             },
-            duration=0,
             generation_config={
-                "experimental": {"accent_localization": 0},
+                "emotion": "neutral",
                 "speed": 0,
                 "volume": 0,
             },
             language="en",
-            pronunciation_dict_ids=["string"],
+            pronunciation_dict_id="pronunciation_dict_id",
             save=True,
             speed="slow",
         )
@@ -282,7 +284,7 @@ class TestAsyncTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -304,7 +306,7 @@ class TestAsyncTTS:
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -329,7 +331,7 @@ class TestAsyncTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -347,7 +349,7 @@ class TestAsyncTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -357,9 +359,13 @@ class TestAsyncTTS:
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
-            duration=0,
+            generation_config={
+                "emotion": "neutral",
+                "speed": 0,
+                "volume": 0,
+            },
             language="en",
-            pronunciation_dict_ids=["string"],
+            pronunciation_dict_id="pronunciation_dict_id",
             speed="slow",
             use_normalized_timestamps=True,
         )
@@ -373,7 +379,7 @@ class TestAsyncTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={
@@ -395,7 +401,7 @@ class TestAsyncTTS:
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
-                "sample_rate": 0,
+                "sample_rate": 8000,
             },
             transcript="transcript",
             voice={

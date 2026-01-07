@@ -21,7 +21,7 @@ class Voice(BaseModel):
     """The description of the voice."""
 
     is_owner: bool
-    """Whether the current user is the owner of the voice."""
+    """Whether your organization owns the voice."""
 
     is_public: bool
     """Whether the voice is publicly accessible."""
@@ -29,9 +29,7 @@ class Voice(BaseModel):
     language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
 
-    Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-    Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-    Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+    For valid options, see [Models](/build-with-cartesia/tts-models).
     """
 
     name: str
@@ -40,8 +38,12 @@ class Voice(BaseModel):
     gender: Optional[GenderPresentation] = None
     """The gender of the voice, if specified."""
 
-    is_starred: Optional[bool] = None
-    """Whether the current user has starred the voice.
+    preview_file_url: Optional[str] = None
+    """A URL to download a preview audio file for this voice.
 
-    Only included when `expand` includes `is_starred`.
+    Useful to avoid consuming credits when looking for the right voice. The URL
+    requires the same Authorization header. Voice previews may be changed, moved, or
+    deleted so you should avoid storing the URL permanently. This property will be
+    null if there's no preview available. Only included when `expand[]` includes
+    `preview_file_url`.
     """

@@ -24,9 +24,7 @@ class VoiceMetadata(BaseModel):
     language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
 
-    Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-    Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-    Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+    For valid options, see [Models](/build-with-cartesia/tts-models).
     """
 
     name: str

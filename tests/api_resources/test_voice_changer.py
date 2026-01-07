@@ -29,7 +29,7 @@ class TestVoiceChanger:
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
-            output_format_sample_rate=0,
+            output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
         assert voice_changer is None
@@ -70,7 +70,7 @@ class TestVoiceChanger:
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
-            output_format_sample_rate=0,
+            output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
         assert voice_changer is None
@@ -117,7 +117,7 @@ class TestAsyncVoiceChanger:
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
-            output_format_sample_rate=0,
+            output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
         assert voice_changer is None
@@ -158,7 +158,7 @@ class TestAsyncVoiceChanger:
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
-            output_format_sample_rate=0,
+            output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
         assert voice_changer is None

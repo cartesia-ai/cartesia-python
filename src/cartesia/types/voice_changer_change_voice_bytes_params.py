@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import Literal, Annotated, TypedDict
 
 from .._types import FileTypes
 from .._utils import PropertyInfo
@@ -24,6 +24,8 @@ class VoiceChangerChangeVoiceBytesParams(TypedDict, total=False):
     output_format_encoding: Annotated[Optional[RawEncoding], PropertyInfo(alias="output_format[encoding]")]
     """Required for `raw` and `wav` containers."""
 
-    output_format_sample_rate: Annotated[int, PropertyInfo(alias="output_format[sample_rate]")]
+    output_format_sample_rate: Annotated[
+        Literal[8000, 16000, 22050, 24000, 44100, 48000], PropertyInfo(alias="output_format[sample_rate]")
+    ]
 
     voice_id: Annotated[str, PropertyInfo(alias="voice[id]")]

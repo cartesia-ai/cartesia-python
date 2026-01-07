@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from typing_extensions import Annotated, TypedDict
+from typing_extensions import Literal, Annotated, TypedDict
 
 from .._types import FileTypes
 from .._utils import PropertyInfo
@@ -20,7 +20,10 @@ class InfillCreateParams(TypedDict, total=False):
     left_audio: FileTypes
 
     model_id: str
-    """The ID of the model to use for generating audio"""
+    """The ID of the model to use for generating audio.
+
+    Any model other than the first `"sonic"` model is supported.
+    """
 
     output_format_bit_rate: Annotated[Optional[int], PropertyInfo(alias="output_format[bit_rate]")]
     """Required for `mp3` containers."""
@@ -31,7 +34,9 @@ class InfillCreateParams(TypedDict, total=False):
     output_format_encoding: Annotated[Optional[RawEncoding], PropertyInfo(alias="output_format[encoding]")]
     """Required for `raw` and `wav` containers."""
 
-    output_format_sample_rate: Annotated[int, PropertyInfo(alias="output_format[sample_rate]")]
+    output_format_sample_rate: Annotated[
+        Literal[8000, 16000, 22050, 24000, 44100, 48000], PropertyInfo(alias="output_format[sample_rate]")
+    ]
     """The sample rate of the output audio"""
 
     right_audio: FileTypes

@@ -29,6 +29,7 @@ class TestAccessToken:
         access_token = client.access_token.create(
             expires_in=0,
             grants={
+                "agent": True,
                 "stt": True,
                 "tts": True,
             },
@@ -75,6 +76,7 @@ class TestAsyncAccessToken:
         access_token = await async_client.access_token.create(
             expires_in=0,
             grants={
+                "agent": True,
                 "stt": True,
                 "tts": True,
             },

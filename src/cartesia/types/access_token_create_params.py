@@ -28,6 +28,12 @@ class Grants(TypedDict, total=False):
     Both TTS and STT grants are optional - specify only the capabilities you need.
     """
 
+    agent: Optional[bool]
+    """
+    The `agent` grant allows the token to be used to access the Agent websocket
+    calling [endpoint](/line/integrations/web-calls#connection).
+    """
+
     stt: Optional[bool]
     """The `stt` grant allows the token to be used to access any STT endpoint."""
 

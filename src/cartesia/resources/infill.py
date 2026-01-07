@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Mapping, Optional, cast
+from typing_extensions import Literal
 
 import httpx
 
@@ -53,7 +54,7 @@ class InfillResource(SyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
         voice_id: str | Omit = omit,
@@ -73,8 +74,6 @@ class InfillResource(SyncAPIResource):
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300
         credits.**
 
-        Infilling is only available on `sonic-2` at this time.
-
         At least one of `left_audio` or `right_audio` must be provided.
 
         As with all generative models, there's some inherent variability, but here's
@@ -91,7 +90,8 @@ class InfillResource(SyncAPIResource):
         Args:
           language: The language of the transcript
 
-          model_id: The ID of the model to use for generating audio
+          model_id: The ID of the model to use for generating audio. Any model other than the first
+              `"sonic"` model is supported.
 
           output_format_bit_rate: Required for `mp3` containers.
 
@@ -173,7 +173,7 @@ class AsyncInfillResource(AsyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
         voice_id: str | Omit = omit,
@@ -193,8 +193,6 @@ class AsyncInfillResource(AsyncAPIResource):
         **The cost is 1 credit per character of the infill text plus a fixed cost of 300
         credits.**
 
-        Infilling is only available on `sonic-2` at this time.
-
         At least one of `left_audio` or `right_audio` must be provided.
 
         As with all generative models, there's some inherent variability, but here's
@@ -211,7 +209,8 @@ class AsyncInfillResource(AsyncAPIResource):
         Args:
           language: The language of the transcript
 
-          model_id: The ID of the model to use for generating audio
+          model_id: The ID of the model to use for generating audio. Any model other than the first
+              `"sonic"` model is supported.
 
           output_format_bit_rate: Required for `mp3` containers.
 

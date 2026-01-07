@@ -28,11 +28,11 @@ The full API of this library can be found in [api.md](api.md).
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key="My API Key",
+    token="My Token",
 )
 
-agents = client.agents.list()
-print(agents.summaries)
+response = client.get_status()
+print(response.ok)
 ```
 
 ## Async usage
@@ -44,13 +44,13 @@ import asyncio
 from cartesia import AsyncCartesia
 
 client = AsyncCartesia(
-    api_key="My API Key",
+    token="My Token",
 )
 
 
 async def main() -> None:
-    agents = await client.agents.list()
-    print(agents.summaries)
+    response = await client.get_status()
+    print(response.ok)
 
 
 asyncio.run(main())
@@ -79,11 +79,11 @@ from cartesia import AsyncCartesia
 
 async def main() -> None:
     async with AsyncCartesia(
-        api_key="My API Key",
+        token="My Token",
         http_client=DefaultAioHttpClient(),
     ) as client:
-        agents = await client.agents.list()
-        print(agents.summaries)
+        response = await client.get_status()
+        print(response.ok)
 
 
 asyncio.run(main())
@@ -109,14 +109,14 @@ from cartesia import Cartesia
 
 client = Cartesia()
 
-all_voices = []
+all_calls = []
 # Automatically fetches more pages as needed.
-for voice in client.voices.list(
-    language="en",
+for call in client.agents.calls.list(
+    agent_id="agent_id",
 ):
-    # Do something with voice here
-    all_voices.append(voice)
-print(all_voices)
+    # Do something with call here
+    all_calls.append(call)
+print(all_calls)
 ```
 
 Or, asynchronously:
@@ -129,13 +129,13 @@ client = AsyncCartesia()
 
 
 async def main() -> None:
-    all_voices = []
+    all_calls = []
     # Iterate through items across all pages, issuing requests as needed.
-    async for voice in client.voices.list(
-        language="en",
+    async for call in client.agents.calls.list(
+        agent_id="agent_id",
     ):
-        all_voices.append(voice)
-    print(all_voices)
+        all_calls.append(call)
+    print(all_calls)
 
 
 asyncio.run(main())
@@ -144,8 +144,8 @@ asyncio.run(main())
 Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
 
 ```python
-first_page = await client.voices.list(
-    language="en",
+first_page = await client.agents.calls.list(
+    agent_id="agent_id",
 )
 if first_page.has_next_page():
     print(f"will fetch next page using these details: {first_page.next_page_info()}")
@@ -158,13 +158,13 @@ if first_page.has_next_page():
 Or just work directly with the returned data:
 
 ```python
-first_page = await client.voices.list(
-    language="en",
+first_page = await client.agents.calls.list(
+    agent_id="agent_id",
 )
 
 print(f"next page cursor: {first_page.starting_after}")  # => "next page cursor: ..."
-for voice in first_page.data:
-    print(voice.id)
+for call in first_page.data:
+    print(call.id)
 
 # Remove `await` for non-async usage.
 ```
@@ -218,7 +218,7 @@ from cartesia import Cartesia
 client = Cartesia()
 
 try:
-    client.agents.list()
+    client.get_status()
 except cartesia.APIConnectionError as e:
     print("The server could not be reached")
     print(e.__cause__)  # an underlying Exception, likely raised within httpx.
@@ -261,7 +261,7 @@ client = Cartesia(
 )
 
 # Or, configure per-request:
-client.with_options(max_retries=5).agents.list()
+client.with_options(max_retries=5).get_status()
 ```
 
 ### Timeouts
@@ -284,7 +284,7 @@ client = Cartesia(
 )
 
 # Override per-request:
-client.with_options(timeout=5.0).agents.list()
+client.with_options(timeout=5.0).get_status()
 ```
 
 On timeout, an `APITimeoutError` is thrown.
@@ -339,11 +339,11 @@ The "raw" Response object can be accessed by prefixing `.with_raw_response.` to 
 from cartesia import Cartesia
 
 client = Cartesia()
-response = client.agents.with_raw_response.list()
+response = client.with_raw_response.get_status()
 print(response.headers.get('X-My-Header'))
 
-agent = response.parse()  # get the object that `agents.list()` would have returned
-print(agent.summaries)
+client = response.parse()  # get the object that `get_status()` would have returned
+print(client.ok)
 ```
 
 These methods return an [`APIResponse`](https://github.com/cartesia-ai/cartesia-python-internal/tree/main/src/cartesia/_response.py) object.
@@ -357,7 +357,7 @@ The above interface eagerly reads the full response body when you make the reque
 To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
 
 ```python
-with client.agents.with_streaming_response.list() as response:
+with client.with_streaming_response.get_status() as response:
     print(response.headers.get("X-My-Header"))
 
     for line in response.iter_lines():

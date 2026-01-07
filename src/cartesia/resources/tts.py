@@ -17,7 +17,7 @@ from ..types import (
     tts_generate_params,
     tts_generate_sse_params,
 )
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, SequenceNotStr, omit, not_given
+from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from .._utils import maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._models import construct_type_unchecked
@@ -98,12 +98,11 @@ class TTSResource(SyncAPIResource):
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
-        duration: Optional[float] | Omit = omit,
-        generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
-        speed: Optional[ModelSpeed] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -118,31 +117,24 @@ class TTSResource(SyncAPIResource):
           model_id: The ID of the model to use for the generation. See
               [Models](/build-with-cartesia/tts-models) for available models.
 
-          duration: The maximum duration of the audio in seconds. You do not usually need to specify
-              this. If the duration is not appropriate for the length of the transcript, the
-              output audio may be truncated.
+          generation_config: Configure the various attributes of the generated speech. These are only for
+              `sonic-3` and have no effect on earlier models.
 
-          generation_config: Configure the various attributes of the generated speech. These controls are
-              only available for `sonic-3-preview` and will have no effect on earlier models.
+              See
+              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in.
+          language: The language that the given voice should speak the transcript in. For valid
+              options, see [Models](/build-with-cartesia/tts-models).
 
-              Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-              Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-              Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
-
-          pronunciation_dict_ids: A list of pronunciation dict IDs to use for the generation. This will be applied
-              in addition to the pinned pronunciation dict, which will be treated as the first
-              element of the list. If there are conflicts with dict items, the latest dict
-              will take precedence.
+          pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
+              dictionaries are supported by `sonic-3` models and newer.
 
           save: Whether to save the generated audio file. When true, the response will include a
               `Cartesia-File-ID` header.
 
-          speed: > This feature is experimental and may not work for all voices.
-
-              Speed setting for the model. Defaults to `normal`.
-
+          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
+              to `normal`. This feature is experimental and may not work for all voices.
               Influences the speed of the generated speech. Faster speeds may reduce
               hallucination rate.
 
@@ -163,10 +155,9 @@ class TTSResource(SyncAPIResource):
                     "output_format": output_format,
                     "transcript": transcript,
                     "voice": voice,
-                    "duration": duration,
                     "generation_config": generation_config,
                     "language": language,
-                    "pronunciation_dict_ids": pronunciation_dict_ids,
+                    "pronunciation_dict_id": pronunciation_dict_id,
                     "save": save,
                     "speed": speed,
                 },
@@ -188,10 +179,10 @@ class TTSResource(SyncAPIResource):
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
-        duration: Optional[float] | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
-        speed: Optional[ModelSpeed] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: SupportedLanguage | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
         use_normalized_timestamps: Optional[bool] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -217,25 +208,21 @@ class TTSResource(SyncAPIResource):
 
           context_id: Optional context ID for this request.
 
-          duration: The maximum duration of the audio in seconds. You do not usually need to specify
-              this. If the duration is not appropriate for the length of the transcript, the
-              output audio may be truncated.
+          generation_config: Configure the various attributes of the generated speech. These are only for
+              `sonic-3` and have no effect on earlier models.
 
-          language: The language that the given voice should speak the transcript in.
+              See
+              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              for a guide on this option.
 
-              Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-              Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-              Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+          language: The language that the given voice should speak the transcript in. For valid
+              options, see [Models](/build-with-cartesia/tts-models).
 
-          pronunciation_dict_ids: A list of pronunciation dict IDs to use for the generation. This will be applied
-              in addition to the pinned pronunciation dict, which will be treated as the first
-              element of the list. If there are conflicts with dict items, the latest dict
-              will take precedence.
+          pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
+              dictionaries are supported by `sonic-3` models and newer.
 
-          speed: > This feature is experimental and may not work for all voices.
-
-              Speed setting for the model. Defaults to `normal`.
-
+          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
+              to `normal`. This feature is experimental and may not work for all voices.
               Influences the speed of the generated speech. Faster speeds may reduce
               hallucination rate.
 
@@ -261,9 +248,9 @@ class TTSResource(SyncAPIResource):
                     "add_phoneme_timestamps": add_phoneme_timestamps,
                     "add_timestamps": add_timestamps,
                     "context_id": context_id,
-                    "duration": duration,
+                    "generation_config": generation_config,
                     "language": language,
-                    "pronunciation_dict_ids": pronunciation_dict_ids,
+                    "pronunciation_dict_id": pronunciation_dict_id,
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
@@ -316,12 +303,11 @@ class AsyncTTSResource(AsyncAPIResource):
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
-        duration: Optional[float] | Omit = omit,
-        generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
-        speed: Optional[ModelSpeed] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -336,31 +322,24 @@ class AsyncTTSResource(AsyncAPIResource):
           model_id: The ID of the model to use for the generation. See
               [Models](/build-with-cartesia/tts-models) for available models.
 
-          duration: The maximum duration of the audio in seconds. You do not usually need to specify
-              this. If the duration is not appropriate for the length of the transcript, the
-              output audio may be truncated.
+          generation_config: Configure the various attributes of the generated speech. These are only for
+              `sonic-3` and have no effect on earlier models.
 
-          generation_config: Configure the various attributes of the generated speech. These controls are
-              only available for `sonic-3-preview` and will have no effect on earlier models.
+              See
+              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in.
+          language: The language that the given voice should speak the transcript in. For valid
+              options, see [Models](/build-with-cartesia/tts-models).
 
-              Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-              Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-              Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
-
-          pronunciation_dict_ids: A list of pronunciation dict IDs to use for the generation. This will be applied
-              in addition to the pinned pronunciation dict, which will be treated as the first
-              element of the list. If there are conflicts with dict items, the latest dict
-              will take precedence.
+          pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
+              dictionaries are supported by `sonic-3` models and newer.
 
           save: Whether to save the generated audio file. When true, the response will include a
               `Cartesia-File-ID` header.
 
-          speed: > This feature is experimental and may not work for all voices.
-
-              Speed setting for the model. Defaults to `normal`.
-
+          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
+              to `normal`. This feature is experimental and may not work for all voices.
               Influences the speed of the generated speech. Faster speeds may reduce
               hallucination rate.
 
@@ -381,10 +360,9 @@ class AsyncTTSResource(AsyncAPIResource):
                     "output_format": output_format,
                     "transcript": transcript,
                     "voice": voice,
-                    "duration": duration,
                     "generation_config": generation_config,
                     "language": language,
-                    "pronunciation_dict_ids": pronunciation_dict_ids,
+                    "pronunciation_dict_id": pronunciation_dict_id,
                     "save": save,
                     "speed": speed,
                 },
@@ -406,10 +384,10 @@ class AsyncTTSResource(AsyncAPIResource):
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
-        duration: Optional[float] | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
-        speed: Optional[ModelSpeed] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: SupportedLanguage | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
         use_normalized_timestamps: Optional[bool] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -435,25 +413,21 @@ class AsyncTTSResource(AsyncAPIResource):
 
           context_id: Optional context ID for this request.
 
-          duration: The maximum duration of the audio in seconds. You do not usually need to specify
-              this. If the duration is not appropriate for the length of the transcript, the
-              output audio may be truncated.
+          generation_config: Configure the various attributes of the generated speech. These are only for
+              `sonic-3` and have no effect on earlier models.
 
-          language: The language that the given voice should speak the transcript in.
+              See
+              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              for a guide on this option.
 
-              Options: English (en), French (fr), German (de), Spanish (es), Portuguese (pt),
-              Chinese (zh), Japanese (ja), Hindi (hi), Italian (it), Korean (ko), Dutch (nl),
-              Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+          language: The language that the given voice should speak the transcript in. For valid
+              options, see [Models](/build-with-cartesia/tts-models).
 
-          pronunciation_dict_ids: A list of pronunciation dict IDs to use for the generation. This will be applied
-              in addition to the pinned pronunciation dict, which will be treated as the first
-              element of the list. If there are conflicts with dict items, the latest dict
-              will take precedence.
+          pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
+              dictionaries are supported by `sonic-3` models and newer.
 
-          speed: > This feature is experimental and may not work for all voices.
-
-              Speed setting for the model. Defaults to `normal`.
-
+          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
+              to `normal`. This feature is experimental and may not work for all voices.
               Influences the speed of the generated speech. Faster speeds may reduce
               hallucination rate.
 
@@ -479,9 +453,9 @@ class AsyncTTSResource(AsyncAPIResource):
                     "add_phoneme_timestamps": add_phoneme_timestamps,
                     "add_timestamps": add_timestamps,
                     "context_id": context_id,
-                    "duration": duration,
+                    "generation_config": generation_config,
                     "language": language,
-                    "pronunciation_dict_ids": pronunciation_dict_ids,
+                    "pronunciation_dict_id": pronunciation_dict_id,
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },

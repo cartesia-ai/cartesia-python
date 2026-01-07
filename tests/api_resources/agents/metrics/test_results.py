@@ -9,8 +9,11 @@ import pytest
 
 from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
+from cartesia._utils import parse_datetime
 from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
-from cartesia.types.agents.metrics import ResultListResponse
+from cartesia.types.agents.metrics import (
+    ResultListResponse,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -31,9 +34,11 @@ class TestResults:
             agent_id="agent_id",
             call_id="call_id",
             deployment_id="deployment_id",
+            end_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             ending_before="ending_before",
             limit=0,
             metric_id="metric_id",
+            start_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             starting_after="starting_after",
         )
         assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
@@ -64,7 +69,7 @@ class TestResults:
     @parametrize
     def test_method_export(self, client: Cartesia) -> None:
         result = client.agents.metrics.results.export()
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -73,12 +78,11 @@ class TestResults:
             agent_id="agent_id",
             call_id="call_id",
             deployment_id="deployment_id",
-            ending_before="ending_before",
-            limit=0,
+            end_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             metric_id="metric_id",
-            starting_after="starting_after",
+            start_date=parse_datetime("2019-12-27T18:11:19.117Z"),
         )
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -88,7 +92,7 @@ class TestResults:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         result = response.parse()
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -98,7 +102,7 @@ class TestResults:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             result = response.parse()
-            assert result is None
+            assert_matches_type(str, result, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
@@ -121,9 +125,11 @@ class TestAsyncResults:
             agent_id="agent_id",
             call_id="call_id",
             deployment_id="deployment_id",
+            end_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             ending_before="ending_before",
             limit=0,
             metric_id="metric_id",
+            start_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             starting_after="starting_after",
         )
         assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
@@ -154,7 +160,7 @@ class TestAsyncResults:
     @parametrize
     async def test_method_export(self, async_client: AsyncCartesia) -> None:
         result = await async_client.agents.metrics.results.export()
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -163,12 +169,11 @@ class TestAsyncResults:
             agent_id="agent_id",
             call_id="call_id",
             deployment_id="deployment_id",
-            ending_before="ending_before",
-            limit=0,
+            end_date=parse_datetime("2019-12-27T18:11:19.117Z"),
             metric_id="metric_id",
-            starting_after="starting_after",
+            start_date=parse_datetime("2019-12-27T18:11:19.117Z"),
         )
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -178,7 +183,7 @@ class TestAsyncResults:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         result = await response.parse()
-        assert result is None
+        assert_matches_type(str, result, path=["response"])
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -188,6 +193,6 @@ class TestAsyncResults:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             result = await response.parse()
-            assert result is None
+            assert_matches_type(str, result, path=["response"])
 
         assert cast(Any, response.is_closed) is True

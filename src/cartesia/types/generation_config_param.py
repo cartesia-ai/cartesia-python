@@ -2,43 +2,89 @@
 
 from __future__ import annotations
 
-from typing import Optional
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
-__all__ = ["GenerationConfigParam", "Experimental"]
-
-
-class Experimental(TypedDict, total=False):
-    """These controls are **experimental** and subject to breaking changes."""
-
-    accent_localization: Optional[int]
-    """
-    Toggle accent localization: 0 (disabled, default) or 1 (enabled). When enabled,
-    the voice adapts to match the transcript language's accent while preserving
-    vocal characteristics. When disabled, maintains the original voice accent. For
-    more information, see
-    [Localize Voices](/build-with-sonic/capabilities/localize-voices).
-    """
+__all__ = ["GenerationConfigParam"]
 
 
 class GenerationConfigParam(TypedDict, total=False):
     """Configure the various attributes of the generated speech.
 
-    These controls are only available for `sonic-3-preview` and will have no effect on earlier models.
+    These are only for `sonic-3` and have no effect on earlier models.
+
+    See [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
     """
 
-    experimental: Optional[Experimental]
-    """These controls are **experimental** and subject to breaking changes."""
+    emotion: Literal[
+        "neutral",
+        "happy",
+        "excited",
+        "enthusiastic",
+        "elated",
+        "euphoric",
+        "triumphant",
+        "amazed",
+        "surprised",
+        "flirtatious",
+        "curious",
+        "content",
+        "peaceful",
+        "serene",
+        "calm",
+        "grateful",
+        "affectionate",
+        "trust",
+        "sympathetic",
+        "anticipation",
+        "mysterious",
+        "angry",
+        "mad",
+        "outraged",
+        "frustrated",
+        "agitated",
+        "threatened",
+        "disgusted",
+        "contempt",
+        "envious",
+        "sarcastic",
+        "ironic",
+        "sad",
+        "dejected",
+        "melancholic",
+        "disappointed",
+        "hurt",
+        "guilty",
+        "bored",
+        "tired",
+        "rejected",
+        "nostalgic",
+        "wistful",
+        "apologetic",
+        "hesitant",
+        "insecure",
+        "confused",
+        "resigned",
+        "anxious",
+        "panicked",
+        "alarmed",
+        "scared",
+        "proud",
+        "confident",
+        "distant",
+        "skeptical",
+        "contemplative",
+        "determined",
+    ]
+    """Guide the emotion of the generated speech."""
 
-    speed: Optional[float]
-    """Adjust the speed of the generated speech between -1.0 (slower) and 1.0 (faster).
-
-    0.0 is the default speed.
+    speed: float
+    """
+    Adjust the speed of the generated speech between 0.6x and 1.5x the original
+    speed (default is 1.0x). Valid values are between [0.6, 1.5] inclusive.
     """
 
-    volume: Optional[float]
-    """Adjust the volume of the generated speech between -1.0 (softer) and 1.0
-    (louder).
-
-    0.0 is the default volume.
+    volume: float
+    """
+    Adjust the volume of the generated speech between 0.5x and 2.0x the original
+    volume (default is 1.0x). Valid values are between [0.5, 2.0] inclusive.
     """

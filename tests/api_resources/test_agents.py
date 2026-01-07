@@ -9,12 +9,7 @@ import pytest
 
 from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from cartesia.types import (
-    AgentSummary,
-    AgentListResponse,
-    AgentListTemplatesResponse,
-    AgentListPhoneNumbersResponse,
-)
+from cartesia.types import AgentSummary, AgentListTemplatesResponse, AgentListPhoneNumbersResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -117,34 +112,6 @@ class TestAgents:
             client.agents.with_raw_response.update(
                 agent_id="",
             )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_method_list(self, client: Cartesia) -> None:
-        agent = client.agents.list()
-        assert_matches_type(AgentListResponse, agent, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_raw_response_list(self, client: Cartesia) -> None:
-        response = client.agents.with_raw_response.list()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
-        assert_matches_type(AgentListResponse, agent, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_streaming_response_list(self, client: Cartesia) -> None:
-        with client.agents.with_streaming_response.list() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            agent = response.parse()
-            assert_matches_type(AgentListResponse, agent, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -359,34 +326,6 @@ class TestAsyncAgents:
             await async_client.agents.with_raw_response.update(
                 agent_id="",
             )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_method_list(self, async_client: AsyncCartesia) -> None:
-        agent = await async_client.agents.list()
-        assert_matches_type(AgentListResponse, agent, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.agents.with_raw_response.list()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = await response.parse()
-        assert_matches_type(AgentListResponse, agent, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
-        async with async_client.agents.with_streaming_response.list() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            agent = await response.parse()
-            assert_matches_type(AgentListResponse, agent, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize

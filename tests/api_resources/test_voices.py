@@ -13,7 +13,6 @@ from cartesia.types import (
     Voice,
     VoiceMetadata,
 )
-from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -84,49 +83,6 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_list(self, client: Cartesia) -> None:
-        voice = client.voices.list()
-        assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_method_list_with_all_params(self, client: Cartesia) -> None:
-        voice = client.voices.list(
-            ending_before="ending_before",
-            expand=["is_starred"],
-            gender="masculine",
-            is_owner=True,
-            is_starred=True,
-            language="language",
-            limit=0,
-            starting_after="starting_after",
-        )
-        assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_raw_response_list(self, client: Cartesia) -> None:
-        response = client.voices.with_raw_response.list()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = response.parse()
-        assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_streaming_response_list(self, client: Cartesia) -> None:
-        with client.voices.with_streaming_response.list() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = response.parse()
-            assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     def test_method_delete(self, client: Cartesia) -> None:
         voice = client.voices.delete(
             "id",
@@ -180,7 +136,6 @@ class TestVoices:
             base_voice_id="base_voice_id",
             clip=b"raw file contents",
             description="description",
-            enhance=True,
             language="en",
             name="name",
         )
@@ -212,7 +167,16 @@ class TestVoices:
     @parametrize
     def test_method_get(self, client: Cartesia) -> None:
         voice = client.voices.get(
-            "id",
+            id="id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_method_get_with_all_params(self, client: Cartesia) -> None:
+        voice = client.voices.get(
+            id="id",
+            expand=["preview_file_url"],
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -220,7 +184,7 @@ class TestVoices:
     @parametrize
     def test_raw_response_get(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.get(
-            "id",
+            id="id",
         )
 
         assert response.is_closed is True
@@ -232,7 +196,7 @@ class TestVoices:
     @parametrize
     def test_streaming_response_get(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.get(
-            "id",
+            id="id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -247,7 +211,7 @@ class TestVoices:
     def test_path_params_get(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.voices.with_raw_response.get(
-                "",
+                id="",
             )
 
     @pytest.mark.skip(reason="Prism tests are disabled")
@@ -378,49 +342,6 @@ class TestAsyncVoices:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_list(self, async_client: AsyncCartesia) -> None:
-        voice = await async_client.voices.list()
-        assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
-        voice = await async_client.voices.list(
-            ending_before="ending_before",
-            expand=["is_starred"],
-            gender="masculine",
-            is_owner=True,
-            is_starred=True,
-            language="language",
-            limit=0,
-            starting_after="starting_after",
-        )
-        assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.voices.with_raw_response.list()
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = await response.parse()
-        assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
-        async with async_client.voices.with_streaming_response.list() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = await response.parse()
-            assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     async def test_method_delete(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.delete(
             "id",
@@ -474,7 +395,6 @@ class TestAsyncVoices:
             base_voice_id="base_voice_id",
             clip=b"raw file contents",
             description="description",
-            enhance=True,
             language="en",
             name="name",
         )
@@ -506,7 +426,16 @@ class TestAsyncVoices:
     @parametrize
     async def test_method_get(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.get(
-            "id",
+            id="id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_get_with_all_params(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.get(
+            id="id",
+            expand=["preview_file_url"],
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -514,7 +443,7 @@ class TestAsyncVoices:
     @parametrize
     async def test_raw_response_get(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.get(
-            "id",
+            id="id",
         )
 
         assert response.is_closed is True
@@ -526,7 +455,7 @@ class TestAsyncVoices:
     @parametrize
     async def test_streaming_response_get(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.get(
-            "id",
+            id="id",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -541,7 +470,7 @@ class TestAsyncVoices:
     async def test_path_params_get(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.voices.with_raw_response.get(
-                "",
+                id="",
             )
 
     @pytest.mark.skip(reason="Prism tests are disabled")

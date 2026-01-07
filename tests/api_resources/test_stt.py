@@ -30,7 +30,7 @@ class TestStt:
             encoding="pcm_s16le",
             sample_rate=0,
             file=b"raw file contents",
-            language="language",
+            language="en",
             model="model",
             timestamp_granularities=["word"],
         )
@@ -77,7 +77,7 @@ class TestAsyncStt:
             encoding="pcm_s16le",
             sample_rate=0,
             file=b"raw file contents",
-            language="language",
+            language="en",
             model="model",
             timestamp_granularities=["word"],
         )

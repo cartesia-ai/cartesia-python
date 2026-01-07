@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Mapping, Optional, cast
+from typing_extensions import Literal
 
 import httpx
 
@@ -56,7 +57,7 @@ class VoiceChangerResource(SyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         voice_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -117,7 +118,7 @@ class VoiceChangerResource(SyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         voice_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -196,7 +197,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         voice_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -259,7 +260,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         output_format_bit_rate: Optional[int] | Omit = omit,
         output_format_container: OutputFormatContainer | Omit = omit,
         output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: int | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
         voice_id: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.

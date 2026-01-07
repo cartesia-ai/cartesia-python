@@ -10,7 +10,7 @@ import httpx
 from ..types import (
     SupportedLanguage,
     GenderPresentation,
-    voice_list_params,
+    voice_get_params,
     voice_clone_params,
     voice_update_params,
     voice_localize_params,
@@ -25,9 +25,8 @@ from .._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
-from .._base_client import AsyncPaginator, make_request_options
+from .._base_client import make_request_options
 from ..types.voice_metadata import VoiceMetadata
 from ..types.supported_language import SupportedLanguage
 from ..types.gender_presentation import GenderPresentation
@@ -108,82 +107,6 @@ class VoicesResource(SyncAPIResource):
             cast_to=Voice,
         )
 
-    def list(
-        self,
-        *,
-        ending_before: Optional[str] | Omit = omit,
-        expand: Optional[List[Literal["is_starred"]]] | Omit = omit,
-        gender: Optional[GenderPresentation] | Omit = omit,
-        is_owner: Optional[bool] | Omit = omit,
-        is_starred: Optional[bool] | Omit = omit,
-        language: str | Omit = omit,
-        limit: Optional[int] | Omit = omit,
-        starting_after: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SyncCursorIDPage[Voice]:
-        """List Voices
-
-        Args:
-          ending_before: A cursor to use in pagination.
-
-        `ending_before` is a Voice ID that defines your
-              place in the list. For example, if you make a /voices request and receive 100
-              objects, starting with `voice_abc123`, your subsequent call can include
-              `ending_before=voice_abc123` to fetch the previous page of the list.
-
-          expand: Additional fields to include in the response.
-
-          gender: The gender presentation of the voices to return.
-
-          is_owner: Whether to only return voices owned by the current user.
-
-          is_starred: Whether to only return starred voices.
-
-          limit: The number of Voices to return per page, ranging between 1 and 100.
-
-          starting_after: A cursor to use in pagination. `starting_after` is a Voice ID that defines your
-              place in the list. For example, if you make a /voices request and receive 100
-              objects, ending with `voice_abc123`, your subsequent call can include
-              `starting_after=voice_abc123` to fetch the next page of the list.
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        return self._get_api_list(
-            "/voices/",
-            page=SyncCursorIDPage[Voice],
-            options=make_request_options(
-                extra_headers=extra_headers,
-                extra_query=extra_query,
-                extra_body=extra_body,
-                timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ending_before": ending_before,
-                        "expand": expand,
-                        "gender": gender,
-                        "is_owner": is_owner,
-                        "is_starred": is_starred,
-                        "language": language,
-                        "limit": limit,
-                        "starting_after": starting_after,
-                    },
-                    voice_list_params.VoiceListParams,
-                ),
-            ),
-            model=Voice,
-        )
-
     def delete(
         self,
         id: str,
@@ -226,7 +149,6 @@ class VoicesResource(SyncAPIResource):
         base_voice_id: Optional[str] | Omit = omit,
         clip: FileTypes | Omit = omit,
         description: Optional[str] | Omit = omit,
-        enhance: Optional[bool] | Omit = omit,
         language: SupportedLanguage | Omit = omit,
         name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -247,9 +169,6 @@ class VoicesResource(SyncAPIResource):
 
           description: A description for the voice.
 
-          enhance: Whether to apply AI enhancements to the clip to reduce background noise. This is
-              not recommended unless the source clip is extremely low quality.
-
           language: The language of the voice.
 
           name: The name of the voice.
@@ -267,7 +186,6 @@ class VoicesResource(SyncAPIResource):
                 "base_voice_id": base_voice_id,
                 "clip": clip,
                 "description": description,
-                "enhance": enhance,
                 "language": language,
                 "name": name,
             }
@@ -291,6 +209,7 @@ class VoicesResource(SyncAPIResource):
         self,
         id: str,
         *,
+        expand: Optional[List[Literal["preview_file_url"]]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -303,6 +222,8 @@ class VoicesResource(SyncAPIResource):
 
         Args:
           id: The ID of the voice.
+
+          expand: Additional fields to include in the response.
 
           extra_headers: Send extra headers
 
@@ -317,7 +238,11 @@ class VoicesResource(SyncAPIResource):
         return self._get(
             f"/voices/{id}",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=maybe_transform({"expand": expand}, voice_get_params.VoiceGetParams),
             ),
             cast_to=Voice,
         )
@@ -459,82 +384,6 @@ class AsyncVoicesResource(AsyncAPIResource):
             cast_to=Voice,
         )
 
-    def list(
-        self,
-        *,
-        ending_before: Optional[str] | Omit = omit,
-        expand: Optional[List[Literal["is_starred"]]] | Omit = omit,
-        gender: Optional[GenderPresentation] | Omit = omit,
-        is_owner: Optional[bool] | Omit = omit,
-        is_starred: Optional[bool] | Omit = omit,
-        language: str | Omit = omit,
-        limit: Optional[int] | Omit = omit,
-        starting_after: Optional[str] | Omit = omit,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncPaginator[Voice, AsyncCursorIDPage[Voice]]:
-        """List Voices
-
-        Args:
-          ending_before: A cursor to use in pagination.
-
-        `ending_before` is a Voice ID that defines your
-              place in the list. For example, if you make a /voices request and receive 100
-              objects, starting with `voice_abc123`, your subsequent call can include
-              `ending_before=voice_abc123` to fetch the previous page of the list.
-
-          expand: Additional fields to include in the response.
-
-          gender: The gender presentation of the voices to return.
-
-          is_owner: Whether to only return voices owned by the current user.
-
-          is_starred: Whether to only return starred voices.
-
-          limit: The number of Voices to return per page, ranging between 1 and 100.
-
-          starting_after: A cursor to use in pagination. `starting_after` is a Voice ID that defines your
-              place in the list. For example, if you make a /voices request and receive 100
-              objects, ending with `voice_abc123`, your subsequent call can include
-              `starting_after=voice_abc123` to fetch the next page of the list.
-
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        return self._get_api_list(
-            "/voices/",
-            page=AsyncCursorIDPage[Voice],
-            options=make_request_options(
-                extra_headers=extra_headers,
-                extra_query=extra_query,
-                extra_body=extra_body,
-                timeout=timeout,
-                query=maybe_transform(
-                    {
-                        "ending_before": ending_before,
-                        "expand": expand,
-                        "gender": gender,
-                        "is_owner": is_owner,
-                        "is_starred": is_starred,
-                        "language": language,
-                        "limit": limit,
-                        "starting_after": starting_after,
-                    },
-                    voice_list_params.VoiceListParams,
-                ),
-            ),
-            model=Voice,
-        )
-
     async def delete(
         self,
         id: str,
@@ -577,7 +426,6 @@ class AsyncVoicesResource(AsyncAPIResource):
         base_voice_id: Optional[str] | Omit = omit,
         clip: FileTypes | Omit = omit,
         description: Optional[str] | Omit = omit,
-        enhance: Optional[bool] | Omit = omit,
         language: SupportedLanguage | Omit = omit,
         name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -598,9 +446,6 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           description: A description for the voice.
 
-          enhance: Whether to apply AI enhancements to the clip to reduce background noise. This is
-              not recommended unless the source clip is extremely low quality.
-
           language: The language of the voice.
 
           name: The name of the voice.
@@ -618,7 +463,6 @@ class AsyncVoicesResource(AsyncAPIResource):
                 "base_voice_id": base_voice_id,
                 "clip": clip,
                 "description": description,
-                "enhance": enhance,
                 "language": language,
                 "name": name,
             }
@@ -642,6 +486,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         self,
         id: str,
         *,
+        expand: Optional[List[Literal["preview_file_url"]]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -654,6 +499,8 @@ class AsyncVoicesResource(AsyncAPIResource):
 
         Args:
           id: The ID of the voice.
+
+          expand: Additional fields to include in the response.
 
           extra_headers: Send extra headers
 
@@ -668,7 +515,11 @@ class AsyncVoicesResource(AsyncAPIResource):
         return await self._get(
             f"/voices/{id}",
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=await async_maybe_transform({"expand": expand}, voice_get_params.VoiceGetParams),
             ),
             cast_to=Voice,
         )
@@ -744,9 +595,6 @@ class VoicesResourceWithRawResponse:
         self.update = to_raw_response_wrapper(
             voices.update,
         )
-        self.list = to_raw_response_wrapper(
-            voices.list,
-        )
         self.delete = to_raw_response_wrapper(
             voices.delete,
         )
@@ -767,9 +615,6 @@ class AsyncVoicesResourceWithRawResponse:
 
         self.update = async_to_raw_response_wrapper(
             voices.update,
-        )
-        self.list = async_to_raw_response_wrapper(
-            voices.list,
         )
         self.delete = async_to_raw_response_wrapper(
             voices.delete,
@@ -792,9 +637,6 @@ class VoicesResourceWithStreamingResponse:
         self.update = to_streamed_response_wrapper(
             voices.update,
         )
-        self.list = to_streamed_response_wrapper(
-            voices.list,
-        )
         self.delete = to_streamed_response_wrapper(
             voices.delete,
         )
@@ -815,9 +657,6 @@ class AsyncVoicesResourceWithStreamingResponse:
 
         self.update = async_to_streamed_response_wrapper(
             voices.update,
-        )
-        self.list = async_to_streamed_response_wrapper(
-            voices.list,
         )
         self.delete = async_to_streamed_response_wrapper(
             voices.delete,

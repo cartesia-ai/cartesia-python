@@ -20,12 +20,6 @@ class VoiceCloneParams(TypedDict, total=False):
     description: Optional[str]
     """A description for the voice."""
 
-    enhance: Optional[bool]
-    """Whether to apply AI enhancements to the clip to reduce background noise.
-
-    This is not recommended unless the source clip is extremely low quality.
-    """
-
     language: SupportedLanguage
     """The language of the voice."""
 
