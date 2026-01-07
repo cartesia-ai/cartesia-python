@@ -15,13 +15,19 @@ Methods:
 Types:
 
 ```python
-from cartesia.types import AgentSummary, AgentListPhoneNumbersResponse, AgentListTemplatesResponse
+from cartesia.types import (
+    AgentSummary,
+    AgentListResponse,
+    AgentListPhoneNumbersResponse,
+    AgentListTemplatesResponse,
+)
 ```
 
 Methods:
 
 - <code title="get /agents/{agent_id}">client.agents.<a href="./src/cartesia/resources/agents/agents.py">retrieve</a>(agent_id) -> <a href="./src/cartesia/types/agent_summary.py">AgentSummary</a></code>
 - <code title="patch /agents/{agent_id}">client.agents.<a href="./src/cartesia/resources/agents/agents.py">update</a>(agent_id, \*\*<a href="src/cartesia/types/agent_update_params.py">params</a>) -> <a href="./src/cartesia/types/agent_summary.py">AgentSummary</a></code>
+- <code title="get /agents">client.agents.<a href="./src/cartesia/resources/agents/agents.py">list</a>() -> <a href="./src/cartesia/types/agent_list_response.py">AgentListResponse</a></code>
 - <code title="delete /agents/{agent_id}">client.agents.<a href="./src/cartesia/resources/agents/agents.py">delete</a>(agent_id) -> None</code>
 - <code title="get /agents/{agent_id}/phone-numbers">client.agents.<a href="./src/cartesia/resources/agents/agents.py">list_phone_numbers</a>(agent_id) -> <a href="./src/cartesia/types/agent_list_phone_numbers_response.py">AgentListPhoneNumbersResponse</a></code>
 - <code title="get /agents/templates">client.agents.<a href="./src/cartesia/resources/agents/agents.py">list_templates</a>() -> <a href="./src/cartesia/types/agent_list_templates_response.py">AgentListTemplatesResponse</a></code>
@@ -219,6 +225,7 @@ from cartesia.types import GenderPresentation, SupportedLanguage, Voice, VoiceMe
 Methods:
 
 - <code title="patch /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">update</a>(id, \*\*<a href="src/cartesia/types/voice_update_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>
+- <code title="get /voices">client.voices.<a href="./src/cartesia/resources/voices.py">list</a>(\*\*<a href="src/cartesia/types/voice_list_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 - <code title="delete /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">delete</a>(id) -> None</code>
 - <code title="post /voices/clone">client.voices.<a href="./src/cartesia/resources/voices.py">clone</a>(\*\*<a href="src/cartesia/types/voice_clone_params.py">params</a>) -> <a href="./src/cartesia/types/voice_metadata.py">VoiceMetadata</a></code>
 - <code title="get /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">get</a>(id, \*\*<a href="src/cartesia/types/voice_get_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>

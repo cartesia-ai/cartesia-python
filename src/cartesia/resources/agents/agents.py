@@ -43,6 +43,7 @@ from .metrics.metrics import (
     AsyncMetricsResourceWithStreamingResponse,
 )
 from ...types.agent_summary import AgentSummary
+from ...types.agent_list_response import AgentListResponse
 from ...types.agent_list_templates_response import AgentListTemplatesResponse
 from ...types.agent_list_phone_numbers_response import AgentListPhoneNumbersResponse
 
@@ -168,6 +169,25 @@ class AgentsResource(SyncAPIResource):
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=AgentSummary,
+        )
+
+    def list(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AgentListResponse:
+        """Lists all agents associated with your account."""
+        return self._get(
+            "/agents",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AgentListResponse,
         )
 
     def delete(
@@ -380,6 +400,25 @@ class AsyncAgentsResource(AsyncAPIResource):
             cast_to=AgentSummary,
         )
 
+    async def list(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AgentListResponse:
+        """Lists all agents associated with your account."""
+        return await self._get(
+            "/agents",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AgentListResponse,
+        )
+
     async def delete(
         self,
         agent_id: str,
@@ -479,6 +518,9 @@ class AgentsResourceWithRawResponse:
         self.update = to_raw_response_wrapper(
             agents.update,
         )
+        self.list = to_raw_response_wrapper(
+            agents.list,
+        )
         self.delete = to_raw_response_wrapper(
             agents.delete,
         )
@@ -511,6 +553,9 @@ class AsyncAgentsResourceWithRawResponse:
         )
         self.update = async_to_raw_response_wrapper(
             agents.update,
+        )
+        self.list = async_to_raw_response_wrapper(
+            agents.list,
         )
         self.delete = async_to_raw_response_wrapper(
             agents.delete,
@@ -545,6 +590,9 @@ class AgentsResourceWithStreamingResponse:
         self.update = to_streamed_response_wrapper(
             agents.update,
         )
+        self.list = to_streamed_response_wrapper(
+            agents.list,
+        )
         self.delete = to_streamed_response_wrapper(
             agents.delete,
         )
@@ -577,6 +625,9 @@ class AsyncAgentsResourceWithStreamingResponse:
         )
         self.update = async_to_streamed_response_wrapper(
             agents.update,
+        )
+        self.list = async_to_streamed_response_wrapper(
+            agents.list,
         )
         self.delete = async_to_streamed_response_wrapper(
             agents.delete,

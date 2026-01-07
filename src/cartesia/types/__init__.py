@@ -12,11 +12,13 @@ from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_get_params import VoiceGetParams as VoiceGetParams
 from .generation_config import GenerationConfig as GenerationConfig
+from .voice_list_params import VoiceListParams as VoiceListParams
 from .generation_request import GenerationRequest as GenerationRequest
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
+from .agent_list_response import AgentListResponse as AgentListResponse
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .dataset_list_params import DatasetListParams as DatasetListParams
 from .gender_presentation import GenderPresentation as GenderPresentation
