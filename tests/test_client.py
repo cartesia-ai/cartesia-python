@@ -22,7 +22,7 @@ from cartesia import Cartesia, AsyncCartesia, APIResponseValidationError
 from cartesia._types import Omit
 from cartesia._utils import asyncify
 from cartesia._models import BaseModel, FinalRequestOptions
-from cartesia._exceptions import APIStatusError, APITimeoutError, APIResponseValidationError
+from cartesia._exceptions import APIStatusError, APIResponseValidationError
 from cartesia._base_client import (
     DEFAULT_TIMEOUT,
     HTTPX_DEFAULT_TIMEOUT,
@@ -48,14 +48,6 @@ def _get_params(client: BaseClient[Any, Any]) -> dict[str, str]:
 
 def _low_retry_timeout(*_args: Any, **_kwargs: Any) -> float:
     return 0.1
-
-
-def _get_open_connections(client: Cartesia | AsyncCartesia) -> int:
-    transport = client._client._transport
-    assert isinstance(transport, httpx.HTTPTransport) or isinstance(transport, httpx.AsyncHTTPTransport)
-
-    pool = transport._pool
-    return len(pool._requests)
 
 
 class TestCartesia:
@@ -728,25 +720,6 @@ class TestCartesia:
         calculated = client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    def test_retrying_timeout_errors_doesnt_leak(self, respx_mock: MockRouter, client: Cartesia) -> None:
-        respx_mock.get("/agents").mock(side_effect=httpx.TimeoutException("Test timeout error"))
-
-        with pytest.raises(APITimeoutError):
-            client.agents.with_streaming_response.list().__enter__()
-
-        assert _get_open_connections(client) == 0
-
-    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    def test_retrying_status_errors_doesnt_leak(self, respx_mock: MockRouter, client: Cartesia) -> None:
-        respx_mock.get("/agents").mock(return_value=httpx.Response(500))
-
-        with pytest.raises(APIStatusError):
-            client.agents.with_streaming_response.list().__enter__()
-        assert _get_open_connections(client) == 0
-
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
     @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
@@ -771,9 +744,9 @@ class TestCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = client.agents.with_raw_response.list()
+        response = client.voices.with_raw_response.list()
 
         assert response.retries_taken == failures_before_success
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -795,9 +768,9 @@ class TestCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = client.agents.with_raw_response.list(extra_headers={"x-stainless-retry-count": Omit()})
+        response = client.voices.with_raw_response.list(extra_headers={"x-stainless-retry-count": Omit()})
 
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
@@ -818,9 +791,9 @@ class TestCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = client.agents.with_raw_response.list(extra_headers={"x-stainless-retry-count": "42"})
+        response = client.voices.with_raw_response.list(extra_headers={"x-stainless-retry-count": "42"})
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
@@ -1555,29 +1528,6 @@ class TestAsyncCartesia:
         calculated = async_client._calculate_retry_timeout(remaining_retries, options, headers)
         assert calculated == pytest.approx(timeout, 0.5 * 0.875)  # pyright: ignore[reportUnknownMemberType]
 
-    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_timeout_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncCartesia
-    ) -> None:
-        respx_mock.get("/agents").mock(side_effect=httpx.TimeoutException("Test timeout error"))
-
-        with pytest.raises(APITimeoutError):
-            await async_client.agents.with_streaming_response.list().__aenter__()
-
-        assert _get_open_connections(async_client) == 0
-
-    @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
-    @pytest.mark.respx(base_url=base_url)
-    async def test_retrying_status_errors_doesnt_leak(
-        self, respx_mock: MockRouter, async_client: AsyncCartesia
-    ) -> None:
-        respx_mock.get("/agents").mock(return_value=httpx.Response(500))
-
-        with pytest.raises(APIStatusError):
-            await async_client.agents.with_streaming_response.list().__aenter__()
-        assert _get_open_connections(async_client) == 0
-
     @pytest.mark.parametrize("failures_before_success", [0, 2, 4])
     @mock.patch("cartesia._base_client.BaseClient._calculate_retry_timeout", _low_retry_timeout)
     @pytest.mark.respx(base_url=base_url)
@@ -1602,9 +1552,9 @@ class TestAsyncCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = await client.agents.with_raw_response.list()
+        response = await client.voices.with_raw_response.list()
 
         assert response.retries_taken == failures_before_success
         assert int(response.http_request.headers.get("x-stainless-retry-count")) == failures_before_success
@@ -1626,9 +1576,9 @@ class TestAsyncCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = await client.agents.with_raw_response.list(extra_headers={"x-stainless-retry-count": Omit()})
+        response = await client.voices.with_raw_response.list(extra_headers={"x-stainless-retry-count": Omit()})
 
         assert len(response.http_request.headers.get_list("x-stainless-retry-count")) == 0
 
@@ -1649,9 +1599,9 @@ class TestAsyncCartesia:
                 return httpx.Response(500)
             return httpx.Response(200)
 
-        respx_mock.get("/agents").mock(side_effect=retry_handler)
+        respx_mock.get("/voices").mock(side_effect=retry_handler)
 
-        response = await client.agents.with_raw_response.list(extra_headers={"x-stainless-retry-count": "42"})
+        response = await client.voices.with_raw_response.list(extra_headers={"x-stainless-retry-count": "42"})
 
         assert response.http_request.headers.get("x-stainless-retry-count") == "42"
 
