@@ -5,9 +5,17 @@ from __future__ import annotations
 import os
 from typing import Any, cast
 
+import httpx
 import pytest
+from respx import MockRouter
 
 from cartesia import Cartesia, AsyncCartesia
+from cartesia._response import (
+    BinaryAPIResponse,
+    AsyncBinaryAPIResponse,
+    StreamedBinaryAPIResponse,
+    AsyncStreamedBinaryAPIResponse,
+)
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
@@ -15,15 +23,20 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestInfill:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_create(self, client: Cartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_create(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         infill = client.infill.create()
-        assert infill is None
+        assert infill.is_closed
+        assert infill.json() == {"foo": "bar"}
+        assert cast(Any, infill.is_closed) is True
+        assert isinstance(infill, BinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_create_with_all_params(self, client: Cartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_create_with_all_params(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         infill = client.infill.create(
             language="language",
             left_audio=b"raw file contents",
@@ -36,29 +49,36 @@ class TestInfill:
             transcript="transcript",
             voice_id="voice_id",
         )
-        assert infill is None
+        assert infill.is_closed
+        assert infill.json() == {"foo": "bar"}
+        assert cast(Any, infill.is_closed) is True
+        assert isinstance(infill, BinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_create(self, client: Cartesia) -> None:
-        response = client.infill.with_raw_response.create()
+    @pytest.mark.respx(base_url=base_url)
+    def test_raw_response_create(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        infill = response.parse()
-        assert infill is None
+        infill = client.infill.with_raw_response.create()
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+        assert infill.is_closed is True
+        assert infill.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert infill.json() == {"foo": "bar"}
+        assert isinstance(infill, BinaryAPIResponse)
+
     @parametrize
-    def test_streaming_response_create(self, client: Cartesia) -> None:
-        with client.infill.with_streaming_response.create() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+    @pytest.mark.respx(base_url=base_url)
+    def test_streaming_response_create(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        with client.infill.with_streaming_response.create() as infill:
+            assert not infill.is_closed
+            assert infill.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            infill = response.parse()
-            assert infill is None
+            assert infill.json() == {"foo": "bar"}
+            assert cast(Any, infill.is_closed) is True
+            assert isinstance(infill, StreamedBinaryAPIResponse)
 
-        assert cast(Any, response.is_closed) is True
+        assert cast(Any, infill.is_closed) is True
 
 
 class TestAsyncInfill:
@@ -66,15 +86,20 @@ class TestAsyncInfill:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_create(self, async_client: AsyncCartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_create(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         infill = await async_client.infill.create()
-        assert infill is None
+        assert infill.is_closed
+        assert await infill.json() == {"foo": "bar"}
+        assert cast(Any, infill.is_closed) is True
+        assert isinstance(infill, AsyncBinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_create_with_all_params(self, async_client: AsyncCartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_create_with_all_params(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         infill = await async_client.infill.create(
             language="language",
             left_audio=b"raw file contents",
@@ -87,26 +112,33 @@ class TestAsyncInfill:
             transcript="transcript",
             voice_id="voice_id",
         )
-        assert infill is None
+        assert infill.is_closed
+        assert await infill.json() == {"foo": "bar"}
+        assert cast(Any, infill.is_closed) is True
+        assert isinstance(infill, AsyncBinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.infill.with_raw_response.create()
+    @pytest.mark.respx(base_url=base_url)
+    async def test_raw_response_create(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        infill = await response.parse()
-        assert infill is None
+        infill = await async_client.infill.with_raw_response.create()
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+        assert infill.is_closed is True
+        assert infill.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert await infill.json() == {"foo": "bar"}
+        assert isinstance(infill, AsyncBinaryAPIResponse)
+
     @parametrize
-    async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
-        async with async_client.infill.with_streaming_response.create() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+    @pytest.mark.respx(base_url=base_url)
+    async def test_streaming_response_create(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        async with async_client.infill.with_streaming_response.create() as infill:
+            assert not infill.is_closed
+            assert infill.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            infill = await response.parse()
-            assert infill is None
+            assert await infill.json() == {"foo": "bar"}
+            assert cast(Any, infill.is_closed) is True
+            assert isinstance(infill, AsyncStreamedBinaryAPIResponse)
 
-        assert cast(Any, response.is_closed) is True
+        assert cast(Any, infill.is_closed) is True

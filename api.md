@@ -44,7 +44,7 @@ Methods:
 
 - <code title="get /agents/calls/{call_id}">client.agents.calls.<a href="./src/cartesia/resources/agents/calls.py">retrieve</a>(call_id) -> <a href="./src/cartesia/types/agents/agent_call.py">AgentCall</a></code>
 - <code title="get /agents/calls">client.agents.calls.<a href="./src/cartesia/resources/agents/calls.py">list</a>(\*\*<a href="src/cartesia/types/agents/call_list_params.py">params</a>) -> <a href="./src/cartesia/types/agents/agent_call.py">SyncCursorIDPage[AgentCall]</a></code>
-- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/cartesia/resources/agents/calls.py">download_audio</a>(call_id) -> None</code>
+- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/cartesia/resources/agents/calls.py">download_audio</a>(call_id) -> BinaryAPIResponse</code>
 
 ## Metrics
 
@@ -156,7 +156,7 @@ from cartesia.types import OutputFormatContainer, RawEncoding
 
 Methods:
 
-- <code title="post /infill/bytes">client.infill.<a href="./src/cartesia/resources/infill.py">create</a>(\*\*<a href="src/cartesia/types/infill_create_params.py">params</a>) -> None</code>
+- <code title="post /infill/bytes">client.infill.<a href="./src/cartesia/resources/infill.py">create</a>(\*\*<a href="src/cartesia/types/infill_create_params.py">params</a>) -> BinaryAPIResponse</code>
 
 # PronunciationDicts
 

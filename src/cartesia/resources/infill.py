@@ -8,15 +8,19 @@ from typing_extensions import Literal
 import httpx
 
 from ..types import RawEncoding, OutputFormatContainer, infill_create_params
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
+from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
-    to_raw_response_wrapper,
-    to_streamed_response_wrapper,
-    async_to_raw_response_wrapper,
-    async_to_streamed_response_wrapper,
+    BinaryAPIResponse,
+    AsyncBinaryAPIResponse,
+    StreamedBinaryAPIResponse,
+    AsyncStreamedBinaryAPIResponse,
+    to_custom_raw_response_wrapper,
+    to_custom_streamed_response_wrapper,
+    async_to_custom_raw_response_wrapper,
+    async_to_custom_streamed_response_wrapper,
 )
 from .._base_client import make_request_options
 from ..types.raw_encoding import RawEncoding
@@ -64,7 +68,7 @@ class InfillResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> BinaryAPIResponse:
         """Generate audio that smoothly connects two existing audio segments.
 
         This is
@@ -113,7 +117,7 @@ class InfillResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "language": language,
@@ -132,7 +136,7 @@ class InfillResource(SyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/infill/bytes",
             body=maybe_transform(body, infill_create_params.InfillCreateParams),
@@ -140,7 +144,7 @@ class InfillResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=BinaryAPIResponse,
         )
 
 
@@ -183,7 +187,7 @@ class AsyncInfillResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncBinaryAPIResponse:
         """Generate audio that smoothly connects two existing audio segments.
 
         This is
@@ -232,7 +236,7 @@ class AsyncInfillResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "language": language,
@@ -251,7 +255,7 @@ class AsyncInfillResource(AsyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/infill/bytes",
             body=await async_maybe_transform(body, infill_create_params.InfillCreateParams),
@@ -259,7 +263,7 @@ class AsyncInfillResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=AsyncBinaryAPIResponse,
         )
 
 
@@ -267,8 +271,9 @@ class InfillResourceWithRawResponse:
     def __init__(self, infill: InfillResource) -> None:
         self._infill = infill
 
-        self.create = to_raw_response_wrapper(
+        self.create = to_custom_raw_response_wrapper(
             infill.create,
+            BinaryAPIResponse,
         )
 
 
@@ -276,8 +281,9 @@ class AsyncInfillResourceWithRawResponse:
     def __init__(self, infill: AsyncInfillResource) -> None:
         self._infill = infill
 
-        self.create = async_to_raw_response_wrapper(
+        self.create = async_to_custom_raw_response_wrapper(
             infill.create,
+            AsyncBinaryAPIResponse,
         )
 
 
@@ -285,8 +291,9 @@ class InfillResourceWithStreamingResponse:
     def __init__(self, infill: InfillResource) -> None:
         self._infill = infill
 
-        self.create = to_streamed_response_wrapper(
+        self.create = to_custom_streamed_response_wrapper(
             infill.create,
+            StreamedBinaryAPIResponse,
         )
 
 
@@ -294,6 +301,7 @@ class AsyncInfillResourceWithStreamingResponse:
     def __init__(self, infill: AsyncInfillResource) -> None:
         self._infill = infill
 
-        self.create = async_to_streamed_response_wrapper(
+        self.create = async_to_custom_streamed_response_wrapper(
             infill.create,
+            AsyncStreamedBinaryAPIResponse,
         )
