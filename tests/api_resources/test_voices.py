@@ -126,48 +126,6 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: Cartesia) -> None:
-        voice = client.voices.delete(
-            "id",
-        )
-        assert voice is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_raw_response_delete(self, client: Cartesia) -> None:
-        response = client.voices.with_raw_response.delete(
-            "id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = response.parse()
-        assert voice is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_streaming_response_delete(self, client: Cartesia) -> None:
-        with client.voices.with_streaming_response.delete(
-            "id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = response.parse()
-            assert voice is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_path_params_delete(self, client: Cartesia) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            client.voices.with_raw_response.delete(
-                "",
-            )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     def test_method_clone(self, client: Cartesia) -> None:
         voice = client.voices.clone()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
@@ -316,6 +274,48 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_method_remove(self, client: Cartesia) -> None:
+        voice = client.voices.remove(
+            "id",
+        )
+        assert voice is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_raw_response_remove(self, client: Cartesia) -> None:
+        response = client.voices.with_raw_response.remove(
+            "id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = response.parse()
+        assert voice is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_streaming_response_remove(self, client: Cartesia) -> None:
+        with client.voices.with_streaming_response.remove(
+            "id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = response.parse()
+            assert voice is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_path_params_remove(self, client: Cartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            client.voices.with_raw_response.remove(
+                "",
+            )
+
 
 class TestAsyncVoices:
     parametrize = pytest.mark.parametrize(
@@ -424,48 +424,6 @@ class TestAsyncVoices:
             assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
 
         assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
-        voice = await async_client.voices.delete(
-            "id",
-        )
-        assert voice is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.voices.with_raw_response.delete(
-            "id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice = await response.parse()
-        assert voice is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
-        async with async_client.voices.with_streaming_response.delete(
-            "id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            voice = await response.parse()
-            assert voice is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            await async_client.voices.with_raw_response.delete(
-                "",
-            )
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
@@ -616,3 +574,45 @@ class TestAsyncVoices:
             assert_matches_type(VoiceMetadata, voice, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_remove(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.remove(
+            "id",
+        )
+        assert voice is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_raw_response_remove(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.voices.with_raw_response.remove(
+            "id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = await response.parse()
+        assert voice is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_streaming_response_remove(self, async_client: AsyncCartesia) -> None:
+        async with async_client.voices.with_streaming_response.remove(
+            "id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = await response.parse()
+            assert voice is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_path_params_remove(self, async_client: AsyncCartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            await async_client.voices.with_raw_response.remove(
+                "",
+            )

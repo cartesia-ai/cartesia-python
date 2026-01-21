@@ -224,7 +224,7 @@ class PronunciationDictsResource(SyncAPIResource):
             model=PronunciationDict,
         )
 
-    def delete(
+    def remove(
         self,
         id: str,
         *,
@@ -458,7 +458,7 @@ class AsyncPronunciationDictsResource(AsyncAPIResource):
             model=PronunciationDict,
         )
 
-    async def delete(
+    async def remove(
         self,
         id: str,
         *,
@@ -509,8 +509,8 @@ class PronunciationDictsResourceWithRawResponse:
         self.list = to_raw_response_wrapper(
             pronunciation_dicts.list,
         )
-        self.delete = to_raw_response_wrapper(
-            pronunciation_dicts.delete,
+        self.remove = to_raw_response_wrapper(
+            pronunciation_dicts.remove,
         )
 
 
@@ -530,8 +530,8 @@ class AsyncPronunciationDictsResourceWithRawResponse:
         self.list = async_to_raw_response_wrapper(
             pronunciation_dicts.list,
         )
-        self.delete = async_to_raw_response_wrapper(
-            pronunciation_dicts.delete,
+        self.remove = async_to_raw_response_wrapper(
+            pronunciation_dicts.remove,
         )
 
 
@@ -551,8 +551,8 @@ class PronunciationDictsResourceWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             pronunciation_dicts.list,
         )
-        self.delete = to_streamed_response_wrapper(
-            pronunciation_dicts.delete,
+        self.remove = to_streamed_response_wrapper(
+            pronunciation_dicts.remove,
         )
 
 
@@ -572,6 +572,6 @@ class AsyncPronunciationDictsResourceWithStreamingResponse:
         self.list = async_to_streamed_response_wrapper(
             pronunciation_dicts.list,
         )
-        self.delete = async_to_streamed_response_wrapper(
-            pronunciation_dicts.delete,
+        self.remove = async_to_streamed_response_wrapper(
+            pronunciation_dicts.remove,
         )

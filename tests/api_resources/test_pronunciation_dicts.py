@@ -207,16 +207,16 @@ class TestPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: Cartesia) -> None:
-        pronunciation_dict = client.pronunciation_dicts.delete(
+    def test_method_remove(self, client: Cartesia) -> None:
+        pronunciation_dict = client.pronunciation_dicts.remove(
             "id",
         )
         assert pronunciation_dict is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_delete(self, client: Cartesia) -> None:
-        response = client.pronunciation_dicts.with_raw_response.delete(
+    def test_raw_response_remove(self, client: Cartesia) -> None:
+        response = client.pronunciation_dicts.with_raw_response.remove(
             "id",
         )
 
@@ -227,8 +227,8 @@ class TestPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_delete(self, client: Cartesia) -> None:
-        with client.pronunciation_dicts.with_streaming_response.delete(
+    def test_streaming_response_remove(self, client: Cartesia) -> None:
+        with client.pronunciation_dicts.with_streaming_response.remove(
             "id",
         ) as response:
             assert not response.is_closed
@@ -241,9 +241,9 @@ class TestPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_delete(self, client: Cartesia) -> None:
+    def test_path_params_remove(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            client.pronunciation_dicts.with_raw_response.delete(
+            client.pronunciation_dicts.with_raw_response.remove(
                 "",
             )
 
@@ -440,16 +440,16 @@ class TestAsyncPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
-        pronunciation_dict = await async_client.pronunciation_dicts.delete(
+    async def test_method_remove(self, async_client: AsyncCartesia) -> None:
+        pronunciation_dict = await async_client.pronunciation_dicts.remove(
             "id",
         )
         assert pronunciation_dict is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.pronunciation_dicts.with_raw_response.delete(
+    async def test_raw_response_remove(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.pronunciation_dicts.with_raw_response.remove(
             "id",
         )
 
@@ -460,8 +460,8 @@ class TestAsyncPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
-        async with async_client.pronunciation_dicts.with_streaming_response.delete(
+    async def test_streaming_response_remove(self, async_client: AsyncCartesia) -> None:
+        async with async_client.pronunciation_dicts.with_streaming_response.remove(
             "id",
         ) as response:
             assert not response.is_closed
@@ -474,8 +474,8 @@ class TestAsyncPronunciationDicts:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
+    async def test_path_params_remove(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            await async_client.pronunciation_dicts.with_raw_response.delete(
+            await async_client.pronunciation_dicts.with_raw_response.remove(
                 "",
             )

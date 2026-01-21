@@ -148,48 +148,6 @@ class TestAgents:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: Cartesia) -> None:
-        agent = client.agents.delete(
-            "agent_id",
-        )
-        assert agent is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_raw_response_delete(self, client: Cartesia) -> None:
-        response = client.agents.with_raw_response.delete(
-            "agent_id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = response.parse()
-        assert agent is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_streaming_response_delete(self, client: Cartesia) -> None:
-        with client.agents.with_streaming_response.delete(
-            "agent_id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            agent = response.parse()
-            assert agent is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    def test_path_params_delete(self, client: Cartesia) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
-            client.agents.with_raw_response.delete(
-                "",
-            )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     def test_method_list_phone_numbers(self, client: Cartesia) -> None:
         agent = client.agents.list_phone_numbers(
             "agent_id",
@@ -257,6 +215,48 @@ class TestAgents:
             assert_matches_type(AgentListTemplatesResponse, agent, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_method_remove(self, client: Cartesia) -> None:
+        agent = client.agents.remove(
+            "agent_id",
+        )
+        assert agent is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_raw_response_remove(self, client: Cartesia) -> None:
+        response = client.agents.with_raw_response.remove(
+            "agent_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        agent = response.parse()
+        assert agent is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_streaming_response_remove(self, client: Cartesia) -> None:
+        with client.agents.with_streaming_response.remove(
+            "agent_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            agent = response.parse()
+            assert agent is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_path_params_remove(self, client: Cartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
+            client.agents.with_raw_response.remove(
+                "",
+            )
 
 
 class TestAsyncAgents:
@@ -390,48 +390,6 @@ class TestAsyncAgents:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
-        agent = await async_client.agents.delete(
-            "agent_id",
-        )
-        assert agent is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.agents.with_raw_response.delete(
-            "agent_id",
-        )
-
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        agent = await response.parse()
-        assert agent is None
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
-        async with async_client.agents.with_streaming_response.delete(
-            "agent_id",
-        ) as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-
-            agent = await response.parse()
-            assert agent is None
-
-        assert cast(Any, response.is_closed) is True
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
-    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
-        with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
-            await async_client.agents.with_raw_response.delete(
-                "",
-            )
-
-    @pytest.mark.skip(reason="Prism tests are disabled")
-    @parametrize
     async def test_method_list_phone_numbers(self, async_client: AsyncCartesia) -> None:
         agent = await async_client.agents.list_phone_numbers(
             "agent_id",
@@ -499,3 +457,45 @@ class TestAsyncAgents:
             assert_matches_type(AgentListTemplatesResponse, agent, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_remove(self, async_client: AsyncCartesia) -> None:
+        agent = await async_client.agents.remove(
+            "agent_id",
+        )
+        assert agent is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_raw_response_remove(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.agents.with_raw_response.remove(
+            "agent_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        agent = await response.parse()
+        assert agent is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_streaming_response_remove(self, async_client: AsyncCartesia) -> None:
+        async with async_client.agents.with_streaming_response.remove(
+            "agent_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            agent = await response.parse()
+            assert agent is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_path_params_remove(self, async_client: AsyncCartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
+            await async_client.agents.with_raw_response.remove(
+                "",
+            )

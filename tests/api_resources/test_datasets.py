@@ -187,16 +187,16 @@ class TestDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_delete(self, client: Cartesia) -> None:
-        dataset = client.datasets.delete(
+    def test_method_remove(self, client: Cartesia) -> None:
+        dataset = client.datasets.remove(
             "id",
         )
         assert dataset is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_delete(self, client: Cartesia) -> None:
-        response = client.datasets.with_raw_response.delete(
+    def test_raw_response_remove(self, client: Cartesia) -> None:
+        response = client.datasets.with_raw_response.remove(
             "id",
         )
 
@@ -207,8 +207,8 @@ class TestDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_delete(self, client: Cartesia) -> None:
-        with client.datasets.with_streaming_response.delete(
+    def test_streaming_response_remove(self, client: Cartesia) -> None:
+        with client.datasets.with_streaming_response.remove(
             "id",
         ) as response:
             assert not response.is_closed
@@ -221,9 +221,9 @@ class TestDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_delete(self, client: Cartesia) -> None:
+    def test_path_params_remove(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            client.datasets.with_raw_response.delete(
+            client.datasets.with_raw_response.remove(
                 "",
             )
 
@@ -402,16 +402,16 @@ class TestAsyncDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
-        dataset = await async_client.datasets.delete(
+    async def test_method_remove(self, async_client: AsyncCartesia) -> None:
+        dataset = await async_client.datasets.remove(
             "id",
         )
         assert dataset is None
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.datasets.with_raw_response.delete(
+    async def test_raw_response_remove(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.datasets.with_raw_response.remove(
             "id",
         )
 
@@ -422,8 +422,8 @@ class TestAsyncDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
-        async with async_client.datasets.with_streaming_response.delete(
+    async def test_streaming_response_remove(self, async_client: AsyncCartesia) -> None:
+        async with async_client.datasets.with_streaming_response.remove(
             "id",
         ) as response:
             assert not response.is_closed
@@ -436,8 +436,8 @@ class TestAsyncDatasets:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
+    async def test_path_params_remove(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            await async_client.datasets.with_raw_response.delete(
+            await async_client.datasets.with_raw_response.remove(
                 "",
             )

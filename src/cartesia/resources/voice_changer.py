@@ -18,18 +18,10 @@ from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_may
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
-    BinaryAPIResponse,
-    AsyncBinaryAPIResponse,
-    StreamedBinaryAPIResponse,
-    AsyncStreamedBinaryAPIResponse,
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
-    to_custom_raw_response_wrapper,
     async_to_streamed_response_wrapper,
-    to_custom_streamed_response_wrapper,
-    async_to_custom_raw_response_wrapper,
-    async_to_custom_streamed_response_wrapper,
 )
 from .._base_client import make_request_options
 from ..types.raw_encoding import RawEncoding
@@ -73,7 +65,7 @@ class VoiceChangerResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> BinaryAPIResponse:
+    ) -> None:
         """
         Takes an audio file of speech, and returns an audio file of speech spoken with
         the same intonation, but with a different voice.
@@ -93,7 +85,7 @@ class VoiceChangerResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "clip": clip,
@@ -108,7 +100,7 @@ class VoiceChangerResource(SyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
+        extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
             "/voice-changer/bytes",
             body=maybe_transform(body, voice_changer_change_voice_bytes_params.VoiceChangerChangeVoiceBytesParams),
@@ -116,7 +108,7 @@ class VoiceChangerResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BinaryAPIResponse,
+            cast_to=NoneType,
         )
 
     def change_voice_sse(
@@ -213,7 +205,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncBinaryAPIResponse:
+    ) -> None:
         """
         Takes an audio file of speech, and returns an audio file of speech spoken with
         the same intonation, but with a different voice.
@@ -233,7 +225,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "clip": clip,
@@ -248,7 +240,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
+        extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
             "/voice-changer/bytes",
             body=await async_maybe_transform(
@@ -258,7 +250,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AsyncBinaryAPIResponse,
+            cast_to=NoneType,
         )
 
     async def change_voice_sse(
@@ -326,9 +318,8 @@ class VoiceChangerResourceWithRawResponse:
     def __init__(self, voice_changer: VoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = to_custom_raw_response_wrapper(
+        self.change_voice_bytes = to_raw_response_wrapper(
             voice_changer.change_voice_bytes,
-            BinaryAPIResponse,
         )
         self.change_voice_sse = to_raw_response_wrapper(
             voice_changer.change_voice_sse,
@@ -339,9 +330,8 @@ class AsyncVoiceChangerResourceWithRawResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = async_to_custom_raw_response_wrapper(
+        self.change_voice_bytes = async_to_raw_response_wrapper(
             voice_changer.change_voice_bytes,
-            AsyncBinaryAPIResponse,
         )
         self.change_voice_sse = async_to_raw_response_wrapper(
             voice_changer.change_voice_sse,
@@ -352,9 +342,8 @@ class VoiceChangerResourceWithStreamingResponse:
     def __init__(self, voice_changer: VoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = to_custom_streamed_response_wrapper(
+        self.change_voice_bytes = to_streamed_response_wrapper(
             voice_changer.change_voice_bytes,
-            StreamedBinaryAPIResponse,
         )
         self.change_voice_sse = to_streamed_response_wrapper(
             voice_changer.change_voice_sse,
@@ -365,9 +354,8 @@ class AsyncVoiceChangerResourceWithStreamingResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = async_to_custom_streamed_response_wrapper(
+        self.change_voice_bytes = async_to_streamed_response_wrapper(
             voice_changer.change_voice_bytes,
-            AsyncStreamedBinaryAPIResponse,
         )
         self.change_voice_sse = async_to_streamed_response_wrapper(
             voice_changer.change_voice_sse,

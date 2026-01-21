@@ -6,23 +6,15 @@ from typing import Optional
 
 import httpx
 
-from ..._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
+from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from ..._utils import maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
-    BinaryAPIResponse,
-    AsyncBinaryAPIResponse,
-    StreamedBinaryAPIResponse,
-    AsyncStreamedBinaryAPIResponse,
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
-    to_custom_raw_response_wrapper,
     async_to_streamed_response_wrapper,
-    to_custom_streamed_response_wrapper,
-    async_to_custom_raw_response_wrapper,
-    async_to_custom_streamed_response_wrapper,
 )
 from ...pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..._base_client import AsyncPaginator, make_request_options
@@ -158,7 +150,7 @@ class CallsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> BinaryAPIResponse:
+    ) -> None:
         """The downloaded audio file is in .wav format.
 
         This endpoint streams the audio
@@ -175,13 +167,13 @@ class CallsResource(SyncAPIResource):
         """
         if not call_id:
             raise ValueError(f"Expected a non-empty value for `call_id` but received {call_id!r}")
-        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._get(
             f"/agents/calls/{call_id}/audio",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=BinaryAPIResponse,
+            cast_to=NoneType,
         )
 
 
@@ -311,7 +303,7 @@ class AsyncCallsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AsyncBinaryAPIResponse:
+    ) -> None:
         """The downloaded audio file is in .wav format.
 
         This endpoint streams the audio
@@ -328,13 +320,13 @@ class AsyncCallsResource(AsyncAPIResource):
         """
         if not call_id:
             raise ValueError(f"Expected a non-empty value for `call_id` but received {call_id!r}")
-        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._get(
             f"/agents/calls/{call_id}/audio",
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AsyncBinaryAPIResponse,
+            cast_to=NoneType,
         )
 
 
@@ -348,9 +340,8 @@ class CallsResourceWithRawResponse:
         self.list = to_raw_response_wrapper(
             calls.list,
         )
-        self.download_audio = to_custom_raw_response_wrapper(
+        self.download_audio = to_raw_response_wrapper(
             calls.download_audio,
-            BinaryAPIResponse,
         )
 
 
@@ -364,9 +355,8 @@ class AsyncCallsResourceWithRawResponse:
         self.list = async_to_raw_response_wrapper(
             calls.list,
         )
-        self.download_audio = async_to_custom_raw_response_wrapper(
+        self.download_audio = async_to_raw_response_wrapper(
             calls.download_audio,
-            AsyncBinaryAPIResponse,
         )
 
 
@@ -380,9 +370,8 @@ class CallsResourceWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             calls.list,
         )
-        self.download_audio = to_custom_streamed_response_wrapper(
+        self.download_audio = to_streamed_response_wrapper(
             calls.download_audio,
-            StreamedBinaryAPIResponse,
         )
 
 
@@ -396,7 +385,6 @@ class AsyncCallsResourceWithStreamingResponse:
         self.list = async_to_streamed_response_wrapper(
             calls.list,
         )
-        self.download_audio = async_to_custom_streamed_response_wrapper(
+        self.download_audio = async_to_streamed_response_wrapper(
             calls.download_audio,
-            AsyncStreamedBinaryAPIResponse,
         )
