@@ -237,7 +237,7 @@ class DatasetsResource(SyncAPIResource):
             model=Dataset,
         )
 
-    def remove(
+    def delete(
         self,
         id: str,
         *,
@@ -477,7 +477,7 @@ class AsyncDatasetsResource(AsyncAPIResource):
             model=Dataset,
         )
 
-    async def remove(
+    async def delete(
         self,
         id: str,
         *,
@@ -528,8 +528,8 @@ class DatasetsResourceWithRawResponse:
         self.list = to_raw_response_wrapper(
             datasets.list,
         )
-        self.remove = to_raw_response_wrapper(
-            datasets.remove,
+        self.delete = to_raw_response_wrapper(
+            datasets.delete,
         )
 
     @cached_property
@@ -553,8 +553,8 @@ class AsyncDatasetsResourceWithRawResponse:
         self.list = async_to_raw_response_wrapper(
             datasets.list,
         )
-        self.remove = async_to_raw_response_wrapper(
-            datasets.remove,
+        self.delete = async_to_raw_response_wrapper(
+            datasets.delete,
         )
 
     @cached_property
@@ -578,8 +578,8 @@ class DatasetsResourceWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             datasets.list,
         )
-        self.remove = to_streamed_response_wrapper(
-            datasets.remove,
+        self.delete = to_streamed_response_wrapper(
+            datasets.delete,
         )
 
     @cached_property
@@ -603,8 +603,8 @@ class AsyncDatasetsResourceWithStreamingResponse:
         self.list = async_to_streamed_response_wrapper(
             datasets.list,
         )
-        self.remove = async_to_streamed_response_wrapper(
-            datasets.remove,
+        self.delete = async_to_streamed_response_wrapper(
+            datasets.delete,
         )
 
     @cached_property

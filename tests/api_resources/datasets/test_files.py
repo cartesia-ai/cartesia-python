@@ -73,8 +73,8 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_remove(self, client: Cartesia) -> None:
-        file = client.datasets.files.remove(
+    def test_method_delete(self, client: Cartesia) -> None:
+        file = client.datasets.files.delete(
             file_id="fileID",
             id="id",
         )
@@ -82,8 +82,8 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_remove(self, client: Cartesia) -> None:
-        response = client.datasets.files.with_raw_response.remove(
+    def test_raw_response_delete(self, client: Cartesia) -> None:
+        response = client.datasets.files.with_raw_response.delete(
             file_id="fileID",
             id="id",
         )
@@ -95,8 +95,8 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_streaming_response_remove(self, client: Cartesia) -> None:
-        with client.datasets.files.with_streaming_response.remove(
+    def test_streaming_response_delete(self, client: Cartesia) -> None:
+        with client.datasets.files.with_streaming_response.delete(
             file_id="fileID",
             id="id",
         ) as response:
@@ -110,15 +110,15 @@ class TestFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_path_params_remove(self, client: Cartesia) -> None:
+    def test_path_params_delete(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            client.datasets.files.with_raw_response.remove(
+            client.datasets.files.with_raw_response.delete(
                 file_id="fileID",
                 id="",
             )
 
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `file_id` but received ''"):
-            client.datasets.files.with_raw_response.remove(
+            client.datasets.files.with_raw_response.delete(
                 file_id="",
                 id="id",
             )
@@ -236,8 +236,8 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_remove(self, async_client: AsyncCartesia) -> None:
-        file = await async_client.datasets.files.remove(
+    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
+        file = await async_client.datasets.files.delete(
             file_id="fileID",
             id="id",
         )
@@ -245,8 +245,8 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_remove(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.datasets.files.with_raw_response.remove(
+    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.datasets.files.with_raw_response.delete(
             file_id="fileID",
             id="id",
         )
@@ -258,8 +258,8 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_streaming_response_remove(self, async_client: AsyncCartesia) -> None:
-        async with async_client.datasets.files.with_streaming_response.remove(
+    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
+        async with async_client.datasets.files.with_streaming_response.delete(
             file_id="fileID",
             id="id",
         ) as response:
@@ -273,15 +273,15 @@ class TestAsyncFiles:
 
     @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_path_params_remove(self, async_client: AsyncCartesia) -> None:
+    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
-            await async_client.datasets.files.with_raw_response.remove(
+            await async_client.datasets.files.with_raw_response.delete(
                 file_id="fileID",
                 id="",
             )
 
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `file_id` but received ''"):
-            await async_client.datasets.files.with_raw_response.remove(
+            await async_client.datasets.files.with_raw_response.delete(
                 file_id="",
                 id="id",
             )

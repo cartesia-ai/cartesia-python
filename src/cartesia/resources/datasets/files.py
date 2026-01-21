@@ -104,7 +104,7 @@ class FilesResource(SyncAPIResource):
             model=FileListResponse,
         )
 
-    def remove(
+    def delete(
         self,
         file_id: str,
         *,
@@ -273,7 +273,7 @@ class AsyncFilesResource(AsyncAPIResource):
             model=FileListResponse,
         )
 
-    async def remove(
+    async def delete(
         self,
         file_id: str,
         *,
@@ -369,8 +369,8 @@ class FilesResourceWithRawResponse:
         self.list = to_raw_response_wrapper(
             files.list,
         )
-        self.remove = to_raw_response_wrapper(
-            files.remove,
+        self.delete = to_raw_response_wrapper(
+            files.delete,
         )
         self.upload = to_raw_response_wrapper(
             files.upload,
@@ -384,8 +384,8 @@ class AsyncFilesResourceWithRawResponse:
         self.list = async_to_raw_response_wrapper(
             files.list,
         )
-        self.remove = async_to_raw_response_wrapper(
-            files.remove,
+        self.delete = async_to_raw_response_wrapper(
+            files.delete,
         )
         self.upload = async_to_raw_response_wrapper(
             files.upload,
@@ -399,8 +399,8 @@ class FilesResourceWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             files.list,
         )
-        self.remove = to_streamed_response_wrapper(
-            files.remove,
+        self.delete = to_streamed_response_wrapper(
+            files.delete,
         )
         self.upload = to_streamed_response_wrapper(
             files.upload,
@@ -414,8 +414,8 @@ class AsyncFilesResourceWithStreamingResponse:
         self.list = async_to_streamed_response_wrapper(
             files.list,
         )
-        self.remove = async_to_streamed_response_wrapper(
-            files.remove,
+        self.delete = async_to_streamed_response_wrapper(
+            files.delete,
         )
         self.upload = async_to_streamed_response_wrapper(
             files.upload,
