@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.0.0-beta7 (2026-01-26)
+
+Full Changelog: [v3.0.0-beta6...v3.0.0-beta7](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta6...v3.0.0-beta7)
+
+### Features
+
+* Alpha Release of v2 Python SDK ([#20](https://github.com/cartesia-ai/cartesia-python/issues/20)) ([0951eb6](https://github.com/cartesia-ai/cartesia-python/commit/0951eb63d7a00573d2ff7b75a59712d735e43b49))
+* **api:** add release environment ([f25d3fc](https://github.com/cartesia-ai/cartesia-python/commit/f25d3fc080b00753d414e408c1084e18e06ede7a))
+
+
+### Bug Fixes
+
+* Update `WebSocketTtsOutput` class to include `PhonemeTimestamps` ([#28](https://github.com/cartesia-ai/cartesia-python/issues/28)) ([6fe7603](https://github.com/cartesia-ai/cartesia-python/commit/6fe7603e8a5df5914d85d205a8b5320eb451a9f0))
+
+
+### Chores
+
+* sync repo ([35649ed](https://github.com/cartesia-ai/cartesia-python/commit/35649ed51fb9de699db06c98ff9e4d28f333aaca))
+* update SDK settings ([bbe3fcc](https://github.com/cartesia-ai/cartesia-python/commit/bbe3fcc8df70d08ef8b50ea0434603204fdaced5))
+
 ## 3.0.0-beta6 (2026-01-23)
 
 Full Changelog: [v3.0.0-beta5...v3.0.0-beta6](https://github.com/cartesia-ai/cartesia-python-internal/compare/v3.0.0-beta5...v3.0.0-beta6)
