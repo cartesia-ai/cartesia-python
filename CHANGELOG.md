@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0-beta8 (2026-01-26)
+
+Full Changelog: [v3.0.0-beta7...v3.0.0-beta8](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta7...v3.0.0-beta8)
+
+### Features
+
+* **api:** update pypi auth_method ([d66842c](https://github.com/cartesia-ai/cartesia-python/commit/d66842c302cfedc0799cf63621def01dc0b55fd2))
+
 ## 3.0.0-beta7 (2026-01-26)
 
 Full Changelog: [v3.0.0-beta6...v3.0.0-beta7](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta6...v3.0.0-beta7)
