@@ -1,645 +1,466 @@
-# Cartesia Python Library
+# Cartesia Python API library
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Fcartesia-ai%2Fcartesia-python)
-[![pypi](https://img.shields.io/pypi/v/cartesia)](https://pypi.python.org/pypi/cartesia)
+<!-- prettier-ignore -->
+[![PyPI version](https://img.shields.io/pypi/v/cartesia.svg?label=pypi%20(stable))](https://pypi.org/project/cartesia/)
 
-The Cartesia Python library provides convenient access to the Cartesia API from Python.
+The Cartesia Python library provides convenient access to the Cartesia REST API from any Python 3.9+
+application. The library includes type definitions for all request params and response fields,
+and offers both synchronous and asynchronous clients powered by [httpx](https://github.com/encode/httpx).
+
+It is generated with [Stainless](https://www.stainless.com/).
 
 ## Documentation
 
-Our complete API documentation can be found [on docs.cartesia.ai](https://docs.cartesia.ai).
+The full API of this library can be found in [api.md](api.md).
 
 ## Installation
 
 ```sh
-pip install cartesia
+# install from PyPI
+pip install '--pre cartesia'
 ```
 
 ## Usage
 
-Instantiate and use the client with the following:
+The full API of this library can be found in [api.md](api.md).
 
 ```python
 from cartesia import Cartesia
-import os
 
 client = Cartesia(
-    api_key=os.environ["CARTESIA_API_KEY"],
+    api_key="My API Key",
 )
 
-
-def main():
-    with open("sonic.wav", "wb") as f:
-        bytes_iter = client.tts.bytes(
-            model_id="sonic-3",
-            transcript="Hello, world!",
-            voice={
-                "mode": "id",
-                "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
-            },
-            language="en",
-            output_format={
-                "container": "wav",
-                "sample_rate": 44100,
-                "encoding": "pcm_f32le",
-            },
-        )
-
-        for chunk in bytes_iter:
-            f.write(chunk)
-
-
-if __name__ == "__main__":
-    main()
+page = client.voices.list()
+print(page.data)
 ```
 
-## Async Client
+## Async usage
 
-The SDK also exports an `async` client so that you can make non-blocking calls to our API.
+Simply import `AsyncCartesia` instead of `Cartesia` and use `await` with each API call:
 
 ```python
 import asyncio
 from cartesia import AsyncCartesia
-import os
 
 client = AsyncCartesia(
-    api_key=os.environ["CARTESIA_API_KEY"],
+    api_key="My API Key",
 )
 
 
-async def main():
-    with open("sonic.wav", "wb") as f:
-        bytes_iter = client.tts.bytes(
-            model_id="sonic-3",
-            transcript="Hello, world!",
-            voice={
-                "mode": "id",
-                "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
-            },
-            language="en",
-            output_format={
-                "container": "wav",
-                "sample_rate": 44100,
-                "encoding": "pcm_f32le",
-            },
-        )
+async def main() -> None:
+    page = await client.voices.list()
+    print(page.data)
 
-        async for chunk in bytes_iter:
-            f.write(chunk)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-## Exception Handling
-
-When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
-will be thrown.
-
-```python
-from cartesia.core.api_error import ApiError
-
-try:
-    client.tts.bytes(...)
-except ApiError as e:
-    print(e.status_code)
-    print(e.body)
-```
-
-## Streaming
-
-The SDK supports streaming responses as well, returning a generator that you can iterate over with a `for ... in ...` loop:
-
-```python
-from cartesia import Cartesia
-import os
-
-def get_tts_chunks():
-    client = Cartesia(
-        api_key=os.getenv("CARTESIA_API_KEY"),
-    )
-    response = client.tts.sse(
-        model_id="sonic-3",
-        transcript="Hello world!",
-        voice={
-            "mode": "id",
-            "id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94",
-        },
-        language="en",
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100,
-        },
-    )
-
-    audio_chunks = []
-    for chunk in response:
-        audio_chunks.append(chunk)
-    return audio_chunks
-
-chunks = get_tts_chunks()
-for chunk in chunks:
-    print(f"Received chunk of size: {len(chunk.data)}")
-```
-
-## WebSockets
-
-For the lowest latency in advanced usecases (such as streaming in an LLM-generated transcript and streaming out audio), you should use our websockets client:
-
-```python
-from cartesia import Cartesia
-from cartesia.tts import TtsRequestEmbeddingSpecifierParams, OutputFormat_RawParams
-import pyaudio
-import os
-
-client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-voice_id = "a0e99841-438c-4a64-b679-ae501e7d6091"
-transcript = "Hello! Welcome to Cartesia"
-
-p = pyaudio.PyAudio()
-rate = 22050
-
-stream = None
-
-# Set up the websocket connection
-ws = client.tts.websocket()
-
-# Generate and stream audio using the websocket
-for output in ws.send(
-    model_id="sonic-3", # see: https://docs.cartesia.ai/build-with-cartesia/tts-models
-    transcript=transcript,
-    voice={"mode": "id", "id": voice_id},
-    stream=True,
-    output_format={
-        "container": "raw",
-        "encoding": "pcm_f32le",
-        "sample_rate": rate
-    },
-):
-    buffer = output.audio
-
-    if not stream:
-        stream = p.open(format=pyaudio.paFloat32, channels=1, rate=rate, output=True)
-
-    # Write the audio data to the stream
-    stream.write(buffer)
-
-stream.stop_stream()
-stream.close()
-p.terminate()
-
-ws.close()  # Close the websocket connection
-```
-
-## Speech-to-Text (STT) with Websockets
-
-```python
-from cartesia import Cartesia
-import os
-
-client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-# Load your audio file as bytes
-with open("path/to/audio.wav", "rb") as f:
-    audio_data = f.read()
-
-# Convert to audio chunks (20ms chunks used here for a streaming example)
-# This chunk size is calculated for 16kHz, 16-bit audio: 16000 * 0.02 * 2 = 640 bytes
-chunk_size = 640
-audio_chunks = [audio_data[i:i+chunk_size] for i in range(0, len(audio_data), chunk_size)]
-
-# Create websocket connection with endpointing parameters
-ws = client.stt.websocket(
-    model="ink-whisper",                 # Model (required)
-    language="en",                       # Language of your audio (required)
-    encoding="pcm_s16le",                # Audio encoding format (required)
-    sample_rate=16000,                   # Audio sample rate (required)
-    min_volume=0.1,                      # Volume threshold for voice activity detection
-    max_silence_duration_secs=0.4,       # Maximum silence duration before endpointing
-)
-
-# Send audio chunks (streaming approach)
-for chunk in audio_chunks:
-    ws.send(chunk)
-
-# Finalize and close
-ws.send("finalize")
-ws.send("done")
-
-# Receive transcription results with word-level timestamps
-for result in ws.receive():
-    if result['type'] == 'transcript':
-        print(f"Transcription: {result['text']}")
-
-        # Handle word-level timestamps if available
-        if 'words' in result and result['words']:
-            print("Word-level timestamps:")
-            for word_info in result['words']:
-                word = word_info['word']
-                start = word_info['start']
-                end = word_info['end']
-                print(f"  '{word}': {start:.2f}s - {end:.2f}s")
-
-        if result['is_final']:
-            print("Final result received")
-    elif result['type'] == 'done':
-        break
-
-ws.close()
-```
-
-### Async Streaming Speech-to-Text (STT) with Websockets
-
-For real-time streaming applications, here's a more practical async example that demonstrates concurrent audio processing and result handling:
-
-```python
-import asyncio
-import os
-from cartesia import AsyncCartesia
-
-async def streaming_stt_example():
-    """
-    Advanced async STT example for real-time streaming applications.
-    This example simulates streaming audio processing with proper error handling
-    and demonstrates the new endpointing and word timestamp features.
-    """
-    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-    try:
-        # Create websocket connection with voice activity detection
-        ws = await client.stt.websocket(
-            model="ink-whisper",             # Model (required)
-            language="en",                   # Language of your audio (required)
-            encoding="pcm_s16le",            # Audio encoding format (required)
-            sample_rate=16000,               # Audio sample rate (required)
-            min_volume=0.15,                 # Volume threshold for voice activity detection
-            max_silence_duration_secs=0.3,   # Maximum silence duration before endpointing
-        )
-
-        # Simulate streaming audio data (replace with your audio source)
-        async def audio_stream():
-            """Simulate real-time audio streaming - replace with actual audio capture"""
-            # Load audio file for simulation
-            with open("path/to/audio.wav", "rb") as f:
-                audio_data = f.read()
-
-            # Stream in 100ms chunks (realistic for real-time processing)
-            chunk_size = int(16000 * 0.1 * 2)  # 100ms at 16kHz, 16-bit
-
-            for i in range(0, len(audio_data), chunk_size):
-                chunk = audio_data[i:i + chunk_size]
-                if chunk:
-                    yield chunk
-                    # Simulate real-time streaming delay
-                    await asyncio.sleep(0.1)
-
-        # Send audio and receive results concurrently
-        async def send_audio():
-            """Send audio chunks to the STT websocket"""
-            try:
-                async for chunk in audio_stream():
-                    await ws.send(chunk)
-                    print(f"Sent audio chunk of {len(chunk)} bytes")
-                    # Small delay to simulate realtime applications
-                    await asyncio.sleep(0.02)
-
-                # Signal end of audio stream
-                await ws.send("finalize")
-                await ws.send("done")
-                print("Audio streaming completed")
-
-            except Exception as e:
-                print(f"Error sending audio: {e}")
-
-        async def receive_transcripts():
-            """Receive and process transcription results with word timestamps"""
-            full_transcript = ""
-            all_word_timestamps = []
-
-            try:
-                async for result in ws.receive():
-                    if result['type'] == 'transcript':
-                        text = result['text']
-                        is_final = result['is_final']
-
-                        # Handle word-level timestamps
-                        if 'words' in result and result['words']:
-                            word_timestamps = result['words']
-                            all_word_timestamps.extend(word_timestamps)
-
-                            if is_final:
-                                print("Word-level timestamps:")
-                                for word_info in word_timestamps:
-                                    word = word_info['word']
-                                    start = word_info['start']
-                                    end = word_info['end']
-                                    print(f"  '{word}': {start:.2f}s - {end:.2f}s")
-
-                        if is_final:
-                            # Final result - this text won't change
-                            full_transcript += text + " "
-                            print(f"FINAL: {text}")
-                        else:
-                            # Partial result - may change as more audio is processed
-                            print(f"PARTIAL: {text}")
-
-                    elif result['type'] == 'done':
-                        print("Transcription completed")
-                        break
-
-            except Exception as e:
-                print(f"Error receiving transcripts: {e}")
-
-            return full_transcript.strip(), all_word_timestamps
-
-        print("Starting streaming STT...")
-
-        # Use asyncio.gather to run audio sending and transcript receiving concurrently
-        _, (final_transcript, word_timestamps) = await asyncio.gather(
-            send_audio(),
-            receive_transcripts()
-        )
-
-        print(f"\nComplete transcript: {final_transcript}")
-        print(f"Total words with timestamps: {len(word_timestamps)}")
-
-        # Clean up
-        await ws.close()
-
-    except Exception as e:
-        print(f"STT streaming error: {e}")
-    finally:
-        await client.close()
-
-# Run the example
-if __name__ == "__main__":
-    asyncio.run(streaming_stt_example())
-```
-
-## Batch Speech-to-Text (STT)
-
-For processing pre-recorded audio files, use the batch STT API which supports uploading complete audio files for transcription:
-
-```python
-from cartesia import Cartesia
-import os
-
-client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-# Transcribe an audio file with word-level timestamps
-with open("path/to/audio.wav", "rb") as audio_file:
-    response = client.stt.transcribe(
-        file=audio_file,                    # Audio file to transcribe
-        model="ink-whisper",                # STT model (required)
-        language="en",                      # Language of the audio (optional)
-        timestamp_granularities=["word"],   # Include word-level timestamps (optional)
-        encoding="pcm_s16le",               # Audio encoding (optional)
-        sample_rate=16000,                  # Audio sample rate (optional)
-    )
-
-# Access transcription results
-print(f"Transcribed text: {response.text}")
-print(f"Audio duration: {response.duration:.2f} seconds")
-
-# Process word-level timestamps if requested
-if response.words:
-    print("\nWord-level timestamps:")
-    for word_info in response.words:
-        word = word_info.word
-        start = word_info.start
-        end = word_info.end
-        print(f"  '{word}': {start:.2f}s - {end:.2f}s")
-```
-
-### Async Batch STT
-
-```python
-import asyncio
-from cartesia import AsyncCartesia
-import os
-
-async def transcribe_file():
-    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-    with open("path/to/audio.wav", "rb") as audio_file:
-        response = await client.stt.transcribe(
-            file=audio_file,
-            model="ink-whisper",
-            language="en",
-            timestamp_granularities=["word"],
-        )
-
-    print(f"Transcribed text: {response.text}")
-
-    # Process word timestamps
-    if response.words:
-        for word_info in response.words:
-            print(f"'{word_info.word}': {word_info.start:.2f}s - {word_info.end:.2f}s")
-
-    await client.close()
-
-asyncio.run(transcribe_file())
-```
-
-> **Note:** Batch STT also supports OpenAI's audio transcriptions format for easy migration from OpenAI Whisper. See our [migration guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai) for details.
-
-## Voices
-
-List all available Voices with `client.voices.list`, which returns an iterable that automatically handles pagination:
-
-```python
-from cartesia import Cartesia
-import os
-
-client = Cartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-# Get all available Voices
-voices = client.voices.list()
-for voice in voices:
-    print(voice)
-```
-
-You can also get the complete metadata for a specific Voice, or make a new Voice by cloning from an audio sample:
-
-```python
-# Get a specific Voice
-voice = client.voices.get(id="a0e99841-438c-4a64-b679-ae501e7d6091")
-print("The embedding for", voice.name, "is", voice.embedding)
-
-# Clone a Voice using file data
-cloned_voice = client.voices.clone(
-    clip=open("path/to/voice.wav", "rb"),
-    name="Test cloned voice",
-    language="en",
-    mode="similarity",  # or "stability"
-    enhance=False, # use enhance=True to clean and denoise the cloning audio
-    description="Test voice description"
-)
-```
-
-## Requesting Timestamps
-
-```python
-import asyncio
-from cartesia import AsyncCartesia
-import os
-
-async def main():
-    client = AsyncCartesia(api_key=os.getenv("CARTESIA_API_KEY"))
-
-    # Connect to the websocket
-    ws = await client.tts.websocket()
-
-    # Generate speech with timestamps
-    output_generate = await ws.send(
-        model_id="sonic-2",
-        transcript="Hello! Welcome to Cartesia's text-to-speech.",
-        voice={"id": "f9836c6e-a0bd-460e-9d3c-f7299fa60f94"},
-        output_format={
-            "container": "raw",
-            "encoding": "pcm_f32le",
-            "sample_rate": 44100
-        },
-        add_timestamps=True,            # Enable word-level timestamps
-        add_phoneme_timestamps=True,    # Enable phonemized timestamps
-        stream=True
-    )
-
-    # Process the streaming response with timestamps
-    all_words = []
-    all_starts = []
-    all_ends = []
-    audio_chunks = []
-
-    async for out in output_generate:
-        # Collect audio data
-        if out.audio is not None:
-            audio_chunks.append(out.audio)
-
-        # Process timestamp data
-        if out.word_timestamps is not None:
-            all_words.extend(out.word_timestamps.words)    # List of words
-            all_starts.extend(out.word_timestamps.start)   # Start time for each word (seconds)
-            all_ends.extend(out.word_timestamps.end)       # End time for each word (seconds)
-
-    await ws.close()
-    await client.close()
 
 asyncio.run(main())
 ```
 
-## Advanced
+Functionality between the synchronous and asynchronous clients is otherwise identical.
+
+### With aiohttp
+
+By default, the async client uses `httpx` for HTTP requests. However, for improved concurrency performance you may also use `aiohttp` as the HTTP backend.
+
+You can enable this by installing `aiohttp`:
+
+```sh
+# install from PyPI
+pip install '--pre cartesia[aiohttp]'
+```
+
+Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
+
+```python
+import asyncio
+from cartesia import DefaultAioHttpClient
+from cartesia import AsyncCartesia
+
+
+async def main() -> None:
+    async with AsyncCartesia(
+        api_key="My API Key",
+        http_client=DefaultAioHttpClient(),
+    ) as client:
+        page = await client.voices.list()
+        print(page.data)
+
+
+asyncio.run(main())
+```
+
+## Using types
+
+Nested request parameters are [TypedDicts](https://docs.python.org/3/library/typing.html#typing.TypedDict). Responses are [Pydantic models](https://docs.pydantic.dev) which also provide helper methods for things like:
+
+- Serializing back into JSON, `model.to_json()`
+- Converting to a dictionary, `model.to_dict()`
+
+Typed requests and responses provide autocomplete and documentation within your editor. If you would like to see type errors in VS Code to help catch bugs earlier, set `python.analysis.typeCheckingMode` to `basic`.
+
+## Pagination
+
+List methods in the Cartesia API are paginated.
+
+This library provides auto-paginating iterators with each list response, so you do not have to request successive pages manually:
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia()
+
+all_voices = []
+# Automatically fetches more pages as needed.
+for voice in client.voices.list():
+    # Do something with voice here
+    all_voices.append(voice)
+print(all_voices)
+```
+
+Or, asynchronously:
+
+```python
+import asyncio
+from cartesia import AsyncCartesia
+
+client = AsyncCartesia()
+
+
+async def main() -> None:
+    all_voices = []
+    # Iterate through items across all pages, issuing requests as needed.
+    async for voice in client.voices.list():
+        all_voices.append(voice)
+    print(all_voices)
+
+
+asyncio.run(main())
+```
+
+Alternatively, you can use the `.has_next_page()`, `.next_page_info()`, or `.get_next_page()` methods for more granular control working with pages:
+
+```python
+first_page = await client.voices.list()
+if first_page.has_next_page():
+    print(f"will fetch next page using these details: {first_page.next_page_info()}")
+    next_page = await first_page.get_next_page()
+    print(f"number of items we just fetched: {len(next_page.data)}")
+
+# Remove `await` for non-async usage.
+```
+
+Or just work directly with the returned data:
+
+```python
+first_page = await client.voices.list()
+
+print(f"next page cursor: {first_page.starting_after}")  # => "next page cursor: ..."
+for voice in first_page.data:
+    print(voice.id)
+
+# Remove `await` for non-async usage.
+```
+
+## Nested params
+
+Nested parameters are dictionaries, typed using `TypedDict`, for example:
+
+```python
+from cartesia import Cartesia
+
+client = Cartesia()
+
+access_token = client.access_token.create(
+    grants={},
+)
+print(access_token.grants)
+```
+
+## File uploads
+
+Request parameters that correspond to file uploads can be passed as `bytes`, or a [`PathLike`](https://docs.python.org/3/library/os.html#os.PathLike) instance or a tuple of `(filename, contents, media type)`.
+
+```python
+from pathlib import Path
+from cartesia import Cartesia
+
+client = Cartesia()
+
+client.datasets.files.upload(
+    id="id",
+    file=Path("/path/to/file"),
+)
+```
+
+The async client uses the exact same interface. If you pass a [`PathLike`](https://docs.python.org/3/library/os.html#os.PathLike) instance, the file contents will be read asynchronously automatically.
+
+## Handling errors
+
+When the library is unable to connect to the API (for example, due to network connection problems or a timeout), a subclass of `cartesia.APIConnectionError` is raised.
+
+When the API returns a non-success status code (that is, 4xx or 5xx
+response), a subclass of `cartesia.APIStatusError` is raised, containing `status_code` and `response` properties.
+
+All errors inherit from `cartesia.APIError`.
+
+```python
+import cartesia
+from cartesia import Cartesia
+
+client = Cartesia()
+
+try:
+    client.voices.list()
+except cartesia.APIConnectionError as e:
+    print("The server could not be reached")
+    print(e.__cause__)  # an underlying Exception, likely raised within httpx.
+except cartesia.RateLimitError as e:
+    print("A 429 status code was received; we should back off a bit.")
+except cartesia.APIStatusError as e:
+    print("Another non-200-range status code was received")
+    print(e.status_code)
+    print(e.response)
+```
+
+Error codes are as follows:
+
+| Status Code | Error Type                 |
+| ----------- | -------------------------- |
+| 400         | `BadRequestError`          |
+| 401         | `AuthenticationError`      |
+| 403         | `PermissionDeniedError`    |
+| 404         | `NotFoundError`            |
+| 422         | `UnprocessableEntityError` |
+| 429         | `RateLimitError`           |
+| >=500       | `InternalServerError`      |
+| N/A         | `APIConnectionError`       |
 
 ### Retries
 
-The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
-as the request is deemed retriable and the number of retry attempts has not grown larger than the configured
-retry limit (default: 2).
+Certain errors are automatically retried 2 times by default, with a short exponential backoff.
+Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
+429 Rate Limit, and >=500 Internal errors are all retried by default.
 
-A request is deemed retriable when any of the following HTTP status codes is returned:
-
-- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
-- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
-- [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
-
-Use the `max_retries` request option to configure this behavior.
+You can use the `max_retries` option to configure or disable retry settings:
 
 ```python
-client.tts.bytes(..., request_options={
-    "max_retries": 1
-})
+from cartesia import Cartesia
+
+# Configure the default for all requests:
+client = Cartesia(
+    # default is 2
+    max_retries=0,
+)
+
+# Or, configure per-request:
+client.with_options(max_retries=5).voices.list()
 ```
 
 ### Timeouts
 
-The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
+By default requests time out after 1 minute. You can configure this with a `timeout` option,
+which accepts a float or an [`httpx.Timeout`](https://www.python-httpx.org/advanced/timeouts/#fine-tuning-the-configuration) object:
 
 ```python
-
 from cartesia import Cartesia
 
+# Configure the default for all requests:
 client = Cartesia(
-    ...,
+    # 20 seconds (default is 1 minute)
     timeout=20.0,
 )
 
-
-# Override timeout for a specific method
-client.tts.bytes(..., request_options={
-    "timeout_in_seconds": 1
-})
-```
-
-### Mixing voices and creating from embeddings
-
-```python
-# Mix voices together
-mixed_voice = client.voices.mix(
-    voices=[
-        {"id": "voice_id_1", "weight": 0.25},
-        {"id": "voice_id_2", "weight": 0.75}
-    ]
+# More granular control:
+client = Cartesia(
+    timeout=httpx.Timeout(60.0, read=5.0, write=10.0, connect=2.0),
 )
 
-# Create a new voice from embedding
-new_voice = client.voices.create(
-    name="Test Voice",
-    description="Test voice description",
-    embedding=[...],  # List[float] with 192 dimensions
-    language="en"
-)
+# Override per-request:
+client.with_options(timeout=5.0).voices.list()
 ```
-### Custom Client
 
-You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
-and transports.
+On timeout, an `APITimeoutError` is thrown.
+
+Note that requests that time out are [retried twice by default](#retries).
+
+## Default Headers
+
+We automatically send the `cartesia-version` header set to `2025-04-16`.
+
+If you need to, you can override it by setting default headers per-request or on the client object.
+
 ```python
-import httpx
 from cartesia import Cartesia
 
 client = Cartesia(
-    ...,
-    httpx_client=httpx.Client(
-        proxies="http://my.test.proxy.example.com",
+    default_headers={"cartesia-version": "My-Custom-Value"},
+)
+```
+
+## Advanced
+
+### Logging
+
+We use the standard library [`logging`](https://docs.python.org/3/library/logging.html) module.
+
+You can enable logging by setting the environment variable `CARTESIA_LOG` to `info`.
+
+```shell
+$ export CARTESIA_LOG=info
+```
+
+Or to `debug` for more verbose logging.
+
+### How to tell whether `None` means `null` or missing
+
+In an API response, a field may be explicitly `null`, or missing entirely; in either case, its value is `None` in this library. You can differentiate the two cases with `.model_fields_set`:
+
+```py
+if response.my_field is None:
+  if 'my_field' not in response.model_fields_set:
+    print('Got json like {}, without a "my_field" key present at all.')
+  else:
+    print('Got json like {"my_field": null}.')
+```
+
+### Accessing raw response data (e.g. headers)
+
+The "raw" Response object can be accessed by prefixing `.with_raw_response.` to any HTTP method call, e.g.,
+
+```py
+from cartesia import Cartesia
+
+client = Cartesia()
+response = client.voices.with_raw_response.list()
+print(response.headers.get('X-My-Header'))
+
+voice = response.parse()  # get the object that `voices.list()` would have returned
+print(voice.id)
+```
+
+These methods return an [`APIResponse`](https://github.com/cartesia-ai/cartesia-python-internal/tree/main/src/cartesia/_response.py) object.
+
+The async client returns an [`AsyncAPIResponse`](https://github.com/cartesia-ai/cartesia-python-internal/tree/main/src/cartesia/_response.py) with the same structure, the only difference being `await`able methods for reading the response content.
+
+#### `.with_streaming_response`
+
+The above interface eagerly reads the full response body when you make the request, which may not always be what you want.
+
+To stream the response body, use `.with_streaming_response` instead, which requires a context manager and only reads the response body once you call `.read()`, `.text()`, `.json()`, `.iter_bytes()`, `.iter_text()`, `.iter_lines()` or `.parse()`. In the async client, these are async methods.
+
+```python
+with client.voices.with_streaming_response.list() as response:
+    print(response.headers.get("X-My-Header"))
+
+    for line in response.iter_lines():
+        print(line)
+```
+
+The context manager is required so that the response will reliably be closed.
+
+### Making custom/undocumented requests
+
+This library is typed for convenient access to the documented API.
+
+If you need to access undocumented endpoints, params, or response properties, the library can still be used.
+
+#### Undocumented endpoints
+
+To make requests to undocumented endpoints, you can make requests using `client.get`, `client.post`, and other
+http verbs. Options on the client will be respected (such as retries) when making this request.
+
+```py
+import httpx
+
+response = client.post(
+    "/foo",
+    cast_to=httpx.Response,
+    body={"my_param": True},
+)
+
+print(response.headers.get("x-foo"))
+```
+
+#### Undocumented request params
+
+If you want to explicitly send an extra param, you can do so with the `extra_query`, `extra_body`, and `extra_headers` request
+options.
+
+#### Undocumented response properties
+
+To access undocumented response properties, you can access the extra fields like `response.unknown_prop`. You
+can also get all the extra fields on the Pydantic model as a dict with
+[`response.model_extra`](https://docs.pydantic.dev/latest/api/base_model/#pydantic.BaseModel.model_extra).
+
+### Configuring the HTTP client
+
+You can directly override the [httpx client](https://www.python-httpx.org/api/#client) to customize it for your use case, including:
+
+- Support for [proxies](https://www.python-httpx.org/advanced/proxies/)
+- Custom [transports](https://www.python-httpx.org/advanced/transports/)
+- Additional [advanced](https://www.python-httpx.org/advanced/clients/) functionality
+
+```python
+import httpx
+from cartesia import Cartesia, DefaultHttpxClient
+
+client = Cartesia(
+    # Or use the `CARTESIA_BASE_URL` env var
+    base_url="http://my.test.server.example.com:8083",
+    http_client=DefaultHttpxClient(
+        proxy="http://my.test.proxy.example.com",
         transport=httpx.HTTPTransport(local_address="0.0.0.0"),
     ),
 )
 ```
 
-## Reference
+You can also customize the client on a per-request basis by using `with_options()`:
 
-A full reference for this library is available [here](./reference.md).
+```python
+client.with_options(http_client=DefaultHttpxClient(...))
+```
+
+### Managing HTTP resources
+
+By default the library closes underlying HTTP connections whenever the client is [garbage collected](https://docs.python.org/3/reference/datamodel.html#object.__del__). You can manually close the client using the `.close()` method if desired, or with a context manager that closes when exiting.
+
+```py
+from cartesia import Cartesia
+
+with Cartesia() as client:
+  # make requests here
+  ...
+
+# HTTP client is now closed
+```
+
+## Versioning
+
+This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) conventions, though certain backwards-incompatible changes may be released as minor versions:
+
+1. Changes that only affect static types, without breaking runtime behavior.
+2. Changes to library internals which are technically public but not intended or documented for external use. _(Please open a GitHub issue to let us know if you are relying on such internals.)_
+3. Changes that we do not expect to impact the vast majority of users in practice.
+
+We take backwards-compatibility seriously and work hard to ensure you can rely on a smooth upgrade experience.
+
+We are keen for your feedback; please open an [issue](https://www.github.com/cartesia-ai/cartesia-python-internal/issues) with questions, bugs, or suggestions.
+
+### Determining the installed version
+
+If you've upgraded to the latest version but aren't seeing any new features you were expecting then your python environment is likely still using an older version.
+
+You can determine the version that is being used at runtime with:
+
+```py
+import cartesia
+print(cartesia.__version__)
+```
+
+## Requirements
+
+Python 3.9 or higher.
 
 ## Contributing
 
-Note that most of this library is generated programmatically from
-<https://github.com/cartesia-ai/docs> — before making edits to a file, verify it's not autogenerated
-by checking for this comment at the top of the file:
-
-```
-# This file was auto-generated by Fern from our API Definition.
-```
-
-### Running tests
-
-```sh
-uv pip install -r requirements.txt
-uv run pytest -rP -vv tests/custom/test_client.py::test_get_voices
-```
-### Manually generating SDK code from docs
-
-Assuming all your repos are cloned into your home directory:
-
-```sh
-$ cd ~/docs
-$ fern generate --group python-sdk --log-level debug --api version-2024-11-13 --preview
-$ cd ~/cartesia-python
-$ git pull ~/docs/fern/apis/version-2024-11-13/.preview/fern-python-sdk
-$ git commit --amend -m "manually regenerate from docs" # optional
-```
-
-### Automatically generating new SDK releases
-
-From https://github.com/cartesia-ai/docs click `Actions` then `Release Python SDK`. (Requires permissions.)
+See [the contributing documentation](./CONTRIBUTING.md).

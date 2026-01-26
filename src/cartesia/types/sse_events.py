@@ -1,0 +1,120 @@
+# SSE Event types for Server-Sent Events streaming
+
+import base64
+from typing import Any, Dict, List, Optional, Union
+from typing_extensions import Literal
+
+from .._models import BaseModel
+
+__all__ = ["SSEEvent", "ChunkEvent", "TimestampsEvent", "PhonemeTimestampsEvent", "DoneEvent", "ErrorEvent"]
+
+
+class SSEEvent(BaseModel):
+    """Base class for Server-Sent Events"""
+    
+    type: str
+    """The event type (e.g., 'chunk', 'timestamps', 'done')"""
+    
+    id: Optional[str] = None
+    """Optional event ID for reconnection support"""
+    
+    retry: Optional[int] = None
+    """Optional retry timeout in milliseconds"""
+
+
+class ChunkEvent(SSEEvent):
+    """Audio chunk event with decoded audio data"""
+    
+    type: Literal["chunk"] = "chunk"
+    
+    data: str
+    """Base64-encoded audio data"""
+    
+    context_id: Optional[str] = None
+    """Context ID for request correlation"""
+    
+    status_code: Optional[int] = None
+    """HTTP status code"""
+    
+    done: bool = False
+    """Whether this is the final chunk"""
+    
+    @property
+    def audio(self) -> Optional[bytes]:
+        """
+        Decoded audio data as bytes.
+        
+        This property automatically base64-decodes the data field for convenience.
+        Returns None if data is None or empty.
+        """
+        if not self.data:
+            return None
+        try:
+            return base64.b64decode(self.data)
+        except Exception:
+            return None
+
+
+class TimestampsEvent(SSEEvent):
+    """Word-level timestamp event"""
+    
+    type: Literal["timestamps"] = "timestamps"
+    
+    word_timestamps: List[Dict[str, Any]] = []
+    """List of word-level timestamp objects"""
+    
+    context_id: Optional[str] = None
+    """Context ID for request correlation"""
+    
+    @property
+    def timestamps(self) -> List[Dict[str, Any]]:
+        """Alias for word_timestamps for convenience"""
+        return self.word_timestamps
+
+
+class PhonemeTimestampsEvent(SSEEvent):
+    """Phoneme-level timestamp event"""
+    
+    type: Literal["phoneme_timestamps"] = "phoneme_timestamps"
+    
+    phoneme_timestamps: List[Dict[str, Any]] = []
+    """List of phoneme-level timestamp objects"""
+    
+    context_id: Optional[str] = None
+    """Context ID for request correlation"""
+    
+    @property
+    def timestamps(self) -> List[Dict[str, Any]]:
+        """Alias for phoneme_timestamps for convenience"""
+        return self.phoneme_timestamps
+
+
+class DoneEvent(SSEEvent):
+    """Stream completion event"""
+    
+    type: Literal["done"] = "done"
+    
+    context_id: Optional[str] = None
+    """Context ID for request correlation"""
+    
+    status_code: Optional[int] = None
+    """HTTP status code"""
+
+
+class ErrorEvent(SSEEvent):
+    """Stream error event"""
+    
+    type: Literal["error"] = "error"
+    
+    error: Optional[str] = None
+    """Error message"""
+    
+    context_id: Optional[str] = None
+    """Context ID for request correlation"""
+    
+    status_code: Optional[int] = None
+    """HTTP status code"""
+
+
+# Union type for all possible SSE events
+SSEEventType = Union[ChunkEvent, TimestampsEvent, PhonemeTimestampsEvent, DoneEvent, ErrorEvent]
