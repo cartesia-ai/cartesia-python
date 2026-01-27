@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0-beta10 (2026-01-27)
+
+Full Changelog: [v3.0.0-beta9...v3.0.0-beta10](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta9...v3.0.0-beta10)
+
+### Features
+
+* **api:** update release environment ([ff6c335](https://github.com/cartesia-ai/cartesia-python/commit/ff6c33500d3534cf552ad272ffb6ae9c5d13e81f))
+
 ## 3.0.0-beta9 (2026-01-27)
 
 Full Changelog: [v3.0.0-beta8...v3.0.0-beta9](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta8...v3.0.0-beta9)
