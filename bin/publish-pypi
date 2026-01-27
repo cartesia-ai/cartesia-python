@@ -3,8 +3,4 @@
 set -eux
 mkdir -p dist
 rye build --clean
-if [ -n "${PYPI_TOKEN:-}" ]; then
-  rye publish --yes --token=$PYPI_TOKEN
-else
-  rye publish --yes
-fi
+rye publish --yes --token=$PYPI_TOKEN
