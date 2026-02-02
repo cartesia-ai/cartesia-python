@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.0-beta11 (2026-02-02)
+
+Full Changelog: [v3.0.0-beta10...v3.0.0-beta11](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta10...v3.0.0-beta11)
+
+### Features
+
+* **api:** update api version ([47f7aac](https://github.com/cartesia-ai/cartesia-python/commit/47f7aac8e3b913d29d876022836097a27eed72cb))
+* **api:** update python edition & auth method ([17c2071](https://github.com/cartesia-ai/cartesia-python/commit/17c20715ce811bf2ac296d378cb724aab5e3879c))
+* **client:** add custom JSON encoder for extended type support ([9095b76](https://github.com/cartesia-ai/cartesia-python/commit/9095b7646415e0aebc1bfca83e68de2c6a4ad293))
+
 ## 3.0.0-beta10 (2026-01-27)
 
 Full Changelog: [v3.0.0-beta9...v3.0.0-beta10](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta9...v3.0.0-beta10)
