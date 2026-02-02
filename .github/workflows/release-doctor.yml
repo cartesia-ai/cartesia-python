@@ -18,5 +18,3 @@ jobs:
       - name: Check release environment
         run: |
           bash ./bin/check-release-environment
-        env:
-          PYPI_TOKEN: ${{ secrets.CARTESIA_PYPI_TOKEN || secrets.PYPI_TOKEN }}
