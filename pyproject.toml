@@ -1,6 +1,6 @@
 [project]
 name = "cartesia"
-version = "3.0.0-beta10"
+version = "3.0.0-beta11"
 description = "The official Python library for the cartesia API"
 dynamic = ["readme"]
 license = "Apache-2.0"
