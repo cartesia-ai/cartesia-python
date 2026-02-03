@@ -12,6 +12,7 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
+    environment: stainless-pypi-release
     permissions:
       contents: read
       id-token: write
