@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0-beta12 (2026-02-03)
+
+Full Changelog: [v3.0.0-beta11...v3.0.0-beta12](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta11...v3.0.0-beta12)
+
+### Chores
+
+* update SDK settings ([9269ed5](https://github.com/cartesia-ai/cartesia-python/commit/9269ed58cf7cfcb973100b06b72d08547c9955e3))
+* update SDK settings ([e25b110](https://github.com/cartesia-ai/cartesia-python/commit/e25b1107d3f19041b15ecd4a5545ee37a8066d8f))
+
 ## 3.0.0-beta11 (2026-02-02)
 
 Full Changelog: [v3.0.0-beta10...v3.0.0-beta11](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta10...v3.0.0-beta11)
