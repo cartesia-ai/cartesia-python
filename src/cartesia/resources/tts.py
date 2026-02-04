@@ -273,7 +273,7 @@ class TTSResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> BinaryAPIResponse:
         """Generate audio that smoothly connects two existing audio segments.
 
         This is
@@ -322,7 +322,7 @@ class TTSResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "language": language,
@@ -341,7 +341,7 @@ class TTSResource(SyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/infill/bytes",
             body=maybe_transform(body, tts_infill_params.TTSInfillParams),
@@ -349,7 +349,7 @@ class TTSResource(SyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=BinaryAPIResponse,
         )
 
     def websocket_connect(
@@ -576,7 +576,7 @@ class AsyncTTSResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncBinaryAPIResponse:
         """Generate audio that smoothly connects two existing audio segments.
 
         This is
@@ -625,7 +625,7 @@ class AsyncTTSResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         body = deepcopy_minimal(
             {
                 "language": language,
@@ -644,7 +644,7 @@ class AsyncTTSResource(AsyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/infill/bytes",
             body=await async_maybe_transform(body, tts_infill_params.TTSInfillParams),
@@ -652,7 +652,7 @@ class AsyncTTSResource(AsyncAPIResource):
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=AsyncBinaryAPIResponse,
         )
 
     def websocket_connect(
@@ -680,8 +680,9 @@ class TTSResourceWithRawResponse:
         self.generate_sse = to_raw_response_wrapper(
             tts.generate_sse,
         )
-        self.infill = to_raw_response_wrapper(
+        self.infill = to_custom_raw_response_wrapper(
             tts.infill,
+            BinaryAPIResponse,
         )
 
 
@@ -696,8 +697,9 @@ class AsyncTTSResourceWithRawResponse:
         self.generate_sse = async_to_raw_response_wrapper(
             tts.generate_sse,
         )
-        self.infill = async_to_raw_response_wrapper(
+        self.infill = async_to_custom_raw_response_wrapper(
             tts.infill,
+            AsyncBinaryAPIResponse,
         )
 
 
@@ -712,8 +714,9 @@ class TTSResourceWithStreamingResponse:
         self.generate_sse = to_streamed_response_wrapper(
             tts.generate_sse,
         )
-        self.infill = to_streamed_response_wrapper(
+        self.infill = to_custom_streamed_response_wrapper(
             tts.infill,
+            StreamedBinaryAPIResponse,
         )
 
 
@@ -728,8 +731,9 @@ class AsyncTTSResourceWithStreamingResponse:
         self.generate_sse = async_to_streamed_response_wrapper(
             tts.generate_sse,
         )
-        self.infill = async_to_streamed_response_wrapper(
+        self.infill = async_to_custom_streamed_response_wrapper(
             tts.infill,
+            AsyncStreamedBinaryAPIResponse,
         )
 
 

@@ -217,15 +217,20 @@ class TestTTS:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_infill(self, client: Cartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_infill(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.infill()
-        assert tts is None
+        assert tts.is_closed
+        assert tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, BinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_method_infill_with_all_params(self, client: Cartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    def test_method_infill_with_all_params(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.infill(
             language="language",
             left_audio=b"raw file contents",
@@ -238,29 +243,36 @@ class TestTTS:
             transcript="transcript",
             voice_id="voice_id",
         )
-        assert tts is None
+        assert tts.is_closed
+        assert tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, BinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    def test_raw_response_infill(self, client: Cartesia) -> None:
-        response = client.tts.with_raw_response.infill()
+    @pytest.mark.respx(base_url=base_url)
+    def test_raw_response_infill(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tts = response.parse()
-        assert tts is None
+        tts = client.tts.with_raw_response.infill()
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+        assert tts.is_closed is True
+        assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert tts.json() == {"foo": "bar"}
+        assert isinstance(tts, BinaryAPIResponse)
+
     @parametrize
-    def test_streaming_response_infill(self, client: Cartesia) -> None:
-        with client.tts.with_streaming_response.infill() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+    @pytest.mark.respx(base_url=base_url)
+    def test_streaming_response_infill(self, client: Cartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        with client.tts.with_streaming_response.infill() as tts:
+            assert not tts.is_closed
+            assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            tts = response.parse()
-            assert tts is None
+            assert tts.json() == {"foo": "bar"}
+            assert cast(Any, tts.is_closed) is True
+            assert isinstance(tts, StreamedBinaryAPIResponse)
 
-        assert cast(Any, response.is_closed) is True
+        assert cast(Any, tts.is_closed) is True
 
 
 class TestAsyncTTS:
@@ -462,15 +474,20 @@ class TestAsyncTTS:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_infill(self, async_client: AsyncCartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_infill(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.infill()
-        assert tts is None
+        assert tts.is_closed
+        assert await tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, AsyncBinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_method_infill_with_all_params(self, async_client: AsyncCartesia) -> None:
+    @pytest.mark.respx(base_url=base_url)
+    async def test_method_infill_with_all_params(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.infill(
             language="language",
             left_audio=b"raw file contents",
@@ -483,26 +500,33 @@ class TestAsyncTTS:
             transcript="transcript",
             voice_id="voice_id",
         )
-        assert tts is None
+        assert tts.is_closed
+        assert await tts.json() == {"foo": "bar"}
+        assert cast(Any, tts.is_closed) is True
+        assert isinstance(tts, AsyncBinaryAPIResponse)
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
     @parametrize
-    async def test_raw_response_infill(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.tts.with_raw_response.infill()
+    @pytest.mark.respx(base_url=base_url)
+    async def test_raw_response_infill(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
-        assert response.is_closed is True
-        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        tts = await response.parse()
-        assert tts is None
+        tts = await async_client.tts.with_raw_response.infill()
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+        assert tts.is_closed is True
+        assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
+        assert await tts.json() == {"foo": "bar"}
+        assert isinstance(tts, AsyncBinaryAPIResponse)
+
     @parametrize
-    async def test_streaming_response_infill(self, async_client: AsyncCartesia) -> None:
-        async with async_client.tts.with_streaming_response.infill() as response:
-            assert not response.is_closed
-            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+    @pytest.mark.respx(base_url=base_url)
+    async def test_streaming_response_infill(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
+        respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
+        async with async_client.tts.with_streaming_response.infill() as tts:
+            assert not tts.is_closed
+            assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            tts = await response.parse()
-            assert tts is None
+            assert await tts.json() == {"foo": "bar"}
+            assert cast(Any, tts.is_closed) is True
+            assert isinstance(tts, AsyncStreamedBinaryAPIResponse)
 
-        assert cast(Any, response.is_closed) is True
+        assert cast(Any, tts.is_closed) is True
