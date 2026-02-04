@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Iterator, Optional, cast, Dict
 from typing_extensions import AsyncIterator
@@ -701,15 +702,18 @@ class AsyncTTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: str):
+    def context(self, context_id: Optional[str] = None):
         """Create a context helper for managing conversational flows.
 
         Args:
-            context_id: Unique identifier for this context
+            context_id: Unique identifier for this context. If not provided,
+                a UUID will be auto-generated.
 
         Returns:
             AsyncWebSocketContext helper for simplified sending and receiving
         """
+        if context_id is None:
+            context_id = str(uuid.uuid4())
         return AsyncWebSocketContext(self, context_id)
 
 
@@ -871,15 +875,18 @@ class TTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: str):
+    def context(self, context_id: Optional[str] = None):
         """Create a context helper for managing conversational flows.
 
         Args:
-            context_id: Unique identifier for this context
+            context_id: Unique identifier for this context. If not provided,
+                a UUID will be auto-generated.
 
         Returns:
             WebSocketContext helper for simplified sending and receiving
         """
+        if context_id is None:
+            context_id = str(uuid.uuid4())
         return WebSocketContext(self, context_id)
 
 
