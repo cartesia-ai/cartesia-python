@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.0.0-beta13 (2026-02-04)
+
+Full Changelog: [v3.0.0-beta12...v3.0.0-beta13](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta12...v3.0.0-beta13)
+
+### Features
+
+* **api:** infill response ([09d2856](https://github.com/cartesia-ai/cartesia-python/commit/09d28561b638e985063fba4d9f2df4adb4c83d19))
+* **api:** move infill and websocket_connect ([50e2649](https://github.com/cartesia-ai/cartesia-python/commit/50e264941f4e8b1df3dddd8b67ce1fa51fd46cfd))
+
+
+### Chores
+
+* **ci:** add missing environment ([d2698b2](https://github.com/cartesia-ai/cartesia-python/commit/d2698b2941eea02b200b3ceb37356349bddbfa8e))
+
 ## 3.0.0-beta12 (2026-02-03)
 
 Full Changelog: [v3.0.0-beta11...v3.0.0-beta12](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta11...v3.0.0-beta12)

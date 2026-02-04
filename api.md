@@ -146,18 +146,6 @@ Methods:
 - <code title="delete /fine-tunes/{id}">client.fine_tunes.<a href="./src/cartesia/resources/fine_tunes.py">delete</a>(id) -> None</code>
 - <code title="get /fine-tunes/{id}/voices">client.fine_tunes.<a href="./src/cartesia/resources/fine_tunes.py">list_voices</a>(id, \*\*<a href="src/cartesia/types/fine_tune_list_voices_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 
-# Infill
-
-Types:
-
-```python
-from cartesia.types import OutputFormatContainer, RawEncoding
-```
-
-Methods:
-
-- <code title="post /infill/bytes">client.infill.<a href="./src/cartesia/resources/infill.py">create</a>(\*\*<a href="src/cartesia/types/infill_create_params.py">params</a>) -> None</code>
-
 # PronunciationDicts
 
 Types:
@@ -195,6 +183,8 @@ from cartesia.types import (
     GenerationConfig,
     GenerationRequest,
     ModelSpeed,
+    OutputFormatContainer,
+    RawEncoding,
     RawOutputFormat,
     VoiceSpecifier,
     WebsocketClientEvent,
@@ -206,6 +196,7 @@ Methods:
 
 - <code title="post /tts/bytes">client.tts.<a href="./src/cartesia/resources/tts.py">generate</a>(\*\*<a href="src/cartesia/types/tts_generate_params.py">params</a>) -> BinaryAPIResponse</code>
 - <code title="post /tts/sse">client.tts.<a href="./src/cartesia/resources/tts.py">generate_sse</a>(\*\*<a href="src/cartesia/types/tts_generate_sse_params.py">params</a>) -> None</code>
+- <code title="post /infill/bytes">client.tts.<a href="./src/cartesia/resources/tts.py">infill</a>(\*\*<a href="src/cartesia/types/tts_infill_params.py">params</a>) -> BinaryAPIResponse</code>
 
 # VoiceChanger
 

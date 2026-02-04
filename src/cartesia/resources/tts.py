@@ -4,21 +4,25 @@ from __future__ import annotations
 
 import json
 import logging
+import uuid
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Iterator, Optional, cast, Dict
-from typing_extensions import AsyncIterator
+from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast, Dict
+from typing_extensions import Literal, AsyncIterator
 
 import httpx
 from pydantic import BaseModel
 
 from ..types import (
     ModelSpeed,
+    RawEncoding,
     SupportedLanguage,
+    OutputFormatContainer,
+    tts_infill_params,
     tts_generate_params,
     tts_generate_sse_params,
 )
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
-from .._utils import maybe_transform, async_maybe_transform
+from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
+from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
 from .._compat import cached_property
 from .._models import construct_type_unchecked
 from .._resource import SyncAPIResource, AsyncAPIResource
@@ -40,11 +44,13 @@ from .._streaming import SSEEventStream, AsyncSSEEventStream
 from .._exceptions import CartesiaError
 from .._base_client import _merge_mappings, make_request_options
 from ..types.model_speed import ModelSpeed
+from ..types.raw_encoding import RawEncoding
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent, GenerationRequest
 from ..types.generation_config_param import GenerationConfigParam
+from ..types.output_format_container import OutputFormatContainer
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
@@ -78,19 +84,6 @@ class TTSResource(SyncAPIResource):
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#with_streaming_response
         """
         return TTSResourceWithStreamingResponse(self)
-
-    def connect(
-        self,
-        extra_query: Query = {},
-        extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
-    ) -> TTSResourceConnectionManager:
-        return TTSResourceConnectionManager(
-            client=self._client,
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
-        )
 
     def generate(
         self,
@@ -322,6 +315,117 @@ class TTSResource(SyncAPIResource):
         )
         return response.iter_bytes()
 
+    def infill(
+        self,
+        *,
+        language: str | Omit = omit,
+        left_audio: FileTypes | Omit = omit,
+        model_id: str | Omit = omit,
+        output_format_bit_rate: Optional[int] | Omit = omit,
+        output_format_container: OutputFormatContainer | Omit = omit,
+        output_format_encoding: Optional[RawEncoding] | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        right_audio: FileTypes | Omit = omit,
+        transcript: str | Omit = omit,
+        voice_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> BinaryAPIResponse:
+        """Generate audio that smoothly connects two existing audio segments.
+
+        This is
+        useful for inserting new speech between existing speech segments while
+        maintaining natural transitions.
+
+        **The cost is 1 credit per character of the infill text plus a fixed cost of 300
+        credits.**
+
+        At least one of `left_audio` or `right_audio` must be provided.
+
+        As with all generative models, there's some inherent variability, but here's
+        some tips we recommend to get the best results from infill:
+
+        - Use longer infill transcripts
+          - This gives the model more flexibility to adapt to the rest of the audio
+        - Target natural pauses in the audio when deciding where to clip
+          - This means you don't need word-level timestamps to be as precise
+        - Clip right up to the start and end of the audio segment you want infilled,
+          keeping as much silence in the left/right audio segments as possible
+          - This helps the model generate more natural transitions
+
+        Args:
+          language: The language of the transcript
+
+          model_id: The ID of the model to use for generating audio. Any model other than the first
+              `"sonic"` model is supported.
+
+          output_format_bit_rate: Required for `mp3` containers.
+
+          output_format_container: The format of the output audio
+
+          output_format_encoding: Required for `raw` and `wav` containers.
+
+          output_format_sample_rate: The sample rate of the output audio
+
+          transcript: The infill text to generate
+
+          voice_id: The ID of the voice to use for generating audio
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        body = deepcopy_minimal(
+            {
+                "language": language,
+                "left_audio": left_audio,
+                "model_id": model_id,
+                "output_format_bit_rate": output_format_bit_rate,
+                "output_format_container": output_format_container,
+                "output_format_encoding": output_format_encoding,
+                "output_format_sample_rate": output_format_sample_rate,
+                "right_audio": right_audio,
+                "transcript": transcript,
+                "voice_id": voice_id,
+            }
+        )
+        files = extract_files(cast(Mapping[str, object], body), paths=[["left_audio"], ["right_audio"]])
+        # It should be noted that the actual Content-Type header that will be
+        # sent to the server will contain a `boundary` parameter, e.g.
+        # multipart/form-data; boundary=---abc--
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
+        return self._post(
+            "/infill/bytes",
+            body=maybe_transform(body, tts_infill_params.TTSInfillParams),
+            files=files,
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=BinaryAPIResponse,
+        )
+
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> TTSResourceConnectionManager:
+        return TTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+
 
 class AsyncTTSResource(AsyncAPIResource):
     @cached_property
@@ -342,19 +446,6 @@ class AsyncTTSResource(AsyncAPIResource):
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#with_streaming_response
         """
         return AsyncTTSResourceWithStreamingResponse(self)
-
-    def connect(
-        self,
-        extra_query: Query = {},
-        extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
-    ) -> AsyncTTSResourceConnectionManager:
-        return AsyncTTSResourceConnectionManager(
-            client=self._client,
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
-        )
 
     async def generate(
         self,
@@ -586,6 +677,117 @@ class AsyncTTSResource(AsyncAPIResource):
         )
         return response.iter_bytes()
 
+    async def infill(
+        self,
+        *,
+        language: str | Omit = omit,
+        left_audio: FileTypes | Omit = omit,
+        model_id: str | Omit = omit,
+        output_format_bit_rate: Optional[int] | Omit = omit,
+        output_format_container: OutputFormatContainer | Omit = omit,
+        output_format_encoding: Optional[RawEncoding] | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        right_audio: FileTypes | Omit = omit,
+        transcript: str | Omit = omit,
+        voice_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AsyncBinaryAPIResponse:
+        """Generate audio that smoothly connects two existing audio segments.
+
+        This is
+        useful for inserting new speech between existing speech segments while
+        maintaining natural transitions.
+
+        **The cost is 1 credit per character of the infill text plus a fixed cost of 300
+        credits.**
+
+        At least one of `left_audio` or `right_audio` must be provided.
+
+        As with all generative models, there's some inherent variability, but here's
+        some tips we recommend to get the best results from infill:
+
+        - Use longer infill transcripts
+          - This gives the model more flexibility to adapt to the rest of the audio
+        - Target natural pauses in the audio when deciding where to clip
+          - This means you don't need word-level timestamps to be as precise
+        - Clip right up to the start and end of the audio segment you want infilled,
+          keeping as much silence in the left/right audio segments as possible
+          - This helps the model generate more natural transitions
+
+        Args:
+          language: The language of the transcript
+
+          model_id: The ID of the model to use for generating audio. Any model other than the first
+              `"sonic"` model is supported.
+
+          output_format_bit_rate: Required for `mp3` containers.
+
+          output_format_container: The format of the output audio
+
+          output_format_encoding: Required for `raw` and `wav` containers.
+
+          output_format_sample_rate: The sample rate of the output audio
+
+          transcript: The infill text to generate
+
+          voice_id: The ID of the voice to use for generating audio
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
+        body = deepcopy_minimal(
+            {
+                "language": language,
+                "left_audio": left_audio,
+                "model_id": model_id,
+                "output_format_bit_rate": output_format_bit_rate,
+                "output_format_container": output_format_container,
+                "output_format_encoding": output_format_encoding,
+                "output_format_sample_rate": output_format_sample_rate,
+                "right_audio": right_audio,
+                "transcript": transcript,
+                "voice_id": voice_id,
+            }
+        )
+        files = extract_files(cast(Mapping[str, object], body), paths=[["left_audio"], ["right_audio"]])
+        # It should be noted that the actual Content-Type header that will be
+        # sent to the server will contain a `boundary` parameter, e.g.
+        # multipart/form-data; boundary=---abc--
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
+        return await self._post(
+            "/infill/bytes",
+            body=await async_maybe_transform(body, tts_infill_params.TTSInfillParams),
+            files=files,
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=AsyncBinaryAPIResponse,
+        )
+
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> AsyncTTSResourceConnectionManager:
+        return AsyncTTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+
 
 class TTSResourceWithRawResponse:
     def __init__(self, tts: TTSResource) -> None:
@@ -597,6 +799,10 @@ class TTSResourceWithRawResponse:
         )
         self.generate_sse = to_raw_response_wrapper(
             tts.generate_sse,
+        )
+        self.infill = to_custom_raw_response_wrapper(
+            tts.infill,
+            BinaryAPIResponse,
         )
 
 
@@ -611,6 +817,10 @@ class AsyncTTSResourceWithRawResponse:
         self.generate_sse = async_to_raw_response_wrapper(
             tts.generate_sse,
         )
+        self.infill = async_to_custom_raw_response_wrapper(
+            tts.infill,
+            AsyncBinaryAPIResponse,
+        )
 
 
 class TTSResourceWithStreamingResponse:
@@ -624,6 +834,10 @@ class TTSResourceWithStreamingResponse:
         self.generate_sse = to_streamed_response_wrapper(
             tts.generate_sse,
         )
+        self.infill = to_custom_streamed_response_wrapper(
+            tts.infill,
+            StreamedBinaryAPIResponse,
+        )
 
 
 class AsyncTTSResourceWithStreamingResponse:
@@ -636,6 +850,10 @@ class AsyncTTSResourceWithStreamingResponse:
         )
         self.generate_sse = async_to_streamed_response_wrapper(
             tts.generate_sse,
+        )
+        self.infill = async_to_custom_streamed_response_wrapper(
+            tts.infill,
+            AsyncStreamedBinaryAPIResponse,
         )
 
 
@@ -701,21 +919,24 @@ class AsyncTTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: str):
+    def context(self, context_id: Optional[str] = None):
         """Create a context helper for managing conversational flows.
 
         Args:
-            context_id: Unique identifier for this context
+            context_id: Unique identifier for this context. If not provided,
+                a UUID will be auto-generated.
 
         Returns:
             AsyncWebSocketContext helper for simplified sending and receiving
         """
+        if context_id is None:
+            context_id = str(uuid.uuid4())
         return AsyncWebSocketContext(self, context_id)
 
 
 class AsyncTTSResourceConnectionManager:
     """
-    Context manager over a `AsyncTTSResourceConnection` that is returned by `tts.connect()`
+    Context manager over a `AsyncTTSResourceConnection` that is returned by `tts.websocket_connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -727,7 +948,7 @@ class AsyncTTSResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = await client.tts.connect(...).enter()
+    connection = await client.tts.websocket_connect(...).enter()
     # ...
     await connection.close()
     ```
@@ -755,7 +976,7 @@ class AsyncTTSResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = await client.tts.connect(...).enter()
+        connection = await client.tts.websocket_connect(...).enter()
         # ...
         await connection.close()
         ```
@@ -871,21 +1092,24 @@ class TTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: str):
+    def context(self, context_id: Optional[str] = None):
         """Create a context helper for managing conversational flows.
 
         Args:
-            context_id: Unique identifier for this context
+            context_id: Unique identifier for this context. If not provided,
+                a UUID will be auto-generated.
 
         Returns:
             WebSocketContext helper for simplified sending and receiving
         """
+        if context_id is None:
+            context_id = str(uuid.uuid4())
         return WebSocketContext(self, context_id)
 
 
 class TTSResourceConnectionManager:
     """
-    Context manager over a `TTSResourceConnection` that is returned by `tts.connect()`
+    Context manager over a `TTSResourceConnection` that is returned by `tts.websocket_connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -897,7 +1121,7 @@ class TTSResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = client.tts.connect(...).enter()
+    connection = client.tts.websocket_connect(...).enter()
     # ...
     connection.close()
     ```
@@ -925,7 +1149,7 @@ class TTSResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = client.tts.connect(...).enter()
+        connection = client.tts.websocket_connect(...).enter()
         # ...
         connection.close()
         ```

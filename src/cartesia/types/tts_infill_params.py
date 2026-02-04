@@ -10,10 +10,10 @@ from .._utils import PropertyInfo
 from .raw_encoding import RawEncoding
 from .output_format_container import OutputFormatContainer
 
-__all__ = ["InfillCreateParams"]
+__all__ = ["TTSInfillParams"]
 
 
-class InfillCreateParams(TypedDict, total=False):
+class TTSInfillParams(TypedDict, total=False):
     language: str
     """The language of the transcript"""
 
