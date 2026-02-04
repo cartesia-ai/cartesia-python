@@ -24,14 +24,6 @@ from .agents import (
     AgentsResourceWithStreamingResponse,
     AsyncAgentsResourceWithStreamingResponse,
 )
-from .infill import (
-    InfillResource,
-    AsyncInfillResource,
-    InfillResourceWithRawResponse,
-    AsyncInfillResourceWithRawResponse,
-    InfillResourceWithStreamingResponse,
-    AsyncInfillResourceWithStreamingResponse,
-)
 from .voices import (
     VoicesResource,
     AsyncVoicesResource,
@@ -106,12 +98,6 @@ __all__ = [
     "AsyncFineTunesResourceWithRawResponse",
     "FineTunesResourceWithStreamingResponse",
     "AsyncFineTunesResourceWithStreamingResponse",
-    "InfillResource",
-    "AsyncInfillResource",
-    "InfillResourceWithRawResponse",
-    "AsyncInfillResourceWithRawResponse",
-    "InfillResourceWithStreamingResponse",
-    "AsyncInfillResourceWithStreamingResponse",
     "PronunciationDictsResource",
     "AsyncPronunciationDictsResource",
     "PronunciationDictsResourceWithRawResponse",

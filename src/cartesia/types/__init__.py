@@ -12,6 +12,7 @@ from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_get_params import VoiceGetParams as VoiceGetParams
 from .generation_config import GenerationConfig as GenerationConfig
+from .tts_infill_params import TTSInfillParams as TTSInfillParams
 from .voice_list_params import VoiceListParams as VoiceListParams
 from .generation_request import GenerationRequest as GenerationRequest
 from .pronunciation_dict import PronunciationDict as PronunciationDict
@@ -25,7 +26,6 @@ from .gender_presentation import GenderPresentation as GenderPresentation
 from .get_status_response import GetStatusResponse as GetStatusResponse
 from .tts_generate_params import TTSGenerateParams as TTSGenerateParams
 from .voice_update_params import VoiceUpdateParams as VoiceUpdateParams
-from .infill_create_params import InfillCreateParams as InfillCreateParams
 from .dataset_create_params import DatasetCreateParams as DatasetCreateParams
 from .dataset_update_params import DatasetUpdateParams as DatasetUpdateParams
 from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
