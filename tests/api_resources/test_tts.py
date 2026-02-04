@@ -217,6 +217,51 @@ class TestTTS:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_method_infill(self, client: Cartesia) -> None:
+        tts = client.tts.infill()
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_method_infill_with_all_params(self, client: Cartesia) -> None:
+        tts = client.tts.infill(
+            language="language",
+            left_audio=b"raw file contents",
+            model_id="model_id",
+            output_format_bit_rate=0,
+            output_format_container="raw",
+            output_format_encoding="pcm_f32le",
+            output_format_sample_rate=8000,
+            right_audio=b"raw file contents",
+            transcript="transcript",
+            voice_id="voice_id",
+        )
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_raw_response_infill(self, client: Cartesia) -> None:
+        response = client.tts.with_raw_response.infill()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        tts = response.parse()
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    def test_streaming_response_infill(self, client: Cartesia) -> None:
+        with client.tts.with_streaming_response.infill() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            tts = response.parse()
+            assert tts is None
+
+        assert cast(Any, response.is_closed) is True
+
 
 class TestAsyncTTS:
     parametrize = pytest.mark.parametrize(
@@ -409,6 +454,51 @@ class TestAsyncTTS:
                 "mode": "id",
             },
         ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            tts = await response.parse()
+            assert tts is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_infill(self, async_client: AsyncCartesia) -> None:
+        tts = await async_client.tts.infill()
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_method_infill_with_all_params(self, async_client: AsyncCartesia) -> None:
+        tts = await async_client.tts.infill(
+            language="language",
+            left_audio=b"raw file contents",
+            model_id="model_id",
+            output_format_bit_rate=0,
+            output_format_container="raw",
+            output_format_encoding="pcm_f32le",
+            output_format_sample_rate=8000,
+            right_audio=b"raw file contents",
+            transcript="transcript",
+            voice_id="voice_id",
+        )
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_raw_response_infill(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.tts.with_raw_response.infill()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        tts = await response.parse()
+        assert tts is None
+
+    @pytest.mark.skip(reason="Prism tests are disabled")
+    @parametrize
+    async def test_streaming_response_infill(self, async_client: AsyncCartesia) -> None:
+        async with async_client.tts.with_streaming_response.infill() as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
