@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Optional
-from typing_extensions import Literal, Annotated, TypedDict
+from typing import Union, Optional
+from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
 
 from .._types import FileTypes
 from .._utils import PropertyInfo
 from .raw_encoding import RawEncoding
 from .output_format_container import OutputFormatContainer
+from .raw_output_format_param import RawOutputFormatParam
 
-__all__ = ["TTSInfillParams"]
+__all__ = [
+    "TTSInfillParams",
+    "OutputFormat",
+    "OutputFormatRawOutputFormat",
+    "OutputFormatWavOutputFormat",
+    "OutputFormatMP3OutputFormat",
+]
 
 
 class TTSInfillParams(TypedDict, total=False):
@@ -24,6 +31,8 @@ class TTSInfillParams(TypedDict, total=False):
 
     Any model other than the first `"sonic"` model is supported.
     """
+
+    output_format: OutputFormat
 
     output_format_bit_rate: Annotated[Optional[int], PropertyInfo(alias="output_format[bit_rate]")]
     """Required for `mp3` containers."""
@@ -46,3 +55,22 @@ class TTSInfillParams(TypedDict, total=False):
 
     voice_id: str
     """The ID of the voice to use for generating audio"""
+
+
+class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
+    container: Literal["raw"]
+
+
+class OutputFormatWavOutputFormat(RawOutputFormatParam, total=False):
+    container: Literal["wav"]
+
+
+class OutputFormatMP3OutputFormat(TypedDict, total=False):
+    bit_rate: Required[Literal[32000, 64000, 96000, 128000, 192000]]
+
+    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
+
+    container: Literal["mp3"]
+
+
+OutputFormat: TypeAlias = Union[OutputFormatRawOutputFormat, OutputFormatWavOutputFormat, OutputFormatMP3OutputFormat]

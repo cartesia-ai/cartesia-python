@@ -235,6 +235,11 @@ class TestTTS:
             language="language",
             left_audio=b"raw file contents",
             model_id="model_id",
+            output_format={
+                "encoding": "pcm_f32le",
+                "sample_rate": 8000,
+                "container": "raw",
+            },
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
@@ -492,6 +497,11 @@ class TestAsyncTTS:
             language="language",
             left_audio=b"raw file contents",
             model_id="model_id",
+            output_format={
+                "encoding": "pcm_f32le",
+                "sample_rate": 8000,
+                "container": "raw",
+            },
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
