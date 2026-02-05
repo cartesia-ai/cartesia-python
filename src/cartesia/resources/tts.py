@@ -7,16 +7,14 @@ import logging
 import uuid
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast, Dict
-from typing_extensions import Literal, AsyncIterator
+from typing_extensions import AsyncIterator
 
 import httpx
 from pydantic import BaseModel
 
 from ..types import (
     ModelSpeed,
-    RawEncoding,
     SupportedLanguage,
-    OutputFormatContainer,
     tts_infill_params,
     tts_generate_params,
     tts_generate_sse_params,
@@ -44,13 +42,11 @@ from .._streaming import SSEEventStream, AsyncSSEEventStream
 from .._exceptions import CartesiaError
 from .._base_client import _merge_mappings, make_request_options
 from ..types.model_speed import ModelSpeed
-from ..types.raw_encoding import RawEncoding
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent, GenerationRequest
 from ..types.generation_config_param import GenerationConfigParam
-from ..types.output_format_container import OutputFormatContainer
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
@@ -321,10 +317,7 @@ class TTSResource(SyncAPIResource):
         language: str | Omit = omit,
         left_audio: FileTypes | Omit = omit,
         model_id: str | Omit = omit,
-        output_format_bit_rate: Optional[int] | Omit = omit,
-        output_format_container: OutputFormatContainer | Omit = omit,
-        output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        output_format: tts_infill_params.OutputFormat | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
         voice_id: str | Omit = omit,
@@ -363,14 +356,6 @@ class TTSResource(SyncAPIResource):
           model_id: The ID of the model to use for generating audio. Any model other than the first
               `"sonic"` model is supported.
 
-          output_format_bit_rate: Required for `mp3` containers.
-
-          output_format_container: The format of the output audio
-
-          output_format_encoding: Required for `raw` and `wav` containers.
-
-          output_format_sample_rate: The sample rate of the output audio
-
           transcript: The infill text to generate
 
           voice_id: The ID of the voice to use for generating audio
@@ -389,10 +374,7 @@ class TTSResource(SyncAPIResource):
                 "language": language,
                 "left_audio": left_audio,
                 "model_id": model_id,
-                "output_format_bit_rate": output_format_bit_rate,
-                "output_format_container": output_format_container,
-                "output_format_encoding": output_format_encoding,
-                "output_format_sample_rate": output_format_sample_rate,
+                "output_format": output_format,
                 "right_audio": right_audio,
                 "transcript": transcript,
                 "voice_id": voice_id,
@@ -683,10 +665,7 @@ class AsyncTTSResource(AsyncAPIResource):
         language: str | Omit = omit,
         left_audio: FileTypes | Omit = omit,
         model_id: str | Omit = omit,
-        output_format_bit_rate: Optional[int] | Omit = omit,
-        output_format_container: OutputFormatContainer | Omit = omit,
-        output_format_encoding: Optional[RawEncoding] | Omit = omit,
-        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        output_format: tts_infill_params.OutputFormat | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
         voice_id: str | Omit = omit,
@@ -725,14 +704,6 @@ class AsyncTTSResource(AsyncAPIResource):
           model_id: The ID of the model to use for generating audio. Any model other than the first
               `"sonic"` model is supported.
 
-          output_format_bit_rate: Required for `mp3` containers.
-
-          output_format_container: The format of the output audio
-
-          output_format_encoding: Required for `raw` and `wav` containers.
-
-          output_format_sample_rate: The sample rate of the output audio
-
           transcript: The infill text to generate
 
           voice_id: The ID of the voice to use for generating audio
@@ -751,10 +722,7 @@ class AsyncTTSResource(AsyncAPIResource):
                 "language": language,
                 "left_audio": left_audio,
                 "model_id": model_id,
-                "output_format_bit_rate": output_format_bit_rate,
-                "output_format_container": output_format_container,
-                "output_format_encoding": output_format_encoding,
-                "output_format_sample_rate": output_format_sample_rate,
+                "output_format": output_format,
                 "right_audio": right_audio,
                 "transcript": transcript,
                 "voice_id": voice_id,

@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0-beta14 (2026-02-05)
+
+Full Changelog: [v3.0.0-beta13...v3.0.0-beta14](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta13...v3.0.0-beta14)
+
+### Features
+
+* **api:** group infill output_format ([a97639e](https://github.com/cartesia-ai/cartesia-python/commit/a97639e4aa45fd1bf716f46c0a1fae526d9e3a8b))
+* **api:** infill output_format ([0fa69a6](https://github.com/cartesia-ai/cartesia-python/commit/0fa69a6693b092a7af4f14d2a04f10323338836e))
+
 ## 3.0.0-beta13 (2026-02-04)
 
 Full Changelog: [v3.0.0-beta12...v3.0.0-beta13](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta12...v3.0.0-beta13)
