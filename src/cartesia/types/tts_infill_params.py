@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Union, Optional
-from typing_extensions import Literal, Required, Annotated, TypeAlias, TypedDict
+from typing import Union
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .._types import FileTypes
-from .._utils import PropertyInfo
-from .raw_encoding import RawEncoding
-from .output_format_container import OutputFormatContainer
 from .raw_output_format_param import RawOutputFormatParam
 
 __all__ = [
@@ -33,20 +30,6 @@ class TTSInfillParams(TypedDict, total=False):
     """
 
     output_format: OutputFormat
-
-    output_format_bit_rate: Annotated[Optional[int], PropertyInfo(alias="output_format[bit_rate]")]
-    """Required for `mp3` containers."""
-
-    output_format_container: Annotated[OutputFormatContainer, PropertyInfo(alias="output_format[container]")]
-    """The format of the output audio"""
-
-    output_format_encoding: Annotated[Optional[RawEncoding], PropertyInfo(alias="output_format[encoding]")]
-    """Required for `raw` and `wav` containers."""
-
-    output_format_sample_rate: Annotated[
-        Literal[8000, 16000, 22050, 24000, 44100, 48000], PropertyInfo(alias="output_format[sample_rate]")
-    ]
-    """The sample rate of the output audio"""
 
     right_audio: FileTypes
 
