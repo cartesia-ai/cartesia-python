@@ -202,7 +202,7 @@ Methods:
 
 Methods:
 
-- <code title="post /voice-changer/bytes">client.voice_changer.<a href="./src/cartesia/resources/voice_changer.py">change_voice_bytes</a>(\*\*<a href="src/cartesia/types/voice_changer_change_voice_bytes_params.py">params</a>) -> None</code>
+- <code title="post /voice-changer/bytes">client.voice_changer.<a href="./src/cartesia/resources/voice_changer.py">change_voice_bytes</a>(\*\*<a href="src/cartesia/types/voice_changer_change_voice_bytes_params.py">params</a>) -> BinaryAPIResponse</code>
 - <code title="post /voice-changer/sse">client.voice_changer.<a href="./src/cartesia/resources/voice_changer.py">change_voice_sse</a>(\*\*<a href="src/cartesia/types/voice_changer_change_voice_sse_params.py">params</a>) -> None</code>
 
 # Voices
