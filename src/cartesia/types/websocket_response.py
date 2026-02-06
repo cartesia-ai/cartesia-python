@@ -1,18 +1,34 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Union, Optional
+from typing import List, Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from .._utils import PropertyInfo
 from .._models import BaseModel
 
-__all__ = ["WebsocketResponse", "Chunk", "FlushDone", "Done", "Timestamps", "Error", "PhonemeTimestamps"]
+__all__ = [
+    "WebsocketResponse",
+    "Chunk",
+    "FlushDone",
+    "Done",
+    "Timestamps",
+    "TimestampsWordTimestamps",
+    "Error",
+    "PhonemeTimestamps",
+    "PhonemeTimestampsPhonemeTimestamps",
+]
 
 
 class Chunk(BaseModel):
+    data: str
+
     done: bool
 
     status_code: int
+
+    step_time: float
+
+    type: Literal["chunk"]
 
     context_id: Optional[str] = None
     """A unique identifier for the context.
@@ -23,13 +39,31 @@ class Chunk(BaseModel):
     conversation IDs) as context IDs.
     """
 
-    type: Optional[Literal["chunk"]] = None
+    flush_id: Optional[int] = None
+    """
+    An identifier corresponding to the number of flush commands that have been sent
+    for this context. Starts at 1.
+
+    This can be used to map chunks of audio to certain transcript submissions.
+    """
 
 
 class FlushDone(BaseModel):
     done: bool
 
+    flush_done: bool
+
+    flush_id: int
+    """
+    An identifier corresponding to the number of flush commands that have been sent
+    for this context. Starts at 1.
+
+    This can be used to map chunks of audio to certain transcript submissions.
+    """
+
     status_code: int
+
+    type: Literal["flush_done"]
 
     context_id: Optional[str] = None
     """A unique identifier for the context.
@@ -39,8 +73,6 @@ class FlushDone(BaseModel):
     Some customers use unique identifiers from their own systems (such as
     conversation IDs) as context IDs.
     """
-
-    type: Optional[Literal["flush_done"]] = None
 
 
 class Done(BaseModel):
@@ -48,6 +80,8 @@ class Done(BaseModel):
 
     status_code: int
 
+    type: Literal["done"]
+
     context_id: Optional[str] = None
     """A unique identifier for the context.
 
@@ -57,7 +91,13 @@ class Done(BaseModel):
     conversation IDs) as context IDs.
     """
 
-    type: Optional[Literal["done"]] = None
+
+class TimestampsWordTimestamps(BaseModel):
+    end: List[float]
+
+    start: List[float]
+
+    words: List[str]
 
 
 class Timestamps(BaseModel):
@@ -65,6 +105,8 @@ class Timestamps(BaseModel):
 
     status_code: int
 
+    type: Literal["timestamps"]
+
     context_id: Optional[str] = None
     """A unique identifier for the context.
 
@@ -74,13 +116,25 @@ class Timestamps(BaseModel):
     conversation IDs) as context IDs.
     """
 
-    type: Optional[Literal["timestamps"]] = None
+    flush_id: Optional[int] = None
+    """
+    An identifier corresponding to the number of flush commands that have been sent
+    for this context. Starts at 1.
+
+    This can be used to map chunks of audio to certain transcript submissions.
+    """
+
+    word_timestamps: Optional[TimestampsWordTimestamps] = None
 
 
 class Error(BaseModel):
     done: bool
 
+    error: str
+
     status_code: int
+
+    type: Literal["error"]
 
     context_id: Optional[str] = None
     """A unique identifier for the context.
@@ -91,7 +145,13 @@ class Error(BaseModel):
     conversation IDs) as context IDs.
     """
 
-    type: Optional[Literal["error"]] = None
+
+class PhonemeTimestampsPhonemeTimestamps(BaseModel):
+    end: List[float]
+
+    phonemes: List[str]
+
+    start: List[float]
 
 
 class PhonemeTimestamps(BaseModel):
@@ -99,6 +159,8 @@ class PhonemeTimestamps(BaseModel):
 
     status_code: int
 
+    type: Literal["phoneme_timestamps"]
+
     context_id: Optional[str] = None
     """A unique identifier for the context.
 
@@ -108,7 +170,15 @@ class PhonemeTimestamps(BaseModel):
     conversation IDs) as context IDs.
     """
 
-    type: Optional[Literal["phoneme_timestamps"]] = None
+    flush_id: Optional[int] = None
+    """
+    An identifier corresponding to the number of flush commands that have been sent
+    for this context. Starts at 1.
+
+    This can be used to map chunks of audio to certain transcript submissions.
+    """
+
+    phoneme_timestamps: Optional[PhonemeTimestampsPhonemeTimestamps] = None
 
 
 WebsocketResponse: TypeAlias = Annotated[
