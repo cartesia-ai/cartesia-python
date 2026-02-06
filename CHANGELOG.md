@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0-beta15 (2026-02-06)
+
+Full Changelog: [v3.0.0-beta14...v3.0.0-beta15](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta14...v3.0.0-beta15)
+
+### Features
+
+* **api:** add flush_id to chunks response and binary response to voice changer ([4f32dc7](https://github.com/cartesia-ai/cartesia-python/commit/4f32dc77e41aa2d895f9ddcb2c8962d7d26339bb))
+* **api:** inline websocketresponse type definitions ([026c079](https://github.com/cartesia-ai/cartesia-python/commit/026c079291ab5ffe53930cf95a39c705a75c7268))
+
 ## 3.0.0-beta14 (2026-02-05)
 
 Full Changelog: [v3.0.0-beta13...v3.0.0-beta14](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta13...v3.0.0-beta14)
