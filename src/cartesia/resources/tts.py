@@ -7,7 +7,7 @@ import logging
 import uuid
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast, Dict
-from typing_extensions import AsyncIterator
+from typing_extensions import AsyncIterator, deprecated
 
 import httpx
 from pydantic import BaseModel
@@ -253,6 +253,7 @@ class TTSResource(SyncAPIResource):
         )
         return SSEEventStream(response=response, client=self._client)
 
+    @deprecated("Use .generate_sse() instead")
     def sse(
         self,
         *,
@@ -297,6 +298,7 @@ class TTSResource(SyncAPIResource):
             timeout=timeout,
         )
 
+    @deprecated("Use .websocket_connect() instead")
     def websocket(
         self,
         extra_query: Query = {},
@@ -311,6 +313,7 @@ class TTSResource(SyncAPIResource):
         )
         return BackcompatTTSResourceConnection(manager)
 
+    @deprecated("Use .generate() instead")
     def bytes(
         self,
         *,
@@ -641,6 +644,7 @@ class AsyncTTSResource(AsyncAPIResource):
         )
         return AsyncSSEEventStream(response=response, client=self._client)
 
+    @deprecated("Use .generate_sse() instead")
     async def sse(
         self,
         *,
@@ -685,6 +689,7 @@ class AsyncTTSResource(AsyncAPIResource):
             timeout=timeout,
         )
 
+    @deprecated("Use .websocket_connect() instead")
     async def websocket(
         self,
         extra_query: Query = {},
@@ -699,6 +704,7 @@ class AsyncTTSResource(AsyncAPIResource):
         )
         return AsyncBackcompatTTSResourceConnection(manager)
 
+    @deprecated("Use .generate() instead")
     async def bytes(
         self,
         *,
