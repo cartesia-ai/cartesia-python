@@ -6,7 +6,7 @@ from typing_extensions import Literal
 
 from .._models import BaseModel
 
-__all__ = ["SSEEvent", "ChunkEvent", "TimestampsEvent", "PhonemeTimestampsEvent", "DoneEvent", "ErrorEvent"]
+__all__ = ["SSEEvent", "ChunkEvent", "TimestampsEvent", "PhonemeTimestampsEvent", "DoneEvent", "ErrorEvent", "WordTimestamps", "PhonemeTimestamps"]
 
 
 class SSEEvent(BaseModel):
@@ -22,6 +22,20 @@ class SSEEvent(BaseModel):
     """Optional retry timeout in milliseconds"""
 
 
+class WordTimestamps(BaseModel):
+    """Word-level timestamps"""
+    words: List[str]
+    start: List[float]
+    end: List[float]
+
+
+class PhonemeTimestamps(BaseModel):
+    """Phoneme-level timestamps"""
+    phonemes: List[str]
+    start: List[float]
+    end: List[float]
+
+
 class ChunkEvent(SSEEvent):
     """Audio chunk event with decoded audio data"""
     
@@ -35,6 +49,9 @@ class ChunkEvent(SSEEvent):
     
     status_code: Optional[int] = None
     """HTTP status code"""
+    
+    step_time: Optional[float] = None
+    """Time taken to generate this chunk"""
     
     done: bool = False
     """Whether this is the final chunk"""
@@ -60,14 +77,14 @@ class TimestampsEvent(SSEEvent):
     
     type: Literal["timestamps"] = "timestamps"
     
-    word_timestamps: List[Dict[str, Any]] = []
-    """List of word-level timestamp objects"""
+    word_timestamps: Optional[WordTimestamps] = None
+    """Word-level timestamp object"""
     
     context_id: Optional[str] = None
     """Context ID for request correlation"""
     
     @property
-    def timestamps(self) -> List[Dict[str, Any]]:
+    def timestamps(self) -> Optional[WordTimestamps]:
         """Alias for word_timestamps for convenience"""
         return self.word_timestamps
 
@@ -77,14 +94,14 @@ class PhonemeTimestampsEvent(SSEEvent):
     
     type: Literal["phoneme_timestamps"] = "phoneme_timestamps"
     
-    phoneme_timestamps: List[Dict[str, Any]] = []
-    """List of phoneme-level timestamp objects"""
+    phoneme_timestamps: Optional[PhonemeTimestamps] = None
+    """Phoneme-level timestamp object"""
     
     context_id: Optional[str] = None
     """Context ID for request correlation"""
     
     @property
-    def timestamps(self) -> List[Dict[str, Any]]:
+    def timestamps(self) -> Optional[PhonemeTimestamps]:
         """Alias for phoneme_timestamps for convenience"""
         return self.phoneme_timestamps
 

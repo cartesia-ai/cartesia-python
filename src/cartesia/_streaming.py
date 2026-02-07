@@ -380,24 +380,23 @@ class SSEEventStream:
                         data=data.get('data', ''),
                         context_id=data.get('context_id'),
                         status_code=data.get('status_code'),
+                        step_time=data.get('step_time'),
                         done=data.get('done', False)
                     )
                 elif event_type == 'timestamps':
-                    # Timestamp data comes as a dict, convert to list
-                    word_timestamps = [data] if data else []
+                    # Timestamp data comes as a dict with a 'word_timestamps' key
                     yield TimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        word_timestamps=word_timestamps,
+                        word_timestamps=data.get('word_timestamps'),
                         context_id=data.get('context_id')
                     )
                 elif event_type == 'phoneme_timestamps':
-                    # Timestamp data comes as a dict, convert to list
-                    phoneme_timestamps = [data] if data else []
+                    # Timestamp data comes as a dict with a 'phoneme_timestamps' key
                     yield PhonemeTimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        phoneme_timestamps=phoneme_timestamps,
+                        phoneme_timestamps=data.get('phoneme_timestamps'),
                         context_id=data.get('context_id')
                     )
                 elif event_type == 'done':
@@ -483,24 +482,23 @@ class AsyncSSEEventStream:
                         data=data.get('data', ''),
                         context_id=data.get('context_id'),
                         status_code=data.get('status_code'),
+                        step_time=data.get('step_time'),
                         done=data.get('done', False)
                     )
                 elif event_type == 'timestamps':
-                    # Timestamp data comes as a dict, convert to list
-                    word_timestamps = [data] if data else []
+                    # Timestamp data comes as a dict with a 'word_timestamps' key
                     yield TimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        word_timestamps=word_timestamps,
+                        word_timestamps=data.get('word_timestamps'),
                         context_id=data.get('context_id')
                     )
                 elif event_type == 'phoneme_timestamps':
-                    # Timestamp data comes as a dict, convert to list
-                    phoneme_timestamps = [data] if data else []
+                    # Timestamp data comes as a dict with a 'phoneme_timestamps' key
                     yield PhonemeTimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        phoneme_timestamps=phoneme_timestamps,
+                        phoneme_timestamps=data.get('phoneme_timestamps'),
                         context_id=data.get('context_id')
                     )
                 elif event_type == 'done':

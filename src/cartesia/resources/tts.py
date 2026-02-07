@@ -7,7 +7,7 @@ import logging
 import uuid
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast, Dict
-from typing_extensions import AsyncIterator
+from typing_extensions import AsyncIterator, deprecated
 
 import httpx
 from pydantic import BaseModel
@@ -253,23 +253,67 @@ class TTSResource(SyncAPIResource):
         )
         return SSEEventStream(response=response, client=self._client)
 
+    @deprecated("Use .generate_sse() instead")
+    def sse(
+        self,
+        *,
+        model_id: str,
+        output_format: tts_generate_sse_params.OutputFormat,
+        transcript: str,
+        voice: VoiceSpecifierParam,
+        add_phoneme_timestamps: Optional[bool] | Omit = omit,
+        add_timestamps: Optional[bool] | Omit = omit,
+        context_id: Optional[str] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: SupportedLanguage | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
+        use_normalized_timestamps: Optional[bool] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> SSEEventStream:
+        """
+        Text to Speech (SSE) - Backward compatibility wrapper for generate_sse().
+        """
+        return self.generate_sse(
+            model_id=model_id,
+            output_format=output_format,
+            transcript=transcript,
+            voice=voice,
+            add_phoneme_timestamps=add_phoneme_timestamps,
+            add_timestamps=add_timestamps,
+            context_id=context_id,
+            generation_config=generation_config,
+            language=language,
+            pronunciation_dict_id=pronunciation_dict_id,
+            speed=speed,
+            use_normalized_timestamps=use_normalized_timestamps,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+        )
+
+    @deprecated("Use .websocket_connect() instead")
     def websocket(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebsocketConnectionOptions = {},
-    ):
-        """Create a WebSocket connection for real-time TTS streaming.
-
-        Returns a connection that can be used directly.
-        """
-        manager = self.connect(
+    ) -> BackcompatTTSResourceConnection:
+        """Create a WebSocket connection for real-time TTS streaming (v2 compatible)."""
+        manager = self.websocket_connect(
             extra_query=extra_query,
             extra_headers=extra_headers,
             websocket_connection_options=websocket_connection_options,
         )
-        return manager.__enter__()
+        return BackcompatTTSResourceConnection(manager)
 
+    @deprecated("Use .generate() instead")
     def bytes(
         self,
         *,
@@ -280,7 +324,7 @@ class TTSResource(SyncAPIResource):
         duration: Optional[float] | Omit = omit,
         generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: Optional[ModelSpeed] | Omit = omit,
         extra_headers: Headers | None = None,
@@ -298,10 +342,9 @@ class TTSResource(SyncAPIResource):
             output_format=output_format,
             transcript=transcript,
             voice=voice,
-            duration=duration,
             generation_config=generation_config,
             language=language,
-            pronunciation_dict_ids=pronunciation_dict_ids,
+            pronunciation_dict_id=pronunciation_dict_id,
             save=save,
             speed=speed,
             extra_headers=extra_headers,
@@ -601,23 +644,67 @@ class AsyncTTSResource(AsyncAPIResource):
         )
         return AsyncSSEEventStream(response=response, client=self._client)
 
+    @deprecated("Use .generate_sse() instead")
+    async def sse(
+        self,
+        *,
+        model_id: str,
+        output_format: tts_generate_sse_params.OutputFormat,
+        transcript: str,
+        voice: VoiceSpecifierParam,
+        add_phoneme_timestamps: Optional[bool] | Omit = omit,
+        add_timestamps: Optional[bool] | Omit = omit,
+        context_id: Optional[str] | Omit = omit,
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: SupportedLanguage | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
+        use_normalized_timestamps: Optional[bool] | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AsyncSSEEventStream:
+        """
+        Text to Speech (SSE) - Backward compatibility wrapper for generate_sse().
+        """
+        return await self.generate_sse(
+            model_id=model_id,
+            output_format=output_format,
+            transcript=transcript,
+            voice=voice,
+            add_phoneme_timestamps=add_phoneme_timestamps,
+            add_timestamps=add_timestamps,
+            context_id=context_id,
+            generation_config=generation_config,
+            language=language,
+            pronunciation_dict_id=pronunciation_dict_id,
+            speed=speed,
+            use_normalized_timestamps=use_normalized_timestamps,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+        )
+
+    @deprecated("Use .websocket_connect() instead")
     async def websocket(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebsocketConnectionOptions = {},
-    ):
-        """Create a WebSocket connection for real-time TTS streaming.
-
-        Returns a connection that can be used directly.
-        """
-        manager = self.connect(
+    ) -> AsyncBackcompatTTSResourceConnection:
+        """Create a WebSocket connection for real-time TTS streaming (v2 compatible)."""
+        manager = self.websocket_connect(
             extra_query=extra_query,
             extra_headers=extra_headers,
             websocket_connection_options=websocket_connection_options,
         )
-        return await manager.__aenter__()
+        return AsyncBackcompatTTSResourceConnection(manager)
 
+    @deprecated("Use .generate() instead")
     async def bytes(
         self,
         *,
@@ -628,7 +715,7 @@ class AsyncTTSResource(AsyncAPIResource):
         duration: Optional[float] | Omit = omit,
         generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
-        pronunciation_dict_ids: Optional[SequenceNotStr[str]] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: Optional[ModelSpeed] | Omit = omit,
         extra_headers: Headers | None = None,
@@ -646,10 +733,9 @@ class AsyncTTSResource(AsyncAPIResource):
             output_format=output_format,
             transcript=transcript,
             voice=voice,
-            duration=duration,
             generation_config=generation_config,
             language=language,
-            pronunciation_dict_ids=pronunciation_dict_ids,
+            pronunciation_dict_id=pronunciation_dict_id,
             save=save,
             speed=speed,
             extra_headers=extra_headers,
@@ -768,6 +854,7 @@ class TTSResourceWithRawResponse:
         self.generate_sse = to_raw_response_wrapper(
             tts.generate_sse,
         )
+        self.sse = self.generate_sse
         self.infill = to_custom_raw_response_wrapper(
             tts.infill,
             BinaryAPIResponse,
@@ -785,6 +872,7 @@ class AsyncTTSResourceWithRawResponse:
         self.generate_sse = async_to_raw_response_wrapper(
             tts.generate_sse,
         )
+        self.sse = self.generate_sse
         self.infill = async_to_custom_raw_response_wrapper(
             tts.infill,
             AsyncBinaryAPIResponse,
@@ -802,6 +890,7 @@ class TTSResourceWithStreamingResponse:
         self.generate_sse = to_streamed_response_wrapper(
             tts.generate_sse,
         )
+        self.sse = self.generate_sse
         self.infill = to_custom_streamed_response_wrapper(
             tts.infill,
             StreamedBinaryAPIResponse,
@@ -819,6 +908,7 @@ class AsyncTTSResourceWithStreamingResponse:
         self.generate_sse = async_to_streamed_response_wrapper(
             tts.generate_sse,
         )
+        self.sse = self.generate_sse
         self.infill = async_to_custom_streamed_response_wrapper(
             tts.infill,
             AsyncStreamedBinaryAPIResponse,
@@ -887,19 +977,41 @@ class AsyncTTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: Optional[str] = None):
+    def context(
+        self,
+        context_id: Optional[str] = None,
+        *,
+        model_id: str | None = None,
+        voice: VoiceSpecifierParam | None = None,
+        output_format: Dict[str, Any] | None = None,
+        language: SupportedLanguage | None = None,
+        generation_config: GenerationConfigParam | None = None,
+    ):
         """Create a context helper for managing conversational flows.
 
         Args:
             context_id: Unique identifier for this context. If not provided,
                 a UUID will be auto-generated.
+            model_id: Default model_id for push().
+            voice: Default voice for push().
+            output_format: Default output_format for push().
+            language: Default language for push().
+            generation_config: Default generation_config for push().
 
         Returns:
             AsyncWebSocketContext helper for simplified sending and receiving
         """
         if context_id is None:
             context_id = str(uuid.uuid4())
-        return AsyncWebSocketContext(self, context_id)
+        return AsyncWebSocketContext(
+            self,
+            context_id,
+            model_id=model_id,
+            voice=voice,
+            output_format=output_format,
+            language=language,
+            generation_config=generation_config,
+        )
 
 
 class AsyncTTSResourceConnectionManager:
@@ -971,6 +1083,7 @@ class AsyncTTSResourceConnectionManager:
                 additional_headers=_merge_mappings(
                     {
                         **self.__client.auth_headers,
+                        "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
                     },
                     self.__extra_headers,
                 ),
@@ -1060,19 +1173,41 @@ class TTSResourceConnection:
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
 
-    def context(self, context_id: Optional[str] = None):
+    def context(
+        self,
+        context_id: Optional[str] = None,
+        *,
+        model_id: str | None = None,
+        voice: VoiceSpecifierParam | None = None,
+        output_format: Dict[str, Any] | None = None,
+        language: SupportedLanguage | None = None,
+        generation_config: GenerationConfigParam | None = None,
+    ):
         """Create a context helper for managing conversational flows.
 
         Args:
             context_id: Unique identifier for this context. If not provided,
                 a UUID will be auto-generated.
+            model_id: Default model_id for push().
+            voice: Default voice for push().
+            output_format: Default output_format for push().
+            language: Default language for push().
+            generation_config: Default generation_config for push().
 
         Returns:
             WebSocketContext helper for simplified sending and receiving
         """
         if context_id is None:
             context_id = str(uuid.uuid4())
-        return WebSocketContext(self, context_id)
+        return WebSocketContext(
+            self,
+            context_id,
+            model_id=model_id,
+            voice=voice,
+            output_format=output_format,
+            language=language,
+            generation_config=generation_config,
+        )
 
 
 class TTSResourceConnectionManager:
@@ -1144,7 +1279,7 @@ class TTSResourceConnectionManager:
                 additional_headers=_merge_mappings(
                     {
                         **self.__client.auth_headers,
-                        "Cartesia-Version": "2025-04-16",
+                        "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
                     },
                     self.__extra_headers,
                 ),
@@ -1175,10 +1310,25 @@ class TTSResourceConnectionManager:
 class WebSocketContext:
     """Context helper for managing WebSocket conversations with automatic context_id handling."""
 
-    def __init__(self, connection: 'TTSResourceConnection', context_id: str):
+    def __init__(
+        self,
+        connection: 'TTSResourceConnection',
+        context_id: str,
+        *,
+        model_id: str | None = None,
+        voice: VoiceSpecifierParam | None = None,
+        output_format: Dict[str, Any] | None = None,
+        language: SupportedLanguage | None = None,
+        generation_config: GenerationConfigParam | None = None,
+    ):
         self._connection = connection
         self._context_id = context_id
         self._completed = False
+        self._model_id = model_id
+        self._voice = voice
+        self._output_format = output_format
+        self._language = language
+        self._generation_config = generation_config
 
     def send(
         self,
@@ -1193,6 +1343,8 @@ class WebSocketContext:
         speed: Optional[ModelSpeed] | Omit = omit,
         add_timestamps: Optional[bool] | Omit = omit,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
+        flush: Optional[bool] | Omit = omit,
+        generation_config: Optional[GenerationConfigParam] | Omit = omit,
         **kwargs,
     ) -> None:
         """Send a generation request with automatic context_id management."""
@@ -1214,7 +1366,7 @@ class WebSocketContext:
             "voice": voice,
             "output_format": output_format,
             "context_id": self._context_id,
-            "continue_": continue_,
+            "continue": continue_,
         }
 
         # Add optional parameters only if they're not omitted
@@ -1228,6 +1380,10 @@ class WebSocketContext:
             request_params["add_timestamps"] = add_timestamps
         if not isinstance(add_phoneme_timestamps, Omit):
             request_params["add_phoneme_timestamps"] = add_phoneme_timestamps
+        if not isinstance(flush, Omit):
+            request_params["flush"] = flush
+        if not isinstance(generation_config, Omit):
+            request_params["generation_config"] = generation_config
 
         # Add any additional kwargs
         request_params.update(kwargs)
@@ -1235,22 +1391,58 @@ class WebSocketContext:
         request = GenerationRequest(**request_params)
         self._connection.send(request)
 
+    def push(
+        self,
+        transcript: str,
+        *,
+        flush: Optional[bool] | Omit = omit,
+        # generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        **kwargs,
+    ) -> None:
+        """Send a generation request with continue_=True using context defaults."""
+        if not all([self._model_id, self._voice]):
+            raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
+
+        language = self._language if self._language is not None else omit
+        
+        # Use passed generation_config if provided in kwargs, otherwise use context default
+        generation_config = kwargs.pop("generation_config", self._generation_config)
+
+        return self.send(
+            model_id=self._model_id,
+            transcript=transcript,
+            voice=self._voice,
+            output_format=self._output_format,
+            continue_=True,
+            language=language,
+            flush=flush,
+            generation_config=generation_config,
+            **kwargs,
+        )
+
     def no_more_inputs(self) -> None:
         """Signal that no more inputs will be sent for this context."""
         if self._completed:
             return  # Already completed, ignore
 
-        # Send a final request with continue_=False to signal completion
-        request = GenerationRequest(
-            model_id="sonic-3",
-            transcript="",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            context_id=self._context_id,
-            continue_=False,
-        )
+        model_id = self._model_id or "sonic-3"
+        voice = self._voice or {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+        output_format = self._output_format or {
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        }
+        language = self._language if self._language is not None else omit
 
-        self._connection.send(request)
+        self.send(
+            model_id=model_id,
+            transcript="",
+            voice=voice,
+            output_format=output_format,
+            continue_=False,
+            language=language,
+            generation_config=self._generation_config,
+        )
         self._completed = True
 
     def receive(self) -> Iterator[WebsocketResponse]:
@@ -1272,10 +1464,25 @@ class WebSocketContext:
 class AsyncWebSocketContext:
     """Async context helper for managing WebSocket conversations with automatic context_id handling."""
 
-    def __init__(self, connection: 'AsyncTTSResourceConnection', context_id: str):
+    def __init__(
+        self,
+        connection: 'AsyncTTSResourceConnection',
+        context_id: str,
+        *,
+        model_id: str | None = None,
+        voice: VoiceSpecifierParam | None = None,
+        output_format: Dict[str, Any] | None = None,
+        language: SupportedLanguage | None = None,
+        generation_config: GenerationConfigParam | None = None,
+    ):
         self._connection = connection
         self._context_id = context_id
         self._completed = False
+        self._model_id = model_id
+        self._voice = voice
+        self._output_format = output_format
+        self._language = language
+        self._generation_config = generation_config
 
     async def send(
         self,
@@ -1290,6 +1497,8 @@ class AsyncWebSocketContext:
         speed: Optional[ModelSpeed] | Omit = omit,
         add_timestamps: Optional[bool] | Omit = omit,
         add_phoneme_timestamps: Optional[bool] | Omit = omit,
+        flush: Optional[bool] | Omit = omit,
+        generation_config: Optional[GenerationConfigParam] | Omit = omit,
         **kwargs,
     ) -> None:
         """Send a generation request with automatic context_id management."""
@@ -1311,7 +1520,7 @@ class AsyncWebSocketContext:
             "voice": voice,
             "output_format": output_format,
             "context_id": self._context_id,
-            "continue_": continue_,
+            "continue": continue_,
         }
 
         # Add optional parameters only if they're not omitted
@@ -1325,6 +1534,10 @@ class AsyncWebSocketContext:
             request_params["add_timestamps"] = add_timestamps
         if not isinstance(add_phoneme_timestamps, Omit):
             request_params["add_phoneme_timestamps"] = add_phoneme_timestamps
+        if not isinstance(flush, Omit):
+            request_params["flush"] = flush
+        if not isinstance(generation_config, Omit):
+            request_params["generation_config"] = generation_config
 
         # Add any additional kwargs
         request_params.update(kwargs)
@@ -1332,22 +1545,58 @@ class AsyncWebSocketContext:
         request = GenerationRequest(**request_params)
         await self._connection.send(request)
 
+    async def push(
+        self,
+        transcript: str,
+        *,
+        flush: Optional[bool] | Omit = omit,
+        # generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        **kwargs,
+    ) -> None:
+        """Send a generation request with continue_=True using context defaults."""
+        if not all([self._model_id, self._voice]):
+            raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
+
+        language = self._language if self._language is not None else omit
+
+        # Use passed generation_config if provided in kwargs, otherwise use context default
+        generation_config = kwargs.pop("generation_config", self._generation_config)
+
+        return await self.send(
+            model_id=self._model_id,
+            transcript=transcript,
+            voice=self._voice,
+            output_format=self._output_format,
+            continue_=True,
+            language=language,
+            flush=flush,
+            generation_config=generation_config,
+            **kwargs,
+        )
+
     async def no_more_inputs(self) -> None:
         """Signal that no more inputs will be sent for this context."""
         if self._completed:
             return  # Already completed, ignore
 
-        # Send a final request with continue_=False to signal completion
-        request = GenerationRequest(
-            model_id="sonic-3",
-            transcript="",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            context_id=self._context_id,
-            continue_=False,
-        )
+        model_id = self._model_id or "sonic-3"
+        voice = self._voice or {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+        output_format = self._output_format or {
+            "container": "raw",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        }
+        language = self._language if self._language is not None else omit
 
-        await self._connection.send(request)
+        await self.send(
+            model_id=model_id,
+            transcript="",
+            voice=voice,
+            output_format=output_format,
+            continue_=False,
+            language=language,
+            generation_config=self._generation_config,
+        )
         self._completed = True
 
     async def receive(self) -> AsyncIterator[WebsocketResponse]:
@@ -1364,5 +1613,165 @@ class AsyncWebSocketContext:
                 yield event
                 if event.type in ["done", "error"]:
                     break
+
+class BackcompatWebSocketTtsOutput(BaseModel):
+    """Output object for backward compatibility with v2 WebSocket response."""
+    audio: Optional[bytes] = None
+    word_timestamps: Optional[Any] = None
+    phoneme_timestamps: Optional[Any] = None
+    context_id: Optional[str] = None
+    flush_done: Optional[bool] = None
+    flush_id: Optional[str] = None
+
+class BackcompatTTSResourceConnection:
+    """Wrapper for TTSResourceConnection to provide v2-compatible API."""
+    
+    def __init__(self, manager: TTSResourceConnectionManager):
+        self._manager = manager
+        self._connection: Optional[TTSResourceConnection] = None
+
+    def connect(self):
+        if self._connection is None:
+            self._connection = self._manager.enter()
+
+    def close(self):
+        if self._connection:
+            self._manager.__exit__(None, None, None)
+            self._connection = None
+
+    def context(self, context_id: Optional[str] = None):
+        """Create a context helper (v2 compatible)."""
+        if not self._connection:
+            self.connect()
+        return self._connection.context(context_id)
+
+    def send(
+        self,
+        *,
+        model_id: str,
+        transcript: str,
+        output_format: Dict[str, Any],
+        voice: Dict[str, Any],
+        context_id: Optional[str] = None,
+        stream: bool = True,
+        **kwargs
+    ) -> Iterator[BackcompatWebSocketTtsOutput]:
+        """Send a request and yield responses (v2 compatible)."""
+        if not self._connection:
+            self.connect()
+
+        ctx = self._connection.context(context_id)
+        
+        # Send the request
+        ctx.send(
+            model_id=model_id,
+            transcript=transcript,
+            voice=voice,
+            output_format=output_format,
+            continue_=False,
+            **kwargs
+        )
+        
+        # Generate output stream
+        def generator():
+            for event in ctx.receive():
+                out = BackcompatWebSocketTtsOutput(
+                    context_id=event.context_id
+                )
+                
+                if event.type == "chunk":
+                    out.audio = event.audio
+                elif event.type == "timestamps":
+                    out.word_timestamps = getattr(event, "word_timestamps", None)
+                elif event.type == "phoneme_timestamps":
+                    out.phoneme_timestamps = getattr(event, "phoneme_timestamps", None)
+                elif event.type == "flush_done":
+                    out.flush_done = getattr(event, "flush_done", None)
+                    out.flush_id = getattr(event, "flush_id", None)
+                
+                yield out
+
+        if stream:
+            return generator()
+        else:
+            # Aggregate if not streaming
+            return list(generator())
+
+class AsyncBackcompatTTSResourceConnection:
+    """Wrapper for AsyncTTSResourceConnection to provide v2-compatible API."""
+    
+    def __init__(self, manager: AsyncTTSResourceConnectionManager):
+        self._manager = manager
+        self._connection: Optional[AsyncTTSResourceConnection] = None
+
+    async def connect(self):
+        if self._connection is None:
+            self._connection = await self._manager.enter()
+
+    async def close(self):
+        if self._connection:
+            await self._manager.__aexit__(None, None, None)
+            self._connection = None
+
+    def context(self, context_id: Optional[str] = None):
+        """Create a context helper (v2 compatible)."""
+        if not self._connection:
+            raise RuntimeError("Must call connect() before creating context")
+        return self._connection.context(context_id)
+
+    async def send(
+        self,
+        *,
+        model_id: str,
+        transcript: str,
+        output_format: Dict[str, Any],
+        voice: Dict[str, Any],
+        context_id: Optional[str] = None,
+        stream: bool = True,
+        **kwargs
+    ) -> AsyncIterator[BackcompatWebSocketTtsOutput]:
+        """Send a request and yield responses (v2 compatible)."""
+        if not self._connection:
+            await self.connect()
+
+        ctx = self._connection.context(context_id)
+        
+        # Send the request
+        await ctx.send(
+            model_id=model_id,
+            transcript=transcript,
+            voice=voice,
+            output_format=output_format,
+            continue_=False,
+            **kwargs
+        )
+        
+        # Generate output stream
+        async def generator():
+            async for event in ctx.receive():
+                out = BackcompatWebSocketTtsOutput(
+                    context_id=event.context_id
+                )
+                
+                if event.type == "chunk":
+                    out.audio = event.audio
+                elif event.type == "timestamps":
+                    out.word_timestamps = getattr(event, "word_timestamps", None)
+                elif event.type == "phoneme_timestamps":
+                    out.phoneme_timestamps = getattr(event, "phoneme_timestamps", None)
+                elif event.type == "flush_done":
+                    out.flush_done = getattr(event, "flush_done", None)
+                    out.flush_id = getattr(event, "flush_id", None)
+                
+                yield out
+
+        if stream:
+            return generator()
+        else:
+            # Aggregate
+            results = []
+            async for item in generator():
+                results.append(item)
+            return results
 
 # Custom Cartesia stuff:
