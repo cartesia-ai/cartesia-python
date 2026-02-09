@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0-beta16 (2026-02-09)
+
+Full Changelog: [v3.0.0-beta15...v3.0.0-beta16](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta15...v3.0.0-beta16)
+
+### Chores
+
+* **internal:** bump dependencies ([0e640cb](https://github.com/cartesia-ai/cartesia-python/commit/0e640cbbd1046a10f89f88826d8e422c794d3ebe))
+
 ## 3.0.0-beta15 (2026-02-06)
 
 Full Changelog: [v3.0.0-beta14...v3.0.0-beta15](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta14...v3.0.0-beta15)
