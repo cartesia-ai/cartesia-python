@@ -87,3 +87,5 @@ jobs:
 
       - name: Run tests
         run: ./scripts/test
+        env:
+          CARTESIA_API_KEY: ${{ secrets.CARTESIA_API_KEY }}
