@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0 (2026-02-09)
+
+Full Changelog: [v3.0.0-beta16...v3.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta16...v3.0.0)
+
 ## 3.0.0-beta16 (2026-02-09)
 
 Full Changelog: [v3.0.0-beta15...v3.0.0-beta16](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta15...v3.0.0-beta16)
