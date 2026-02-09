@@ -20,6 +20,12 @@ from cartesia import AsyncCartesia, Cartesia
 from cartesia.pagination import SyncCursorIDPage
 from cartesia.types import Voice, VoiceMetadata
 
+# Ignore asyncio resource warnings that occur during test teardown
+pytestmark = pytest.mark.filterwarnings(
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::ResourceWarning"
+)
+
 THISDIR = os.path.dirname(__file__)
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
 
@@ -563,6 +569,8 @@ async def test_tts_websocket_context_async():
             _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
 
 
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_tts_websocket_push_overrides(client: Cartesia):
     """Test TTS WebSocket .push() with dynamic parameter overrides."""
     logger.info("Testing tts.websocket_connect .push() overrides")
