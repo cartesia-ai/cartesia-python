@@ -28,11 +28,22 @@ The full API of this library can be found in [api.md](api.md).
 from cartesia import Cartesia
 
 client = Cartesia(
-    api_key="My API Key",
+    token="My Token",
 )
 
-page = client.voices.list()
-print(page.data)
+response = client.tts.generate(
+    model_id="sonic-3",
+    output_format={
+        "container": "wav",
+        "encoding": "pcm_f32le",
+        "sample_rate": 44100,
+    },
+    transcript="I have to say that I'd rather stay awake when I'm asleep.",
+    voice={
+        "mode": "id",
+        "id": "e07c00bc-4134-4eae-9ea4-1a55fb45746b",
+    },
+)
 ```
 
 ## Async usage
@@ -44,13 +55,24 @@ import asyncio
 from cartesia import AsyncCartesia
 
 client = AsyncCartesia(
-    api_key="My API Key",
+    token="My Token",
 )
 
 
 async def main() -> None:
-    page = await client.voices.list()
-    print(page.data)
+    response = await client.tts.generate(
+        model_id="sonic-3",
+        output_format={
+            "container": "wav",
+            "encoding": "pcm_f32le",
+            "sample_rate": 44100,
+        },
+        transcript="I have to say that I'd rather stay awake when I'm asleep.",
+        voice={
+            "mode": "id",
+            "id": "e07c00bc-4134-4eae-9ea4-1a55fb45746b",
+        },
+    )
 
 
 asyncio.run(main())
@@ -79,11 +101,22 @@ from cartesia import AsyncCartesia
 
 async def main() -> None:
     async with AsyncCartesia(
-        api_key="My API Key",
+        token="My Token",
         http_client=DefaultAioHttpClient(),
     ) as client:
-        page = await client.voices.list()
-        print(page.data)
+        response = await client.tts.generate(
+            model_id="sonic-3",
+            output_format={
+                "container": "wav",
+                "encoding": "pcm_f32le",
+                "sample_rate": 44100,
+            },
+            transcript="I have to say that I'd rather stay awake when I'm asleep.",
+            voice={
+                "mode": "id",
+                "id": "e07c00bc-4134-4eae-9ea4-1a55fb45746b",
+            },
+        )
 
 
 asyncio.run(main())
@@ -170,10 +203,19 @@ from cartesia import Cartesia
 
 client = Cartesia()
 
-access_token = client.access_token.create(
-    grants={},
+response = client.tts.generate(
+    model_id="model_id",
+    output_format={
+        "encoding": "pcm_f32le",
+        "sample_rate": 8000,
+    },
+    transcript="transcript",
+    voice={
+        "id": "id",
+        "mode": "id",
+    },
 )
-print(access_token.grants)
+print(response.voice)
 ```
 
 ## File uploads
