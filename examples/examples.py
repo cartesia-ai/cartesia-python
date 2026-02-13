@@ -372,6 +372,58 @@ def tts_websocket_speed(client: Cartesia) -> None:
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
 
 
+def tts_websocket_concurrent_receives(client: Cartesia) -> None:
+    """Two contexts on one connection, each using ctx.receive() to get their own audio.
+
+    Since sync code can't receive from both contexts concurrently, we collect
+    them sequentially — but the lazy-routing in receive() ensures that events
+    consumed while reading context 1 are queued for context 2 (and vice-versa).
+    """
+    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
+
+    with client.tts.websocket_connect() as connection:
+        ctx1 = connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format=output_format,
+        )
+        ctx2 = connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format=output_format,
+        )
+
+        # Send to both contexts before receiving
+        ctx1.push("Context one is speaking now. This is a longer transcript to ensure that audio chunks from both contexts are interleaved on the wire. The quick brown fox jumps over the lazy dog.")
+        ctx1.no_more_inputs()
+
+        ctx2.push("Context two has a different message. We want to verify that the routing logic correctly separates the audio streams. Pack my box with five dozen liquor jugs.")
+        ctx2.no_more_inputs()
+
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        # Receive from ctx1 — any ctx2 events read from the wire get queued
+        filename1 = f"tts_concurrent_ctx1_{timestamp}.pcm"
+        with open(filename1, "wb") as f:
+            for response in ctx1.receive():
+                if response.type == "chunk" and response.audio:
+                    f.write(response.audio)
+
+        # Receive from ctx2 — picks up queued events first
+        filename2 = f"tts_concurrent_ctx2_{timestamp}.pcm"
+        with open(filename2, "wb") as f:
+            for response in ctx2.receive():
+                if response.type == "chunk" and response.audio:
+                    f.write(response.audio)
+
+        print(f"Saved context 1 audio to {filename1}")
+        print(f"Saved context 2 audio to {filename2}")
+        print(f"Play with:")
+        print(f"  ffplay -f f32le -ar 44100 {filename1}")
+        print(f"  ffplay -f f32le -ar 44100 {filename2}")
+
+
 def tts_websocket_response_handling(client: Cartesia) -> None:
     """WebSocket response type handling."""
     with client.tts.websocket_connect() as connection:

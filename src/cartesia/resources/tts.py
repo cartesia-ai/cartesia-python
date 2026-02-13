@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import uuid
+import queue
 import logging
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Iterator, Optional, cast
@@ -51,6 +52,8 @@ from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
 if TYPE_CHECKING:
+    import asyncio
+
     from websockets.sync.client import ClientConnection as WebsocketConnection
     from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
 
@@ -921,7 +924,10 @@ class AsyncTTSResourceConnection:
     _connection: AsyncWebsocketConnection
 
     def __init__(self, connection: AsyncWebsocketConnection) -> None:
+        import asyncio as _asyncio
         self._connection = connection
+        self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
+        self._recv_lock: asyncio.Lock = _asyncio.Lock()
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
         """
@@ -1003,6 +1009,8 @@ class AsyncTTSResourceConnection:
         """
         if context_id is None:
             context_id = str(uuid.uuid4())
+        import asyncio
+        self._context_queues[context_id] = asyncio.Queue()
         return AsyncWebSocketContext(
             self,
             context_id,
@@ -1118,6 +1126,7 @@ class TTSResourceConnection:
 
     def __init__(self, connection: WebsocketConnection) -> None:
         self._connection = connection
+        self._context_queues: dict[str, queue.Queue[WebsocketResponse]] = {}
 
     def __iter__(self) -> Iterator[WebsocketResponse]:
         """
@@ -1199,6 +1208,7 @@ class TTSResourceConnection:
         """
         if context_id is None:
             context_id = str(uuid.uuid4())
+        self._context_queues[context_id] = queue.Queue()
         return WebSocketContext(
             self,
             context_id,
@@ -1445,19 +1455,53 @@ class WebSocketContext:
         self._completed = True
 
     def receive(self) -> Iterator[WebsocketResponse]:
-        """Receive responses filtered to this context only."""
-        for event in self._connection:
-            # Filter events by context_id
-            if hasattr(event, "context_id") and event.context_id == self._context_id:
+        """Receive responses filtered to this context only.
+
+        When multiple contexts share a connection, the context that reads from
+        the websocket acts as a router: non-matching events are placed onto the
+        correct context's queue so they are never lost.
+        """
+        from websockets.exceptions import ConnectionClosedOK
+
+        my_queue = self._connection._context_queues.get(self._context_id)
+
+        while True:
+            # 1. Drain our own queue first (events routed here by another context).
+            if my_queue is not None:
+                try:
+                    event = my_queue.get_nowait()
+                    yield event
+                    if event.type == "done":
+                        return
+                    continue
+                except queue.Empty:
+                    pass
+
+            # 2. Read the next event from the connection.
+            try:
+                event = self._connection.recv()
+            except ConnectionClosedOK:
+                return
+
+            # 3. Route the event.
+            event_ctx = event.context_id if hasattr(event, "context_id") else None
+
+            if event_ctx == self._context_id:
                 yield event
-                # Stop iteration when context is done
                 if event.type == "done":
-                    break
-            elif not hasattr(event, "context_id") and event.type in ["done", "error"]:
-                # Handle events without context_id (legacy or global events)
+                    return
+            elif event_ctx is not None and event_ctx in self._connection._context_queues:
+                self._connection._context_queues[event_ctx].put(event)
+            elif not hasattr(event, "context_id") and event.type in ("done", "error"):
+                # Global events without context_id
                 yield event
-                if event.type in ["done", "error"]:
-                    break
+                if event.type in ("done", "error"):
+                    return
+            else:
+                # Unregistered context — yield for backwards compat
+                yield event
+                if event.type == "done":
+                    return
 
 
 class AsyncWebSocketContext:
@@ -1598,19 +1642,70 @@ class AsyncWebSocketContext:
         self._completed = True
 
     async def receive(self) -> AsyncIterator[WebsocketResponse]:
-        """Receive responses filtered to this context only."""
-        async for event in self._connection:
-            # Filter events by context_id
-            if hasattr(event, "context_id") and event.context_id == self._context_id:
-                yield event
-                # Stop iteration when context is done
-                if event.type == "done":
-                    break
-            elif not hasattr(event, "context_id") and event.type in ["done", "error"]:
-                # Handle events without context_id (legacy or global events)
-                yield event
-                if event.type in ["done", "error"]:
-                    break
+        """Receive responses filtered to this context only.
+
+        When multiple contexts share a connection, the context that reads from
+        the wire acts as a router: non-matching events are placed onto the
+        correct context's queue so they are never lost.  A lock ensures only
+        one context reads from the wire at a time; the others wait on their
+        queues.
+        """
+        import asyncio as _asyncio
+
+        from websockets.exceptions import ConnectionClosedOK
+
+        my_queue = self._connection._context_queues.get(self._context_id)
+
+        while True:
+            # 1. Drain our own queue first (events routed here by another context).
+            if my_queue is not None:
+                try:
+                    event = my_queue.get_nowait()
+                    yield event
+                    if event.type == "done":
+                        return
+                    continue
+                except (_asyncio.QueueEmpty, queue.Empty):
+                    pass
+
+            # 2. Acquire the recv lock so only one context reads the wire.
+            async with self._connection._recv_lock:
+                # Re-check queue — events may have arrived while we waited.
+                if my_queue is not None:
+                    try:
+                        event = my_queue.get_nowait()
+                        yield event
+                        if event.type == "done":
+                            return
+                        continue
+                    except (_asyncio.QueueEmpty, queue.Empty):
+                        pass
+
+                # Read the next event from the wire.
+                try:
+                    event = await self._connection.recv()
+                except ConnectionClosedOK:
+                    return
+
+                # Route the event.
+                event_ctx = event.context_id if hasattr(event, "context_id") else None
+
+                if event_ctx == self._context_id:
+                    yield event
+                    if event.type == "done":
+                        return
+                elif event_ctx is not None and event_ctx in self._connection._context_queues:
+                    await self._connection._context_queues[event_ctx].put(event)
+                elif not hasattr(event, "context_id") and event.type in ("done", "error"):
+                    # Legacy/global events without context_id
+                    yield event
+                    if event.type in ("done", "error"):
+                        return
+                else:
+                    # Unregistered context — yield for backwards compat
+                    yield event
+                    if event.type == "done":
+                        return
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):

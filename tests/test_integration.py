@@ -631,6 +631,54 @@ async def test_tts_websocket_concurrent_contexts_async():
             _validate_audio_response(b"".join(audio2), DEFAULT_OUTPUT_FORMAT)
 
 
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_concurrent_receive_async():
+    """Test two contexts on one connection both using ctx.receive() concurrently.
+
+    This validates the lazy-routing fix: whichever task reads from the wire
+    routes non-matching events to the correct context's queue.
+    """
+    logger.info("Testing concurrent ctx.receive() on one WebSocket")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx1 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+            ctx2 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+
+            # Send to both contexts
+            await ctx1.push("Context one audio.")
+            await ctx1.no_more_inputs()
+
+            await ctx2.push("Context two audio.")
+            await ctx2.no_more_inputs()
+
+            # Receive concurrently via tasks
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
+
+            audio1, audio2 = await asyncio.gather(
+                collect(ctx1),
+                collect(ctx2),
+            )
+
+            _validate_audio_response(audio1, DEFAULT_OUTPUT_FORMAT)
+            _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
+
+
 # ============================================================================
 # TTS Infill Tests
 # ============================================================================
