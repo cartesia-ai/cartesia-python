@@ -161,21 +161,20 @@ def tts_sse_with_match(client: Cartesia):
 
     with open(filename, "wb") as f:
         for event in stream:
-            match event.type:
-                case "chunk":
-                    # Audio chunk - event.audio contains bytes
-                    if event.audio:
-                        f.write(event.audio)
-                    process_audio(event.audio)
-                case "timestamps":
-                    # Word timestamps - event.word_timestamps
-                    process_timestamps(event.word_timestamps)
-                case "done":
-                    # Stream complete
-                    break
-                case "error":
-                    # Error occurred
-                    raise Exception(event.error)
+            if event.type == "chunk":
+                # Audio chunk - event.audio contains bytes
+                if event.audio:
+                    f.write(event.audio)
+                process_audio(event.audio)
+            elif event.type == "timestamps":
+                # Word timestamps - event.word_timestamps
+                process_timestamps(event.word_timestamps)
+            elif event.type == "done":
+                # Stream complete
+                break
+            elif event.type == "error":
+                # Error occurred
+                raise Exception(event.error)
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
