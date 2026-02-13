@@ -4,6 +4,10 @@ Examples for Cartesia Python SDK v3.x
 These examples are extracted from MIGRATING.md for type inspection in editors.
 """
 
+from __future__ import annotations
+
+from typing import IO
+
 from cartesia import (
     APIError,
     Cartesia,
@@ -41,7 +45,7 @@ def tts_generate_to_file(client: Cartesia):
 
 def tts_bytes_to_file(client: Cartesia):
     """Backwards compatibility: use the bytes() method to write a wav file."""
-    response = client.tts.bytes(
+    response = client.tts.bytes(  # pyright: ignore[reportDeprecated]
         model_id="sonic-3",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
@@ -165,7 +169,7 @@ def tts_sse_with_match(client: Cartesia):
                 # Audio chunk - event.audio contains bytes
                 if event.audio:
                     f.write(event.audio)
-                process_audio(event.audio)
+                    process_audio(event.audio)
             elif event.type == "timestamps":
                 # Word timestamps - event.word_timestamps
                 process_timestamps(event.word_timestamps)
@@ -180,11 +184,11 @@ def tts_sse_with_match(client: Cartesia):
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
 
 
-def process_audio(audio: bytes):
+def process_audio(audio: bytes) -> None:
     pass
 
 
-def process_timestamps(timestamps):
+def process_timestamps(timestamps: object) -> None:
     pass
 
 
@@ -282,7 +286,7 @@ def tts_websocket_flushing(client: Cartesia):
         timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 
         # We'll save audio to separate files based on flush_id
-        files = {}
+        files: dict[int, IO[bytes]] = {}
 
         for response in ctx.receive():
             if response.type == "chunk" and response.audio:
@@ -388,7 +392,7 @@ def tts_websocket_response_handling(client: Cartesia):
         # You could also send chunks over the network, play them in real-time, etc.
         with open(filename, "wb") as f:
             for response in connection:
-                if response.type == "chunk":
+                if response.type == "chunk" and response.audio:
                     f.write(response.audio)
                 elif response.type == "timestamps":
                     process_timestamps(response.word_timestamps)
@@ -492,7 +496,7 @@ def stt_transcribe(client: Cartesia):
 def error_handling_example(client: Cartesia):
     """Example of error handling with SDK exceptions."""
     try:
-        response = client.tts.generate(
+        _response = client.tts.generate(
             model_id="sonic-3",
             transcript="Hello, world!",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
@@ -534,9 +538,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Allow overriding version via env var (helpful if default version has issues)
-    extra_headers = {}
-    if os.environ.get("CARTESIA_VERSION"):
-        extra_headers["Cartesia-Version"] = os.environ.get("CARTESIA_VERSION")
+    extra_headers: dict[str, str] = {}
+    cartesia_version = os.environ.get("CARTESIA_VERSION")
+    if cartesia_version:
+        extra_headers["Cartesia-Version"] = cartesia_version
 
     try:
         client = Cartesia(api_key=api_key, default_headers=extra_headers)
