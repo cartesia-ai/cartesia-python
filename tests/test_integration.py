@@ -8,17 +8,17 @@ Run with: pytest tests/test_integration.py -v
 Requires: CARTESIA_API_KEY environment variable
 """
 
-import asyncio
-import logging
 import os
 import uuid
+import asyncio
+import logging
 from typing import List
 
 import pytest
 
-from cartesia import AsyncCartesia, Cartesia
-from cartesia.pagination import SyncCursorIDPage
+from cartesia import Cartesia, AsyncCartesia, APIStatusError
 from cartesia.types import Voice, VoiceMetadata
+from cartesia.pagination import SyncCursorIDPage
 
 # Ignore asyncio resource warnings that occur during test teardown
 pytestmark = pytest.mark.filterwarnings(
@@ -708,7 +708,7 @@ def test_tts_invalid_voice_id(client: Cartesia):
     """Test that invalid voice ID returns an error."""
     logger.info("Testing error handling for invalid voice ID")
 
-    with pytest.raises(Exception):
+    with pytest.raises(APIStatusError):
         client.tts.generate(
             model_id=DEFAULT_MODEL_ID,
             transcript=SAMPLE_TRANSCRIPT,
@@ -723,7 +723,7 @@ def test_get_nonexistent_voice(client: Cartesia):
     """Test that getting a nonexistent voice returns an error."""
     logger.info("Testing error handling for nonexistent voice")
 
-    with pytest.raises(Exception):
+    with pytest.raises(APIStatusError):
         client.voices.get("nonexistent-voice-id")
 
 

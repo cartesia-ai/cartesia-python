@@ -1,7 +1,7 @@
 # SSE Event types for Server-Sent Events streaming
 
 import base64
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Union, Optional
 from typing_extensions import Literal
 
 from .._models import BaseModel

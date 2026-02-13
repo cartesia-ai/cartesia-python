@@ -344,7 +344,6 @@ class SSEEventStream:
         response: httpx.Response,
         client: 'Cartesia',
     ) -> None:
-        from .types.sse_events import SSEEventType
         
         self.response = response
         self._client = client
@@ -362,7 +361,7 @@ class SSEEventStream:
         yield from self._decoder.iter_bytes(self.response.iter_bytes())
 
     def __stream__(self) -> Iterator['SSEEventType']:
-        from .types.sse_events import ChunkEvent, TimestampsEvent, PhonemeTimestampsEvent, DoneEvent, ErrorEvent
+        from .types.sse_events import DoneEvent, ChunkEvent, ErrorEvent, TimestampsEvent, PhonemeTimestampsEvent
         
         iterator = self._iter_events()
 
@@ -452,7 +451,6 @@ class AsyncSSEEventStream:
         response: httpx.Response,
         client: 'AsyncCartesia',
     ) -> None:
-        from .types.sse_events import SSEEventType
         
         self.response = response
         self._client = client
@@ -466,7 +464,7 @@ class AsyncSSEEventStream:
             yield event
 
     async def __stream__(self) -> AsyncIterator['SSEEventType']:
-        from .types.sse_events import ChunkEvent, TimestampsEvent, PhonemeTimestampsEvent, DoneEvent, ErrorEvent
+        from .types.sse_events import DoneEvent, ChunkEvent, ErrorEvent, TimestampsEvent, PhonemeTimestampsEvent
         
         async for sse in self._iter_events():
             try:
