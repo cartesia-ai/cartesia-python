@@ -679,6 +679,70 @@ async def test_tts_websocket_concurrent_receive_async():
             _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
 
 
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_recv_lock_not_held_across_yield():
+    """Verify the recv lock is released before yielding events to consumers.
+
+    If receive() holds the lock across yield, a slow consumer will starve all
+    other contexts.  This test has one consumer sleep between iterations; the
+    other must still complete within a reasonable timeout.
+    """
+    logger.info("Testing recv lock is not held across yield")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx1 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+            ctx2 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+
+            await ctx1.push("Hello from context one.")
+            await ctx1.no_more_inputs()
+
+            await ctx2.push("Hello from context two.")
+            await ctx2.no_more_inputs()
+
+            # Slow consumer: sleeps 0.5s between every event
+            async def slow_collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                    await asyncio.sleep(0.5)
+                return b"".join(chunks)
+
+            # Fast consumer: no delays
+            async def fast_collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
+
+            # If the lock were held across yield, fast_collect would be blocked
+            # for the entire duration of slow_collect's sleeps (~many seconds).
+            # With the fix, fast_collect finishes independently.
+            # Use a generous timeout that would still catch a deadlock.
+            audio1, audio2 = await asyncio.wait_for(
+                asyncio.gather(
+                    slow_collect(ctx1),
+                    fast_collect(ctx2),
+                ),
+                timeout=30.0,
+            )
+
+            assert len(audio1) > 0, "Slow consumer should still get audio"
+            assert len(audio2) > 0, "Fast consumer should still get audio"
+
+
 # ============================================================================
 # TTS Infill Tests
 # ============================================================================

@@ -1007,6 +1007,8 @@ class AsyncTTSResourceConnection:
         Returns:
             AsyncWebSocketContext helper for simplified sending and receiving
         """
+        if context_id is not None and context_id in self._context_queues:
+            raise ValueError(f"Context for context ID {context_id} already exists.")
         if context_id is None:
             context_id = str(uuid.uuid4())
         import asyncio
@@ -1206,6 +1208,8 @@ class TTSResourceConnection:
         Returns:
             WebSocketContext helper for simplified sending and receiving
         """
+        if context_id is not None and context_id in self._context_queues:
+            raise ValueError(f"Context for context ID {context_id} already exists.")
         if context_id is None:
             context_id = str(uuid.uuid4())
         self._context_queues[context_id] = queue.Queue()
@@ -1465,43 +1469,46 @@ class WebSocketContext:
 
         my_queue = self._connection._context_queues.get(self._context_id)
 
-        while True:
-            # 1. Drain our own queue first (events routed here by another context).
-            if my_queue is not None:
+        try:
+            while True:
+                # 1. Drain our own queue first (events routed here by another context).
+                if my_queue is not None:
+                    try:
+                        event = my_queue.get_nowait()
+                        yield event
+                        if event.type == "done":
+                            return
+                        continue
+                    except queue.Empty:
+                        pass
+
+                # 2. Read the next event from the connection.
                 try:
-                    event = my_queue.get_nowait()
+                    event = self._connection.recv()
+                except ConnectionClosedOK:
+                    return
+
+                # 3. Route the event.
+                event_ctx = event.context_id if hasattr(event, "context_id") else None
+
+                if event_ctx == self._context_id:
                     yield event
                     if event.type == "done":
                         return
-                    continue
-                except queue.Empty:
-                    pass
-
-            # 2. Read the next event from the connection.
-            try:
-                event = self._connection.recv()
-            except ConnectionClosedOK:
-                return
-
-            # 3. Route the event.
-            event_ctx = event.context_id if hasattr(event, "context_id") else None
-
-            if event_ctx == self._context_id:
-                yield event
-                if event.type == "done":
-                    return
-            elif event_ctx is not None and event_ctx in self._connection._context_queues:
-                self._connection._context_queues[event_ctx].put(event)
-            elif not hasattr(event, "context_id") and event.type in ("done", "error"):
-                # Global events without context_id
-                yield event
-                if event.type in ("done", "error"):
-                    return
-            else:
-                # Unregistered context — yield for backwards compat
-                yield event
-                if event.type == "done":
-                    return
+                elif event_ctx is not None and event_ctx in self._connection._context_queues:
+                    self._connection._context_queues[event_ctx].put(event)
+                elif not hasattr(event, "context_id") and event.type in ("done", "error"):
+                    # Global events without context_id
+                    yield event
+                    if event.type in ("done", "error"):
+                        return
+                else:
+                    # Unregistered context — yield for backwards compat
+                    yield event
+                    if event.type == "done":
+                        return
+        finally:
+            self._connection._context_queues.pop(self._context_id, None)
 
 
 class AsyncWebSocketContext:
@@ -1656,21 +1663,9 @@ class AsyncWebSocketContext:
 
         my_queue = self._connection._context_queues.get(self._context_id)
 
-        while True:
-            # 1. Drain our own queue first (events routed here by another context).
-            if my_queue is not None:
-                try:
-                    event = my_queue.get_nowait()
-                    yield event
-                    if event.type == "done":
-                        return
-                    continue
-                except (_asyncio.QueueEmpty, queue.Empty):
-                    pass
-
-            # 2. Acquire the recv lock so only one context reads the wire.
-            async with self._connection._recv_lock:
-                # Re-check queue — events may have arrived while we waited.
+        try:
+            while True:
+                # 1. Drain our own queue first (events routed here by another context).
                 if my_queue is not None:
                     try:
                         event = my_queue.get_nowait()
@@ -1681,31 +1676,48 @@ class AsyncWebSocketContext:
                     except (_asyncio.QueueEmpty, queue.Empty):
                         pass
 
-                # Read the next event from the wire.
-                try:
-                    event = await self._connection.recv()
-                except ConnectionClosedOK:
-                    return
+                # 2. Acquire the recv lock so only one context reads the wire.
+                #    We must release the lock *before* yielding so other contexts
+                #    aren't blocked while the caller processes the event.
+                to_yield: WebsocketResponse | None = None
 
-                # Route the event.
-                event_ctx = event.context_id if hasattr(event, "context_id") else None
+                async with self._connection._recv_lock:
+                    # Re-check queue — events may have arrived while we waited.
+                    if my_queue is not None:
+                        try:
+                            to_yield = my_queue.get_nowait()
+                        except (_asyncio.QueueEmpty, queue.Empty):
+                            pass
 
-                if event_ctx == self._context_id:
-                    yield event
-                    if event.type == "done":
+                    if to_yield is None:
+                        # Read the next event from the wire.
+                        try:
+                            event = await self._connection.recv()
+                        except ConnectionClosedOK:
+                            return
+
+                        # Route the event.
+                        event_ctx = event.context_id if hasattr(event, "context_id") else None
+
+                        if event_ctx == self._context_id:
+                            to_yield = event
+                        elif event_ctx is not None and event_ctx in self._connection._context_queues:
+                            await self._connection._context_queues[event_ctx].put(event)
+                        elif not hasattr(event, "context_id") and event.type in ("done", "error"):
+                            to_yield = event
+                        else:
+                            # Unregistered context — yield for backwards compat
+                            to_yield = event
+
+                # Lock released — now yield outside the critical section.
+                if to_yield is not None:
+                    yield to_yield
+                    if to_yield.type == "done":
                         return
-                elif event_ctx is not None and event_ctx in self._connection._context_queues:
-                    await self._connection._context_queues[event_ctx].put(event)
-                elif not hasattr(event, "context_id") and event.type in ("done", "error"):
-                    # Legacy/global events without context_id
-                    yield event
-                    if event.type in ("done", "error"):
+                    if to_yield.type == "error" and not hasattr(to_yield, "context_id"):
                         return
-                else:
-                    # Unregistered context — yield for backwards compat
-                    yield event
-                    if event.type == "done":
-                        return
+        finally:
+            self._connection._context_queues.pop(self._context_id, None)
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):
