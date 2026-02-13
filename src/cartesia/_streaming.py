@@ -1,4 +1,4 @@
-# Note: initially copied from https://github.com/florimondmanca/httpx-sse/blob/master/src/httpx_sse/_decoders.py
+# Note: manually maintained, not generated from OpenAPI spec.
 from __future__ import annotations
 
 import json
@@ -13,6 +13,7 @@ from ._utils import extract_type_var_from_base
 
 if TYPE_CHECKING:
     from ._client import Cartesia, AsyncCartesia
+    from .types.sse_events import SSEEventType
 
 
 _T = TypeVar("_T")
@@ -344,7 +345,7 @@ class SSEEventStream:
         response: httpx.Response,
         client: 'Cartesia',
     ) -> None:
-        
+
         self.response = response
         self._client = client
         self._decoder = client._make_sse_decoder()
@@ -362,56 +363,54 @@ class SSEEventStream:
 
     def __stream__(self) -> Iterator['SSEEventType']:
         from .types.sse_events import DoneEvent, ChunkEvent, ErrorEvent, TimestampsEvent, PhonemeTimestampsEvent
-        
+
         iterator = self._iter_events()
 
         for sse in iterator:
             try:
                 # Parse JSON data
-                data = sse.json() if sse.data else {}
-                event_type = sse.event or 'message'
-                
+                data: dict[str, Any] = sse.json() if sse.data else {}
+                event_type: str = sse.event or 'message'
+
                 # Create appropriate event object based on type
                 if event_type == 'chunk':
                     yield ChunkEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        data=data.get('data', ''),
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code'),
-                        step_time=data.get('step_time'),
-                        done=data.get('done', False)
+                        data=cast(str, data.get('data', '')),
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
+                        step_time=cast('float | None', data.get('step_time')),
+                        done=cast(bool, data.get('done', False)),
                     )
                 elif event_type == 'timestamps':
-                    # Timestamp data comes as a dict with a 'word_timestamps' key
                     yield TimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        word_timestamps=data.get('word_timestamps'),
-                        context_id=data.get('context_id')
+                        word_timestamps=cast(Any, data.get('word_timestamps')),
+                        context_id=cast('str | None', data.get('context_id')),
                     )
                 elif event_type == 'phoneme_timestamps':
-                    # Timestamp data comes as a dict with a 'phoneme_timestamps' key
                     yield PhonemeTimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        phoneme_timestamps=data.get('phoneme_timestamps'),
-                        context_id=data.get('context_id')
+                        phoneme_timestamps=cast(Any, data.get('phoneme_timestamps')),
+                        context_id=cast('str | None', data.get('context_id')),
                     )
                 elif event_type == 'done':
                     yield DoneEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code')
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
                     )
                 elif event_type == 'error':
                     yield ErrorEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        error=data.get('error'),
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code')
+                        error=cast('str | None', data.get('error')),
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
                     )
             except (json.JSONDecodeError, KeyError, TypeError):
                 # Skip malformed events
@@ -434,7 +433,7 @@ class SSEEventStream:
     def close(self) -> None:
         """
         Close the response and release the connection.
-        
+
         Automatically called if the response body is read to completion.
         """
         self.response.close()
@@ -451,7 +450,7 @@ class AsyncSSEEventStream:
         response: httpx.Response,
         client: 'AsyncCartesia',
     ) -> None:
-        
+
         self.response = response
         self._client = client
         self._decoder = client._make_sse_decoder()
@@ -465,60 +464,58 @@ class AsyncSSEEventStream:
 
     async def __stream__(self) -> AsyncIterator['SSEEventType']:
         from .types.sse_events import DoneEvent, ChunkEvent, ErrorEvent, TimestampsEvent, PhonemeTimestampsEvent
-        
+
         async for sse in self._iter_events():
             try:
                 # Parse JSON data
-                data = sse.json() if sse.data else {}
-                event_type = sse.event or 'message'
-                
+                data: dict[str, Any] = sse.json() if sse.data else {}
+                event_type: str = sse.event or 'message'
+
                 # Create appropriate event object based on type
                 if event_type == 'chunk':
                     yield ChunkEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        data=data.get('data', ''),
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code'),
-                        step_time=data.get('step_time'),
-                        done=data.get('done', False)
+                        data=cast(str, data.get('data', '')),
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
+                        step_time=cast('float | None', data.get('step_time')),
+                        done=cast(bool, data.get('done', False)),
                     )
                 elif event_type == 'timestamps':
-                    # Timestamp data comes as a dict with a 'word_timestamps' key
                     yield TimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        word_timestamps=data.get('word_timestamps'),
-                        context_id=data.get('context_id')
+                        word_timestamps=cast(Any, data.get('word_timestamps')),
+                        context_id=cast('str | None', data.get('context_id')),
                     )
                 elif event_type == 'phoneme_timestamps':
-                    # Timestamp data comes as a dict with a 'phoneme_timestamps' key
                     yield PhonemeTimestampsEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        phoneme_timestamps=data.get('phoneme_timestamps'),
-                        context_id=data.get('context_id')
+                        phoneme_timestamps=cast(Any, data.get('phoneme_timestamps')),
+                        context_id=cast('str | None', data.get('context_id')),
                     )
                 elif event_type == 'done':
                     yield DoneEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code')
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
                     )
                 elif event_type == 'error':
                     yield ErrorEvent(
                         id=sse.id,
                         retry=sse.retry,
-                        error=data.get('error'),
-                        context_id=data.get('context_id'),
-                        status_code=data.get('status_code')
+                        error=cast('str | None', data.get('error')),
+                        context_id=cast('str | None', data.get('context_id')),
+                        status_code=cast('int | None', data.get('status_code')),
                     )
             except (json.JSONDecodeError, KeyError, TypeError):
                 # Skip malformed events
                 continue
 
-        # Close the response when iteration is complete  
+        # Close the response when iteration is complete
         await self.response.aclose()
 
     async def __aenter__(self) -> Self:
@@ -535,7 +532,7 @@ class AsyncSSEEventStream:
     async def aclose(self) -> None:
         """
         Close the response and release the connection.
-        
+
         Automatically called if the response body is read to completion.
         """
         await self.response.aclose()
