@@ -4,17 +4,14 @@ Examples for Cartesia Python SDK v3.x
 These examples are extracted from MIGRATING.md for type inspection in editors.
 """
 
-from cartesia import Cartesia
 from cartesia import (
-    CartesiaError,
     APIError,
-    APIStatusError,
-    BadRequestError,
-    AuthenticationError,
+    Cartesia,
     NotFoundError,
     RateLimitError,
+    BadRequestError,
+    AuthenticationError,
 )
-
 
 # =============================================================================
 # Client Initialization
@@ -514,8 +511,8 @@ def error_handling_example(client: Cartesia):
         print(f"API error: {e}")
 
 if __name__ == "__main__":
-    import sys
     import os
+    import sys
     import inspect
 
     if len(sys.argv) < 2:

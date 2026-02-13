@@ -4,15 +4,9 @@ Async Examples for Cartesia Python SDK v3.x
 
 import asyncio
 import datetime
-from cartesia import AsyncCartesia
+
 from cartesia import (
-    CartesiaError,
-    APIError,
-    APIStatusError,
-    BadRequestError,
-    AuthenticationError,
-    NotFoundError,
-    RateLimitError,
+    AsyncCartesia,
 )
 
 # =============================================================================
@@ -398,8 +392,8 @@ async def infill_create_async(client: AsyncCartesia):
     print("Play with: ffplay -f wav infill_output_async.wav")
 
 if __name__ == "__main__":
-    import sys
     import os
+    import sys
     import inspect
 
     if len(sys.argv) < 2:

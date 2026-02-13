@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import json
-import logging
 import uuid
+import logging
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast, Dict
+from typing import TYPE_CHECKING, Any, Dict, Mapping, Iterator, Optional, cast
 from typing_extensions import AsyncIterator, deprecated
 
 import httpx
@@ -19,7 +19,7 @@ from ..types import (
     tts_generate_params,
     tts_generate_sse_params,
 )
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
+from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
 from .._compat import cached_property
 from .._models import construct_type_unchecked
@@ -45,7 +45,7 @@ from ..types.model_speed import ModelSpeed
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
-from ..types.websocket_client_event import WebsocketClientEvent, GenerationRequest
+from ..types.websocket_client_event import GenerationRequest, WebsocketClientEvent
 from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
@@ -321,7 +321,7 @@ class TTSResource(SyncAPIResource):
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
-        duration: Optional[float] | Omit = omit,
+        duration: Optional[float] | Omit = omit,  # noqa: ARG002
         generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
@@ -712,7 +712,7 @@ class AsyncTTSResource(AsyncAPIResource):
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
-        duration: Optional[float] | Omit = omit,
+        duration: Optional[float] | Omit = omit,  # noqa: ARG002
         generation_config: Optional[tts_generate_params.GenerationConfig] | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
