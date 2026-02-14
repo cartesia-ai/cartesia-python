@@ -46,7 +46,7 @@ from ..types.model_speed import ModelSpeed
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
-from ..types.websocket_client_event import GenerationRequest, WebsocketClientEvent
+from ..types.websocket_client_event import GenerationRequest, CancelContextRequest, WebsocketClientEvent
 from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
@@ -923,9 +923,10 @@ class AsyncTTSResourceConnection:
 
     _connection: AsyncWebsocketConnection
 
-    def __init__(self, connection: AsyncWebsocketConnection) -> None:
+    def __init__(self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager | None = None) -> None:
         import asyncio as _asyncio
         self._connection = connection
+        self._manager = manager
         self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
         self._recv_lock: asyncio.Lock = _asyncio.Lock()
 
@@ -950,7 +951,7 @@ class AsyncTTSResourceConnection:
         """
         return self.parse_event(await self.recv_bytes())
 
-    async def recv_bytes(self) -> bytes:
+    async def recv_bytes(self, timeout: float | None = None) -> bytes:
         """Receive the next message from the connection as raw bytes.
 
         Canceling this method is safe. There's no risk of losing data.
@@ -958,11 +959,16 @@ class AsyncTTSResourceConnection:
         If you want to parse the message into a `WebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
-        message = await self._connection.recv(decode=False)
+        if timeout is not None:
+            import asyncio as _asyncio
+            message = await _asyncio.wait_for(self._connection.recv(decode=False), timeout=timeout)
+        else:
+            message = await self._connection.recv(decode=False)
         log.debug(f"Received websocket message: %s", message)
         return message
 
     async def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
+        await self._ensure_connected()
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
             if isinstance(event, BaseModel)
@@ -972,6 +978,15 @@ class AsyncTTSResourceConnection:
 
     async def close(self, *, code: int = 1000, reason: str = "") -> None:
         await self._connection.close(code=code, reason=reason)
+
+    async def _ensure_connected(self) -> None:
+        from websockets.protocol import State
+
+        if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
+            log.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
+            new_conn = await self._manager.__aenter__()
+            self._connection = new_conn._connection
+            self._context_queues.clear()
 
     def parse_event(self, data: str | bytes) -> WebsocketResponse:
         """
@@ -987,6 +1002,7 @@ class AsyncTTSResourceConnection:
         self,
         context_id: Optional[str] = None,
         *,
+        timeout: float | None = None,
         model_id: str | None = None,
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
@@ -1016,6 +1032,7 @@ class AsyncTTSResourceConnection:
         return AsyncWebSocketContext(
             self,
             context_id,
+            timeout=timeout,
             model_id=model_id,
             voice=voice,
             output_format=output_format,
@@ -1098,7 +1115,8 @@ class AsyncTTSResourceConnectionManager:
                     self.__extra_headers,
                 ),
                 **self.__websocket_connection_options,
-            )
+            ),
+            manager=self,
         )
 
         return self.__connection
@@ -1126,8 +1144,9 @@ class TTSResourceConnection:
 
     _connection: WebsocketConnection
 
-    def __init__(self, connection: WebsocketConnection) -> None:
+    def __init__(self, connection: WebsocketConnection, manager: TTSResourceConnectionManager | None = None) -> None:
         self._connection = connection
+        self._manager = manager
         self._context_queues: dict[str, queue.Queue[WebsocketResponse]] = {}
 
     def __iter__(self) -> Iterator[WebsocketResponse]:
@@ -1151,7 +1170,7 @@ class TTSResourceConnection:
         """
         return self.parse_event(self.recv_bytes())
 
-    def recv_bytes(self) -> bytes:
+    def recv_bytes(self, timeout: float | None = None) -> bytes:
         """Receive the next message from the connection as raw bytes.
 
         Canceling this method is safe. There's no risk of losing data.
@@ -1159,11 +1178,12 @@ class TTSResourceConnection:
         If you want to parse the message into a `WebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
-        message = self._connection.recv(decode=False)
+        message = self._connection.recv(decode=False, timeout=timeout)
         log.debug(f"Received websocket message: %s", message)
         return message
 
     def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
+        self._ensure_connected()
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
             if isinstance(event, BaseModel)
@@ -1173,6 +1193,15 @@ class TTSResourceConnection:
 
     def close(self, *, code: int = 1000, reason: str = "") -> None:
         self._connection.close(code=code, reason=reason)
+
+    def _ensure_connected(self) -> None:
+        from websockets.protocol import State
+
+        if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
+            log.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
+            new_conn = self._manager.__enter__()
+            self._connection = new_conn._connection
+            self._context_queues.clear()
 
     def parse_event(self, data: str | bytes) -> WebsocketResponse:
         """
@@ -1188,6 +1217,7 @@ class TTSResourceConnection:
         self,
         context_id: Optional[str] = None,
         *,
+        timeout: float | None = None,
         model_id: str | None = None,
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
@@ -1216,6 +1246,7 @@ class TTSResourceConnection:
         return WebSocketContext(
             self,
             context_id,
+            timeout=timeout,
             model_id=model_id,
             voice=voice,
             output_format=output_format,
@@ -1298,7 +1329,8 @@ class TTSResourceConnectionManager:
                     self.__extra_headers,
                 ),
                 **self.__websocket_connection_options,
-            )
+            ),
+            manager=self,
         )
 
         return self.__connection
@@ -1329,6 +1361,7 @@ class WebSocketContext:
         connection: 'TTSResourceConnection',
         context_id: str,
         *,
+        timeout: float | None = None,
         model_id: str | None = None,
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
@@ -1338,6 +1371,7 @@ class WebSocketContext:
         self._connection = connection
         self._context_id = context_id
         self._completed = False
+        self._timeout = timeout
         self._model_id = model_id
         self._voice = voice
         self._output_format = output_format
@@ -1458,6 +1492,11 @@ class WebSocketContext:
         )
         self._completed = True
 
+    def cancel(self) -> None:
+        """Cancel this context, stopping any in-progress generation."""
+        self._connection.send(CancelContextRequest(cancel=True, context_id=self._context_id))
+        self._connection._context_queues.pop(self._context_id, None)
+
     def receive(self) -> Iterator[WebsocketResponse]:
         """Receive responses filtered to this context only.
 
@@ -1468,6 +1507,7 @@ class WebSocketContext:
         from websockets.exceptions import ConnectionClosedOK
 
         my_queue = self._connection._context_queues.get(self._context_id)
+        done = False
 
         try:
             while True:
@@ -1476,7 +1516,8 @@ class WebSocketContext:
                     try:
                         event = my_queue.get_nowait()
                         yield event
-                        if event.type == "done":
+                        if event.type in ("done", "error"):
+                            done = True
                             return
                         continue
                     except queue.Empty:
@@ -1484,8 +1525,10 @@ class WebSocketContext:
 
                 # 2. Read the next event from the connection.
                 try:
-                    event = self._connection.recv()
+                    raw = self._connection.recv_bytes(timeout=self._timeout)
+                    event = self._connection.parse_event(raw)
                 except ConnectionClosedOK:
+                    done = True
                     return
 
                 # 3. Route the event.
@@ -1493,7 +1536,8 @@ class WebSocketContext:
 
                 if event_ctx == self._context_id:
                     yield event
-                    if event.type == "done":
+                    if event.type in ("done", "error"):
+                        done = True
                         return
                 elif event_ctx is not None and event_ctx in self._connection._context_queues:
                     self._connection._context_queues[event_ctx].put(event)
@@ -1501,14 +1545,21 @@ class WebSocketContext:
                     # Global events without context_id
                     yield event
                     if event.type in ("done", "error"):
+                        done = True
                         return
                 else:
                     # Unregistered context — yield for backwards compat
                     yield event
                     if event.type == "done":
+                        done = True
                         return
         finally:
-            self._connection._context_queues.pop(self._context_id, None)
+            # Only unregister the queue if the context completed.  If the
+            # consumer exited early (break / cancel), keep the queue so
+            # future events for this context_id are absorbed rather than
+            # leaking into other contexts via the fallback path.
+            if done:
+                self._connection._context_queues.pop(self._context_id, None)
 
 
 class AsyncWebSocketContext:
@@ -1519,6 +1570,7 @@ class AsyncWebSocketContext:
         connection: 'AsyncTTSResourceConnection',
         context_id: str,
         *,
+        timeout: float | None = None,
         model_id: str | None = None,
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
@@ -1528,6 +1580,7 @@ class AsyncWebSocketContext:
         self._connection = connection
         self._context_id = context_id
         self._completed = False
+        self._timeout = timeout
         self._model_id = model_id
         self._voice = voice
         self._output_format = output_format
@@ -1648,6 +1701,11 @@ class AsyncWebSocketContext:
         )
         self._completed = True
 
+    async def cancel(self) -> None:
+        """Cancel this context, stopping any in-progress generation."""
+        await self._connection.send(CancelContextRequest(cancel=True, context_id=self._context_id))
+        self._connection._context_queues.pop(self._context_id, None)
+
     async def receive(self) -> AsyncIterator[WebsocketResponse]:
         """Receive responses filtered to this context only.
 
@@ -1662,6 +1720,7 @@ class AsyncWebSocketContext:
         from websockets.exceptions import ConnectionClosedOK
 
         my_queue = self._connection._context_queues.get(self._context_id)
+        done = False
 
         try:
             while True:
@@ -1670,7 +1729,8 @@ class AsyncWebSocketContext:
                     try:
                         event = my_queue.get_nowait()
                         yield event
-                        if event.type == "done":
+                        if event.type in ("done", "error"):
+                            done = True
                             return
                         continue
                     except (_asyncio.QueueEmpty, queue.Empty):
@@ -1692,9 +1752,14 @@ class AsyncWebSocketContext:
                     if to_yield is None:
                         # Read the next event from the wire.
                         try:
-                            event = await self._connection.recv()
+                            raw = await self._connection.recv_bytes(timeout=self._timeout)
+                            event = self._connection.parse_event(raw)
                         except ConnectionClosedOK:
+                            done = True
                             return
+                        except TimeoutError:
+                            done = True
+                            raise
 
                         # Route the event.
                         event_ctx = event.context_id if hasattr(event, "context_id") else None
@@ -1712,12 +1777,16 @@ class AsyncWebSocketContext:
                 # Lock released — now yield outside the critical section.
                 if to_yield is not None:
                     yield to_yield
-                    if to_yield.type == "done":
-                        return
-                    if to_yield.type == "error" and not hasattr(to_yield, "context_id"):
+                    if to_yield.type in ("done", "error"):
+                        done = True
                         return
         finally:
-            self._connection._context_queues.pop(self._context_id, None)
+            # Only unregister the queue if the context completed.  If the
+            # consumer exited early (break / cancel), keep the queue so
+            # future events for this context_id are absorbed rather than
+            # leaking into other contexts via the fallback path.
+            if done:
+                self._connection._context_queues.pop(self._context_id, None)
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):
@@ -1763,11 +1832,17 @@ class BackcompatTTSResourceConnection:
         context_id: Optional[str] = None,
         stream: bool = True,
         **kwargs: Any,
-    ) -> Iterator[BackcompatWebSocketTtsOutput]:
-        """Send a request and yield responses (v2 compatible)."""
+    ) -> "Iterator[BackcompatWebSocketTtsOutput] | BackcompatWebSocketTtsOutput":
+        """Send a request and return responses (v2 compatible).
+
+        If stream is True, returns an iterator of BackcompatWebSocketTtsOutput chunks.
+        If stream is False, returns a single BackcompatWebSocketTtsOutput with all
+        audio concatenated and timestamps aggregated (matching v2 behaviour).
+        """
         if not self._connection:
             self.connect()
         assert self._connection is not None
+        self._connection._ensure_connected()
 
         ctx = self._connection.context(context_id)
 
@@ -1784,6 +1859,9 @@ class BackcompatTTSResourceConnection:
         # Generate output stream
         def generator() -> Iterator[BackcompatWebSocketTtsOutput]:
             for event in ctx.receive():
+                if event.type == "error":
+                    raise RuntimeError(f"Error generating audio:\n{getattr(event, 'error', 'Unknown error')}")
+
                 out = BackcompatWebSocketTtsOutput(
                     context_id=event.context_id
                 )
@@ -1802,8 +1880,33 @@ class BackcompatTTSResourceConnection:
 
         if stream:
             return generator()
-        else:
-            return iter(list(generator()))
+
+        audio_parts: list[bytes] = []
+        words: list[str] = []
+        word_starts: list[float] = []
+        word_ends: list[float] = []
+        phonemes: list[str] = []
+        phoneme_starts: list[float] = []
+        phoneme_ends: list[float] = []
+        for chunk in generator():
+            if chunk.audio is not None:
+                audio_parts.append(chunk.audio)
+            if chunk.word_timestamps is not None:
+                wt = chunk.word_timestamps
+                words.extend(wt.words)
+                word_starts.extend(wt.start)
+                word_ends.extend(wt.end)
+            if chunk.phoneme_timestamps is not None:
+                pt = chunk.phoneme_timestamps
+                phonemes.extend(pt.phonemes)
+                phoneme_starts.extend(pt.start)
+                phoneme_ends.extend(pt.end)
+        return BackcompatWebSocketTtsOutput(
+            audio=b"".join(audio_parts) if audio_parts else None,
+            context_id=context_id,
+            word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
+            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
+        )
 
 
 class AsyncBackcompatTTSResourceConnection:
@@ -1838,11 +1941,17 @@ class AsyncBackcompatTTSResourceConnection:
         context_id: Optional[str] = None,
         stream: bool = True,
         **kwargs: Any,
-    ) -> AsyncIterator[BackcompatWebSocketTtsOutput]:
-        """Send a request and yield responses (v2 compatible)."""
+    ) -> "AsyncIterator[BackcompatWebSocketTtsOutput] | BackcompatWebSocketTtsOutput":
+        """Send a request and return responses (v2 compatible).
+
+        If stream is True, returns an async iterator of BackcompatWebSocketTtsOutput chunks.
+        If stream is False, returns a single BackcompatWebSocketTtsOutput with all
+        audio concatenated and timestamps aggregated (matching v2 behaviour).
+        """
         if not self._connection:
             await self.connect()
         assert self._connection is not None
+        await self._connection._ensure_connected()
 
         ctx = self._connection.context(context_id)
 
@@ -1859,6 +1968,9 @@ class AsyncBackcompatTTSResourceConnection:
         # Generate output stream
         async def generator() -> AsyncIterator[BackcompatWebSocketTtsOutput]:
             async for event in ctx.receive():
+                if event.type == "error":
+                    raise RuntimeError(f"Error generating audio:\n{getattr(event, 'error', 'Unknown error')}")
+
                 out = BackcompatWebSocketTtsOutput(
                     context_id=event.context_id
                 )
@@ -1877,16 +1989,30 @@ class AsyncBackcompatTTSResourceConnection:
 
         if stream:
             return generator()
-        else:
-            results: list[BackcompatWebSocketTtsOutput] = []
-            async for item in generator():
-                results.append(item)
 
-            async def async_iter() -> AsyncIterator[BackcompatWebSocketTtsOutput]:
-                for item in results:
-                    yield item
-
-            return async_iter()
-
-
-# Custom Cartesia stuff:
+        audio_parts: list[bytes] = []
+        words: list[str] = []
+        word_starts: list[float] = []
+        word_ends: list[float] = []
+        phonemes: list[str] = []
+        phoneme_starts: list[float] = []
+        phoneme_ends: list[float] = []
+        async for chunk in generator():
+            if chunk.audio is not None:
+                audio_parts.append(chunk.audio)
+            if chunk.word_timestamps is not None:
+                wt = chunk.word_timestamps
+                words.extend(wt.words)
+                word_starts.extend(wt.start)
+                word_ends.extend(wt.end)
+            if chunk.phoneme_timestamps is not None:
+                pt = chunk.phoneme_timestamps
+                phonemes.extend(pt.phonemes)
+                phoneme_starts.extend(pt.start)
+                phoneme_ends.extend(pt.end)
+        return BackcompatWebSocketTtsOutput(
+            audio=b"".join(audio_parts) if audio_parts else None,
+            context_id=context_id,
+            word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
+            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
+        )
