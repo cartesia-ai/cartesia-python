@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.0.1 (2026-02-19)
+
+Full Changelog: [v3.0.0...v3.0.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0...v3.0.1)
+
+### Features
+
+* **api:** update headline example ([fb14a78](https://github.com/cartesia-ai/cartesia-python/commit/fb14a78923cd146cb1dcb20765fc7cce0392010a))
+
+
+### Chores
+
+* Fix lint ([3f6a0cc](https://github.com/cartesia-ai/cartesia-python/commit/3f6a0cc57350a092f577207041080b28d20ea2bc))
+* fix lints and update headline examples ([#72](https://github.com/cartesia-ai/cartesia-python/issues/72)) ([0d37a8b](https://github.com/cartesia-ai/cartesia-python/commit/0d37a8bb16a93bc0f2e6af8e5f1e9d2d38f50a1d))
+* format all `api.md` files ([680d8eb](https://github.com/cartesia-ai/cartesia-python/commit/680d8eb0a58b33e2915d76bcbc0f3231874ce2e3))
+* **internal:** fix lint error on Python 3.14 ([b2eae65](https://github.com/cartesia-ai/cartesia-python/commit/b2eae650b8eccaea275308a668930d4cd54a8f7a))
+* **internal:** remove mock server code ([af0d52a](https://github.com/cartesia-ai/cartesia-python/commit/af0d52a9a467db4b6e516884591d0b92b189517f))
+* update mock server docs ([875bf82](https://github.com/cartesia-ai/cartesia-python/commit/875bf82754e7dd62e626d15987d436e7d4fb502c))
+
 ## 3.0.0 (2026-02-09)
 
 Full Changelog: [v3.0.0-beta16...v3.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0-beta16...v3.0.0)

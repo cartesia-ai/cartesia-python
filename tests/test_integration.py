@@ -8,17 +8,22 @@ Run with: pytest tests/test_integration.py -v
 Requires: CARTESIA_API_KEY environment variable
 """
 
-import asyncio
-import logging
+from __future__ import annotations
+
 import os
 import uuid
-from typing import List
+import asyncio
+import logging
+from typing import Any, List, cast
 
 import pytest
 
-from cartesia import AsyncCartesia, Cartesia
-from cartesia.pagination import SyncCursorIDPage
+from cartesia import Cartesia, AsyncCartesia, APIStatusError
 from cartesia.types import Voice, VoiceMetadata
+from cartesia.pagination import SyncCursorIDPage
+from cartesia.resources.tts import AsyncWebSocketContext
+from cartesia.types.supported_language import SupportedLanguage
+from cartesia.types.generation_request_param import GenerationRequestParam
 
 # Ignore asyncio resource warnings that occur during test teardown
 pytestmark = pytest.mark.filterwarnings(
@@ -33,7 +38,7 @@ RESOURCES_DIR = os.path.join(THISDIR, "resources")
 os.makedirs(RESOURCES_DIR, exist_ok=True)
 
 DEFAULT_MODEL_ID = "sonic-2"
-DEFAULT_OUTPUT_FORMAT = {
+DEFAULT_OUTPUT_FORMAT: Any = {
     "container": "raw",
     "encoding": "pcm_f32le",
     "sample_rate": 44100,
@@ -116,7 +121,7 @@ def _validate_raw_response(data: bytes, sample_rate: int, min_duration_s: float 
     assert len(data) >= expected_min_bytes, f"Raw audio too short: {len(data)} < {expected_min_bytes}"
 
 
-def _validate_audio_response(data: bytes, output_format: dict):
+def _validate_audio_response(data: bytes, output_format: dict[str, Any]) -> None:
     """Validate audio data based on format."""
     assert len(data) > 0, "Audio data should not be empty"
 
@@ -244,7 +249,7 @@ def test_update_voice(client: Cartesia, sample_audio_path: str):
     {"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
     {"container": "mp3", "sample_rate": 44100, "bit_rate": 128000},
 ])
-def test_tts_generate_sync(client: Cartesia, output_format: dict):
+def test_tts_generate_sync(client: Cartesia, output_format: Any) -> None:
     """Test synchronous TTS generation with various output formats."""
     logger.info(f"Testing tts.generate with format {output_format}")
 
@@ -276,7 +281,7 @@ async def test_tts_generate_async():
             language=SAMPLE_LANGUAGE,
         )
 
-        chunks = []
+        chunks: list[bytes] = []
         async for chunk in response.iter_bytes():
             chunks.append(chunk)
 
@@ -301,7 +306,7 @@ def test_tts_sse_sync(client: Cartesia):
         language=SAMPLE_LANGUAGE,
     )
 
-    audio_chunks = []
+    audio_chunks: list[bytes] = []
     for event in stream:
         if event.type == "chunk" and event.audio:
             audio_chunks.append(event.audio)
@@ -314,7 +319,7 @@ def test_tts_sse_sync(client: Cartesia):
     _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
 
 
-def test_tts_sse_with_timestamps(client: Cartesia):
+def test_tts_sse_with_timestamps(client: Cartesia) -> None:
     """Test TTS SSE with word timestamps."""
     logger.info("Testing tts.generate_sse with timestamps")
 
@@ -327,36 +332,20 @@ def test_tts_sse_with_timestamps(client: Cartesia):
         add_timestamps=True,
     )
 
-    audio_chunks = []
-    all_words = []
-    all_starts = []
-    all_ends = []
+    audio_chunks: list[bytes] = []
+    all_words: list[str] = []
+    all_starts: list[float] = []
+    all_ends: list[float] = []
 
     for event in stream:
         if event.type == "chunk" and event.audio:
             audio_chunks.append(event.audio)
         elif event.type == "timestamps":
-            wt = getattr(event, "word_timestamps", None)
+            wt = event.word_timestamps
             if wt:
-                # Handle dict, list, and object forms
-                if isinstance(wt, dict):
-                    all_words.extend(wt.get("words", []))
-                    all_starts.extend(wt.get("start", []))
-                    all_ends.extend(wt.get("end", []))
-                elif isinstance(wt, list):
-                    # List of timestamp entries
-                    for ts in wt:
-                        if isinstance(ts, dict):
-                            if "word" in ts:
-                                all_words.append(ts["word"])
-                            if "start" in ts:
-                                all_starts.append(ts["start"])
-                            if "end" in ts:
-                                all_ends.append(ts["end"])
-                else:
-                    all_words.extend(wt.words)
-                    all_starts.extend(wt.start)
-                    all_ends.extend(wt.end)
+                all_words.extend(wt.words)
+                all_starts.extend(wt.start)
+                all_ends.extend(wt.end)
         elif event.type == "done":
             break
 
@@ -383,7 +372,7 @@ async def test_tts_sse_async():
             language=SAMPLE_LANGUAGE,
         )
 
-        audio_chunks = []
+        audio_chunks: list[bytes] = []
         async for event in stream:
             if event.type == "chunk" and event.audio:
                 audio_chunks.append(event.audio)
@@ -405,16 +394,16 @@ def test_tts_websocket_sync(client: Cartesia):
 
     with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
-        connection.send({
+        connection.send(cast(GenerationRequestParam, {
             "context_id": context_id,
             "model_id": DEFAULT_MODEL_ID,
             "transcript": SAMPLE_TRANSCRIPT,
             "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
             "output_format": DEFAULT_OUTPUT_FORMAT,
             "language": SAMPLE_LANGUAGE,
-        })
+        }))
 
-        audio_chunks = []
+        audio_chunks: list[bytes] = []
         for response in connection:
             if response.type == "chunk" and response.audio:
                 audio_chunks.append(response.audio)
@@ -427,13 +416,13 @@ def test_tts_websocket_sync(client: Cartesia):
         _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
 
 
-def test_tts_websocket_with_timestamps(client: Cartesia):
+def test_tts_websocket_with_timestamps(client: Cartesia) -> None:
     """Test TTS WebSocket with word timestamps."""
     logger.info("Testing tts.websocket_connect with timestamps")
 
     with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
-        connection.send({
+        connection.send(cast(GenerationRequestParam, {
             "context_id": context_id,
             "model_id": DEFAULT_MODEL_ID,
             "transcript": SAMPLE_TRANSCRIPT,
@@ -441,28 +430,22 @@ def test_tts_websocket_with_timestamps(client: Cartesia):
             "output_format": DEFAULT_OUTPUT_FORMAT,
             "language": SAMPLE_LANGUAGE,
             "add_timestamps": True,
-        })
+        }))
 
-        audio_chunks = []
-        all_words = []
-        all_starts = []
-        all_ends = []
+        audio_chunks: list[bytes] = []
+        all_words: list[str] = []
+        all_starts: list[float] = []
+        all_ends: list[float] = []
 
         for response in connection:
             if response.type == "chunk" and response.audio:
                 audio_chunks.append(response.audio)
             elif response.type == "timestamps":
-                wt = getattr(response, "word_timestamps", None)
+                wt = response.word_timestamps
                 if wt:
-                    # Handle both dict and object forms
-                    if isinstance(wt, dict):
-                        all_words.extend(wt.get("words", []))
-                        all_starts.extend(wt.get("start", []))
-                        all_ends.extend(wt.get("end", []))
-                    else:
-                        all_words.extend(wt.words)
-                        all_starts.extend(wt.start)
-                        all_ends.extend(wt.end)
+                    all_words.extend(wt.words)
+                    all_starts.extend(wt.start)
+                    all_ends.extend(wt.end)
             elif response.type == "done" or response.done:
                 break
 
@@ -483,16 +466,16 @@ async def test_tts_websocket_async():
     async with create_async_client() as client:
         async with client.tts.websocket_connect() as connection:
             context_id = str(uuid.uuid4())
-            await connection.send({
+            await connection.send(cast(GenerationRequestParam, {
                 "context_id": context_id,
                 "model_id": DEFAULT_MODEL_ID,
                 "transcript": SAMPLE_TRANSCRIPT,
                 "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
                 "output_format": DEFAULT_OUTPUT_FORMAT,
                 "language": SAMPLE_LANGUAGE,
-            })
+            }))
 
-            audio_chunks = []
+            audio_chunks: list[bytes] = []
             async for response in connection:
                 if response.type == "chunk" and response.audio:
                     audio_chunks.append(response.audio)
@@ -525,7 +508,7 @@ def test_tts_websocket_context(client: Cartesia):
 
         ctx.no_more_inputs()
 
-        audio_chunks = []
+        audio_chunks: list[bytes] = []
         for response in ctx.receive():
             if response.type == "chunk" and response.audio:
                 audio_chunks.append(response.audio)
@@ -560,7 +543,7 @@ async def test_tts_websocket_context_async():
 
             await ctx.no_more_inputs()
 
-            audio_chunks = []
+            audio_chunks: list[bytes] = []
             async for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     audio_chunks.append(response.audio)
@@ -588,7 +571,7 @@ def test_tts_websocket_push_overrides(client: Cartesia):
         ctx.push("Fast speed!", generation_config={"speed": 1.5})
         ctx.no_more_inputs()
 
-        audio_chunks = []
+        audio_chunks: list[bytes] = []
         for response in ctx.receive():
             if response.type == "chunk" and response.audio:
                 audio_chunks.append(response.audio)
@@ -617,7 +600,7 @@ async def test_tts_websocket_concurrent_contexts_async():
                 output_format=DEFAULT_OUTPUT_FORMAT,
             )
 
-            async def send_to_ctx(ctx, text):
+            async def send_to_ctx(ctx: AsyncWebSocketContext, text: str) -> None:
                 await ctx.push(text)
                 await ctx.no_more_inputs()
 
@@ -626,11 +609,12 @@ async def test_tts_websocket_concurrent_contexts_async():
             send_task2 = asyncio.create_task(send_to_ctx(ctx2, "Context two audio."))
 
             # Receiver loop to demultiplex
-            audio1, audio2 = [], []
-            active = {ctx1._context_id, ctx2._context_id}
+            audio1: list[bytes] = []
+            audio2: list[bytes] = []
+            active: set[str | None] = {ctx1._context_id, ctx2._context_id}
 
             async for response in connection:
-                if response.type == "chunk":
+                if response.type == "chunk" and response.audio:
                     if response.context_id == ctx1._context_id:
                         audio1.append(response.audio)
                     elif response.context_id == ctx2._context_id:
@@ -681,7 +665,7 @@ def test_tts_infill(client: Cartesia, sample_audio_path: str):
 @pytest.mark.parametrize("language", ["en", "es", "fr", "de", "ja", "pt", "zh"])
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
-def test_multilingual_tts(client: Cartesia, language: str):
+def test_multilingual_tts(client: Cartesia, language: SupportedLanguage) -> None:
     """Test TTS with different languages."""
     logger.info(f"Testing TTS with language: {language}")
 
@@ -708,7 +692,7 @@ def test_tts_invalid_voice_id(client: Cartesia):
     """Test that invalid voice ID returns an error."""
     logger.info("Testing error handling for invalid voice ID")
 
-    with pytest.raises(Exception):
+    with pytest.raises(APIStatusError):
         client.tts.generate(
             model_id=DEFAULT_MODEL_ID,
             transcript=SAMPLE_TRANSCRIPT,
@@ -723,7 +707,7 @@ def test_get_nonexistent_voice(client: Cartesia):
     """Test that getting a nonexistent voice returns an error."""
     logger.info("Testing error handling for nonexistent voice")
 
-    with pytest.raises(Exception):
+    with pytest.raises(APIStatusError):
         client.voices.get("nonexistent-voice-id")
 
 
@@ -777,7 +761,7 @@ async def test_concurrent_tts_requests():
     """Test multiple concurrent TTS requests."""
     logger.info("Testing concurrent TTS requests")
 
-    async def make_request(client, num):
+    async def make_request(client: AsyncCartesia, num: int) -> bytes:
         logger.info(f"Concurrent request {num} starting")
         response = await client.tts.generate(
             model_id=DEFAULT_MODEL_ID,
@@ -786,7 +770,7 @@ async def test_concurrent_tts_requests():
             output_format=DEFAULT_OUTPUT_FORMAT,
             language=SAMPLE_LANGUAGE,
         )
-        chunks = []
+        chunks: list[bytes] = []
         async for chunk in response.iter_bytes():
             chunks.append(chunk)
         return b"".join(chunks)

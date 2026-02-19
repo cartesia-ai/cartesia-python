@@ -21,7 +21,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestVoices:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_update(self, client: Cartesia) -> None:
         voice = client.voices.update(
@@ -31,7 +31,7 @@ class TestVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_update_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.update(
@@ -42,7 +42,7 @@ class TestVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_update(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.update(
@@ -56,7 +56,7 @@ class TestVoices:
         voice = response.parse()
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_update(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.update(
@@ -72,7 +72,7 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_update(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -82,13 +82,13 @@ class TestVoices:
                 name="name",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list(self, client: Cartesia) -> None:
         voice = client.voices.list()
         assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.list(
@@ -102,7 +102,7 @@ class TestVoices:
         )
         assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.list()
@@ -112,7 +112,7 @@ class TestVoices:
         voice = response.parse()
         assert_matches_type(SyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.list() as response:
@@ -124,7 +124,7 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_delete(self, client: Cartesia) -> None:
         voice = client.voices.delete(
@@ -132,7 +132,7 @@ class TestVoices:
         )
         assert voice is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_delete(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.delete(
@@ -144,7 +144,7 @@ class TestVoices:
         voice = response.parse()
         assert voice is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_delete(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.delete(
@@ -158,7 +158,7 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_delete(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -166,13 +166,13 @@ class TestVoices:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_clone(self, client: Cartesia) -> None:
         voice = client.voices.clone()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_clone_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.clone(
@@ -184,7 +184,7 @@ class TestVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_clone(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.clone()
@@ -194,7 +194,7 @@ class TestVoices:
         voice = response.parse()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_clone(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.clone() as response:
@@ -206,7 +206,7 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_get(self, client: Cartesia) -> None:
         voice = client.voices.get(
@@ -214,7 +214,7 @@ class TestVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_get_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.get(
@@ -223,7 +223,7 @@ class TestVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_get(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.get(
@@ -235,7 +235,7 @@ class TestVoices:
         voice = response.parse()
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_get(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.get(
@@ -249,7 +249,7 @@ class TestVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_get(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -257,7 +257,7 @@ class TestVoices:
                 id="",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_localize(self, client: Cartesia) -> None:
         voice = client.voices.localize(
@@ -269,7 +269,7 @@ class TestVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_localize_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.localize(
@@ -282,7 +282,7 @@ class TestVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_localize(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.localize(
@@ -298,7 +298,7 @@ class TestVoices:
         voice = response.parse()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_localize(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.localize(
@@ -322,7 +322,7 @@ class TestAsyncVoices:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_update(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.update(
@@ -332,7 +332,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_update_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.update(
@@ -343,7 +343,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_update(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.update(
@@ -357,7 +357,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_update(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.update(
@@ -373,7 +373,7 @@ class TestAsyncVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_update(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -383,13 +383,13 @@ class TestAsyncVoices:
                 name="name",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.list()
         assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.list(
@@ -403,7 +403,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.list()
@@ -413,7 +413,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert_matches_type(AsyncCursorIDPage[Voice], voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.list() as response:
@@ -425,7 +425,7 @@ class TestAsyncVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_delete(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.delete(
@@ -433,7 +433,7 @@ class TestAsyncVoices:
         )
         assert voice is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.delete(
@@ -445,7 +445,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert voice is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.delete(
@@ -459,7 +459,7 @@ class TestAsyncVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -467,13 +467,13 @@ class TestAsyncVoices:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_clone(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.clone()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_clone_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.clone(
@@ -485,7 +485,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_clone(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.clone()
@@ -495,7 +495,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_clone(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.clone() as response:
@@ -507,7 +507,7 @@ class TestAsyncVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_get(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.get(
@@ -515,7 +515,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_get_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.get(
@@ -524,7 +524,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_get(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.get(
@@ -536,7 +536,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert_matches_type(Voice, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_get(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.get(
@@ -550,7 +550,7 @@ class TestAsyncVoices:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_get(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -558,7 +558,7 @@ class TestAsyncVoices:
                 id="",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_localize(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.localize(
@@ -570,7 +570,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_localize_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.localize(
@@ -583,7 +583,7 @@ class TestAsyncVoices:
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_localize(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.localize(
@@ -599,7 +599,7 @@ class TestAsyncVoices:
         voice = await response.parse()
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_localize(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.localize(

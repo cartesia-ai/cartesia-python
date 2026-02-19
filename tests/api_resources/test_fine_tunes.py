@@ -18,7 +18,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestFineTunes:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_create(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.create(
@@ -30,7 +30,7 @@ class TestFineTunes:
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.create(
@@ -46,7 +46,7 @@ class TestFineTunes:
         fine_tune = response.parse()
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_create(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.create(
@@ -64,7 +64,7 @@ class TestFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_retrieve(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.retrieve(
@@ -72,7 +72,7 @@ class TestFineTunes:
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_retrieve(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.retrieve(
@@ -84,7 +84,7 @@ class TestFineTunes:
         fine_tune = response.parse()
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_retrieve(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.retrieve(
@@ -98,7 +98,7 @@ class TestFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_retrieve(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -106,13 +106,13 @@ class TestFineTunes:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list()
         assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_with_all_params(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list(
@@ -122,7 +122,7 @@ class TestFineTunes:
         )
         assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.list()
@@ -132,7 +132,7 @@ class TestFineTunes:
         fine_tune = response.parse()
         assert_matches_type(SyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.list() as response:
@@ -144,7 +144,7 @@ class TestFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_delete(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.delete(
@@ -152,7 +152,7 @@ class TestFineTunes:
         )
         assert fine_tune is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_delete(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.delete(
@@ -164,7 +164,7 @@ class TestFineTunes:
         fine_tune = response.parse()
         assert fine_tune is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_delete(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.delete(
@@ -178,7 +178,7 @@ class TestFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_delete(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -186,7 +186,7 @@ class TestFineTunes:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_voices(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list_voices(
@@ -194,7 +194,7 @@ class TestFineTunes:
         )
         assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_voices_with_all_params(self, client: Cartesia) -> None:
         fine_tune = client.fine_tunes.list_voices(
@@ -205,7 +205,7 @@ class TestFineTunes:
         )
         assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_list_voices(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.list_voices(
@@ -217,7 +217,7 @@ class TestFineTunes:
         fine_tune = response.parse()
         assert_matches_type(SyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_list_voices(self, client: Cartesia) -> None:
         with client.fine_tunes.with_streaming_response.list_voices(
@@ -231,7 +231,7 @@ class TestFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_list_voices(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -245,7 +245,7 @@ class TestAsyncFineTunes:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_create(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.create(
@@ -257,7 +257,7 @@ class TestAsyncFineTunes:
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.create(
@@ -273,7 +273,7 @@ class TestAsyncFineTunes:
         fine_tune = await response.parse()
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.create(
@@ -291,7 +291,7 @@ class TestAsyncFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.retrieve(
@@ -299,7 +299,7 @@ class TestAsyncFineTunes:
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.retrieve(
@@ -311,7 +311,7 @@ class TestAsyncFineTunes:
         fine_tune = await response.parse()
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.retrieve(
@@ -325,7 +325,7 @@ class TestAsyncFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_retrieve(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -333,13 +333,13 @@ class TestAsyncFineTunes:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list()
         assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list(
@@ -349,7 +349,7 @@ class TestAsyncFineTunes:
         )
         assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.list()
@@ -359,7 +359,7 @@ class TestAsyncFineTunes:
         fine_tune = await response.parse()
         assert_matches_type(AsyncCursorIDPage[FineTune], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.list() as response:
@@ -371,7 +371,7 @@ class TestAsyncFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_delete(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.delete(
@@ -379,7 +379,7 @@ class TestAsyncFineTunes:
         )
         assert fine_tune is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.delete(
@@ -391,7 +391,7 @@ class TestAsyncFineTunes:
         fine_tune = await response.parse()
         assert fine_tune is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.delete(
@@ -405,7 +405,7 @@ class TestAsyncFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
@@ -413,7 +413,7 @@ class TestAsyncFineTunes:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_voices(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list_voices(
@@ -421,7 +421,7 @@ class TestAsyncFineTunes:
         )
         assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_voices_with_all_params(self, async_client: AsyncCartesia) -> None:
         fine_tune = await async_client.fine_tunes.list_voices(
@@ -432,7 +432,7 @@ class TestAsyncFineTunes:
         )
         assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_list_voices(self, async_client: AsyncCartesia) -> None:
         response = await async_client.fine_tunes.with_raw_response.list_voices(
@@ -444,7 +444,7 @@ class TestAsyncFineTunes:
         fine_tune = await response.parse()
         assert_matches_type(AsyncCursorIDPage[Voice], fine_tune, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_list_voices(self, async_client: AsyncCartesia) -> None:
         async with async_client.fine_tunes.with_streaming_response.list_voices(
@@ -458,7 +458,7 @@ class TestAsyncFineTunes:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_list_voices(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
