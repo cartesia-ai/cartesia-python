@@ -123,7 +123,7 @@ class TestTTS:
 
         assert cast(Any, tts.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_generate_sse(self, client: Cartesia) -> None:
         tts = client.tts.generate_sse(
@@ -141,7 +141,7 @@ class TestTTS:
         )
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_generate_sse_with_all_params(self, client: Cartesia) -> None:
         tts = client.tts.generate_sse(
@@ -171,7 +171,7 @@ class TestTTS:
         )
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_generate_sse(self, client: Cartesia) -> None:
         response = client.tts.with_raw_response.generate_sse(
@@ -193,7 +193,7 @@ class TestTTS:
         tts = response.parse()
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_generate_sse(self, client: Cartesia) -> None:
         with client.tts.with_streaming_response.generate_sse(
@@ -381,7 +381,7 @@ class TestAsyncTTS:
 
         assert cast(Any, tts.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_generate_sse(self, async_client: AsyncCartesia) -> None:
         tts = await async_client.tts.generate_sse(
@@ -399,7 +399,7 @@ class TestAsyncTTS:
         )
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_generate_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
         tts = await async_client.tts.generate_sse(
@@ -429,7 +429,7 @@ class TestAsyncTTS:
         )
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         response = await async_client.tts.with_raw_response.generate_sse(
@@ -451,7 +451,7 @@ class TestAsyncTTS:
         tts = await response.parse()
         assert tts is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         async with async_client.tts.with_streaming_response.generate_sse(
