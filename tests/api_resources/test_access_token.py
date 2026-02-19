@@ -17,13 +17,13 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestAccessToken:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_create(self, client: Cartesia) -> None:
         access_token = client.access_token.create()
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_create_with_all_params(self, client: Cartesia) -> None:
         access_token = client.access_token.create(
@@ -36,7 +36,7 @@ class TestAccessToken:
         )
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.access_token.with_raw_response.create()
@@ -46,7 +46,7 @@ class TestAccessToken:
         access_token = response.parse()
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_create(self, client: Cartesia) -> None:
         with client.access_token.with_streaming_response.create() as response:
@@ -64,13 +64,13 @@ class TestAsyncAccessToken:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_create(self, async_client: AsyncCartesia) -> None:
         access_token = await async_client.access_token.create()
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncCartesia) -> None:
         access_token = await async_client.access_token.create(
@@ -83,7 +83,7 @@ class TestAsyncAccessToken:
         )
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
         response = await async_client.access_token.with_raw_response.create()
@@ -93,7 +93,7 @@ class TestAsyncAccessToken:
         access_token = await response.parse()
         assert_matches_type(AccessTokenCreateResponse, access_token, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
         async with async_client.access_token.with_streaming_response.create() as response:
