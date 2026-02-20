@@ -285,6 +285,59 @@ async def tts_websocket_speed_async(client: AsyncCartesia) -> None:
         print(f"Saved audio to {filename}")
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
 
+async def tts_websocket_concurrent_receives_async(client: AsyncCartesia) -> None:
+    """Two contexts on one connection, each using ctx.receive() concurrently via tasks.
+
+    The lazy-routing in receive() ensures that whichever task happens to read an
+    event from the wire routes it to the correct context's queue.
+    """
+    from cartesia.resources.tts import AsyncWebSocketContext
+
+    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
+
+    async with client.tts.websocket_connect() as connection:
+        ctx1 = connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format=output_format,
+        )
+        ctx2 = connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format=output_format,
+        )
+
+        # Send to both contexts
+        await ctx1.push("Context one is speaking now. This is a longer transcript to ensure that audio chunks from both contexts are interleaved on the wire. The quick brown fox jumps over the lazy dog.")
+        await ctx1.no_more_inputs()
+
+        await ctx2.push("Context two has a different message. We want to verify that the routing logic correctly separates the audio streams. Pack my box with five dozen liquor jugs.")
+        await ctx2.no_more_inputs()
+
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+        # Receive concurrently via tasks, writing to files
+        async def collect(ctx: AsyncWebSocketContext, filename: str) -> None:
+            with open(filename, "wb") as f:
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        f.write(response.audio)
+
+        filename1 = f"tts_concurrent_async_ctx1_{timestamp}.pcm"
+        filename2 = f"tts_concurrent_async_ctx2_{timestamp}.pcm"
+
+        await asyncio.gather(
+            collect(ctx1, filename1),
+            collect(ctx2, filename2),
+        )
+
+        print(f"Saved context 1 audio to {filename1}")
+        print(f"Saved context 2 audio to {filename2}")
+        print(f"Play with:")
+        print(f"  ffplay -f f32le -ar 44100 {filename1}")
+        print(f"  ffplay -f f32le -ar 44100 {filename2}")
+
+
 async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
     """
     Demonstrates using a single WebSocket connection to manage multiple contexts concurrently.
