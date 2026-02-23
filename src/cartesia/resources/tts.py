@@ -1052,8 +1052,6 @@ class AsyncTTSResourceConnection:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
-        duration: float | None = None,
-        speed: ModelSpeed | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
@@ -1067,8 +1065,6 @@ class AsyncTTSResourceConnection:
             voice: Default voice for push().
             output_format: Default output_format for push().
             language: Default language for push().
-            duration: Default duration for push().
-            speed: Default speed for push().
             add_timestamps: Default add_timestamps for push().
             add_phoneme_timestamps: Default add_phoneme_timestamps for push().
             generation_config: Default generation_config for push().
@@ -1090,8 +1086,6 @@ class AsyncTTSResourceConnection:
             voice=voice,
             output_format=output_format,
             language=language,
-            duration=duration,
-            speed=speed,
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             generation_config=generation_config,
@@ -1279,8 +1273,6 @@ class TTSResourceConnection:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
-        duration: float | None = None,
-        speed: ModelSpeed | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
@@ -1294,8 +1286,6 @@ class TTSResourceConnection:
             voice: Default voice for push().
             output_format: Default output_format for push().
             language: Default language for push().
-            duration: Default duration for push().
-            speed: Default speed for push().
             add_timestamps: Default add_timestamps for push().
             add_phoneme_timestamps: Default add_phoneme_timestamps for push().
             generation_config: Default generation_config for push().
@@ -1316,8 +1306,6 @@ class TTSResourceConnection:
             voice=voice,
             output_format=output_format,
             language=language,
-            duration=duration,
-            speed=speed,
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             generation_config=generation_config,
@@ -1435,8 +1423,6 @@ class WebSocketContext:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
-        duration: float | None = None,
-        speed: ModelSpeed | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
@@ -1449,8 +1435,6 @@ class WebSocketContext:
         self._voice = voice
         self._output_format = output_format
         self._language = language
-        self._duration = duration
-        self._speed = speed
         self._add_timestamps = add_timestamps
         self._add_phoneme_timestamps = add_phoneme_timestamps
         self._generation_config = generation_config
@@ -1528,8 +1512,6 @@ class WebSocketContext:
             raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
 
         language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
-        duration: float | Omit = self._duration if self._duration is not None else omit
-        speed: ModelSpeed | Omit = self._speed if self._speed is not None else omit
         add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
         add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
 
@@ -1543,8 +1525,6 @@ class WebSocketContext:
             output_format=self._output_format,
             continue_=True,
             language=language,
-            duration=duration,
-            speed=speed,
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             flush=flush,
@@ -1663,8 +1643,6 @@ class AsyncWebSocketContext:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
-        duration: float | None = None,
-        speed: ModelSpeed | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
@@ -1677,8 +1655,6 @@ class AsyncWebSocketContext:
         self._voice = voice
         self._output_format = output_format
         self._language = language
-        self._duration = duration
-        self._speed = speed
         self._add_timestamps = add_timestamps
         self._add_phoneme_timestamps = add_phoneme_timestamps
         self._generation_config = generation_config
@@ -1757,8 +1733,6 @@ class AsyncWebSocketContext:
             raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
 
         language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
-        duration: float | Omit = self._duration if self._duration is not None else omit
-        speed: ModelSpeed | Omit = self._speed if self._speed is not None else omit
         add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
         add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
 
@@ -1772,8 +1746,6 @@ class AsyncWebSocketContext:
             output_format=self._output_format,
             continue_=True,
             language=language,
-            duration=duration,
-            speed=speed,
             add_timestamps=add_timestamps,
             add_phoneme_timestamps=add_phoneme_timestamps,
             flush=flush,
