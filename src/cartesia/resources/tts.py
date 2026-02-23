@@ -975,7 +975,6 @@ class AsyncTTSResourceConnection:
             else json.dumps(await async_maybe_transform(event, WebsocketClientEventParam))
         )
         await self._connection.send(data)
-        self._dispatch_listener()
 
     async def close(self, *, code: int = 1000, reason: str = "") -> None:
         import asyncio as _asyncio
@@ -1744,6 +1743,7 @@ class AsyncWebSocketContext:
 
         request = GenerationRequest(**request_params)
         await self._connection.send(request)
+        self._connection._dispatch_listener()
 
     async def push(
         self,

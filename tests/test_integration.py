@@ -600,35 +600,28 @@ async def test_tts_websocket_concurrent_contexts_async():
                 output_format=DEFAULT_OUTPUT_FORMAT,
             )
 
-            async def send_to_ctx(ctx: AsyncWebSocketContext, text: str) -> None:
-                await ctx.push(text)
-                await ctx.no_more_inputs()
+            # Send to both contexts
+            await ctx1.push("Context one audio.")
+            await ctx1.no_more_inputs()
 
-            # Start sending concurrently
-            send_task1 = asyncio.create_task(send_to_ctx(ctx1, "Context one audio."))
-            send_task2 = asyncio.create_task(send_to_ctx(ctx2, "Context two audio."))
+            await ctx2.push("Context two audio.")
+            await ctx2.no_more_inputs()
 
-            # Receiver loop to demultiplex
-            audio1: list[bytes] = []
-            audio2: list[bytes] = []
-            active: set[str | None] = {ctx1._context_id, ctx2._context_id}
+            # Receive concurrently via ctx.receive()
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
 
-            async for response in connection:
-                if response.type == "chunk" and response.audio:
-                    if response.context_id == ctx1._context_id:
-                        audio1.append(response.audio)
-                    elif response.context_id == ctx2._context_id:
-                        audio2.append(response.audio)
-                elif response.type == "done":
-                    if response.context_id in active:
-                        active.remove(response.context_id)
-                    if not active:
-                        break
+            audio1, audio2 = await asyncio.gather(
+                collect(ctx1),
+                collect(ctx2),
+            )
 
-            await asyncio.gather(send_task1, send_task2)
-
-            _validate_audio_response(b"".join(audio1), DEFAULT_OUTPUT_FORMAT)
-            _validate_audio_response(b"".join(audio2), DEFAULT_OUTPUT_FORMAT)
+            _validate_audio_response(audio1, DEFAULT_OUTPUT_FORMAT)
+            _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
 
 
 @pytest.mark.asyncio
