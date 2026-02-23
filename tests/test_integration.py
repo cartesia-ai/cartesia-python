@@ -600,35 +600,140 @@ async def test_tts_websocket_concurrent_contexts_async():
                 output_format=DEFAULT_OUTPUT_FORMAT,
             )
 
-            async def send_to_ctx(ctx: AsyncWebSocketContext, text: str) -> None:
-                await ctx.push(text)
-                await ctx.no_more_inputs()
+            # Send to both contexts
+            await ctx1.push("Context one audio.")
+            await ctx1.no_more_inputs()
 
-            # Start sending concurrently
-            send_task1 = asyncio.create_task(send_to_ctx(ctx1, "Context one audio."))
-            send_task2 = asyncio.create_task(send_to_ctx(ctx2, "Context two audio."))
+            await ctx2.push("Context two audio.")
+            await ctx2.no_more_inputs()
 
-            # Receiver loop to demultiplex
-            audio1: list[bytes] = []
-            audio2: list[bytes] = []
-            active: set[str | None] = {ctx1._context_id, ctx2._context_id}
+            # Receive concurrently via ctx.receive()
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
 
-            async for response in connection:
-                if response.type == "chunk" and response.audio:
-                    if response.context_id == ctx1._context_id:
-                        audio1.append(response.audio)
-                    elif response.context_id == ctx2._context_id:
-                        audio2.append(response.audio)
-                elif response.type == "done":
-                    if response.context_id in active:
-                        active.remove(response.context_id)
-                    if not active:
-                        break
+            audio1, audio2 = await asyncio.gather(
+                collect(ctx1),
+                collect(ctx2),
+            )
 
-            await asyncio.gather(send_task1, send_task2)
+            _validate_audio_response(audio1, DEFAULT_OUTPUT_FORMAT)
+            _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
 
-            _validate_audio_response(b"".join(audio1), DEFAULT_OUTPUT_FORMAT)
-            _validate_audio_response(b"".join(audio2), DEFAULT_OUTPUT_FORMAT)
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_concurrent_receive_async():
+    """Test two contexts on one connection both using ctx.receive() concurrently.
+
+    This validates the lazy-routing fix: whichever task reads from the wire
+    routes non-matching events to the correct context's queue.
+    """
+    logger.info("Testing concurrent ctx.receive() on one WebSocket")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx1 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+            ctx2 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+
+            # Send to both contexts
+            await ctx1.push("Context one audio.")
+            await ctx1.no_more_inputs()
+
+            await ctx2.push("Context two audio.")
+            await ctx2.no_more_inputs()
+
+            # Receive concurrently via tasks
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
+
+            audio1, audio2 = await asyncio.gather(
+                collect(ctx1),
+                collect(ctx2),
+            )
+
+            _validate_audio_response(audio1, DEFAULT_OUTPUT_FORMAT)
+            _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
+
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_recv_lock_not_held_across_yield():
+    """Verify the recv lock is released before yielding events to consumers.
+
+    If receive() holds the lock across yield, a slow consumer will starve all
+    other contexts.  This test has one consumer sleep between iterations; the
+    other must still complete within a reasonable timeout.
+    """
+    logger.info("Testing recv lock is not held across yield")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx1 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+            ctx2 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+            )
+
+            await ctx1.push("Hello from context one.")
+            await ctx1.no_more_inputs()
+
+            await ctx2.push("Hello from context two.")
+            await ctx2.no_more_inputs()
+
+            # Slow consumer: sleeps 0.5s between every event
+            async def slow_collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                    await asyncio.sleep(0.5)
+                return b"".join(chunks)
+
+            # Fast consumer: no delays
+            async def fast_collect(ctx: AsyncWebSocketContext) -> bytes:
+                chunks: list[bytes] = []
+                async for response in ctx.receive():
+                    if response.type == "chunk" and response.audio:
+                        chunks.append(response.audio)
+                return b"".join(chunks)
+
+            # If the lock were held across yield, fast_collect would be blocked
+            # for the entire duration of slow_collect's sleeps (~many seconds).
+            # With the fix, fast_collect finishes independently.
+            # Use a generous timeout that would still catch a deadlock.
+            audio1, audio2 = await asyncio.wait_for(
+                asyncio.gather(
+                    slow_collect(ctx1),
+                    fast_collect(ctx2),
+                ),
+                timeout=30.0,
+            )
+
+            assert len(audio1) > 0, "Slow consumer should still get audio"
+            assert len(audio2) > 0, "Fast consumer should still get audio"
 
 
 # ============================================================================
@@ -740,6 +845,317 @@ def test_stt_batch_transcription(client: Cartesia, sample_audio_path: str):
         if "not found" in str(e).lower() or "not available" in str(e).lower():
             pytest.skip("STT not available for this API key")
         raise
+
+
+# ============================================================================
+# Context Flush Tests
+# ============================================================================
+
+
+def test_tts_websocket_context_flush_sync(client: Cartesia):
+    """Test flush on a sync WebSocket context.
+
+    Sends transcripts followed by separate flush requests (empty transcript +
+    flush=True), validates that flush_done events are received and audio is
+    produced for each segment.
+    """
+    logger.info("Testing sync context flush")
+
+    with client.tts.websocket_connect() as connection:
+        ctx = connection.context(
+            model_id=DEFAULT_MODEL_ID,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            language=SAMPLE_LANGUAGE,
+        )
+
+        transcripts = ["Hello, world!", "My name is Cartesia.", "I am a text-to-speech API."]
+        for transcript in transcripts:
+            # Send the transcript, then a separate flush request
+            ctx.push(transcript)
+            ctx.push("", flush=True)
+
+        ctx.no_more_inputs()
+
+        audio_chunks: list[bytes] = []
+        flush_count = 0
+        for response in ctx.receive():
+            if response.type == "chunk" and response.audio:
+                audio_chunks.append(response.audio)
+            elif response.type == "flush_done":
+                flush_count += 1
+
+        audio_data = b"".join(audio_chunks)
+        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+        assert flush_count == len(transcripts), f"Expected {len(transcripts)} flush_done events, got {flush_count}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_context_flush_async():
+    """Test flush on an async WebSocket context.
+
+    Sends transcripts followed by separate flush requests (empty transcript +
+    flush=True), validates that flush_done events are received and audio is
+    produced for each segment.
+    """
+    logger.info("Testing async context flush")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                language=SAMPLE_LANGUAGE,
+            )
+
+            transcripts = ["Hello, world!", "My name is Cartesia.", "I am a text-to-speech API."]
+            for transcript in transcripts:
+                # Send the transcript, then a separate flush request
+                await ctx.push(transcript)
+                await ctx.push("", flush=True)
+
+            await ctx.no_more_inputs()
+
+            audio_chunks: list[bytes] = []
+            flush_count = 0
+            async for response in ctx.receive():
+                if response.type == "chunk" and response.audio:
+                    audio_chunks.append(response.audio)
+                elif response.type == "flush_done":
+                    flush_count += 1
+
+            audio_data = b"".join(audio_chunks)
+            _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+            assert flush_count == len(transcripts), f"Expected {len(transcripts)} flush_done events, got {flush_count}"
+
+
+# ============================================================================
+# Context Cancel Tests
+# ============================================================================
+
+
+def test_tts_websocket_context_cancel_sync(client: Cartesia):
+    """Test cancelling a sync WebSocket context mid-generation.
+
+    Sends a long transcript, receives a few chunks, then cancels.
+    Validates that the context stops cleanly and the connection is still usable.
+    """
+    logger.info("Testing sync context cancel")
+
+    long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
+
+    with client.tts.websocket_connect() as connection:
+        ctx = connection.context(
+            model_id=DEFAULT_MODEL_ID,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            language=SAMPLE_LANGUAGE,
+        )
+
+        ctx.push(long_transcript)
+        ctx.no_more_inputs()
+
+        chunks_received = 0
+        for response in ctx.receive():
+            if response.type == "chunk" and response.audio:
+                chunks_received += 1
+                if chunks_received >= 2:
+                    ctx.cancel()
+                    break
+
+        assert chunks_received >= 2, "Should have received at least 2 chunks before cancel"
+
+        # Verify the connection is still usable after cancel
+        ctx2 = connection.context(
+            model_id=DEFAULT_MODEL_ID,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            language=SAMPLE_LANGUAGE,
+        )
+        ctx2.push("Short test after cancel.")
+        ctx2.no_more_inputs()
+
+        audio_chunks: list[bytes] = []
+        for response in ctx2.receive():
+            if response.type == "chunk" and response.audio:
+                audio_chunks.append(response.audio)
+
+        audio_data = b"".join(audio_chunks)
+        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_context_cancel_async():
+    """Test cancelling an async WebSocket context mid-generation.
+
+    Sends a long transcript, receives a few chunks, then cancels.
+    Validates that the context stops cleanly and the connection is still usable.
+    """
+    logger.info("Testing async context cancel")
+
+    long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                language=SAMPLE_LANGUAGE,
+            )
+
+            await ctx.push(long_transcript)
+            await ctx.no_more_inputs()
+
+            chunks_received = 0
+            async for response in ctx.receive():
+                if response.type == "chunk" and response.audio:
+                    chunks_received += 1
+                    if chunks_received >= 2:
+                        await ctx.cancel()
+                        break
+
+            assert chunks_received >= 2, "Should have received at least 2 chunks before cancel"
+
+            # Verify the connection is still usable after cancel
+            ctx2 = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                language=SAMPLE_LANGUAGE,
+            )
+            await ctx2.push("Short test after cancel.")
+            await ctx2.no_more_inputs()
+
+            audio_chunks: list[bytes] = []
+            async for response in ctx2.receive():
+                if response.type == "chunk" and response.audio:
+                    audio_chunks.append(response.audio)
+
+            audio_data = b"".join(audio_chunks)
+            _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+
+
+# ============================================================================
+# Context Reuse Tests
+# ============================================================================
+
+
+def test_tts_websocket_context_reuse_sync(client: Cartesia):
+    """Test reusing a sync WebSocket context for multiple send/receive cycles.
+
+    Sends two separate rounds of transcripts on the same context (with
+    continue_=True), calls no_more_inputs once at the end, and validates that
+    audio is received for the full combined output.
+    """
+    logger.info("Testing sync context reuse")
+
+    with client.tts.websocket_connect() as connection:
+        ctx = connection.context(
+            model_id=DEFAULT_MODEL_ID,
+            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+            output_format=DEFAULT_OUTPUT_FORMAT,
+            language=SAMPLE_LANGUAGE,
+            add_timestamps=True,
+        )
+
+        # First round of transcripts
+        transcripts_round1 = ["Hello, world!", "How are you today?"]
+        for transcript in transcripts_round1:
+            ctx.push(transcript)
+
+        # Second round of transcripts on the same context
+        transcripts_round2 = ["I am doing well.", "Thank you for asking."]
+        for transcript in transcripts_round2:
+            ctx.push(transcript)
+
+        ctx.no_more_inputs()
+
+        audio_chunks: list[bytes] = []
+        all_words: list[str] = []
+        all_starts: list[float] = []
+        all_ends: list[float] = []
+
+        for response in ctx.receive():
+            if response.type == "chunk" and response.audio:
+                audio_chunks.append(response.audio)
+            elif response.type == "timestamps":
+                wt = response.word_timestamps
+                if wt:
+                    all_words.extend(wt.words)
+                    all_starts.extend(wt.start)
+                    all_ends.extend(wt.end)
+
+        audio_data = b"".join(audio_chunks)
+        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+
+        # Timestamps should cover words from all transcripts
+        if all_words:
+            _validate_timestamps(all_words, all_starts, all_ends)
+            assert len(all_words) >= 4, f"Expected words from all transcripts, got {len(all_words)}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
+async def test_tts_websocket_context_reuse_async():
+    """Test reusing an async WebSocket context for multiple send/receive cycles.
+
+    Sends two separate rounds of transcripts on the same context (with
+    continue_=True), calls no_more_inputs once at the end, and validates that
+    audio is received for the full combined output.
+    """
+    logger.info("Testing async context reuse")
+
+    async with create_async_client() as client:
+        async with client.tts.websocket_connect() as connection:
+            ctx = connection.context(
+                model_id=DEFAULT_MODEL_ID,
+                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
+                output_format=DEFAULT_OUTPUT_FORMAT,
+                language=SAMPLE_LANGUAGE,
+                add_timestamps=True,
+            )
+
+            # First round of transcripts
+            transcripts_round1 = ["Hello, world!", "How are you today?"]
+            for transcript in transcripts_round1:
+                await ctx.push(transcript)
+
+            # Second round of transcripts on the same context
+            transcripts_round2 = ["I am doing well.", "Thank you for asking."]
+            for transcript in transcripts_round2:
+                await ctx.push(transcript)
+
+            await ctx.no_more_inputs()
+
+            audio_chunks: list[bytes] = []
+            all_words: list[str] = []
+            all_starts: list[float] = []
+            all_ends: list[float] = []
+
+            async for response in ctx.receive():
+                if response.type == "chunk" and response.audio:
+                    audio_chunks.append(response.audio)
+                elif response.type == "timestamps":
+                    wt = response.word_timestamps
+                    if wt:
+                        all_words.extend(wt.words)
+                        all_starts.extend(wt.start)
+                        all_ends.extend(wt.end)
+
+            audio_data = b"".join(audio_chunks)
+            _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
+
+            # Timestamps should cover words from all transcripts
+            if all_words:
+                _validate_timestamps(all_words, all_starts, all_ends)
+                assert len(all_words) >= 4, f"Expected words from all transcripts, got {len(all_words)}"
 
 
 # ============================================================================
