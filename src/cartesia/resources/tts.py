@@ -924,11 +924,11 @@ class AsyncTTSResourceConnection:
     _connection: AsyncWebsocketConnection
 
     def __init__(self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager | None = None) -> None:
-        import asyncio as _asyncio
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
-        self._recv_lock: asyncio.Lock = _asyncio.Lock()
+        self._processing_task: asyncio.Task[None] | None = None
+        self._closing = False
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
         """
@@ -975,15 +975,61 @@ class AsyncTTSResourceConnection:
             else json.dumps(await async_maybe_transform(event, WebsocketClientEventParam))
         )
         await self._connection.send(data)
+        self._dispatch_listener()
 
     async def close(self, *, code: int = 1000, reason: str = "") -> None:
-        await self._connection.close(code=code, reason=reason)
+        import asyncio as _asyncio
+
+        self._closing = True
+        try:
+            if self._processing_task is not None:
+                self._processing_task.cancel()
+                try:
+                    await self._processing_task
+                except _asyncio.CancelledError:
+                    pass
+                self._processing_task = None
+            await self._connection.close(code=code, reason=reason)
+        finally:
+            self._closing = False
+
+    def _dispatch_listener(self) -> None:
+        import asyncio as _asyncio
+
+        if self._processing_task is None or self._processing_task.done():
+            self._processing_task = _asyncio.create_task(self._process_responses())
+
+    async def _process_responses(self) -> None:
+        from websockets.exceptions import ConnectionClosed
+
+        try:
+            while True:
+                raw = await self._connection.recv(decode=False)
+                log.debug("Received websocket message: %s", raw)
+                event = self.parse_event(raw)
+                event_ctx = event.context_id if hasattr(event, "context_id") else None
+                if event_ctx is not None and event_ctx in self._context_queues:
+                    await self._context_queues[event_ctx].put(event)
+                else:
+                    log.debug("Received event for unregistered context %s", event_ctx)
+        except ConnectionClosed:
+            if not self._closing:
+                log.warning("WebSocket connection closed unexpectedly")
 
     async def _ensure_connected(self) -> None:
+        import asyncio as _asyncio
+
         from websockets.protocol import State
 
         if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
             log.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
+            if self._processing_task is not None:
+                self._processing_task.cancel()
+                try:
+                    await self._processing_task
+                except _asyncio.CancelledError:
+                    pass
+                self._processing_task = None
             new_conn = await self._manager.__aenter__()
             self._connection = new_conn._connection
             self._context_queues.clear()
@@ -1007,6 +1053,10 @@ class AsyncTTSResourceConnection:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
+        duration: float | None = None,
+        speed: ModelSpeed | None = None,
+        add_timestamps: bool | None = None,
+        add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
     ) -> AsyncWebSocketContext:
         """Create a context helper for managing conversational flows.
@@ -1018,6 +1068,10 @@ class AsyncTTSResourceConnection:
             voice: Default voice for push().
             output_format: Default output_format for push().
             language: Default language for push().
+            duration: Default duration for push().
+            speed: Default speed for push().
+            add_timestamps: Default add_timestamps for push().
+            add_phoneme_timestamps: Default add_phoneme_timestamps for push().
             generation_config: Default generation_config for push().
 
         Returns:
@@ -1037,6 +1091,10 @@ class AsyncTTSResourceConnection:
             voice=voice,
             output_format=output_format,
             language=language,
+            duration=duration,
+            speed=speed,
+            add_timestamps=add_timestamps,
+            add_phoneme_timestamps=add_phoneme_timestamps,
             generation_config=generation_config,
         )
 
@@ -1222,6 +1280,10 @@ class TTSResourceConnection:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
+        duration: float | None = None,
+        speed: ModelSpeed | None = None,
+        add_timestamps: bool | None = None,
+        add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
     ) -> WebSocketContext:
         """Create a context helper for managing conversational flows.
@@ -1233,6 +1295,10 @@ class TTSResourceConnection:
             voice: Default voice for push().
             output_format: Default output_format for push().
             language: Default language for push().
+            duration: Default duration for push().
+            speed: Default speed for push().
+            add_timestamps: Default add_timestamps for push().
+            add_phoneme_timestamps: Default add_phoneme_timestamps for push().
             generation_config: Default generation_config for push().
 
         Returns:
@@ -1251,6 +1317,10 @@ class TTSResourceConnection:
             voice=voice,
             output_format=output_format,
             language=language,
+            duration=duration,
+            speed=speed,
+            add_timestamps=add_timestamps,
+            add_phoneme_timestamps=add_phoneme_timestamps,
             generation_config=generation_config,
         )
 
@@ -1366,6 +1436,10 @@ class WebSocketContext:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
+        duration: float | None = None,
+        speed: ModelSpeed | None = None,
+        add_timestamps: bool | None = None,
+        add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
     ):
         self._connection = connection
@@ -1376,6 +1450,10 @@ class WebSocketContext:
         self._voice = voice
         self._output_format = output_format
         self._language = language
+        self._duration = duration
+        self._speed = speed
+        self._add_timestamps = add_timestamps
+        self._add_phoneme_timestamps = add_phoneme_timestamps
         self._generation_config = generation_config
 
     def send(
@@ -1451,6 +1529,10 @@ class WebSocketContext:
             raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
 
         language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        duration: float | Omit = self._duration if self._duration is not None else omit
+        speed: ModelSpeed | Omit = self._speed if self._speed is not None else omit
+        add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
+        add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
 
         # Use passed generation_config if provided in kwargs, otherwise use context default
         generation_config: GenerationConfigParam | None = kwargs.pop("generation_config", self._generation_config)
@@ -1462,6 +1544,10 @@ class WebSocketContext:
             output_format=self._output_format,
             continue_=True,
             language=language,
+            duration=duration,
+            speed=speed,
+            add_timestamps=add_timestamps,
+            add_phoneme_timestamps=add_phoneme_timestamps,
             flush=flush,
             generation_config=generation_config,
             **kwargs,
@@ -1530,6 +1616,9 @@ class WebSocketContext:
                 except ConnectionClosedOK:
                     done = True
                     return
+                except TimeoutError:
+                    done = True
+                    raise
 
                 # 3. Route the event.
                 event_ctx = event.context_id if hasattr(event, "context_id") else None
@@ -1575,6 +1664,10 @@ class AsyncWebSocketContext:
         voice: VoiceSpecifierParam | None = None,
         output_format: Dict[str, Any] | None = None,
         language: SupportedLanguage | None = None,
+        duration: float | None = None,
+        speed: ModelSpeed | None = None,
+        add_timestamps: bool | None = None,
+        add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
     ):
         self._connection = connection
@@ -1585,6 +1678,10 @@ class AsyncWebSocketContext:
         self._voice = voice
         self._output_format = output_format
         self._language = language
+        self._duration = duration
+        self._speed = speed
+        self._add_timestamps = add_timestamps
+        self._add_phoneme_timestamps = add_phoneme_timestamps
         self._generation_config = generation_config
 
     async def send(
@@ -1660,6 +1757,10 @@ class AsyncWebSocketContext:
             raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
 
         language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        duration: float | Omit = self._duration if self._duration is not None else omit
+        speed: ModelSpeed | Omit = self._speed if self._speed is not None else omit
+        add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
+        add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
 
         # Use passed generation_config if provided in kwargs, otherwise use context default
         generation_config: GenerationConfigParam | None = kwargs.pop("generation_config", self._generation_config)
@@ -1671,6 +1772,10 @@ class AsyncWebSocketContext:
             output_format=self._output_format,
             continue_=True,
             language=language,
+            duration=duration,
+            speed=speed,
+            add_timestamps=add_timestamps,
+            add_phoneme_timestamps=add_phoneme_timestamps,
             flush=flush,
             generation_config=generation_config,
             **kwargs,
@@ -1709,82 +1814,34 @@ class AsyncWebSocketContext:
     async def receive(self) -> AsyncIterator[WebsocketResponse]:
         """Receive responses filtered to this context only.
 
-        When multiple contexts share a connection, the context that reads from
-        the wire acts as a router: non-matching events are placed onto the
-        correct context's queue so they are never lost.  A lock ensures only
-        one context reads from the wire at a time; the others wait on their
-        queues.
+        A background task on the connection continuously reads from the wire
+        and routes events into per-context queues.  This method simply drains
+        the queue for this context.
         """
         import asyncio as _asyncio
 
-        from websockets.exceptions import ConnectionClosedOK
-
         my_queue = self._connection._context_queues.get(self._context_id)
+        if my_queue is None:
+            return
+
         done = False
 
         try:
             while True:
-                # 1. Drain our own queue first (events routed here by another context).
-                if my_queue is not None:
-                    try:
-                        event = my_queue.get_nowait()
-                        yield event
-                        if event.type in ("done", "error"):
-                            done = True
-                            return
-                        continue
-                    except (_asyncio.QueueEmpty, queue.Empty):
-                        pass
+                try:
+                    if self._timeout is not None:
+                        event = await _asyncio.wait_for(my_queue.get(), timeout=self._timeout)
+                    else:
+                        event = await my_queue.get()
+                except TimeoutError:
+                    done = True
+                    raise
 
-                # 2. Acquire the recv lock so only one context reads the wire.
-                #    We must release the lock *before* yielding so other contexts
-                #    aren't blocked while the caller processes the event.
-                to_yield: WebsocketResponse | None = None
-
-                async with self._connection._recv_lock:
-                    # Re-check queue — events may have arrived while we waited.
-                    if my_queue is not None:
-                        try:
-                            to_yield = my_queue.get_nowait()
-                        except (_asyncio.QueueEmpty, queue.Empty):
-                            pass
-
-                    if to_yield is None:
-                        # Read the next event from the wire.
-                        try:
-                            raw = await self._connection.recv_bytes(timeout=self._timeout)
-                            event = self._connection.parse_event(raw)
-                        except ConnectionClosedOK:
-                            done = True
-                            return
-                        except TimeoutError:
-                            done = True
-                            raise
-
-                        # Route the event.
-                        event_ctx = event.context_id if hasattr(event, "context_id") else None
-
-                        if event_ctx == self._context_id:
-                            to_yield = event
-                        elif event_ctx is not None and event_ctx in self._connection._context_queues:
-                            await self._connection._context_queues[event_ctx].put(event)
-                        elif not hasattr(event, "context_id") and event.type in ("done", "error"):
-                            to_yield = event
-                        else:
-                            # Unregistered context — yield for backwards compat
-                            to_yield = event
-
-                # Lock released — now yield outside the critical section.
-                if to_yield is not None:
-                    yield to_yield
-                    if to_yield.type in ("done", "error"):
-                        done = True
-                        return
+                yield event
+                if event.type in ("done", "error"):
+                    done = True
+                    return
         finally:
-            # Only unregister the queue if the context completed.  If the
-            # consumer exited early (break / cancel), keep the queue so
-            # future events for this context_id are absorbed rather than
-            # leaking into other contexts via the fallback path.
             if done:
                 self._connection._context_queues.pop(self._context_id, None)
 
