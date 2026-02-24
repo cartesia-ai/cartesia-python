@@ -76,13 +76,13 @@ class TestVoiceChanger:
 
         assert cast(Any, voice_changer.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_change_voice_sse(self, client: Cartesia) -> None:
         voice_changer = client.voice_changer.change_voice_sse()
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_change_voice_sse_with_all_params(self, client: Cartesia) -> None:
         voice_changer = client.voice_changer.change_voice_sse(
@@ -95,7 +95,7 @@ class TestVoiceChanger:
         )
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_change_voice_sse(self, client: Cartesia) -> None:
         response = client.voice_changer.with_raw_response.change_voice_sse()
@@ -105,7 +105,7 @@ class TestVoiceChanger:
         voice_changer = response.parse()
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_change_voice_sse(self, client: Cartesia) -> None:
         with client.voice_changer.with_streaming_response.change_voice_sse() as response:
@@ -180,13 +180,13 @@ class TestAsyncVoiceChanger:
 
         assert cast(Any, voice_changer.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_change_voice_sse(self, async_client: AsyncCartesia) -> None:
         voice_changer = await async_client.voice_changer.change_voice_sse()
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_change_voice_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice_changer = await async_client.voice_changer.change_voice_sse(
@@ -199,7 +199,7 @@ class TestAsyncVoiceChanger:
         )
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_change_voice_sse(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voice_changer.with_raw_response.change_voice_sse()
@@ -209,7 +209,7 @@ class TestAsyncVoiceChanger:
         voice_changer = await response.parse()
         assert voice_changer is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_change_voice_sse(self, async_client: AsyncCartesia) -> None:
         async with async_client.voice_changer.with_streaming_response.change_voice_sse() as response:

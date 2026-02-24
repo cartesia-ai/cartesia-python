@@ -1375,7 +1375,7 @@ class _DefaultAsyncHttpxClient(httpx.AsyncClient):
 
 
 try:
-    import httpx_aiohttp
+    import httpx_aiohttp  # type: ignore # stainless bug: missing type stubs
 except ImportError:
 
     class _DefaultAioHttpClient(httpx.AsyncClient):

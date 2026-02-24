@@ -21,13 +21,13 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestResults:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list(self, client: Cartesia) -> None:
         result = client.agents.metrics.results.list()
         assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_with_all_params(self, client: Cartesia) -> None:
         result = client.agents.metrics.results.list(
@@ -43,7 +43,7 @@ class TestResults:
         )
         assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.agents.metrics.results.with_raw_response.list()
@@ -53,7 +53,7 @@ class TestResults:
         result = response.parse()
         assert_matches_type(SyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.agents.metrics.results.with_streaming_response.list() as response:
@@ -65,13 +65,13 @@ class TestResults:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_export(self, client: Cartesia) -> None:
         result = client.agents.metrics.results.export()
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_export_with_all_params(self, client: Cartesia) -> None:
         result = client.agents.metrics.results.export(
@@ -84,7 +84,7 @@ class TestResults:
         )
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_export(self, client: Cartesia) -> None:
         response = client.agents.metrics.results.with_raw_response.export()
@@ -94,7 +94,7 @@ class TestResults:
         result = response.parse()
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_export(self, client: Cartesia) -> None:
         with client.agents.metrics.results.with_streaming_response.export() as response:
@@ -112,13 +112,13 @@ class TestAsyncResults:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list(self, async_client: AsyncCartesia) -> None:
         result = await async_client.agents.metrics.results.list()
         assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         result = await async_client.agents.metrics.results.list(
@@ -134,7 +134,7 @@ class TestAsyncResults:
         )
         assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.results.with_raw_response.list()
@@ -144,7 +144,7 @@ class TestAsyncResults:
         result = await response.parse()
         assert_matches_type(AsyncCursorIDPage[ResultListResponse], result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.results.with_streaming_response.list() as response:
@@ -156,13 +156,13 @@ class TestAsyncResults:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_export(self, async_client: AsyncCartesia) -> None:
         result = await async_client.agents.metrics.results.export()
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_export_with_all_params(self, async_client: AsyncCartesia) -> None:
         result = await async_client.agents.metrics.results.export(
@@ -175,7 +175,7 @@ class TestAsyncResults:
         )
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_export(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.results.with_raw_response.export()
@@ -185,7 +185,7 @@ class TestAsyncResults:
         result = await response.parse()
         assert_matches_type(str, result, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_export(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.results.with_streaming_response.export() as response:

@@ -77,8 +77,8 @@ __all__ = [
 
 class Cartesia(SyncAPIClient):
     # client options
-    token: str | None
     api_key: str | None
+    token: str | None
 
     websocket_base_url: str | httpx.URL | None
     """Base URL for WebSocket connections.
@@ -91,8 +91,8 @@ class Cartesia(SyncAPIClient):
     def __init__(
         self,
         *,
-        token: str | None = None,
         api_key: str | None = None,
+        token: str | None = None,
         base_url: str | httpx.URL | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
@@ -114,9 +114,9 @@ class Cartesia(SyncAPIClient):
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new synchronous Cartesia client instance."""
-        self.token = token
-
         self.api_key = api_key
+
+        self.token = token
 
         self.websocket_base_url = websocket_base_url
 
@@ -244,8 +244,8 @@ class Cartesia(SyncAPIClient):
     def copy(
         self,
         *,
-        token: str | None = None,
         api_key: str | None = None,
+        token: str | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
@@ -280,8 +280,8 @@ class Cartesia(SyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            token=token or self.token,
             api_key=api_key or self.api_key,
+            token=token or self.token,
             websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,
@@ -351,8 +351,8 @@ class Cartesia(SyncAPIClient):
 
 class AsyncCartesia(AsyncAPIClient):
     # client options
-    token: str | None
     api_key: str | None
+    token: str | None
 
     websocket_base_url: str | httpx.URL | None
     """Base URL for WebSocket connections.
@@ -365,8 +365,8 @@ class AsyncCartesia(AsyncAPIClient):
     def __init__(
         self,
         *,
-        token: str | None = None,
         api_key: str | None = None,
+        token: str | None = None,
         base_url: str | httpx.URL | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
@@ -388,9 +388,9 @@ class AsyncCartesia(AsyncAPIClient):
         _strict_response_validation: bool = False,
     ) -> None:
         """Construct a new async AsyncCartesia client instance."""
-        self.token = token
-
         self.api_key = api_key
+
+        self.token = token
 
         self.websocket_base_url = websocket_base_url
 
@@ -518,8 +518,8 @@ class AsyncCartesia(AsyncAPIClient):
     def copy(
         self,
         *,
-        token: str | None = None,
         api_key: str | None = None,
+        token: str | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
         timeout: float | Timeout | None | NotGiven = not_given,
@@ -554,8 +554,8 @@ class AsyncCartesia(AsyncAPIClient):
 
         http_client = http_client or self._client
         return self.__class__(
-            token=token or self.token,
             api_key=api_key or self.api_key,
+            token=token or self.token,
             websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
             timeout=self.timeout if isinstance(timeout, NotGiven) else timeout,

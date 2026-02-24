@@ -17,7 +17,7 @@ base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 class TestMetrics:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_create(self, client: Cartesia) -> None:
         metric = client.agents.metrics.create(
@@ -26,7 +26,7 @@ class TestMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_create_with_all_params(self, client: Cartesia) -> None:
         metric = client.agents.metrics.create(
@@ -36,7 +36,7 @@ class TestMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.create(
@@ -49,7 +49,7 @@ class TestMetrics:
         metric = response.parse()
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_create(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.create(
@@ -64,7 +64,7 @@ class TestMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_retrieve(self, client: Cartesia) -> None:
         metric = client.agents.metrics.retrieve(
@@ -72,7 +72,7 @@ class TestMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_retrieve(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.retrieve(
@@ -84,7 +84,7 @@ class TestMetrics:
         metric = response.parse()
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_retrieve(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.retrieve(
@@ -98,7 +98,7 @@ class TestMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_retrieve(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
@@ -106,13 +106,13 @@ class TestMetrics:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list(self, client: Cartesia) -> None:
         metric = client.agents.metrics.list()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_list_with_all_params(self, client: Cartesia) -> None:
         metric = client.agents.metrics.list(
@@ -121,7 +121,7 @@ class TestMetrics:
         )
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_list(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.list()
@@ -131,7 +131,7 @@ class TestMetrics:
         metric = response.parse()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_list(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.list() as response:
@@ -143,7 +143,7 @@ class TestMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_add_to_agent(self, client: Cartesia) -> None:
         metric = client.agents.metrics.add_to_agent(
@@ -152,7 +152,7 @@ class TestMetrics:
         )
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_add_to_agent(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.add_to_agent(
@@ -165,7 +165,7 @@ class TestMetrics:
         metric = response.parse()
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_add_to_agent(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.add_to_agent(
@@ -180,7 +180,7 @@ class TestMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_add_to_agent(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
@@ -195,7 +195,7 @@ class TestMetrics:
                 agent_id="agent_id",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_remove_from_agent(self, client: Cartesia) -> None:
         metric = client.agents.metrics.remove_from_agent(
@@ -204,7 +204,7 @@ class TestMetrics:
         )
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_remove_from_agent(self, client: Cartesia) -> None:
         response = client.agents.metrics.with_raw_response.remove_from_agent(
@@ -217,7 +217,7 @@ class TestMetrics:
         metric = response.parse()
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_remove_from_agent(self, client: Cartesia) -> None:
         with client.agents.metrics.with_streaming_response.remove_from_agent(
@@ -232,7 +232,7 @@ class TestMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_path_params_remove_from_agent(self, client: Cartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
@@ -253,7 +253,7 @@ class TestAsyncMetrics:
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_create(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.create(
@@ -262,7 +262,7 @@ class TestAsyncMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_create_with_all_params(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.create(
@@ -272,7 +272,7 @@ class TestAsyncMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_create(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.create(
@@ -285,7 +285,7 @@ class TestAsyncMetrics:
         metric = await response.parse()
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_create(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.create(
@@ -300,7 +300,7 @@ class TestAsyncMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_retrieve(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.retrieve(
@@ -308,7 +308,7 @@ class TestAsyncMetrics:
         )
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_retrieve(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.retrieve(
@@ -320,7 +320,7 @@ class TestAsyncMetrics:
         metric = await response.parse()
         assert_matches_type(Metric, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_retrieve(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.retrieve(
@@ -334,7 +334,7 @@ class TestAsyncMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_retrieve(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
@@ -342,13 +342,13 @@ class TestAsyncMetrics:
                 "",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.list()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_list_with_all_params(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.list(
@@ -357,7 +357,7 @@ class TestAsyncMetrics:
         )
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_list(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.list()
@@ -367,7 +367,7 @@ class TestAsyncMetrics:
         metric = await response.parse()
         assert_matches_type(MetricListResponse, metric, path=["response"])
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_list(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.list() as response:
@@ -379,7 +379,7 @@ class TestAsyncMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_add_to_agent(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.add_to_agent(
@@ -388,7 +388,7 @@ class TestAsyncMetrics:
         )
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_add_to_agent(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.add_to_agent(
@@ -401,7 +401,7 @@ class TestAsyncMetrics:
         metric = await response.parse()
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_add_to_agent(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.add_to_agent(
@@ -416,7 +416,7 @@ class TestAsyncMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_add_to_agent(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):
@@ -431,7 +431,7 @@ class TestAsyncMetrics:
                 agent_id="agent_id",
             )
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         metric = await async_client.agents.metrics.remove_from_agent(
@@ -440,7 +440,7 @@ class TestAsyncMetrics:
         )
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.metrics.with_raw_response.remove_from_agent(
@@ -453,7 +453,7 @@ class TestAsyncMetrics:
         metric = await response.parse()
         assert metric is None
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.metrics.with_streaming_response.remove_from_agent(
@@ -468,7 +468,7 @@ class TestAsyncMetrics:
 
         assert cast(Any, response.is_closed) is True
 
-    @pytest.mark.skip(reason="Prism tests are disabled")
+    @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_path_params_remove_from_agent(self, async_client: AsyncCartesia) -> None:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `agent_id` but received ''"):

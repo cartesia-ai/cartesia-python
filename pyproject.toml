@@ -1,6 +1,6 @@
 [project]
 name = "cartesia"
-version = "3.0.0"
+version = "3.0.1"
 description = "The official Python library for the cartesia API"
 dynamic = ["readme"]
 license = "Apache-2.0"
@@ -57,7 +57,7 @@ conflicts = [
 [dependency-groups]
 # version pins are in uv.lock
 dev = [
-    "pyright==1.1.399",
+    "pyright==1.1.408",
     "mypy==1.17",
     "respx",
     "pytest",
@@ -68,6 +68,7 @@ dev = [
     "importlib-metadata>=6.7.0",
     "rich>=13.7.1",
     "pytest-xdist>=3.6.1",
+    "websockets>=13,<16",
 ]
 pydantic-v1 = [
     "pydantic>=1.9.0,<2",
