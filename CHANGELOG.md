@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.2 (2026-02-26)
+
+Full Changelog: [v3.0.1...v3.0.2](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.1...v3.0.2)
+
+### Features
+
+* open unions for generation config ([#74](https://github.com/cartesia-ai/cartesia-python/issues/74)) ([296b0fa](https://github.com/cartesia-ai/cartesia-python/commit/296b0faae9ca90c8dc3497cc46ec817babcf1d5f))
+
 ## 3.0.1 (2026-02-23)
 
 Full Changelog: [v3.0.0...v3.0.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.0...v3.0.1)
