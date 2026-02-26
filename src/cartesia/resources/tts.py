@@ -1932,7 +1932,7 @@ class BackcompatTTSResourceConnection:
                 phoneme_ends.extend(pt.end)
         return BackcompatWebSocketTtsOutput(
             audio=b"".join(audio_parts) if audio_parts else None,
-            context_id=context_id,
+            context_id=ctx._context_id,
             word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
             phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
         )
@@ -2041,7 +2041,7 @@ class AsyncBackcompatTTSResourceConnection:
                 phoneme_ends.extend(pt.end)
         return BackcompatWebSocketTtsOutput(
             audio=b"".join(audio_parts) if audio_parts else None,
-            context_id=context_id,
+            context_id=ctx._context_id,
             word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
             phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
         )
