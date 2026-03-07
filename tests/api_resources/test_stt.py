@@ -29,7 +29,7 @@ class TestStt:
         stt = client.stt.transcribe(
             encoding="pcm_s16le",
             sample_rate=0,
-            file=b"raw file contents",
+            file=b"Example data",
             language="en",
             model="model",
             timestamp_granularities=["word"],
@@ -76,7 +76,7 @@ class TestAsyncStt:
         stt = await async_client.stt.transcribe(
             encoding="pcm_s16le",
             sample_rate=0,
-            file=b"raw file contents",
+            file=b"Example data",
             language="en",
             model="model",
             timestamp_granularities=["word"],

@@ -233,14 +233,14 @@ class TestTTS:
         respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.infill(
             language="language",
-            left_audio=b"raw file contents",
+            left_audio=b"Example data",
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
                 "container": "raw",
             },
-            right_audio=b"raw file contents",
+            right_audio=b"Example data",
             transcript="transcript",
             voice_id="voice_id",
         )
@@ -491,14 +491,14 @@ class TestAsyncTTS:
         respx_mock.post("/infill/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.infill(
             language="language",
-            left_audio=b"raw file contents",
+            left_audio=b"Example data",
             model_id="model_id",
             output_format={
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
                 "container": "raw",
             },
-            right_audio=b"raw file contents",
+            right_audio=b"Example data",
             transcript="transcript",
             voice_id="voice_id",
         )
