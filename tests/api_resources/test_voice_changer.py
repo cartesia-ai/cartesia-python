@@ -38,7 +38,7 @@ class TestVoiceChanger:
     def test_method_change_voice_bytes_with_all_params(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/voice-changer/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         voice_changer = client.voice_changer.change_voice_bytes(
-            clip=b"raw file contents",
+            clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
@@ -86,7 +86,7 @@ class TestVoiceChanger:
     @parametrize
     def test_method_change_voice_sse_with_all_params(self, client: Cartesia) -> None:
         voice_changer = client.voice_changer.change_voice_sse(
-            clip=b"raw file contents",
+            clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
@@ -140,7 +140,7 @@ class TestAsyncVoiceChanger:
     ) -> None:
         respx_mock.post("/voice-changer/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         voice_changer = await async_client.voice_changer.change_voice_bytes(
-            clip=b"raw file contents",
+            clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",
@@ -190,7 +190,7 @@ class TestAsyncVoiceChanger:
     @parametrize
     async def test_method_change_voice_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice_changer = await async_client.voice_changer.change_voice_sse(
-            clip=b"raw file contents",
+            clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
             output_format_encoding="pcm_f32le",

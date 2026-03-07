@@ -177,7 +177,7 @@ class TestVoices:
     def test_method_clone_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.clone(
             base_voice_id="base_voice_id",
-            clip=b"raw file contents",
+            clip=b"Example data",
             description="description",
             language="en",
             name="name",
@@ -478,7 +478,7 @@ class TestAsyncVoices:
     async def test_method_clone_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.clone(
             base_voice_id="base_voice_id",
-            clip=b"raw file contents",
+            clip=b"Example data",
             description="description",
             language="en",
             name="name",
