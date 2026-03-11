@@ -1389,7 +1389,7 @@ else:
             kwargs.setdefault("limits", DEFAULT_CONNECTION_LIMITS)
             kwargs.setdefault("follow_redirects", True)
 
-            super().__init__(**kwargs)
+            super().__init__(**kwargs)  # type: ignore # stainless bug: missing type stubs
 
 
 if TYPE_CHECKING:

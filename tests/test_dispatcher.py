@@ -23,6 +23,7 @@ from cartesia.resources.tts import AsyncTTSResourceConnection
 # Mock WebSocket
 # ---------------------------------------------------------------------------
 
+
 class MockAsyncWebsocket:
     """Fake async WebSocket whose receive buffer is an asyncio.Queue.
 
@@ -129,9 +130,7 @@ async def test_dispatcher_drains_websocket_buffer():
             break
         await asyncio.sleep(0.01)
 
-    assert ws._queue.empty(), (
-        "Background task should have consumed all messages from the WebSocket"
-    )
+    assert ws._queue.empty(), "Background task should have consumed all messages from the WebSocket"
 
     # All messages should now be sitting in the context queue.
     ctx_queue = conn._context_queues[ctx_id]

@@ -26,10 +26,7 @@ from cartesia.types.supported_language import SupportedLanguage
 from cartesia.types.generation_request_param import GenerationRequestParam
 
 # Ignore asyncio resource warnings that occur during test teardown
-pytestmark = pytest.mark.filterwarnings(
-    "ignore::pytest.PytestUnraisableExceptionWarning",
-    "ignore::ResourceWarning"
-)
+pytestmark = pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning", "ignore::ResourceWarning")
 
 THISDIR = os.path.dirname(__file__)
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
@@ -242,13 +239,16 @@ def test_update_voice(client: Cartesia, sample_audio_path: str):
 # ============================================================================
 
 
-@pytest.mark.parametrize("output_format", [
-    {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-    {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
-    {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 16000},
-    {"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
-    {"container": "mp3", "sample_rate": 44100, "bit_rate": 128000},
-])
+@pytest.mark.parametrize(
+    "output_format",
+    [
+        {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
+        {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 16000},
+        {"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        {"container": "mp3", "sample_rate": 44100, "bit_rate": 128000},
+    ],
+)
 def test_tts_generate_sync(client: Cartesia, output_format: Any) -> None:
     """Test synchronous TTS generation with various output formats."""
     logger.info(f"Testing tts.generate with format {output_format}")
@@ -394,14 +394,19 @@ def test_tts_websocket_sync(client: Cartesia):
 
     with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
-        connection.send(cast(GenerationRequestParam, {
-            "context_id": context_id,
-            "model_id": DEFAULT_MODEL_ID,
-            "transcript": SAMPLE_TRANSCRIPT,
-            "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
-            "output_format": DEFAULT_OUTPUT_FORMAT,
-            "language": SAMPLE_LANGUAGE,
-        }))
+        connection.send(
+            cast(
+                GenerationRequestParam,
+                {
+                    "context_id": context_id,
+                    "model_id": DEFAULT_MODEL_ID,
+                    "transcript": SAMPLE_TRANSCRIPT,
+                    "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
+                    "output_format": DEFAULT_OUTPUT_FORMAT,
+                    "language": SAMPLE_LANGUAGE,
+                },
+            )
+        )
 
         audio_chunks: list[bytes] = []
         for response in connection:
@@ -422,15 +427,20 @@ def test_tts_websocket_with_timestamps(client: Cartesia) -> None:
 
     with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
-        connection.send(cast(GenerationRequestParam, {
-            "context_id": context_id,
-            "model_id": DEFAULT_MODEL_ID,
-            "transcript": SAMPLE_TRANSCRIPT,
-            "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
-            "output_format": DEFAULT_OUTPUT_FORMAT,
-            "language": SAMPLE_LANGUAGE,
-            "add_timestamps": True,
-        }))
+        connection.send(
+            cast(
+                GenerationRequestParam,
+                {
+                    "context_id": context_id,
+                    "model_id": DEFAULT_MODEL_ID,
+                    "transcript": SAMPLE_TRANSCRIPT,
+                    "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
+                    "output_format": DEFAULT_OUTPUT_FORMAT,
+                    "language": SAMPLE_LANGUAGE,
+                    "add_timestamps": True,
+                },
+            )
+        )
 
         audio_chunks: list[bytes] = []
         all_words: list[str] = []
@@ -466,14 +476,19 @@ async def test_tts_websocket_async():
     async with create_async_client() as client:
         async with client.tts.websocket_connect() as connection:
             context_id = str(uuid.uuid4())
-            await connection.send(cast(GenerationRequestParam, {
-                "context_id": context_id,
-                "model_id": DEFAULT_MODEL_ID,
-                "transcript": SAMPLE_TRANSCRIPT,
-                "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
-                "output_format": DEFAULT_OUTPUT_FORMAT,
-                "language": SAMPLE_LANGUAGE,
-            }))
+            await connection.send(
+                cast(
+                    GenerationRequestParam,
+                    {
+                        "context_id": context_id,
+                        "model_id": DEFAULT_MODEL_ID,
+                        "transcript": SAMPLE_TRANSCRIPT,
+                        "voice": {"mode": "id", "id": SAMPLE_VOICE_ID},
+                        "output_format": DEFAULT_OUTPUT_FORMAT,
+                        "language": SAMPLE_LANGUAGE,
+                    },
+                )
+            )
 
             audio_chunks: list[bytes] = []
             async for response in connection:
@@ -1163,8 +1178,6 @@ async def test_tts_websocket_context_reuse_async():
 # ============================================================================
 
 
-
-
 # ============================================================================
 # Concurrent Request Tests
 # ============================================================================
@@ -1198,5 +1211,3 @@ async def test_concurrent_tts_requests():
         for i, audio_data in enumerate(results):
             _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
             logger.info(f"Request {i} completed with {len(audio_data)} bytes")
-
-

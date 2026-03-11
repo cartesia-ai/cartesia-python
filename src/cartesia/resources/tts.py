@@ -49,13 +49,13 @@ from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import GenerationRequest, CancelContextRequest, WebsocketClientEvent
 from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
-from ..types.websocket_connection_options import WebsocketConnectionOptions
+from ..types.websocket_connection_options import WebSocketConnectionOptions
 
 if TYPE_CHECKING:
     import asyncio
 
-    from websockets.sync.client import ClientConnection as WebsocketConnection
-    from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
+    from websockets.sync.client import ClientConnection as WebSocketConnection
+    from websockets.asyncio.client import ClientConnection as AsyncWebSocketConnection
 
     from .._client import Cartesia, AsyncCartesia
 
@@ -306,7 +306,7 @@ class TTSResource(SyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> BackcompatTTSResourceConnection:
         """Create a WebSocket connection for real-time TTS streaming (v2 compatible)."""
         manager = self.websocket_connect(
@@ -445,7 +445,7 @@ class TTSResource(SyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> TTSResourceConnectionManager:
         return TTSResourceConnectionManager(
             client=self._client,
@@ -697,7 +697,7 @@ class AsyncTTSResource(AsyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> AsyncBackcompatTTSResourceConnection:
         """Create a WebSocket connection for real-time TTS streaming (v2 compatible)."""
         manager = self.websocket_connect(
@@ -836,7 +836,7 @@ class AsyncTTSResource(AsyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> AsyncTTSResourceConnectionManager:
         return AsyncTTSResourceConnectionManager(
             client=self._client,
@@ -921,9 +921,11 @@ class AsyncTTSResourceWithStreamingResponse:
 class AsyncTTSResourceConnection:
     """Represents a live WebSocket connection to the TTS API"""
 
-    _connection: AsyncWebsocketConnection
+    _connection: AsyncWebSocketConnection
 
-    def __init__(self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager | None = None) -> None:
+    def __init__(
+        self, connection: AsyncWebSocketConnection, manager: AsyncTTSResourceConnectionManager | None = None
+    ) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
@@ -961,6 +963,7 @@ class AsyncTTSResourceConnection:
         """
         if timeout is not None:
             import asyncio as _asyncio
+
             message = await _asyncio.wait_for(self._connection.recv(decode=False), timeout=timeout)
         else:
             message = await self._connection.recv(decode=False)
@@ -1077,6 +1080,7 @@ class AsyncTTSResourceConnection:
         if context_id is None:
             context_id = str(uuid.uuid4())
         import asyncio
+
         self._context_queues[context_id] = asyncio.Queue()
         return AsyncWebSocketContext(
             self,
@@ -1118,7 +1122,7 @@ class AsyncTTSResourceConnectionManager:
         client: AsyncCartesia,
         extra_query: Query,
         extra_headers: Headers,
-        websocket_connection_options: WebsocketConnectionOptions,
+        websocket_connection_options: WebSocketConnectionOptions,
     ) -> None:
         self.__client = client
         self.__connection: AsyncTTSResourceConnection | None = None
@@ -1195,9 +1199,9 @@ class AsyncTTSResourceConnectionManager:
 class TTSResourceConnection:
     """Represents a live WebSocket connection to the TTS API"""
 
-    _connection: WebsocketConnection
+    _connection: WebSocketConnection
 
-    def __init__(self, connection: WebsocketConnection, manager: TTSResourceConnectionManager | None = None) -> None:
+    def __init__(self, connection: WebSocketConnection, manager: TTSResourceConnectionManager | None = None) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, queue.Queue[WebsocketResponse]] = {}
@@ -1340,7 +1344,7 @@ class TTSResourceConnectionManager:
         client: Cartesia,
         extra_query: Query,
         extra_headers: Headers,
-        websocket_connection_options: WebsocketConnectionOptions,
+        websocket_connection_options: WebSocketConnectionOptions,
     ) -> None:
         self.__client = client
         self.__connection: TTSResourceConnection | None = None
@@ -1413,13 +1417,14 @@ class TTSResourceConnectionManager:
         if self.__connection is not None:
             self.__connection.close()
 
+
 # WebSocket context helpers for managing conversational flows.
 class WebSocketContext:
     """Context helper for managing WebSocket conversations with automatic context_id handling."""
 
     def __init__(
         self,
-        connection: 'TTSResourceConnection',
+        connection: "TTSResourceConnection",
         context_id: str,
         *,
         timeout: float | None = None,
@@ -1513,11 +1518,17 @@ class WebSocketContext:
     ) -> None:
         """Send a generation request with continue_=True using context defaults."""
         if self._model_id is None or self._voice is None:
-            raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
+            raise ValueError(
+                "Context was initialized without required parameters (model_id, voice). Cannot use push()."
+            )
 
-        language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        language: SupportedLanguage | Omit = (
+            cast(SupportedLanguage, self._language) if self._language is not None else omit
+        )
         add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
-        add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
+        add_phoneme_timestamps: bool | Omit = (
+            self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
+        )
 
         # Use passed generation_config if provided in kwargs, otherwise use context default
         generation_config: GenerationConfigParam | None = kwargs.pop("generation_config", self._generation_config)
@@ -1542,13 +1553,17 @@ class WebSocketContext:
             return  # Already completed, ignore
 
         model_id: str = self._model_id or "sonic-3"
-        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"})
+        voice: VoiceSpecifierParam = self._voice or cast(
+            VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+        )
         output_format = self._output_format or {
             "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100,
         }
-        language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        language: SupportedLanguage | Omit = (
+            cast(SupportedLanguage, self._language) if self._language is not None else omit
+        )
 
         self.send(
             model_id=model_id,
@@ -1639,7 +1654,7 @@ class AsyncWebSocketContext:
 
     def __init__(
         self,
-        connection: 'AsyncTTSResourceConnection',
+        connection: "AsyncTTSResourceConnection",
         context_id: str,
         *,
         timeout: float | None = None,
@@ -1734,11 +1749,17 @@ class AsyncWebSocketContext:
     ) -> None:
         """Send a generation request with continue_=True using context defaults."""
         if self._model_id is None or self._voice is None:
-            raise ValueError("Context was initialized without required parameters (model_id, voice). Cannot use push().")
+            raise ValueError(
+                "Context was initialized without required parameters (model_id, voice). Cannot use push()."
+            )
 
-        language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        language: SupportedLanguage | Omit = (
+            cast(SupportedLanguage, self._language) if self._language is not None else omit
+        )
         add_timestamps: bool | Omit = self._add_timestamps if self._add_timestamps is not None else omit
-        add_phoneme_timestamps: bool | Omit = self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
+        add_phoneme_timestamps: bool | Omit = (
+            self._add_phoneme_timestamps if self._add_phoneme_timestamps is not None else omit
+        )
 
         # Use passed generation_config if provided in kwargs, otherwise use context default
         generation_config: GenerationConfigParam | None = kwargs.pop("generation_config", self._generation_config)
@@ -1763,13 +1784,17 @@ class AsyncWebSocketContext:
             return  # Already completed, ignore
 
         model_id: str = self._model_id or "sonic-3"
-        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"})
+        voice: VoiceSpecifierParam = self._voice or cast(
+            VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+        )
         output_format = self._output_format or {
             "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100,
         }
-        language: SupportedLanguage | Omit = cast(SupportedLanguage, self._language) if self._language is not None else omit
+        language: SupportedLanguage | Omit = (
+            cast(SupportedLanguage, self._language) if self._language is not None else omit
+        )
 
         await self.send(
             model_id=model_id,
@@ -1824,6 +1849,7 @@ class AsyncWebSocketContext:
 
 class BackcompatWebSocketTtsOutput(BaseModel):
     """Output object for backward compatibility with v2 WebSocket response."""
+
     audio: Optional[bytes] = None
     word_timestamps: Optional[Any] = None
     phoneme_timestamps: Optional[Any] = None
@@ -1895,9 +1921,7 @@ class BackcompatTTSResourceConnection:
                 if event.type == "error":
                     raise RuntimeError(f"Error generating audio:\n{getattr(event, 'error', 'Unknown error')}")
 
-                out = BackcompatWebSocketTtsOutput(
-                    context_id=event.context_id
-                )
+                out = BackcompatWebSocketTtsOutput(context_id=event.context_id)
 
                 if event.type == "chunk":
                     out.audio = event.audio
@@ -1938,7 +1962,9 @@ class BackcompatTTSResourceConnection:
             audio=b"".join(audio_parts) if audio_parts else None,
             context_id=ctx._context_id,
             word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
-            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
+            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends}
+            if phonemes
+            else None,
         )
 
 
@@ -2004,9 +2030,7 @@ class AsyncBackcompatTTSResourceConnection:
                 if event.type == "error":
                     raise RuntimeError(f"Error generating audio:\n{getattr(event, 'error', 'Unknown error')}")
 
-                out = BackcompatWebSocketTtsOutput(
-                    context_id=event.context_id
-                )
+                out = BackcompatWebSocketTtsOutput(context_id=event.context_id)
 
                 if event.type == "chunk":
                     out.audio = event.audio
@@ -2047,5 +2071,7 @@ class AsyncBackcompatTTSResourceConnection:
             audio=b"".join(audio_parts) if audio_parts else None,
             context_id=ctx._context_id,
             word_timestamps={"words": words, "start": word_starts, "end": word_ends} if words else None,
-            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends} if phonemes else None,
+            phoneme_timestamps={"phonemes": phonemes, "start": phoneme_starts, "end": phoneme_ends}
+            if phonemes
+            else None,
         )

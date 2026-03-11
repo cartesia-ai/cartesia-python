@@ -6,7 +6,16 @@ from typing_extensions import Literal
 
 from .._models import BaseModel
 
-__all__ = ["SSEEvent", "ChunkEvent", "TimestampsEvent", "PhonemeTimestampsEvent", "DoneEvent", "ErrorEvent", "WordTimestamps", "PhonemeTimestamps"]
+__all__ = [
+    "SSEEvent",
+    "ChunkEvent",
+    "TimestampsEvent",
+    "PhonemeTimestampsEvent",
+    "DoneEvent",
+    "ErrorEvent",
+    "WordTimestamps",
+    "PhonemeTimestamps",
+]
 
 
 class SSEEvent(BaseModel):
@@ -26,6 +35,7 @@ class SSEEvent(BaseModel):
 
 class WordTimestamps(BaseModel):
     """Word-level timestamps"""
+
     words: List[str]
     start: List[float]
     end: List[float]
@@ -33,6 +43,7 @@ class WordTimestamps(BaseModel):
 
 class PhonemeTimestamps(BaseModel):
     """Phoneme-level timestamps"""
+
     phonemes: List[str]
     start: List[float]
     end: List[float]
