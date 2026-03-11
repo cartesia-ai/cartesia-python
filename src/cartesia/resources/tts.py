@@ -46,11 +46,11 @@ from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
-from ..types.websocket_connection_options import WebsocketConnectionOptions
+from ..types.websocket_connection_options import WebSocketConnectionOptions
 
 if TYPE_CHECKING:
-    from websockets.sync.client import ClientConnection as WebsocketConnection
-    from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
+    from websockets.sync.client import ClientConnection as WebSocketConnection
+    from websockets.asyncio.client import ClientConnection as AsyncWebSocketConnection
 
     from .._client import Cartesia, AsyncCartesia
 
@@ -338,7 +338,7 @@ class TTSResource(SyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> TTSResourceConnectionManager:
         return TTSResourceConnectionManager(
             client=self._client,
@@ -627,7 +627,7 @@ class AsyncTTSResource(AsyncAPIResource):
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
-        websocket_connection_options: WebsocketConnectionOptions = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> AsyncTTSResourceConnectionManager:
         return AsyncTTSResourceConnectionManager(
             client=self._client,
@@ -708,9 +708,9 @@ class AsyncTTSResourceWithStreamingResponse:
 class AsyncTTSResourceConnection:
     """Represents a live WebSocket connection to the TTS API"""
 
-    _connection: AsyncWebsocketConnection
+    _connection: AsyncWebSocketConnection
 
-    def __init__(self, connection: AsyncWebsocketConnection) -> None:
+    def __init__(self, connection: AsyncWebSocketConnection) -> None:
         self._connection = connection
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
@@ -743,7 +743,7 @@ class AsyncTTSResourceConnection:
         then you can call `.parse_event(data)`.
         """
         message = await self._connection.recv(decode=False)
-        log.debug(f"Received websocket message: %s", message)
+        log.debug(f"Received WebSocket message: %s", message)
         return message
 
     async def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
@@ -794,7 +794,7 @@ class AsyncTTSResourceConnectionManager:
         client: AsyncCartesia,
         extra_query: Query,
         extra_headers: Headers,
-        websocket_connection_options: WebsocketConnectionOptions,
+        websocket_connection_options: WebSocketConnectionOptions,
     ) -> None:
         self.__client = client
         self.__connection: AsyncTTSResourceConnection | None = None
@@ -869,9 +869,9 @@ class AsyncTTSResourceConnectionManager:
 class TTSResourceConnection:
     """Represents a live WebSocket connection to the TTS API"""
 
-    _connection: WebsocketConnection
+    _connection: WebSocketConnection
 
-    def __init__(self, connection: WebsocketConnection) -> None:
+    def __init__(self, connection: WebSocketConnection) -> None:
         self._connection = connection
 
     def __iter__(self) -> Iterator[WebsocketResponse]:
@@ -904,7 +904,7 @@ class TTSResourceConnection:
         then you can call `.parse_event(data)`.
         """
         message = self._connection.recv(decode=False)
-        log.debug(f"Received websocket message: %s", message)
+        log.debug(f"Received WebSocket message: %s", message)
         return message
 
     def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
@@ -955,7 +955,7 @@ class TTSResourceConnectionManager:
         client: Cartesia,
         extra_query: Query,
         extra_headers: Headers,
-        websocket_connection_options: WebsocketConnectionOptions,
+        websocket_connection_options: WebSocketConnectionOptions,
     ) -> None:
         self.__client = client
         self.__connection: TTSResourceConnection | None = None
