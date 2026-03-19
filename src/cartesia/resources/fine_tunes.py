@@ -8,7 +8,7 @@ import httpx
 
 from ..types import fine_tune_list_params, fine_tune_create_params, fine_tune_list_voices_params
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
-from .._utils import maybe_transform, async_maybe_transform
+from .._utils import path_template, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -126,7 +126,7 @@ class FineTunesResource(SyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get(
-            f"/fine-tunes/{id}",
+            path_template("/fine-tunes/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -217,7 +217,7 @@ class FineTunesResource(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._delete(
-            f"/fine-tunes/{id}",
+            path_template("/fine-tunes/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -265,7 +265,7 @@ class FineTunesResource(SyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get_api_list(
-            f"/fine-tunes/{id}/voices",
+            path_template("/fine-tunes/{id}/voices", id=id),
             page=SyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -386,7 +386,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return await self._get(
-            f"/fine-tunes/{id}",
+            path_template("/fine-tunes/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -477,7 +477,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._delete(
-            f"/fine-tunes/{id}",
+            path_template("/fine-tunes/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -525,7 +525,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get_api_list(
-            f"/fine-tunes/{id}/voices",
+            path_template("/fine-tunes/{id}/voices", id=id),
             page=AsyncCursorIDPage[Voice],
             options=make_request_options(
                 extra_headers=extra_headers,

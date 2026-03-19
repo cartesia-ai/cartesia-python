@@ -7,7 +7,7 @@ from typing import Mapping, Optional, cast
 import httpx
 
 from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
-from ..._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
+from ..._utils import extract_files, path_template, maybe_transform, deepcopy_minimal, async_maybe_transform
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -85,7 +85,7 @@ class FilesResource(SyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get_api_list(
-            f"/datasets/{id}/files",
+            path_template("/datasets/{id}/files", id=id),
             page=SyncCursorIDPage[FileListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -134,7 +134,7 @@ class FilesResource(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._delete(
-            f"/datasets/{id}/files/{file_id}",
+            path_template("/datasets/{id}/files/{file_id}", id=id, file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -183,7 +183,7 @@ class FilesResource(SyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return self._post(
-            f"/datasets/{id}/files",
+            path_template("/datasets/{id}/files", id=id),
             body=maybe_transform(body, file_upload_params.FileUploadParams),
             files=files,
             options=make_request_options(
@@ -254,7 +254,7 @@ class AsyncFilesResource(AsyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get_api_list(
-            f"/datasets/{id}/files",
+            path_template("/datasets/{id}/files", id=id),
             page=AsyncCursorIDPage[FileListResponse],
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -303,7 +303,7 @@ class AsyncFilesResource(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `file_id` but received {file_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._delete(
-            f"/datasets/{id}/files/{file_id}",
+            path_template("/datasets/{id}/files/{file_id}", id=id, file_id=file_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -352,7 +352,7 @@ class AsyncFilesResource(AsyncAPIResource):
         # multipart/form-data; boundary=---abc--
         extra_headers["Content-Type"] = "multipart/form-data"
         return await self._post(
-            f"/datasets/{id}/files",
+            path_template("/datasets/{id}/files", id=id),
             body=await async_maybe_transform(body, file_upload_params.FileUploadParams),
             files=files,
             options=make_request_options(
