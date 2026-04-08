@@ -979,6 +979,9 @@ class AsyncTTSResourceConnection:
         )
         await self._connection.send(data)
 
+    async def send_raw(self, data: bytes | str) -> None:
+        await self._connection.send(data)
+
     async def close(self, *, code: int = 1000, reason: str = "") -> None:
         import asyncio as _asyncio
 
@@ -1246,6 +1249,9 @@ class TTSResourceConnection:
             if isinstance(event, BaseModel)
             else json.dumps(maybe_transform(event, WebsocketClientEventParam))
         )
+        self._connection.send(data)
+
+    def send_raw(self, data: bytes | str) -> None:
         self._connection.send(data)
 
     def close(self, *, code: int = 1000, reason: str = "") -> None:
