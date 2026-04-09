@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
+import time
+import random
 import logging
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast
+from typing import TYPE_CHECKING, Any, Mapping, Callable, Iterator, Optional, Awaitable, cast
 from typing_extensions import AsyncIterator
 
 import httpx
@@ -44,6 +46,7 @@ from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
+from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebSocketConnectionOptions
@@ -339,12 +342,20 @@ class TTSResource(SyncAPIResource):
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
     ) -> TTSResourceConnectionManager:
         return TTSResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
             websocket_connection_options=websocket_connection_options,
+            on_reconnecting=on_reconnecting,
+            max_retries=max_retries,
+            initial_delay=initial_delay,
+            max_delay=max_delay,
         )
 
 
@@ -628,12 +639,20 @@ class AsyncTTSResource(AsyncAPIResource):
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
     ) -> AsyncTTSResourceConnectionManager:
         return AsyncTTSResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
             websocket_connection_options=websocket_connection_options,
+            on_reconnecting=on_reconnecting,
+            max_retries=max_retries,
+            initial_delay=initial_delay,
+            max_delay=max_delay,
         )
 
 
@@ -710,21 +729,43 @@ class AsyncTTSResourceConnection:
 
     _connection: AsyncWebSocketConnection
 
-    def __init__(self, connection: AsyncWebSocketConnection) -> None:
+    def __init__(
+        self,
+        connection: AsyncWebSocketConnection,
+        *,
+        make_ws: Callable[[Query, Headers], Awaitable[AsyncWebSocketConnection]] | None = None,
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+    ) -> None:
         self._connection = connection
+        self._make_ws = make_ws
+        self._on_reconnecting = on_reconnecting
+        self._max_retries = max_retries
+        self._initial_delay = initial_delay
+        self._max_delay = max_delay
+        self._extra_query = extra_query
+        self._extra_headers = extra_headers
+        self._intentionally_closed = False
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
         """
-        from websockets.exceptions import ConnectionClosedOK
+        from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 
-        try:
-            while True:
+        while True:
+            try:
                 yield await self.recv()
-        except ConnectionClosedOK:
-            return
+            except ConnectionClosedOK:
+                return
+            except ConnectionClosedError as exc:
+                if not await self._reconnect(exc):
+                    raise
 
     async def recv(self) -> WebsocketResponse:
         """
@@ -758,6 +799,7 @@ class AsyncTTSResourceConnection:
         await self._connection.send(data)
 
     async def close(self, *, code: int = 1000, reason: str = "") -> None:
+        self._intentionally_closed = True
         await self._connection.close(code=code, reason=reason)
 
     def parse_event(self, data: str | bytes) -> WebsocketResponse:
@@ -769,6 +811,74 @@ class AsyncTTSResourceConnection:
         return cast(
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
+
+    async def _reconnect(self, exc: Exception) -> bool:
+        """Attempt to reconnect after a connection failure.
+
+        Returns ``True`` if a new connection was established, ``False`` if the
+        caller should re-raise the original exception.
+        """
+        import asyncio
+
+        if self._on_reconnecting is None or self._make_ws is None:
+            return False
+
+        from websockets.exceptions import ConnectionClosedError
+
+        close_code = 1006
+        if isinstance(exc, ConnectionClosedError) and exc.rcvd is not None:
+            close_code = exc.rcvd.code
+
+        if not is_recoverable_close(close_code):
+            return False
+
+        for attempt in range(1, self._max_retries + 1):
+            base_delay = min(self._initial_delay * (2 ** (attempt - 1)), self._max_delay)
+            jitter = 0.75 + random.random() * 0.25
+            delay = base_delay * jitter
+
+            event = ReconnectingEvent(
+                attempt=attempt,
+                max_attempts=self._max_retries,
+                delay=delay,
+                close_code=close_code,
+                extra_query=self._extra_query,
+                extra_headers=self._extra_headers,
+            )
+
+            try:
+                result = self._on_reconnecting(event)
+            except Exception:
+                return False
+
+            if result is not None and result.get("abort"):
+                return False
+
+            if result is not None:
+                if "extra_query" in result:
+                    self._extra_query = result["extra_query"]
+                if "extra_headers" in result:
+                    self._extra_headers = result["extra_headers"]
+
+            log.info(
+                "Reconnecting to WebSocket API (attempt %d/%d) after %.1fs delay",
+                attempt,
+                self._max_retries,
+                delay,
+            )
+            await asyncio.sleep(delay)
+
+            if self._intentionally_closed:
+                return False
+
+            try:
+                self._connection = await self._make_ws(self._extra_query, self._extra_headers)
+                log.info("Reconnected to WebSocket API")
+                return True
+            except Exception:
+                pass
+
+        return False
 
 
 class AsyncTTSResourceConnectionManager:
@@ -798,12 +908,20 @@ class AsyncTTSResourceConnectionManager:
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
     ) -> None:
         self.__client = client
         self.__connection: AsyncTTSResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
+        self.__on_reconnecting = on_reconnecting
+        self.__max_retries = max_retries
+        self.__initial_delay = initial_delay
+        self.__max_delay = max_delay
 
     async def __aenter__(self) -> AsyncTTSResourceConnection:
         """
@@ -818,6 +936,24 @@ class AsyncTTSResourceConnectionManager:
         await connection.close()
         ```
         """
+        ws = await self._connect_ws(self.__extra_query, self.__extra_headers)
+
+        self.__connection = AsyncTTSResourceConnection(
+            ws,
+            make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
+            on_reconnecting=self.__on_reconnecting,
+            max_retries=self.__max_retries,
+            initial_delay=self.__initial_delay,
+            max_delay=self.__max_delay,
+            extra_query=self.__extra_query,
+            extra_headers=self.__extra_headers,
+        )
+
+        return self.__connection
+
+    enter = __aenter__
+
+    async def _connect_ws(self, extra_query: Query, extra_headers: Headers) -> AsyncWebSocketConnection:
         try:
             from websockets.asyncio.client import connect
         except ImportError as exc:
@@ -826,30 +962,24 @@ class AsyncTTSResourceConnectionManager:
         url = self._prepare_url().copy_with(
             params={
                 **self.__client.base_url.params,
-                **self.__extra_query,
+                **extra_query,
             },
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
             log.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = AsyncTTSResourceConnection(
-            await connect(
-                str(url),
-                user_agent_header=self.__client.user_agent,
-                additional_headers=_merge_mappings(
-                    {
-                        **self.__client.auth_headers,
-                    },
-                    self.__extra_headers,
-                ),
-                **self.__websocket_connection_options,
-            )
+        return await connect(
+            str(url),
+            user_agent_header=self.__client.user_agent,
+            additional_headers=_merge_mappings(
+                {
+                    **self.__client.auth_headers,
+                },
+                extra_headers,
+            ),
+            **self.__websocket_connection_options,
         )
-
-        return self.__connection
-
-    enter = __aenter__
 
     def _prepare_url(self) -> httpx.URL:
         if self.__client.websocket_base_url is not None:
@@ -874,21 +1004,43 @@ class TTSResourceConnection:
 
     _connection: WebSocketConnection
 
-    def __init__(self, connection: WebSocketConnection) -> None:
+    def __init__(
+        self,
+        connection: WebSocketConnection,
+        *,
+        make_ws: Callable[[Query, Headers], WebSocketConnection] | None = None,
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+    ) -> None:
         self._connection = connection
+        self._make_ws = make_ws
+        self._on_reconnecting = on_reconnecting
+        self._max_retries = max_retries
+        self._initial_delay = initial_delay
+        self._max_delay = max_delay
+        self._extra_query = extra_query
+        self._extra_headers = extra_headers
+        self._intentionally_closed = False
 
     def __iter__(self) -> Iterator[WebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
         """
-        from websockets.exceptions import ConnectionClosedOK
+        from websockets.exceptions import ConnectionClosedOK, ConnectionClosedError
 
-        try:
-            while True:
+        while True:
+            try:
                 yield self.recv()
-        except ConnectionClosedOK:
-            return
+            except ConnectionClosedOK:
+                return
+            except ConnectionClosedError as exc:
+                if not self._reconnect(exc):
+                    raise
 
     def recv(self) -> WebsocketResponse:
         """
@@ -922,6 +1074,7 @@ class TTSResourceConnection:
         self._connection.send(data)
 
     def close(self, *, code: int = 1000, reason: str = "") -> None:
+        self._intentionally_closed = True
         self._connection.close(code=code, reason=reason)
 
     def parse_event(self, data: str | bytes) -> WebsocketResponse:
@@ -933,6 +1086,72 @@ class TTSResourceConnection:
         return cast(
             WebsocketResponse, construct_type_unchecked(value=json.loads(data), type_=cast(Any, WebsocketResponse))
         )
+
+    def _reconnect(self, exc: Exception) -> bool:
+        """Attempt to reconnect after a connection failure.
+
+        Returns ``True`` if a new connection was established, ``False`` if the
+        caller should re-raise the original exception.
+        """
+        if self._on_reconnecting is None or self._make_ws is None:
+            return False
+
+        from websockets.exceptions import ConnectionClosedError
+
+        close_code = 1006
+        if isinstance(exc, ConnectionClosedError) and exc.rcvd is not None:
+            close_code = exc.rcvd.code
+
+        if not is_recoverable_close(close_code):
+            return False
+
+        for attempt in range(1, self._max_retries + 1):
+            base_delay = min(self._initial_delay * (2 ** (attempt - 1)), self._max_delay)
+            jitter = 0.75 + random.random() * 0.25
+            delay = base_delay * jitter
+
+            event = ReconnectingEvent(
+                attempt=attempt,
+                max_attempts=self._max_retries,
+                delay=delay,
+                close_code=close_code,
+                extra_query=self._extra_query,
+                extra_headers=self._extra_headers,
+            )
+
+            try:
+                result = self._on_reconnecting(event)
+            except Exception:
+                return False
+
+            if result is not None and result.get("abort"):
+                return False
+
+            if result is not None:
+                if "extra_query" in result:
+                    self._extra_query = result["extra_query"]
+                if "extra_headers" in result:
+                    self._extra_headers = result["extra_headers"]
+
+            log.info(
+                "Reconnecting to WebSocket API (attempt %d/%d) after %.1fs delay",
+                attempt,
+                self._max_retries,
+                delay,
+            )
+            time.sleep(delay)
+
+            if self._intentionally_closed:
+                return False
+
+            try:
+                self._connection = self._make_ws(self._extra_query, self._extra_headers)
+                log.info("Reconnected to WebSocket API")
+                return True
+            except Exception:
+                pass
+
+        return False
 
 
 class TTSResourceConnectionManager:
@@ -962,12 +1181,20 @@ class TTSResourceConnectionManager:
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
     ) -> None:
         self.__client = client
         self.__connection: TTSResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
+        self.__on_reconnecting = on_reconnecting
+        self.__max_retries = max_retries
+        self.__initial_delay = initial_delay
+        self.__max_delay = max_delay
 
     def __enter__(self) -> TTSResourceConnection:
         """
@@ -982,6 +1209,24 @@ class TTSResourceConnectionManager:
         connection.close()
         ```
         """
+        ws = self._connect_ws(self.__extra_query, self.__extra_headers)
+
+        self.__connection = TTSResourceConnection(
+            ws,
+            make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
+            on_reconnecting=self.__on_reconnecting,
+            max_retries=self.__max_retries,
+            initial_delay=self.__initial_delay,
+            max_delay=self.__max_delay,
+            extra_query=self.__extra_query,
+            extra_headers=self.__extra_headers,
+        )
+
+        return self.__connection
+
+    enter = __enter__
+
+    def _connect_ws(self, extra_query: Query, extra_headers: Headers) -> WebSocketConnection:
         try:
             from websockets.sync.client import connect
         except ImportError as exc:
@@ -990,30 +1235,24 @@ class TTSResourceConnectionManager:
         url = self._prepare_url().copy_with(
             params={
                 **self.__client.base_url.params,
-                **self.__extra_query,
+                **extra_query,
             },
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
             log.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = TTSResourceConnection(
-            connect(
-                str(url),
-                user_agent_header=self.__client.user_agent,
-                additional_headers=_merge_mappings(
-                    {
-                        **self.__client.auth_headers,
-                    },
-                    self.__extra_headers,
-                ),
-                **self.__websocket_connection_options,
-            )
+        return connect(
+            str(url),
+            user_agent_header=self.__client.user_agent,
+            additional_headers=_merge_mappings(
+                {
+                    **self.__client.auth_headers,
+                },
+                extra_headers,
+            ),
+            **self.__websocket_connection_options,
         )
-
-        return self.__connection
-
-    enter = __enter__
 
     def _prepare_url(self) -> httpx.URL:
         if self.__client.websocket_base_url is not None:
