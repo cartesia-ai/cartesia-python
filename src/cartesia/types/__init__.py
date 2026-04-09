@@ -33,6 +33,10 @@ from .stt_transcribe_params import SttTranscribeParams as SttTranscribeParams
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
+from .websocket_reconnection import (
+    ReconnectingEvent as ReconnectingEvent,
+    ReconnectingOverrides as ReconnectingOverrides,
+)
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .generation_config_param import GenerationConfigParam as GenerationConfigParam
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
