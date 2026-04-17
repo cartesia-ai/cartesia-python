@@ -22,8 +22,9 @@ from ..types import (
     tts_generate_params,
     tts_generate_sse_params,
 )
+from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
-from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
+from .._utils import extract_files, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._models import construct_type_unchecked
 from .._resource import SyncAPIResource, AsyncAPIResource
@@ -420,7 +421,7 @@ class TTSResource(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "language": language,
                 "left_audio": left_audio,
@@ -429,7 +430,8 @@ class TTSResource(SyncAPIResource):
                 "right_audio": right_audio,
                 "transcript": transcript,
                 "voice_id": voice_id,
-            }
+            },
+            [["left_audio"], ["right_audio"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["left_audio"], ["right_audio"]])
         # It should be noted that the actual Content-Type header that will be
@@ -821,7 +823,7 @@ class AsyncTTSResource(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "language": language,
                 "left_audio": left_audio,
@@ -830,7 +832,8 @@ class AsyncTTSResource(AsyncAPIResource):
                 "right_audio": right_audio,
                 "transcript": transcript,
                 "voice_id": voice_id,
-            }
+            },
+            [["left_audio"], ["right_audio"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["left_audio"], ["right_audio"]])
         # It should be noted that the actual Content-Type header that will be

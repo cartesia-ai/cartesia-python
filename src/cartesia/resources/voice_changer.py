@@ -13,8 +13,9 @@ from ..types import (
     voice_changer_change_voice_sse_params,
     voice_changer_change_voice_bytes_params,
 )
+from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
-from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
+from .._utils import extract_files, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -94,7 +95,7 @@ class VoiceChangerResource(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "clip": clip,
                 "output_format_bit_rate": output_format_bit_rate,
@@ -102,7 +103,8 @@ class VoiceChangerResource(SyncAPIResource):
                 "output_format_encoding": output_format_encoding,
                 "output_format_sample_rate": output_format_sample_rate,
                 "voice_id": voice_id,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
@@ -152,7 +154,7 @@ class VoiceChangerResource(SyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "clip": clip,
                 "output_format_bit_rate": output_format_bit_rate,
@@ -160,7 +162,8 @@ class VoiceChangerResource(SyncAPIResource):
                 "output_format_encoding": output_format_encoding,
                 "output_format_sample_rate": output_format_sample_rate,
                 "voice_id": voice_id,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
@@ -234,7 +237,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "clip": clip,
                 "output_format_bit_rate": output_format_bit_rate,
@@ -242,7 +245,8 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
                 "output_format_encoding": output_format_encoding,
                 "output_format_sample_rate": output_format_sample_rate,
                 "voice_id": voice_id,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
@@ -294,7 +298,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
           timeout: Override the client-level default timeout for this request, in seconds
         """
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "clip": clip,
                 "output_format_bit_rate": output_format_bit_rate,
@@ -302,7 +306,8 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
                 "output_format_encoding": output_format_encoding,
                 "output_format_sample_rate": output_format_sample_rate,
                 "voice_id": voice_id,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
