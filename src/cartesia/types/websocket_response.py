@@ -130,19 +130,19 @@ class Timestamps(BaseModel):
 
 
 class Error(BaseModel):
-    context_id: str
+    done: bool
+
+    type: Literal["error"]
+
+    context_id: Optional[str] = None
     """A unique identifier for the context.
 
     You can use any unique identifier, like a UUID or human ID.
     """
 
-    done: bool
+    error: Optional[str] = None
 
-    error: str
-
-    status_code: int
-
-    type: Literal["error"]
+    status_code: Optional[int] = None
 
 
 class PhonemeTimestampsPhonemeTimestamps(BaseModel):
