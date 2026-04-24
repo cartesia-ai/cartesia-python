@@ -1079,8 +1079,8 @@ class AsyncTTSResourceConnection:
                 raw = await self._connection.recv(decode=False)
                 log.debug("Received websocket message: %s", raw)
                 event = self.parse_event(raw)
-                event_ctx = event.context_id if hasattr(event, "context_id") else None
-                if event_ctx is not None and event_ctx in self._context_queues:
+                event_ctx = event.context_id
+                if event_ctx in self._context_queues:
                     await self._context_queues[event_ctx].put(event)
                 else:
                     log.debug("Received event for unregistered context %s", event_ctx)
@@ -2183,7 +2183,6 @@ class WebSocketContext:
         from websockets.exceptions import ConnectionClosedOK
 
         my_queue = self._connection._context_queues.get(self._context_id)
-        done = False
 
         try:
             while True:
@@ -2192,8 +2191,9 @@ class WebSocketContext:
                     try:
                         event = my_queue.get_nowait()
                         yield event
-                        if event.type in ("done", "error"):
-                            done = True
+                        if event.type == "done":
+                            return
+                        if event.type == "error" and not (hasattr(event, 'done') and event.done == False):
                             return
                         continue
                     except queue.Empty:
@@ -2204,41 +2204,21 @@ class WebSocketContext:
                     raw = self._connection.recv_bytes(timeout=self._timeout)
                     event = self._connection.parse_event(raw)
                 except ConnectionClosedOK:
-                    done = True
                     return
-                except TimeoutError:
-                    done = True
-                    raise
 
                 # 3. Route the event.
-                event_ctx = event.context_id if hasattr(event, "context_id") else None
+                event_ctx = event.context_id
 
-                if event_ctx == self._context_id:
-                    yield event
-                    if event.type in ("done", "error"):
-                        done = True
-                        return
-                elif event_ctx is not None and event_ctx in self._connection._context_queues:
+                if event_ctx != self._context_id and event_ctx in self._connection._context_queues:
                     self._connection._context_queues[event_ctx].put(event)
-                elif not hasattr(event, "context_id") and event.type in ("done", "error"):
-                    # Global events without context_id
-                    yield event
-                    if event.type in ("done", "error"):
-                        done = True
-                        return
                 else:
-                    # Unregistered context — yield for backwards compat
                     yield event
                     if event.type == "done":
-                        done = True
+                        return
+                    if event.type == "error" and not (hasattr(event, 'done') and event.done == False):
                         return
         finally:
-            # Only unregister the queue if the context completed.  If the
-            # consumer exited early (break / cancel), keep the queue so
-            # future events for this context_id are absorbed rather than
-            # leaking into other contexts via the fallback path.
-            if done:
-                self._connection._context_queues.pop(self._context_id, None)
+            self._connection._context_queues.pop(self._context_id, None)
 
 
 class AsyncWebSocketContext:
@@ -2417,26 +2397,20 @@ class AsyncWebSocketContext:
         if my_queue is None:
             return
 
-        done = False
-
         try:
             while True:
-                try:
-                    if self._timeout is not None:
-                        event = await _asyncio.wait_for(my_queue.get(), timeout=self._timeout)
-                    else:
-                        event = await my_queue.get()
-                except TimeoutError:
-                    done = True
-                    raise
+                if self._timeout is not None:
+                    event = await _asyncio.wait_for(my_queue.get(), timeout=self._timeout)
+                else:
+                    event = await my_queue.get()
 
                 yield event
-                if event.type in ("done", "error"):
-                    done = True
+                if event.type == "done":
+                    return
+                if event.type == "error" and not (hasattr(event, 'done') and event.done == False):
                     return
         finally:
-            if done:
-                self._connection._context_queues.pop(self._context_id, None)
+            self._connection._context_queues.pop(self._context_id, None)
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):

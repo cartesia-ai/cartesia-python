@@ -204,13 +204,13 @@ def process_timestamps(timestamps: object) -> None:
 def tts_websocket_basic(client: Cartesia) -> None:
     """Basic WebSocket usage with websocket_connect() context manager."""
     with client.tts.websocket_connect() as connection:
-        connection.send(
-            {
-                "model_id": "sonic-3",
-                "transcript": "Hello, world!",
-                "voice": {"mode": "id", "id": "voice-id"},
-                "output_format": {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            }
+        ctx = connection.context()
+        ctx.send(
+            model_id="sonic-3",
+            transcript="Hello, world!",
+            voice={"mode": "id", "id": "voice-id"},
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            _continue=False,
         )
 
         import datetime
@@ -447,13 +447,13 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
 def tts_websocket_response_handling(client: Cartesia) -> None:
     """WebSocket response type handling."""
     with client.tts.websocket_connect() as connection:
-        connection.send(
-            {
-                "model_id": "sonic-3",
-                "transcript": "Hello, world!",
-                "voice": {"mode": "id", "id": "voice-id"},
-                "output_format": {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            }
+        ctx = connection.context()
+        ctx.send(
+            model_id="sonic-3",
+            transcript="Hello, world!",
+            voice={"mode": "id", "id": "voice-id"},
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            _continue=False,
         )
 
         import datetime
