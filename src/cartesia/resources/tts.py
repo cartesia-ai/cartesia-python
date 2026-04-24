@@ -127,10 +127,9 @@ class TTSResource(SyncAPIResource):
           save: Whether to save the generated audio file. When true, the response will include a
               `Cartesia-File-ID` header.
 
-          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
-              to `normal`. This feature is experimental and may not work for all voices.
-              Influences the speed of the generated speech. Faster speeds may reduce
-              hallucination rate.
+          speed: Speed setting for the model. Defaults to `normal`. This feature is experimental
+              and may not work for all voices. Influences the speed of the generated speech.
+              Faster speeds may reduce hallucination rate.
 
           extra_headers: Send extra headers
 
@@ -215,10 +214,9 @@ class TTSResource(SyncAPIResource):
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
 
-          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
-              to `normal`. This feature is experimental and may not work for all voices.
-              Influences the speed of the generated speech. Faster speeds may reduce
-              hallucination rate.
+          speed: Speed setting for the model. Defaults to `normal`. This feature is experimental
+              and may not work for all voices. Influences the speed of the generated speech.
+              Faster speeds may reduce hallucination rate.
 
           use_normalized_timestamps: Whether to use normalized timestamps (True) or original timestamps (False).
 
@@ -427,10 +425,9 @@ class AsyncTTSResource(AsyncAPIResource):
           save: Whether to save the generated audio file. When true, the response will include a
               `Cartesia-File-ID` header.
 
-          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
-              to `normal`. This feature is experimental and may not work for all voices.
-              Influences the speed of the generated speech. Faster speeds may reduce
-              hallucination rate.
+          speed: Speed setting for the model. Defaults to `normal`. This feature is experimental
+              and may not work for all voices. Influences the speed of the generated speech.
+              Faster speeds may reduce hallucination rate.
 
           extra_headers: Send extra headers
 
@@ -515,10 +512,9 @@ class AsyncTTSResource(AsyncAPIResource):
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
 
-          speed: Use `generation_config.speed` for sonic-3. Speed setting for the model. Defaults
-              to `normal`. This feature is experimental and may not work for all voices.
-              Influences the speed of the generated speech. Faster speeds may reduce
-              hallucination rate.
+          speed: Speed setting for the model. Defaults to `normal`. This feature is experimental
+              and may not work for all voices. Influences the speed of the generated speech.
+              Faster speeds may reduce hallucination rate.
 
           use_normalized_timestamps: Whether to use normalized timestamps (True) or original timestamps (False).
 

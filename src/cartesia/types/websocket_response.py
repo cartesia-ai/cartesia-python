@@ -20,6 +20,12 @@ __all__ = [
 
 
 class Chunk(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     data: str
 
     done: bool
@@ -29,15 +35,6 @@ class Chunk(BaseModel):
     step_time: float
 
     type: Literal["chunk"]
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
-    """
 
     flush_id: Optional[int] = None
     """
@@ -49,6 +46,12 @@ class Chunk(BaseModel):
 
 
 class FlushDone(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     done: bool
 
     flush_done: bool
@@ -65,31 +68,19 @@ class FlushDone(BaseModel):
 
     type: Literal["flush_done"]
 
-    context_id: Optional[str] = None
+
+class Done(BaseModel):
+    context_id: str
     """A unique identifier for the context.
 
     You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
     """
 
-
-class Done(BaseModel):
     done: bool
 
     status_code: int
 
     type: Literal["done"]
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
-    """
 
 
 class TimestampsWordTimestamps(BaseModel):
@@ -101,20 +92,17 @@ class TimestampsWordTimestamps(BaseModel):
 
 
 class Timestamps(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     done: bool
 
     status_code: int
 
     type: Literal["timestamps"]
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
-    """
 
     flush_id: Optional[int] = None
     """
@@ -128,6 +116,12 @@ class Timestamps(BaseModel):
 
 
 class Error(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     done: bool
 
     error: str
@@ -135,15 +129,6 @@ class Error(BaseModel):
     status_code: int
 
     type: Literal["error"]
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
-    """
 
 
 class PhonemeTimestampsPhonemeTimestamps(BaseModel):
@@ -155,20 +140,17 @@ class PhonemeTimestampsPhonemeTimestamps(BaseModel):
 
 
 class PhonemeTimestamps(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     done: bool
 
     status_code: int
 
     type: Literal["phoneme_timestamps"]
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
-    """
 
     flush_id: Optional[int] = None
     """
