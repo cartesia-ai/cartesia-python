@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from typing import IO, Optional
+from typing import IO
 
 from cartesia import (
     AsyncCartesia,
@@ -116,13 +116,13 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
 async def tts_websocket_basic_async(client: AsyncCartesia) -> None:
     """Async WebSocket usage with websocket_connect()."""
     async with client.tts.websocket_connect() as connection:
-        await connection.send(
-            {
-                "model_id": "sonic-3",
-                "transcript": "Hello, world!",
-                "voice": {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-                "output_format": {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            }
+        ctx = connection.context()
+        await ctx.send(
+            model_id="sonic-3",
+            transcript="Hello, world!",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            _continue=False,
         )
 
         filename = f"tts_ws_basic_async_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pcm"
@@ -403,8 +403,8 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
         send_tasks = [asyncio.create_task(send_transcript(i, ctx)) for i, ctx in enumerate(contexts)]
 
         # Receiver loop
-        files: dict[Optional[str], IO[bytes]] = {}
-        active_contexts: set[Optional[str]] = {ctx._context_id for ctx in contexts}
+        files: dict[str, IO[bytes]] = {}
+        active_contexts: set[str] = {ctx._context_id for ctx in contexts}
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         print("Starting receiver loop...")
