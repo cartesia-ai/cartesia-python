@@ -30,10 +30,7 @@ by [websockets](https://websockets.readthedocs.io/en/stable/).
 
 ## Documentation
 
-The REST API documentation can be found on <http://docs.cartesia.ai/>. The full API of this library can be found in [api.md](api.md).
-
-> [!NOTE]
-> **Migrating from 2.x?** The 3.x series maintains backwards compatibility with the method signatures from 2.x. To use the latest helpers, see [MIGRATING.md](MIGRATING.md).
+The REST API documentation can be found on [docs.cartesia.ai](https://docs.cartesia.ai). The full API of this library can be found in [api.md](api.md).
 
 ## Installation
 

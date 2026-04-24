@@ -67,7 +67,7 @@ class TTSGenerateSseParams(TypedDict, total=False):
     """
 
     speed: ModelSpeed
-    """Use `generation_config.speed` for sonic-3. Speed setting for the model.
+    """Speed setting for the model.
 
     Defaults to `normal`. This feature is experimental and may not work for all
     voices. Influences the speed of the generated speech. Faster speeds may reduce
