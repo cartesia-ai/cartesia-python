@@ -76,6 +76,8 @@ class VoiceChangerResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BinaryAPIResponse:
         """
+        Voice Changer (Bytes).
+
         Takes an audio file of speech, and returns an audio file of speech spoken with
         the same intonation, but with a different voice.
 
@@ -218,6 +220,8 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncBinaryAPIResponse:
         """
+        Voice Changer (Bytes).
+
         Takes an audio file of speech, and returns an audio file of speech spoken with
         the same intonation, but with a different voice.
 
