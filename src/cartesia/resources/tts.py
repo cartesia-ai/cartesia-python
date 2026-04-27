@@ -110,7 +110,13 @@ class TTSResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BinaryAPIResponse:
         """
-        Text to Speech (Bytes)
+        Text-to-Speech (Bytes).
+
+        The simplest way to stream generated audio.
+
+        See
+        [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+        for details.
 
         Args:
           model_id: The ID of the model to use for the generation. See
@@ -190,7 +196,17 @@ class TTSResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> SSEEventStream:
         """
-        Text to Speech (SSE)
+        Text-to-Speech (SSE).
+
+        Supports:
+
+        - Streaming
+        - Timestamps
+        - context_id without transcript buffering
+
+        See
+        [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+        for details.
 
         Args:
           model_id: The ID of the model to use for the generation. See
@@ -378,9 +394,10 @@ class TTSResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> BinaryAPIResponse:
-        """Generate audio that smoothly connects two existing audio segments.
+        """
+        Infill (Bytes).
 
-        This is
+        Generate audio that smoothly connects two existing audio segments. This is
         useful for inserting new speech between existing speech segments while
         maintaining natural transitions.
 
@@ -510,7 +527,13 @@ class AsyncTTSResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncBinaryAPIResponse:
         """
-        Text to Speech (Bytes)
+        Text-to-Speech (Bytes).
+
+        The simplest way to stream generated audio.
+
+        See
+        [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+        for details.
 
         Args:
           model_id: The ID of the model to use for the generation. See
@@ -590,7 +613,17 @@ class AsyncTTSResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncSSEEventStream:
         """
-        Text to Speech (SSE)
+        Text-to-Speech (SSE).
+
+        Supports:
+
+        - Streaming
+        - Timestamps
+        - context_id without transcript buffering
+
+        See
+        [Compare TTS Endpoints](https://docs.cartesia.ai/use-the-api/compare-tts-endpoints)
+        for details.
 
         Args:
           model_id: The ID of the model to use for the generation. See
@@ -778,9 +811,10 @@ class AsyncTTSResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncBinaryAPIResponse:
-        """Generate audio that smoothly connects two existing audio segments.
+        """
+        Infill (Bytes).
 
-        This is
+        Generate audio that smoothly connects two existing audio segments. This is
         useful for inserting new speech between existing speech segments while
         maintaining natural transitions.
 
