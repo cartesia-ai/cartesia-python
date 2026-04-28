@@ -79,13 +79,13 @@ class TestVoiceChanger:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_change_voice_sse(self, client: Cartesia) -> None:
-        voice_changer = client.voice_changer.change_voice_sse()
-        assert voice_changer is None
+        voice_changer_stream = client.voice_changer.change_voice_sse()
+        voice_changer_stream.response.close()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_change_voice_sse_with_all_params(self, client: Cartesia) -> None:
-        voice_changer = client.voice_changer.change_voice_sse(
+        voice_changer_stream = client.voice_changer.change_voice_sse(
             clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
@@ -93,17 +93,16 @@ class TestVoiceChanger:
             output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
-        assert voice_changer is None
+        voice_changer_stream.response.close()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_change_voice_sse(self, client: Cartesia) -> None:
         response = client.voice_changer.with_raw_response.change_voice_sse()
 
-        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice_changer = response.parse()
-        assert voice_changer is None
+        stream = response.parse()
+        stream.close()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -112,8 +111,8 @@ class TestVoiceChanger:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            voice_changer = response.parse()
-            assert voice_changer is None
+            stream = response.parse()
+            stream.close()
 
         assert cast(Any, response.is_closed) is True
 
@@ -183,13 +182,13 @@ class TestAsyncVoiceChanger:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_change_voice_sse(self, async_client: AsyncCartesia) -> None:
-        voice_changer = await async_client.voice_changer.change_voice_sse()
-        assert voice_changer is None
+        voice_changer_stream = await async_client.voice_changer.change_voice_sse()
+        await voice_changer_stream.response.aclose()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_change_voice_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
-        voice_changer = await async_client.voice_changer.change_voice_sse(
+        voice_changer_stream = await async_client.voice_changer.change_voice_sse(
             clip=b"Example data",
             output_format_bit_rate=0,
             output_format_container="raw",
@@ -197,17 +196,16 @@ class TestAsyncVoiceChanger:
             output_format_sample_rate=8000,
             voice_id="voice[id]",
         )
-        assert voice_changer is None
+        await voice_changer_stream.response.aclose()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_change_voice_sse(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voice_changer.with_raw_response.change_voice_sse()
 
-        assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
-        voice_changer = await response.parse()
-        assert voice_changer is None
+        stream = await response.parse()
+        await stream.close()
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -216,7 +214,7 @@ class TestAsyncVoiceChanger:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
-            voice_changer = await response.parse()
-            assert voice_changer is None
+            stream = await response.parse()
+            await stream.close()
 
         assert cast(Any, response.is_closed) is True

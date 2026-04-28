@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Mapping, Optional, cast
+from typing import Any, Mapping, Optional, cast
 from typing_extensions import Literal
 
 import httpx
@@ -14,7 +14,7 @@ from ..types import (
     voice_changer_change_voice_bytes_params,
 )
 from .._files import deepcopy_with_paths
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
+from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
@@ -32,9 +32,11 @@ from .._response import (
     async_to_custom_raw_response_wrapper,
     async_to_custom_streamed_response_wrapper,
 )
+from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
 from ..types.raw_encoding import RawEncoding
 from ..types.output_format_container import OutputFormatContainer
+from ..types.voice_changer_sse_event import VoiceChangerSSEEvent
 
 __all__ = ["VoiceChangerResource", "AsyncVoiceChangerResource"]
 
@@ -138,7 +140,7 @@ class VoiceChangerResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> Stream[VoiceChangerSSEEvent]:
         """
         Voice Changer (SSE)
 
@@ -155,7 +157,7 @@ class VoiceChangerResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/event-stream", **(extra_headers or {})}
         body = deepcopy_with_paths(
             {
                 "clip": clip,
@@ -171,15 +173,17 @@ class VoiceChangerResource(SyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/voice-changer/sse",
-            body=maybe_transform(body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSseParams),
+            body=maybe_transform(body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSSEParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=cast(Any, VoiceChangerSSEEvent),  # Union types cannot be passed in as arguments in the type system
+            stream=True,
+            stream_cls=Stream[VoiceChangerSSEEvent],
         )
 
 
@@ -284,7 +288,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncStream[VoiceChangerSSEEvent]:
         """
         Voice Changer (SSE)
 
@@ -301,7 +305,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/event-stream", **(extra_headers or {})}
         body = deepcopy_with_paths(
             {
                 "clip": clip,
@@ -317,17 +321,19 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         # It should be noted that the actual Content-Type header that will be
         # sent to the server will contain a `boundary` parameter, e.g.
         # multipart/form-data; boundary=---abc--
-        extra_headers["Content-Type"] = "multipart/form-data"
+        extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/voice-changer/sse",
             body=await async_maybe_transform(
-                body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSseParams
+                body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSSEParams
             ),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=cast(Any, VoiceChangerSSEEvent),  # Union types cannot be passed in as arguments in the type system
+            stream=True,
+            stream_cls=AsyncStream[VoiceChangerSSEEvent],
         )
 
 

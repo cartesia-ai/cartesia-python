@@ -35,6 +35,7 @@ class Chunk(BaseModel):
     status_code: int
 
     step_time: float
+    """Server-side processing time for this chunk in milliseconds"""
 
     type: Literal["chunk"]
 

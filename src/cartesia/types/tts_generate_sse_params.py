@@ -11,10 +11,10 @@ from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
 
-__all__ = ["TTSGenerateSseParams", "OutputFormat"]
+__all__ = ["TTSGenerateSSEParams", "OutputFormat"]
 
 
-class TTSGenerateSseParams(TypedDict, total=False):
+class TTSGenerateSSEParams(TypedDict, total=False):
     model_id: Required[str]
     """The ID of the model to use for the generation.
 
