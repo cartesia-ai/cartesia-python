@@ -140,9 +140,18 @@ class Error(BaseModel):
     You can use any unique identifier, like a UUID or human ID.
     """
 
-    error: Optional[str] = None
+    doc_url: Optional[str] = None
+
+    error_code: Optional[str] = None
+
+    message: Optional[str] = None
+
+    request_id: Optional[str] = None
+    """A unique identifier for the network connection."""
 
     status_code: Optional[int] = None
+
+    title: Optional[str] = None
 
 
 class PhonemeTimestampsPhonemeTimestamps(BaseModel):
