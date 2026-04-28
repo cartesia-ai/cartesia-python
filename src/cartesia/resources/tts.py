@@ -21,7 +21,7 @@ from ..types import (
     tts_generate_sse_params,
 )
 from .._files import deepcopy_with_paths
-from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
+from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._models import construct_type_unchecked
@@ -40,11 +40,13 @@ from .._response import (
     async_to_custom_raw_response_wrapper,
     async_to_custom_streamed_response_wrapper,
 )
+from .._streaming import Stream, AsyncStream
 from .._exceptions import CartesiaError, WebSocketConnectionClosedError
 from .._send_queue import SendQueue
 from .._base_client import _merge_mappings, make_request_options
 from .._event_handler import EventHandlerRegistry
 from ..types.model_speed import ModelSpeed
+from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import Error, WebsocketResponse
 from ..types.voice_specifier_param import VoiceSpecifierParam
@@ -189,7 +191,7 @@ class TTSResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> Stream[TTSSSEEvent]:
         """
         Text-to-Speech (SSE).
 
@@ -244,7 +246,7 @@ class TTSResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/event-stream", **(extra_headers or {})}
         return self._post(
             "/tts/sse",
             body=maybe_transform(
@@ -262,12 +264,14 @@ class TTSResource(SyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tts_generate_sse_params.TTSGenerateSseParams,
+                tts_generate_sse_params.TTSGenerateSSEParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=cast(Any, TTSSSEEvent),  # Union types cannot be passed in as arguments in the type system
+            stream=True,
+            stream_cls=Stream[TTSSSEEvent],
         )
 
     def infill(
@@ -504,7 +508,7 @@ class AsyncTTSResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncStream[TTSSSEEvent]:
         """
         Text-to-Speech (SSE).
 
@@ -559,7 +563,7 @@ class AsyncTTSResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "text/event-stream", **(extra_headers or {})}
         return await self._post(
             "/tts/sse",
             body=await async_maybe_transform(
@@ -577,12 +581,14 @@ class AsyncTTSResource(AsyncAPIResource):
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
                 },
-                tts_generate_sse_params.TTSGenerateSseParams,
+                tts_generate_sse_params.TTSGenerateSSEParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=cast(Any, TTSSSEEvent),  # Union types cannot be passed in as arguments in the type system
+            stream=True,
+            stream_cls=AsyncStream[TTSSSEEvent],
         )
 
     async def infill(

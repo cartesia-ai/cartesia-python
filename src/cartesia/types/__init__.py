@@ -8,6 +8,7 @@ from .fine_tune import FineTune as FineTune
 from .model_speed import ModelSpeed as ModelSpeed
 from .raw_encoding import RawEncoding as RawEncoding
 from .agent_summary import AgentSummary as AgentSummary
+from .tts_sse_event import TTSSSEEvent as TTSSSEEvent
 from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_get_params import VoiceGetParams as VoiceGetParams
@@ -43,7 +44,8 @@ from .output_format_container import OutputFormatContainer as OutputFormatContai
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
-from .tts_generate_sse_params import TTSGenerateSseParams as TTSGenerateSseParams
+from .tts_generate_sse_params import TTSGenerateSSEParams as TTSGenerateSSEParams
+from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
@@ -56,7 +58,7 @@ from .pronunciation_dict_list_params import PronunciationDictListParams as Pronu
 from .pronunciation_dict_create_params import PronunciationDictCreateParams as PronunciationDictCreateParams
 from .pronunciation_dict_update_params import PronunciationDictUpdateParams as PronunciationDictUpdateParams
 from .agent_list_phone_numbers_response import AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse
-from .voice_changer_change_voice_sse_params import VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams
+from .voice_changer_change_voice_sse_params import VoiceChangerChangeVoiceSSEParams as VoiceChangerChangeVoiceSSEParams
 from .voice_changer_change_voice_bytes_params import (
     VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
 )

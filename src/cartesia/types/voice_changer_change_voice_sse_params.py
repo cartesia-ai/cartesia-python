@@ -10,10 +10,10 @@ from .._utils import PropertyInfo
 from .raw_encoding import RawEncoding
 from .output_format_container import OutputFormatContainer
 
-__all__ = ["VoiceChangerChangeVoiceSseParams"]
+__all__ = ["VoiceChangerChangeVoiceSSEParams"]
 
 
-class VoiceChangerChangeVoiceSseParams(TypedDict, total=False):
+class VoiceChangerChangeVoiceSSEParams(TypedDict, total=False):
     clip: FileTypes
 
     output_format_bit_rate: Annotated[Optional[int], PropertyInfo(alias="output_format[bit_rate]")]
