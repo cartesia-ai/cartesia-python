@@ -1,18 +1,18 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import List, Union, Optional
+from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
 from .._utils import PropertyInfo
 from .._models import BaseModel
+from .word_timestamps import WordTimestamps
+from .phoneme_timestamps import PhonemeTimestamps
 
 __all__ = [
     "TTSSSEEvent",
     "TTSSSEChunkEvent",
     "TTSSSETimestampsEvent",
-    "TTSSSETimestampsEventWordTimestamps",
     "TTSSSEPhonemeTimestampsEvent",
-    "TTSSSEPhonemeTimestampsEventPhonemeTimestamps",
     "TTSSSEDoneEvent",
     "TTSSSEErrorEvent",
 ]
@@ -43,19 +43,6 @@ class TTSSSEChunkEvent(BaseModel):
     """The context ID echoed back from the request, if one was provided."""
 
 
-class TTSSSETimestampsEventWordTimestamps(BaseModel):
-    """Word-level timing information."""
-
-    end: List[float]
-    """End times in seconds for each word."""
-
-    start: List[float]
-    """Start times in seconds for each word."""
-
-    words: List[str]
-    """List of words in order."""
-
-
 class TTSSSETimestampsEvent(BaseModel):
     """Word-level timing information."""
 
@@ -71,24 +58,11 @@ class TTSSSETimestampsEvent(BaseModel):
     type: Literal["timestamps"]
     """Event type identifier."""
 
-    word_timestamps: TTSSSETimestampsEventWordTimestamps
+    word_timestamps: WordTimestamps
     """Word-level timing information."""
 
     context_id: Optional[str] = None
     """The context ID echoed back from the request, if one was provided."""
-
-
-class TTSSSEPhonemeTimestampsEventPhonemeTimestamps(BaseModel):
-    """Phoneme-level timing information."""
-
-    end: List[float]
-    """End times in seconds for each phoneme."""
-
-    phonemes: List[str]
-    """List of phonemes in order."""
-
-    start: List[float]
-    """Start times in seconds for each phoneme."""
 
 
 class TTSSSEPhonemeTimestampsEvent(BaseModel):
@@ -100,7 +74,7 @@ class TTSSSEPhonemeTimestampsEvent(BaseModel):
     Always `false` for phoneme_timestamps events.
     """
 
-    phoneme_timestamps: TTSSSEPhonemeTimestampsEventPhonemeTimestamps
+    phoneme_timestamps: PhonemeTimestamps
     """Phoneme-level timing information."""
 
     status_code: int
