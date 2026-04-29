@@ -7,12 +7,7 @@ from typing_extensions import Literal
 
 import httpx
 
-from ..types import (
-    RawEncoding,
-    OutputFormatContainer,
-    voice_changer_change_voice_sse_params,
-    voice_changer_change_voice_bytes_params,
-)
+from ..types import RawEncoding, OutputFormatContainer, voice_changer_generate_params, voice_changer_generate_sse_params
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, async_maybe_transform
@@ -61,7 +56,7 @@ class VoiceChangerResource(SyncAPIResource):
         """
         return VoiceChangerResourceWithStreamingResponse(self)
 
-    def change_voice_bytes(
+    def generate(
         self,
         *,
         clip: FileTypes | Omit = omit,
@@ -117,7 +112,7 @@ class VoiceChangerResource(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/voice-changer/bytes",
-            body=maybe_transform(body, voice_changer_change_voice_bytes_params.VoiceChangerChangeVoiceBytesParams),
+            body=maybe_transform(body, voice_changer_generate_params.VoiceChangerGenerateParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -125,7 +120,7 @@ class VoiceChangerResource(SyncAPIResource):
             cast_to=BinaryAPIResponse,
         )
 
-    def change_voice_sse(
+    def generate_sse(
         self,
         *,
         clip: FileTypes | Omit = omit,
@@ -176,7 +171,7 @@ class VoiceChangerResource(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/voice-changer/sse",
-            body=maybe_transform(body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSSEParams),
+            body=maybe_transform(body, voice_changer_generate_sse_params.VoiceChangerGenerateSSEParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -207,7 +202,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         """
         return AsyncVoiceChangerResourceWithStreamingResponse(self)
 
-    async def change_voice_bytes(
+    async def generate(
         self,
         *,
         clip: FileTypes | Omit = omit,
@@ -263,9 +258,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/voice-changer/bytes",
-            body=await async_maybe_transform(
-                body, voice_changer_change_voice_bytes_params.VoiceChangerChangeVoiceBytesParams
-            ),
+            body=await async_maybe_transform(body, voice_changer_generate_params.VoiceChangerGenerateParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -273,7 +266,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
             cast_to=AsyncBinaryAPIResponse,
         )
 
-    async def change_voice_sse(
+    async def generate_sse(
         self,
         *,
         clip: FileTypes | Omit = omit,
@@ -324,9 +317,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/voice-changer/sse",
-            body=await async_maybe_transform(
-                body, voice_changer_change_voice_sse_params.VoiceChangerChangeVoiceSSEParams
-            ),
+            body=await async_maybe_transform(body, voice_changer_generate_sse_params.VoiceChangerGenerateSSEParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
@@ -341,12 +332,12 @@ class VoiceChangerResourceWithRawResponse:
     def __init__(self, voice_changer: VoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = to_custom_raw_response_wrapper(
-            voice_changer.change_voice_bytes,
+        self.generate = to_custom_raw_response_wrapper(
+            voice_changer.generate,
             BinaryAPIResponse,
         )
-        self.change_voice_sse = to_raw_response_wrapper(
-            voice_changer.change_voice_sse,
+        self.generate_sse = to_raw_response_wrapper(
+            voice_changer.generate_sse,
         )
 
 
@@ -354,12 +345,12 @@ class AsyncVoiceChangerResourceWithRawResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = async_to_custom_raw_response_wrapper(
-            voice_changer.change_voice_bytes,
+        self.generate = async_to_custom_raw_response_wrapper(
+            voice_changer.generate,
             AsyncBinaryAPIResponse,
         )
-        self.change_voice_sse = async_to_raw_response_wrapper(
-            voice_changer.change_voice_sse,
+        self.generate_sse = async_to_raw_response_wrapper(
+            voice_changer.generate_sse,
         )
 
 
@@ -367,12 +358,12 @@ class VoiceChangerResourceWithStreamingResponse:
     def __init__(self, voice_changer: VoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = to_custom_streamed_response_wrapper(
-            voice_changer.change_voice_bytes,
+        self.generate = to_custom_streamed_response_wrapper(
+            voice_changer.generate,
             StreamedBinaryAPIResponse,
         )
-        self.change_voice_sse = to_streamed_response_wrapper(
-            voice_changer.change_voice_sse,
+        self.generate_sse = to_streamed_response_wrapper(
+            voice_changer.generate_sse,
         )
 
 
@@ -380,10 +371,10 @@ class AsyncVoiceChangerResourceWithStreamingResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
         self._voice_changer = voice_changer
 
-        self.change_voice_bytes = async_to_custom_streamed_response_wrapper(
-            voice_changer.change_voice_bytes,
+        self.generate = async_to_custom_streamed_response_wrapper(
+            voice_changer.generate,
             AsyncStreamedBinaryAPIResponse,
         )
-        self.change_voice_sse = async_to_streamed_response_wrapper(
-            voice_changer.change_voice_sse,
+        self.generate_sse = async_to_streamed_response_wrapper(
+            voice_changer.generate_sse,
         )

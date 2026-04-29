@@ -371,6 +371,16 @@ class TTSResource(SyncAPIResource):
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
     ) -> TTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
+
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
         return TTSResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
@@ -688,6 +698,16 @@ class AsyncTTSResource(AsyncAPIResource):
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
     ) -> AsyncTTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
+
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
         return AsyncTTSResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
