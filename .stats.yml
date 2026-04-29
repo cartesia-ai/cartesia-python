@@ -1,4 +1,4 @@
 configured_endpoints: 50
-openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/cartesia-noahlt%2Fnoah-testing-671da86d133490e7b564e0efb4379a03d92df9af0eca89f3c725a08e1fe33ffd.yml
+openapi_spec_url: https://storage.googleapis.com/stainless-sdk-openapi-specs/cartesia-noahlt/noah-testing-671da86d133490e7b564e0efb4379a03d92df9af0eca89f3c725a08e1fe33ffd.yml
 openapi_spec_hash: f3bdc21987760f90b2b6c74e7d272c98
 config_hash: b73d924c60cc0269db56c0034fbfada3
