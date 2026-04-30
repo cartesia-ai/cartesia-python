@@ -1,3 +1,10 @@
+"""
+TTSResource.websocket() and AsyncTTSResource.websocket() implementation.
+
+.. deprecated::
+    Use contexts.py instead.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -9,18 +16,25 @@ from pydantic import BaseModel
 from ...types.voice_specifier_param import VoiceSpecifierParam
 
 if TYPE_CHECKING:
-    from ...resources.tts import (
-        TTSResourceConnection,
-        AsyncTTSResourceConnection,
-        TTSResourceConnectionManager,
-        AsyncTTSResourceConnectionManager,
+    from .connection_manager_3_0_2 import (
+        WebSocketContext,
+        AsyncWebSocketContext,
+        TTSResourceConnection_3_0_2,
+        AsyncTTSResourceConnection_3_0_2,
+        TTSResourceConnectionManager_3_0_2,
+        AsyncTTSResourceConnectionManager_3_0_2,
     )
 
 log: logging.Logger = logging.getLogger(__name__)
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):
-    """Output object for backward compatibility with v2 WebSocket response."""
+    """
+    Output object for backward compatibility with v2 WebSocket response.
+
+    .. deprecated::
+        Returned by :class:`BackcompatTTSResourceConnection` and :class:`AsyncBackcompatTTSResourceConnection`.
+    """
 
     audio: Optional[bytes] = None
     word_timestamps: Optional[Any] = None
@@ -31,11 +45,16 @@ class BackcompatWebSocketTtsOutput(BaseModel):
 
 
 class BackcompatTTSResourceConnection:
-    """Wrapper for TTSResourceConnection to provide v2-compatible API."""
+    """
+    Wrapper for TTSResourceConnection to provide v2-compatible API.
 
-    def __init__(self, manager: "TTSResourceConnectionManager"):
+    .. deprecated::
+        Use ``tts.create_context_manager()`` instead.
+    """
+
+    def __init__(self, manager: "TTSResourceConnectionManager_3_0_2"):
         self._manager = manager
-        self._connection: Optional["TTSResourceConnection"] = None
+        self._connection: Optional["TTSResourceConnection_3_0_2"] = None
 
     def connect(self) -> None:
         if self._connection is None:
@@ -141,11 +160,16 @@ class BackcompatTTSResourceConnection:
 
 
 class AsyncBackcompatTTSResourceConnection:
-    """Wrapper for AsyncTTSResourceConnection to provide v2-compatible API."""
+    """
+    Wrapper for AsyncTTSResourceConnection to provide v2-compatible API.
 
-    def __init__(self, manager: "AsyncTTSResourceConnectionManager"):
+    .. deprecated::
+        Use ``tts.create_context_manager()`` instead.
+    """
+
+    def __init__(self, manager: "AsyncTTSResourceConnectionManager_3_0_2"):
         self._manager = manager
-        self._connection: Optional["AsyncTTSResourceConnection"] = None
+        self._connection: Optional["AsyncTTSResourceConnection_3_0_2"] = None
 
     async def connect(self) -> None:
         if self._connection is None:
