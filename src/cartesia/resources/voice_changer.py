@@ -32,6 +32,7 @@ from .._base_client import make_request_options
 from ..types.raw_encoding import RawEncoding
 from ..types.output_format_container import OutputFormatContainer
 from ..types.voice_changer_sse_event import VoiceChangerSSEEvent
+from ..lib._voice_changer.change_voice_sse import sync_change_voice_sse, async_change_voice_sse
 
 __all__ = ["VoiceChangerResource", "AsyncVoiceChangerResource"]
 
@@ -181,6 +182,57 @@ class VoiceChangerResource(SyncAPIResource):
             stream_cls=Stream[VoiceChangerSSEEvent],
         )
 
+    change_voice_bytes = generate  # Alias for backward compatibility
+
+    def change_voice_sse(
+        self,
+        *,
+        clip: FileTypes | Omit = omit,
+        output_format_bit_rate: Optional[int] | Omit = omit,
+        output_format_container: OutputFormatContainer | Omit = omit,
+        output_format_encoding: Optional[RawEncoding] | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        voice_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> None:
+        """
+        Make a Voice Changer (SSE) request without any added response handling.
+
+        Deprecated: Use .generate_sse() to have events parsed and streamed for you.
+
+        Args:
+          output_format_bit_rate: Required for `mp3` containers.
+
+          output_format_encoding: Required for `raw` and `wav` containers.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+
+        return sync_change_voice_sse(
+            self,
+            clip=clip,
+            output_format_bit_rate=output_format_bit_rate,
+            output_format_container=output_format_container,
+            output_format_encoding=output_format_encoding,
+            output_format_sample_rate=output_format_sample_rate,
+            voice_id=voice_id,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+        )
+
 
 class AsyncVoiceChangerResource(AsyncAPIResource):
     @cached_property
@@ -325,6 +377,57 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
             cast_to=cast(Any, VoiceChangerSSEEvent),  # Union types cannot be passed in as arguments in the type system
             stream=True,
             stream_cls=AsyncStream[VoiceChangerSSEEvent],
+        )
+
+    change_voice_bytes = generate  # Alias for backward compatibility
+
+    async def change_voice_sse(
+        self,
+        *,
+        clip: FileTypes | Omit = omit,
+        output_format_bit_rate: Optional[int] | Omit = omit,
+        output_format_container: OutputFormatContainer | Omit = omit,
+        output_format_encoding: Optional[RawEncoding] | Omit = omit,
+        output_format_sample_rate: Literal[8000, 16000, 22050, 24000, 44100, 48000] | Omit = omit,
+        voice_id: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> None:
+        """
+        Make a Voice Changer (SSE) request without any added response handling.
+
+        Deprecated: Use .generate_sse() to have events parsed and streamed for you.
+
+        Args:
+          output_format_bit_rate: Required for `mp3` containers.
+
+          output_format_encoding: Required for `raw` and `wav` containers.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+
+        return await async_change_voice_sse(
+            self,
+            clip=clip,
+            output_format_bit_rate=output_format_bit_rate,
+            output_format_container=output_format_container,
+            output_format_encoding=output_format_encoding,
+            output_format_sample_rate=output_format_sample_rate,
+            voice_id=voice_id,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
         )
 
 

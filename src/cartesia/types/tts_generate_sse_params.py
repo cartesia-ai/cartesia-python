@@ -11,7 +11,7 @@ from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
 
-__all__ = ["TTSGenerateSSEParams", "OutputFormat"]
+__all__ = ["TTSGenerateSSEParams", "OutputFormat", "TTSGenerateSseParams"]
 
 
 class TTSGenerateSSEParams(TypedDict, total=False):
@@ -84,3 +84,6 @@ class OutputFormat(TypedDict, total=False):
     encoding: Required[RawEncoding]
 
     sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
+
+
+TTSGenerateSseParams = TTSGenerateSSEParams  # Alias for backward compatibility
