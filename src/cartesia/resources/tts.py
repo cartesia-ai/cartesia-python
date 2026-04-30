@@ -879,6 +879,8 @@ class TTSResourceWithRawResponse:
             BinaryAPIResponse,
         )
 
+        self.sse = self.generate_sse  # Alias for backward compatibility
+
 
 class AsyncTTSResourceWithRawResponse:
     def __init__(self, tts: AsyncTTSResource) -> None:
@@ -895,6 +897,8 @@ class AsyncTTSResourceWithRawResponse:
             tts.infill,
             AsyncBinaryAPIResponse,
         )
+
+        self.sse = self.generate_sse  # Alias for backward compatibility
 
 
 class TTSResourceWithStreamingResponse:
@@ -913,6 +917,8 @@ class TTSResourceWithStreamingResponse:
             StreamedBinaryAPIResponse,
         )
 
+        self.sse = self.generate_sse  # Alias for backward compatibility
+
 
 class AsyncTTSResourceWithStreamingResponse:
     def __init__(self, tts: AsyncTTSResource) -> None:
@@ -929,6 +935,8 @@ class AsyncTTSResourceWithStreamingResponse:
             tts.infill,
             AsyncStreamedBinaryAPIResponse,
         )
+
+        self.sse = self.generate_sse  # Alias for backward compatibility
 
 
 class AsyncTTSResourceConnection:
