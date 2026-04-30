@@ -443,6 +443,9 @@ class VoiceChangerResourceWithRawResponse:
             voice_changer.generate_sse,
         )
 
+        self.change_voice_bytes = self.generate  # Alias for backward compatibility
+        self.change_voice_sse = to_raw_response_wrapper(voice_changer.change_voice_sse)
+
 
 class AsyncVoiceChangerResourceWithRawResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
@@ -455,6 +458,9 @@ class AsyncVoiceChangerResourceWithRawResponse:
         self.generate_sse = async_to_raw_response_wrapper(
             voice_changer.generate_sse,
         )
+
+        self.change_voice_bytes = self.generate  # Alias for backward compatibility
+        self.change_voice_sse = async_to_raw_response_wrapper(voice_changer.change_voice_sse)
 
 
 class VoiceChangerResourceWithStreamingResponse:
@@ -469,6 +475,9 @@ class VoiceChangerResourceWithStreamingResponse:
             voice_changer.generate_sse,
         )
 
+        self.change_voice_bytes = self.generate  # Alias for backward compatibility
+        self.change_voice_sse = to_streamed_response_wrapper(voice_changer.change_voice_sse)
+
 
 class AsyncVoiceChangerResourceWithStreamingResponse:
     def __init__(self, voice_changer: AsyncVoiceChangerResource) -> None:
@@ -481,3 +490,6 @@ class AsyncVoiceChangerResourceWithStreamingResponse:
         self.generate_sse = async_to_streamed_response_wrapper(
             voice_changer.generate_sse,
         )
+
+        self.change_voice_bytes = self.generate  # Alias for backward compatibility
+        self.change_voice_sse = async_to_streamed_response_wrapper(voice_changer.change_voice_sse)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from copy import deepcopy
 from typing import Mapping, Optional, cast
 from typing_extensions import Literal
 
@@ -12,6 +11,7 @@ from ...types import (
     OutputFormatContainer,
     voice_changer_change_voice_sse_params,
 )
+from ..._files import deepcopy_with_paths
 from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes
 from ..._utils import extract_files, maybe_transform
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -46,7 +46,7 @@ def sync_change_voice_sse(
     )
 
     extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-    body = deepcopy(
+    body = deepcopy_with_paths(
         {
             "clip": clip,
             "output_format_bit_rate": output_format_bit_rate,
@@ -54,7 +54,8 @@ def sync_change_voice_sse(
             "output_format_encoding": output_format_encoding,
             "output_format_sample_rate": output_format_sample_rate,
             "voice_id": voice_id,
-        }
+        },
+        [["clip"]],
     )
     files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
     # It should be noted that the actual Content-Type header that will be
@@ -97,7 +98,7 @@ async def async_change_voice_sse(
     )
 
     extra_headers = {"Accept": "*/*", **(extra_headers or {})}
-    body = deepcopy(
+    body = deepcopy_with_paths(
         {
             "clip": clip,
             "output_format_bit_rate": output_format_bit_rate,
@@ -105,7 +106,8 @@ async def async_change_voice_sse(
             "output_format_encoding": output_format_encoding,
             "output_format_sample_rate": output_format_sample_rate,
             "voice_id": voice_id,
-        }
+        },
+        [["clip"]],
     )
     files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
     # It should be noted that the actual Content-Type header that will be
