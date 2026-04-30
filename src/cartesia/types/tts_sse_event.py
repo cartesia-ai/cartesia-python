@@ -1,5 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+import base64
 from typing import Union, Optional
 from typing_extensions import Literal, Annotated, TypeAlias
 
@@ -42,6 +43,21 @@ class TTSSSEChunkEvent(BaseModel):
     context_id: Optional[str] = None
     """The context ID echoed back from the request, if one was provided."""
 
+    @property
+    def audio(self) -> Optional[bytes]:
+        """
+        Decoded audio data as bytes.
+
+        This property automatically base64-decodes the data field for convenience.
+        Returns None if data is None or empty.
+        """
+        if not self.data:
+            return None
+        try:
+            return base64.b64decode(self.data)
+        except Exception:
+            return None
+
 
 class TTSSSETimestampsEvent(BaseModel):
     """Word-level timing information."""
@@ -64,6 +80,11 @@ class TTSSSETimestampsEvent(BaseModel):
     context_id: Optional[str] = None
     """The context ID echoed back from the request, if one was provided."""
 
+    @property
+    def timestamps(self) -> Optional[WordTimestamps]:
+        """Alias for word_timestamps for convenience"""
+        return self.word_timestamps
+
 
 class TTSSSEPhonemeTimestampsEvent(BaseModel):
     """Phoneme-level timing information."""
@@ -85,6 +106,11 @@ class TTSSSEPhonemeTimestampsEvent(BaseModel):
 
     context_id: Optional[str] = None
     """The context ID echoed back from the request, if one was provided."""
+
+    @property
+    def timestamps(self) -> Optional[PhonemeTimestamps]:
+        """Alias for phoneme_timestamps for convenience"""
+        return self.phoneme_timestamps
 
 
 class TTSSSEDoneEvent(BaseModel):
@@ -129,6 +155,17 @@ class TTSSSEErrorEvent(BaseModel):
 
     error_code: Optional[str] = None
     """Machine-readable error code."""
+
+    @property
+    def error(self) -> str:
+        """
+        Human-readable error message.
+
+        This property exists for backward compatibility
+        since previous versions of the SDK incorrectly included it.
+        """
+
+        return f"{self.status_code} {self.title}: {self.message}"
 
 
 TTSSSEEvent: TypeAlias = Annotated[

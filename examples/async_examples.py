@@ -72,7 +72,7 @@ async def tts_sse_basic_async(client: AsyncCartesia) -> None:
             elif event.type == "done":
                 break
             elif event.type == "error":
-                raise Exception(f"Error: {event.error}")
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -102,7 +102,7 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
             elif event.type == "done":
                 break
             elif event.type == "error":
-                raise Exception(f"Error: {event.error}")
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")

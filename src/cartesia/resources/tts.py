@@ -6,6 +6,7 @@ import json
 import time
 import random
 import logging
+import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Mapping, Callable, Iterator, Optional, Awaitable, cast
 from typing_extensions import AsyncIterator
@@ -46,6 +47,7 @@ from .._send_queue import SendQueue
 from .._base_client import _merge_mappings, make_request_options
 from .._event_handler import EventHandlerRegistry
 from ..types.model_speed import ModelSpeed
+from ..lib._tts.backcompat import BackcompatTTSResourceConnection, AsyncBackcompatTTSResourceConnection
 from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import Error, WebsocketResponse
@@ -393,6 +395,76 @@ class TTSResource(SyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
+    def bytes(
+        self,
+        *,
+        model_id: str,
+        output_format: tts_generate_params.OutputFormat,
+        transcript: str,
+        voice: VoiceSpecifierParam,
+        duration: Optional[float] | Omit = omit,  # noqa: ARG002
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: Optional[SupportedLanguage] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        save: Optional[bool] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Iterator[bytes]:
+        """
+        Deprecated version of .generate().
+        """
+
+        warnings.warn(
+            "Use .generate() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        response = self.generate(
+            model_id=model_id,
+            output_format=output_format,
+            transcript=transcript,
+            voice=voice,
+            generation_config=generation_config,
+            language=language,
+            pronunciation_dict_id=pronunciation_dict_id,
+            save=save,
+            speed=speed,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+        )
+        return response.iter_bytes()
+
+    sse = generate_sse  # alias for backward compatibility
+
+    def websocket(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+    ) -> BackcompatTTSResourceConnection:
+        """
+        Deprecated version of .websocket_connect().
+        """
+
+        warnings.warn(
+            "Use .websocket_connect() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        manager = self.websocket_connect(
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+        return BackcompatTTSResourceConnection(manager)
+
 
 class AsyncTTSResource(AsyncAPIResource):
     @cached_property
@@ -719,6 +791,76 @@ class AsyncTTSResource(AsyncAPIResource):
             max_delay=max_delay,
             max_queue_size=max_queue_size,
         )
+
+    async def bytes(
+        self,
+        *,
+        model_id: str,
+        output_format: tts_generate_params.OutputFormat,
+        transcript: str,
+        voice: VoiceSpecifierParam,
+        duration: Optional[float] | Omit = omit,  # noqa: ARG002
+        generation_config: GenerationConfigParam | Omit = omit,
+        language: Optional[SupportedLanguage] | Omit = omit,
+        pronunciation_dict_id: Optional[str] | Omit = omit,
+        save: Optional[bool] | Omit = omit,
+        speed: ModelSpeed | Omit = omit,
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> AsyncIterator[bytes]:
+        """
+        Deprecated version of .generate().
+        """
+
+        warnings.warn(
+            "Use .generate() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        response = await self.generate(
+            model_id=model_id,
+            output_format=output_format,
+            transcript=transcript,
+            voice=voice,
+            generation_config=generation_config,
+            language=language,
+            pronunciation_dict_id=pronunciation_dict_id,
+            save=save,
+            speed=speed,
+            extra_headers=extra_headers,
+            extra_query=extra_query,
+            extra_body=extra_body,
+            timeout=timeout,
+        )
+        return response.iter_bytes()
+
+    sse = generate_sse  # Alias for backward compatibility
+
+    async def websocket(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+    ) -> AsyncBackcompatTTSResourceConnection:
+        """
+        Deprecated version of .websocket_connect().
+        """
+
+        warnings.warn(
+            "Use .websocket_connect() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        manager = self.websocket_connect(
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+        return AsyncBackcompatTTSResourceConnection(manager)
 
 
 class TTSResourceWithRawResponse:

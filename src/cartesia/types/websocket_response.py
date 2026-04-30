@@ -9,7 +9,17 @@ from .._utils import PropertyInfo
 from .._models import BaseModel
 from .word_timestamps import WordTimestamps
 
-__all__ = ["WebsocketResponse", "Chunk", "FlushDone", "Done", "Timestamps", "Error", "PhonemeTimestamps"]
+__all__ = [
+    "WebsocketResponse",
+    "Chunk",
+    "FlushDone",
+    "Done",
+    "Timestamps",
+    "Error",
+    "PhonemeTimestamps",
+    "TimestampsWordTimestamps",
+    "PhonemeTimestampsPhonemeTimestamps",
+]
 
 
 class Chunk(BaseModel):
@@ -185,3 +195,9 @@ class PhonemeTimestamps(BaseModel):
 WebsocketResponse: TypeAlias = Annotated[
     Union[Chunk, FlushDone, Done, Timestamps, Error, PhonemeTimestamps], PropertyInfo(discriminator="type")
 ]
+
+# Alias for backward compatibility
+TimestampsWordTimestamps = WordTimestamps
+
+# Alias for backward compatibility
+PhonemeTimestampsPhonemeTimestamps = PhonemeTimestamps

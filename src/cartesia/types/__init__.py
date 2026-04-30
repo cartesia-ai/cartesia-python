@@ -46,14 +46,20 @@ from .output_format_container import OutputFormatContainer as OutputFormatContai
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
-from .tts_generate_sse_params import TTSGenerateSSEParams as TTSGenerateSSEParams
+from .tts_generate_sse_params import (
+    TTSGenerateSSEParams as TTSGenerateSSEParams,
+    TTSGenerateSseParams as TTSGenerateSseParams,
+)
 from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
 from .websocket_client_event_param import WebsocketClientEventParam as WebsocketClientEventParam
-from .websocket_connection_options import WebSocketConnectionOptions as WebSocketConnectionOptions
+from .websocket_connection_options import (
+    WebSocketConnectionOptions as WebSocketConnectionOptions,
+    WebsocketConnectionOptions as WebsocketConnectionOptions,
+)
 from .agent_list_templates_response import AgentListTemplatesResponse as AgentListTemplatesResponse
 from .pronunciation_dict_item_param import PronunciationDictItemParam as PronunciationDictItemParam
 from .voice_changer_generate_params import VoiceChangerGenerateParams as VoiceChangerGenerateParams
@@ -62,3 +68,9 @@ from .pronunciation_dict_create_params import PronunciationDictCreateParams as P
 from .pronunciation_dict_update_params import PronunciationDictUpdateParams as PronunciationDictUpdateParams
 from .agent_list_phone_numbers_response import AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse
 from .voice_changer_generate_sse_params import VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams
+from .voice_changer_change_voice_sse_params import (
+    VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
+)
+from .voice_changer_change_voice_bytes_params import (
+    VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
+)

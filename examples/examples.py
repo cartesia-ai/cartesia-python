@@ -84,7 +84,7 @@ def tts_sse_basic(client: Cartesia) -> None:
             elif event.type == "done":
                 break
             elif event.type == "error":
-                raise Exception(f"Error: {event.error}")
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -116,7 +116,7 @@ def tts_sse_with_timestamps(client: Cartesia) -> None:
             elif event.type == "done":
                 break
             elif event.type == "error":
-                raise Exception(f"Error: {event.error}")
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -148,7 +148,7 @@ def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
             elif event.type == "done":
                 break
             elif event.type == "error":
-                raise Exception(f"Error: {event.error}")
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -182,7 +182,7 @@ def tts_sse_with_match(client: Cartesia) -> None:
                 break
             elif event.type == "error":
                 # Error occurred
-                raise Exception(event.error)
+                raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -471,7 +471,7 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
                 elif response.type == "done" or response.done:
                     break
                 elif response.type == "error":
-                    raise Exception(response.error)
+                    raise Exception(f"{response.title}: {response.message}")
 
         print(f"Saved audio to {filename}")
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
