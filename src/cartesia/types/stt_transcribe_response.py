@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from .._models import BaseModel
 
-__all__ = ["SttTranscribeResponse", "Word"]
+__all__ = ["STTTranscribeResponse", "Word"]
 
 
 class Word(BaseModel):
@@ -18,7 +18,7 @@ class Word(BaseModel):
     """The transcribed word."""
 
 
-class SttTranscribeResponse(BaseModel):
+class STTTranscribeResponse(BaseModel):
     text: str
     """The transcribed text."""
 
