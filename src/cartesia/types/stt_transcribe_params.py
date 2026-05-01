@@ -7,7 +7,7 @@ from typing_extensions import Literal, TypedDict
 
 from .._types import FileTypes
 
-__all__ = ["STTTranscribeParams"]
+__all__ = ["STTTranscribeParams", "SttTranscribeParams"]
 
 
 class STTTranscribeParams(TypedDict, total=False):
@@ -149,3 +149,6 @@ class STTTranscribeParams(TypedDict, total=False):
 
     Currently only `word` level timestamps are supported.
     """
+
+
+SttTranscribeParams = STTTranscribeParams  # Alias for backward compatibility

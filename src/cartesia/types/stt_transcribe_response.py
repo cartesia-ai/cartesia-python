@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from .._models import BaseModel
 
-__all__ = ["STTTranscribeResponse", "Word"]
+__all__ = ["STTTranscribeResponse", "SttTranscribeResponse", "Word"]
 
 
 class Word(BaseModel):
@@ -33,3 +33,6 @@ class STTTranscribeResponse(BaseModel):
 
     Only included when `[word]` is passed into `timestamp_granularities[]`.
     """
+
+
+SttTranscribeResponse = STTTranscribeResponse  # Alias for backward compatibility

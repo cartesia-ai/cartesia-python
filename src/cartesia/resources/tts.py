@@ -82,16 +82,7 @@ if TYPE_CHECKING:
 
     from .._client import Cartesia, AsyncCartesia
 
-__all__ = [
-    "TTSResource",
-    "AsyncTTSResource",
-    "TTSContext",
-    "AsyncTTSContext",
-    "TTSContextsConnection",
-    "AsyncTTSContextsConnection",
-    "TTSContextsConnectionManager",
-    "AsyncTTSContextsConnectionManager",
-]
+__all__ = ["TTSResource", "AsyncTTSResource"]
 
 log: logging.Logger = logging.getLogger(__name__)
 

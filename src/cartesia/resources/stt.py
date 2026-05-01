@@ -513,3 +513,12 @@ class AsyncSTTResourceWithStreamingResponse:
         self.transcribe = async_to_streamed_response_wrapper(
             stt.transcribe,
         )
+
+
+# Aliases for backward compatibility
+SttResource = STTResource
+AsyncSttResource = AsyncSTTResource
+SttResourceWithRawResponse = STTResourceWithRawResponse
+AsyncSttResourceWithRawResponse = AsyncSTTResourceWithRawResponse
+SttResourceWithStreamingResponse = STTResourceWithStreamingResponse
+AsyncSttResourceWithStreamingResponse = AsyncSTTResourceWithStreamingResponse
