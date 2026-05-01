@@ -100,10 +100,10 @@ The 3.x SDK also aliases `.sse()` to `.generate_sse()` for backwards compatibili
 
 ## TTS WebSocket
 
-You can now call `client.tts.websocket_connect()` to get a Python context that
+You can now call `client.tts.create_context_manager()` or `client.tts.generateWS()` to get a Python context that
 automatically closes the websocket.
 
-### Basic Usage
+### WebSocket Basic Usage
 
 ```python
 # v2.x
@@ -124,18 +124,19 @@ with open("output.pcm", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.websocket_connect() as ws:
-    ws.send({
-        "model_id": "sonic-3",
-        "transcript": "Hello, world!",
-        "voice": {"mode": "id", "id": "voice-id"},
-        "output_format": {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-    })
+with client.tts.create_context_manager() as connection:
+    ctx = connection.context(
+        model_id="sonic-3",
+        voice={"mode": "id", "id": "voice-id"},
+        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+    )
+    ctx.push("Hello, world!")
+    ctx.end()
 
     # Write chunks to file as they arrive.
     # You could also send chunks over the network, play them in real-time, etc.
     with open("output.pcm", "wb") as f:
-        for response in ws:
+        for response in ctx.receive():
             if response.type == "chunk":
                 f.write(response.audio)
 ```
@@ -161,19 +162,17 @@ with open("output.raw", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.websocket_connect() as connection:
-    ctx = connection.context()
+with client.tts.create_context_manager() as connection:
+    ctx = connection.context(
+        model_id="sonic-3",
+        voice={"mode": "id", "id": "voice-id"},
+        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+    )
 
     for transcript in transcripts:
-        ctx.send(
-            model_id="sonic-3",
-            transcript=transcript,
-            voice={"mode": "id", "id": "voice-id"},
-            output_format=output_format,
-            continue_=True,
-        )
+        ctx.push(transcript)
 
-    ctx.no_more_inputs()
+    ctx.end()
 
     # Write chunks to file as they arrive.
     # You could also send chunks over the network, play them in real-time, etc.
@@ -184,10 +183,6 @@ with client.tts.websocket_connect() as connection:
 ```
 
 ## Voices API
-
-
-
-
 
 ### Creating Voices
 
@@ -211,10 +206,6 @@ with open("sample.wav", "rb") as clip:
         language="en",
     )
 ```
-
-
-
-
 
 ### Mixing Voices
 
