@@ -20,30 +20,30 @@ from .._response import (
     async_to_streamed_response_wrapper,
 )
 from .._base_client import make_request_options
-from ..types.stt_transcribe_response import SttTranscribeResponse
+from ..types.stt_transcribe_response import STTTranscribeResponse
 
-__all__ = ["SttResource", "AsyncSttResource"]
+__all__ = ["STTResource", "SttResource", "AsyncSTTResource", "AsyncSttResource"]
 
 
-class SttResource(SyncAPIResource):
+class STTResource(SyncAPIResource):
     @cached_property
-    def with_raw_response(self) -> SttResourceWithRawResponse:
+    def with_raw_response(self) -> STTResourceWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#accessing-raw-response-data-eg-headers
         """
-        return SttResourceWithRawResponse(self)
+        return STTResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> SttResourceWithStreamingResponse:
+    def with_streaming_response(self) -> STTResourceWithStreamingResponse:
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#with_streaming_response
         """
-        return SttResourceWithStreamingResponse(self)
+        return STTResourceWithStreamingResponse(self)
 
     def transcribe(
         self,
@@ -165,7 +165,7 @@ class SttResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SttTranscribeResponse:
+    ) -> STTTranscribeResponse:
         """
         Transcribes audio files into text using Cartesia's Speech-to-Text API.
 
@@ -233,7 +233,7 @@ class SttResource(SyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return self._post(
             "/stt",
-            body=maybe_transform(body, stt_transcribe_params.SttTranscribeParams),
+            body=maybe_transform(body, stt_transcribe_params.STTTranscribeParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -245,32 +245,32 @@ class SttResource(SyncAPIResource):
                         "encoding": encoding,
                         "sample_rate": sample_rate,
                     },
-                    stt_transcribe_params.SttTranscribeParams,
+                    stt_transcribe_params.STTTranscribeParams,
                 ),
             ),
-            cast_to=SttTranscribeResponse,
+            cast_to=STTTranscribeResponse,
         )
 
 
-class AsyncSttResource(AsyncAPIResource):
+class AsyncSTTResource(AsyncAPIResource):
     @cached_property
-    def with_raw_response(self) -> AsyncSttResourceWithRawResponse:
+    def with_raw_response(self) -> AsyncSTTResourceWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
         the raw response object instead of the parsed content.
 
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#accessing-raw-response-data-eg-headers
         """
-        return AsyncSttResourceWithRawResponse(self)
+        return AsyncSTTResourceWithRawResponse(self)
 
     @cached_property
-    def with_streaming_response(self) -> AsyncSttResourceWithStreamingResponse:
+    def with_streaming_response(self) -> AsyncSTTResourceWithStreamingResponse:
         """
         An alternative to `.with_raw_response` that doesn't eagerly read the response body.
 
         For more information, see https://www.github.com/cartesia-ai/cartesia-python#with_streaming_response
         """
-        return AsyncSttResourceWithStreamingResponse(self)
+        return AsyncSTTResourceWithStreamingResponse(self)
 
     async def transcribe(
         self,
@@ -392,7 +392,7 @@ class AsyncSttResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> SttTranscribeResponse:
+    ) -> STTTranscribeResponse:
         """
         Transcribes audio files into text using Cartesia's Speech-to-Text API.
 
@@ -460,7 +460,7 @@ class AsyncSttResource(AsyncAPIResource):
         extra_headers = {"Content-Type": "multipart/form-data", **(extra_headers or {})}
         return await self._post(
             "/stt",
-            body=await async_maybe_transform(body, stt_transcribe_params.SttTranscribeParams),
+            body=await async_maybe_transform(body, stt_transcribe_params.STTTranscribeParams),
             files=files,
             options=make_request_options(
                 extra_headers=extra_headers,
@@ -472,15 +472,15 @@ class AsyncSttResource(AsyncAPIResource):
                         "encoding": encoding,
                         "sample_rate": sample_rate,
                     },
-                    stt_transcribe_params.SttTranscribeParams,
+                    stt_transcribe_params.STTTranscribeParams,
                 ),
             ),
-            cast_to=SttTranscribeResponse,
+            cast_to=STTTranscribeResponse,
         )
 
 
-class SttResourceWithRawResponse:
-    def __init__(self, stt: SttResource) -> None:
+class STTResourceWithRawResponse:
+    def __init__(self, stt: STTResource) -> None:
         self._stt = stt
 
         self.transcribe = to_raw_response_wrapper(
@@ -488,8 +488,8 @@ class SttResourceWithRawResponse:
         )
 
 
-class AsyncSttResourceWithRawResponse:
-    def __init__(self, stt: AsyncSttResource) -> None:
+class AsyncSTTResourceWithRawResponse:
+    def __init__(self, stt: AsyncSTTResource) -> None:
         self._stt = stt
 
         self.transcribe = async_to_raw_response_wrapper(
@@ -497,8 +497,8 @@ class AsyncSttResourceWithRawResponse:
         )
 
 
-class SttResourceWithStreamingResponse:
-    def __init__(self, stt: SttResource) -> None:
+class STTResourceWithStreamingResponse:
+    def __init__(self, stt: STTResource) -> None:
         self._stt = stt
 
         self.transcribe = to_streamed_response_wrapper(
@@ -506,10 +506,19 @@ class SttResourceWithStreamingResponse:
         )
 
 
-class AsyncSttResourceWithStreamingResponse:
-    def __init__(self, stt: AsyncSttResource) -> None:
+class AsyncSTTResourceWithStreamingResponse:
+    def __init__(self, stt: AsyncSTTResource) -> None:
         self._stt = stt
 
         self.transcribe = async_to_streamed_response_wrapper(
             stt.transcribe,
         )
+
+
+# Aliases for backward compatibility
+SttResource = STTResource
+AsyncSttResource = AsyncSTTResource
+SttResourceWithRawResponse = STTResourceWithRawResponse
+AsyncSttResourceWithRawResponse = AsyncSTTResourceWithRawResponse
+SttResourceWithStreamingResponse = STTResourceWithStreamingResponse
+AsyncSttResourceWithStreamingResponse = AsyncSTTResourceWithStreamingResponse

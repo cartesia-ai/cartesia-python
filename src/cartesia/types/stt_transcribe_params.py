@@ -7,10 +7,10 @@ from typing_extensions import Literal, TypedDict
 
 from .._types import FileTypes
 
-__all__ = ["SttTranscribeParams"]
+__all__ = ["STTTranscribeParams", "SttTranscribeParams"]
 
 
-class SttTranscribeParams(TypedDict, total=False):
+class STTTranscribeParams(TypedDict, total=False):
     encoding: Optional[Literal["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"]]
     """The encoding format to process the audio as.
 
@@ -149,3 +149,6 @@ class SttTranscribeParams(TypedDict, total=False):
 
     Currently only `word` level timestamps are supported.
     """
+
+
+SttTranscribeParams = STTTranscribeParams  # Alias for backward compatibility

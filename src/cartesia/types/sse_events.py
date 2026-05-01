@@ -1,6 +1,11 @@
-"""Aliases for backward compatibility."""
+"""
+Aliases for backward compatibility.
 
-from .._models import BaseModel
+Breaking in v3.1.0: Changed SSEEvent from a pydantic model to be the same as SSEEventType.
+This was done to remove ``id`` and ``retry`` members from all SSE event models
+in order to prevent unexpected behavior in conflict with the SSE protocol.
+"""
+
 from .tts_sse_event import (
     TTSSSEEvent,
     TTSSSEDoneEvent,
@@ -23,10 +28,7 @@ __all__ = [
     "PhonemeTimestamps",
 ]
 
-# This is technically a breaking change from v3.0.2,
-# but I think it's worth the cost since accessing SSEEvent.id and SSEEvent.retry
-# is undefined behavior
-SSEEvent = BaseModel
+SSEEvent = TTSSSEEvent  # changed from model to type in v3.1.0
 
 ChunkEvent = TTSSSEChunkEvent
 

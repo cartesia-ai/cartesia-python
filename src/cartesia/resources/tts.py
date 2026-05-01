@@ -6,7 +6,6 @@ import json
 import time
 import random
 import logging
-import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Mapping, Callable, Iterator, Optional, Awaitable, cast
 from typing_extensions import AsyncIterator, deprecated
@@ -47,12 +46,12 @@ from .._send_queue import SendQueue
 from .._base_client import _merge_mappings, make_request_options
 from .._event_handler import EventHandlerRegistry
 from ..lib._tts.contexts import (
-    TTSContext as TTSContext,
-    AsyncTTSContext as AsyncTTSContext,
-    TTSContextsConnection as TTSContextsConnection,
-    AsyncTTSContextsConnection as AsyncTTSContextsConnection,
-    TTSContextsConnectionManager as TTSContextsConnectionManager,
-    AsyncTTSContextsConnectionManager as AsyncTTSContextsConnectionManager,
+    TTSWSContext as TTSWSContext,
+    AsyncTTSWSContext as AsyncTTSWSContext,
+    TTSContextsWSConnection as TTSContextsWSConnection,
+    AsyncTTSContextsWSConnection as AsyncTTSContextsWSConnection,
+    TTSContextsWSConnectionManager as TTSContextsWSConnectionManager,
+    AsyncTTSContextsWSConnectionManager as AsyncTTSContextsWSConnectionManager,
 )
 from ..types.model_speed import ModelSpeed
 from ..lib._tts.backcompat import (
@@ -68,8 +67,6 @@ from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
 from ..lib._tts.connection_manager_3_0_2 import (
-    WebSocketContext as WebSocketContext,  # imported for backward compatibility
-    AsyncWebSocketContext as AsyncWebSocketContext,  # imported for backward compatibility
     TTSResourceConnectionManager_3_0_2,
     AsyncTTSResourceConnectionManager_3_0_2,
 )
@@ -82,16 +79,7 @@ if TYPE_CHECKING:
 
     from .._client import Cartesia, AsyncCartesia
 
-__all__ = [
-    "TTSResource",
-    "AsyncTTSResource",
-    "TTSContext",
-    "AsyncTTSContext",
-    "TTSContextsConnection",
-    "AsyncTTSContextsConnection",
-    "TTSContextsConnectionManager",
-    "AsyncTTSContextsConnectionManager",
-]
+__all__ = ["TTSResource", "AsyncTTSResource"]
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -325,7 +313,7 @@ class TTSResource(SyncAPIResource):
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
 
         See Also:
-            :meth:`create_context_manager`: The same API endpoint, with client-side context management for convenience.
+            :meth:`contexts_ws`: The same API endpoint, with client-side context management for convenience.
         """
         return TTSResourceConnectionManager(
             client=self._client,
@@ -425,7 +413,7 @@ class TTSResource(SyncAPIResource):
             cast_to=BinaryAPIResponse,
         )
 
-    def create_context_manager(
+    def contexts_ws(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
@@ -435,7 +423,7 @@ class TTSResource(SyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> TTSContextsConnectionManager:
+    ) -> TTSContextsWSConnectionManager:
         """Text-to-Speech (WebSocket) with built in context management for convenience.
 
         Supports:
@@ -449,7 +437,7 @@ class TTSResource(SyncAPIResource):
         See Also:
             :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
-        return TTSContextsConnectionManager(
+        return TTSContextsWSConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -461,7 +449,7 @@ class TTSResource(SyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
-    @deprecated("Use .generate() instead")
+    @deprecated("bytes() is deprecated; use .generate() instead")
     def bytes(
         self,
         *,
@@ -487,12 +475,6 @@ class TTSResource(SyncAPIResource):
             Use :meth:`generate` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.generate() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         response = self.generate(
             model_id=model_id,
             output_format=output_format,
@@ -512,7 +494,7 @@ class TTSResource(SyncAPIResource):
 
     sse = generate_sse  # alias for backward compatibility
 
-    @deprecated("Use .create_context_manager() instead")
+    @deprecated("websocket_connect() is deprecated; use .contexts_ws() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -523,14 +505,8 @@ class TTSResource(SyncAPIResource):
         Text-to-Speech (WebSocket).
 
         .. deprecated::
-            Use :meth:`create_context_manager` instead.
+            Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.create_context_manager() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return TTSResourceConnectionManager_3_0_2(
             client=self._client,
@@ -539,7 +515,7 @@ class TTSResource(SyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
-    @deprecated("Use .create_context_manager() instead")
+    @deprecated("websocket() is deprecated; use contexts_ws() instead")
     def websocket(
         self,
         extra_query: Query = {},
@@ -550,14 +526,8 @@ class TTSResource(SyncAPIResource):
         SDK v2 compatible Text-to-Speech (WebSocket).
 
         .. deprecated::
-            Use :meth:`create_context_manager` instead.
+            Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.create_context_manager() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return BackcompatTTSResourceConnection(
             TTSResourceConnectionManager_3_0_2(
@@ -798,7 +768,7 @@ class AsyncTTSResource(AsyncAPIResource):
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
 
         See Also:
-            :meth:`create_context_manager`: The same API endpoint, with client-side context management for convenience.
+            :meth:`contexts_ws`: The same API endpoint, with client-side context management for convenience.
         """
         return AsyncTTSResourceConnectionManager(
             client=self._client,
@@ -898,7 +868,7 @@ class AsyncTTSResource(AsyncAPIResource):
             cast_to=AsyncBinaryAPIResponse,
         )
 
-    def create_context_manager(
+    def contexts_ws(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
@@ -908,7 +878,7 @@ class AsyncTTSResource(AsyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> AsyncTTSContextsConnectionManager:
+    ) -> AsyncTTSContextsWSConnectionManager:
         """Text-to-Speech (WebSocket) with built in context management for convenience.
 
         Supports:
@@ -922,7 +892,7 @@ class AsyncTTSResource(AsyncAPIResource):
         See Also:
             :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
-        return AsyncTTSContextsConnectionManager(
+        return AsyncTTSContextsWSConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -934,7 +904,7 @@ class AsyncTTSResource(AsyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
-    @deprecated("Use .generate() instead")
+    @deprecated("bytes() is deprecated; use .generate() instead")
     async def bytes(
         self,
         *,
@@ -960,12 +930,6 @@ class AsyncTTSResource(AsyncAPIResource):
             Use :meth:`generate` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.generate() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         response = await self.generate(
             model_id=model_id,
             output_format=output_format,
@@ -985,7 +949,7 @@ class AsyncTTSResource(AsyncAPIResource):
 
     sse = generate_sse  # Alias for backward compatibility
 
-    @deprecated("Use .create_context_manager() instead")
+    @deprecated("websocket_connect() is deprecated; use .contexts_ws() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -996,14 +960,8 @@ class AsyncTTSResource(AsyncAPIResource):
         Text-to-Speech (WebSocket).
 
         .. deprecated::
-            Use :meth:`create_context_manager` instead.
+            Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.create_context_manager() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return AsyncTTSResourceConnectionManager_3_0_2(
             client=self._client,
@@ -1012,7 +970,7 @@ class AsyncTTSResource(AsyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
-    @deprecated("Use .create_context_manager() instead")
+    @deprecated("websocket() is deprecated; use contexts_ws() instead")
     async def websocket(
         self,
         extra_query: Query = {},
@@ -1023,14 +981,8 @@ class AsyncTTSResource(AsyncAPIResource):
         SDK v2 compatible Text-to-Speech (WebSocket).
 
         .. deprecated::
-            Use :meth:`create_context_manager` instead.
+            Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.create_context_manager() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return AsyncBackcompatTTSResourceConnection(
             AsyncTTSResourceConnectionManager_3_0_2(

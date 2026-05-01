@@ -1,5 +1,28 @@
 # Changelog
 
+## 3.1.0-b2 (2026-05-01)
+
+Full Changelog: [v3.1.0-b1...v3.1.0-b2](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b1...v3.1.0-b2)
+
+### Bug Fixes
+
+* **stt:** add back missing export ([0826925](https://github.com/cartesia-ai/cartesia-python/commit/0826925da84ec0867df8971051814944a83558c3))
+* **stt:** make stt an initialism ([b897fa5](https://github.com/cartesia-ai/cartesia-python/commit/b897fa5a9d197e4b876a28e5288393f9cc76e643))
+* **tts:** tts.websocket() can send continue_=True ([57e1e10](https://github.com/cartesia-ai/cartesia-python/commit/57e1e1039f65cf2bbf78b344dac11b1a9220d006))
+
+
+### Chores
+
+* **api:** cleanup deprecation warnings ([66202c2](https://github.com/cartesia-ai/cartesia-python/commit/66202c2bdde07d97e4517bf4d2f4a05210cb0320))
+* **lib:** delete random keep file ([2e4da18](https://github.com/cartesia-ai/cartesia-python/commit/2e4da18f2ffc5735c3ef990a114a37007e3b9822))
+* **manual:** cleanup exports ([dab06b2](https://github.com/cartesia-ai/cartesia-python/commit/dab06b286cd8ccfe9391ee06c0565a030d5d2989))
+* **tts:** rename context manager to contexts ws ([bc0abb9](https://github.com/cartesia-ai/cartesia-python/commit/bc0abb9d9e80f647b905d2fc20c020e4dd15540b))
+
+
+### Refactors
+
+* **tts:** remove deprecated exports that are confusing ([1ce6132](https://github.com/cartesia-ai/cartesia-python/commit/1ce6132491cb3d6c6990d0bad325c65104a310e0))
+
 ## 3.1.0-b1 (2026-05-01)
 
 Full Changelog: [v3.0.2...v3.1.0-b1](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.2...v3.1.0-b1)

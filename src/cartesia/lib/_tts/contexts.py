@@ -45,7 +45,7 @@ log: logging.Logger = logging.getLogger(__name__)
 _ErrorHandler = Callable[[WebSocketResponseError], Any]
 """Type of an error event handler.
 
-For :class:`AsyncTTSContextsConnection`, the handler may also be ``async def``
+For :class:`AsyncTTSContextsWSConnection`, the handler may also be ``async def``
 — its returned coroutine is scheduled as a fire-and-forget task.
 """
 
@@ -111,7 +111,7 @@ def _build_generation_request(
 # ---------------------------------------------------------------------------
 
 
-class TTSContext:
+class TTSWSContext:
     """
     Contexts are short-lived and designed to generate audio for a single transcript.
 
@@ -124,7 +124,7 @@ class TTSContext:
     def __init__(
         self,
         *,
-        contexts: TTSContextsConnection,
+        ws: TTSContextsWSConnection,
         timeout: float | None = None,
         context_id: str,
         model_id: str,
@@ -134,7 +134,7 @@ class TTSContext:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
     ) -> None:
-        self._contexts = contexts
+        self._ws = ws
         self._context_id = context_id
         self._queue: queue.Queue[Any] = queue.Queue()
         self._closed = False
@@ -211,7 +211,7 @@ class TTSContext:
             generation_config=generation_config,
             extra=kwargs,
         )
-        self._contexts._send(request)
+        self._ws._send(request)
 
     def end(self) -> None:
         """Signal that no more transcript chunks will be sent.
@@ -245,7 +245,7 @@ class TTSContext:
         )
 
         try:
-            self._contexts._send(request)
+            self._ws._send(request)
         except WebSocketQueueFullError:
             raise
         except CartesiaError:
@@ -289,7 +289,7 @@ class TTSContext:
             generation_config=None,
             extra={},
         )
-        self._contexts._send(request)
+        self._ws._send(request)
 
     def cancel(self) -> None:
         """Cancel this context to stop generating speech.
@@ -304,7 +304,7 @@ class TTSContext:
         if self._closed:
             return
         try:
-            self._contexts._send(CancelContextRequest(cancel=True, context_id=self._context_id))
+            self._ws._send(CancelContextRequest(cancel=True, context_id=self._context_id))
         except WebSocketQueueFullError:
             raise
         except CartesiaError:
@@ -358,17 +358,17 @@ class TTSContext:
         self._closed = True
         # Wake any pending receive() loop. The queue is unbounded so put_nowait can't raise.
         self._queue.put_nowait(_DISCONNECT_SENTINEL)
-        self._contexts._unregister_context(self._context_id, self)
+        self._ws._unregister_context(self._context_id, self)
 
 
-class TTSContextsConnection:
-    """Used to create instances of :class:`TTSContext` on a single WebSocket connection."""
+class TTSContextsWSConnection:
+    """Used to create instances of :class:`TTSWSContext` on a single WebSocket connection."""
 
-    def __init__(self, manager: TTSContextsConnectionManager) -> None:
+    def __init__(self, manager: TTSContextsWSConnectionManager) -> None:
         self._manager = manager
         self._inner_manager: TTSResourceConnectionManager | None = None
         self._inner_connection: TTSResourceConnection | None = None
-        self._contexts: Dict[str, TTSContext] = {}
+        self._contexts: Dict[str, TTSWSContext] = {}
         self._event_handler_registry = EventHandlerRegistry(use_lock=True)
         self._reader_thread: threading.Thread | None = None
         self._connect_lock = threading.Lock()
@@ -418,8 +418,8 @@ class TTSContextsConnection:
         language: SupportedLanguage | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
-    ) -> TTSContext:
-        """Create a context. TTSContexts are short-lived and designed to generate audio for a single transcript.
+    ) -> TTSWSContext:
+        """Create a context. TTSWSContexts are short-lived and designed to generate audio for a single transcript.
 
         See [the API docs](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) for details.
 
@@ -430,7 +430,7 @@ class TTSContextsConnection:
             context_id: Unique identifier for this context. If not provided,
                 a UUID will be auto-generated. Must be unique per WebSocket connection
                 if provided.
-            timeout: Client-side receive timeout in seconds. If set, :meth:`TTSContext.receive`
+            timeout: Client-side receive timeout in seconds. If set, :meth:`TTSWSContext.receive`
                 will yield a synthetic ``client_timeout`` :class:`WebSocketResponseError` and return when no
                 events arrive within the timeout.
             language: Language for this context.
@@ -438,18 +438,18 @@ class TTSContextsConnection:
             add_phoneme_timestamps: Include phoneme-level timestamps.
 
         Returns:
-            :class:`TTSContext` for generating audio on the context.
+            :class:`TTSWSContext` for generating audio on the context.
 
         Raises:
-            :class:`CartesiaError`: If a :class:`TTSContext` with the same ``context_id`` already exists.
+            :class:`CartesiaError`: If a :class:`TTSWSContext` with the same ``context_id`` already exists.
         """
         self._ensure_connected()
         if context_id is None:
             context_id = str(uuid.uuid4())
         if context_id in self._contexts:
             raise CartesiaError(f"Duplicate context ID: {context_id}")
-        ctx = TTSContext(
-            contexts=self,
+        ctx = TTSWSContext(
+            ws=self,
             context_id=context_id,
             timeout=timeout,
             model_id=model_id,
@@ -462,39 +462,39 @@ class TTSContextsConnection:
         self._contexts[context_id] = ctx
         return ctx
 
-    def get_context(self, context_id: str) -> TTSContext | None:
+    def get_context(self, context_id: str) -> TTSWSContext | None:
         """
         Gets the context created by :meth:`context`.
-        Contexts are automatically cleaned up when :meth:`TTSContext.receive` returns.
+        Contexts are automatically cleaned up when :meth:`TTSWSContext.receive` returns.
 
         Args:
-            context_id: :attr:`TTSContext.context_id`
+            context_id: :attr:`TTSWSContext.context_id`
 
         Returns:
-            :class:`TTSContext` or ``None`` if it was cleaned up.
+            :class:`TTSWSContext` or ``None`` if it was cleaned up.
         """
         return self._contexts.get(context_id)
 
-    def list_contexts(self) -> List[TTSContext]:
+    def list_contexts(self) -> List[TTSWSContext]:
         """
         Lists all contexts created by :meth:`context` that have not been cleaned up.
-        Contexts are automatically cleaned up when :meth:`TTSContext.receive` returns.
+        Contexts are automatically cleaned up when :meth:`TTSWSContext.receive` returns.
 
         Returns:
-            A list of :class:`TTSContext`.
+            A list of :class:`TTSWSContext`.
         """
         return list(self._contexts.values())
 
     @overload
-    def on_error(self, handler: _ErrorHandler) -> TTSContextsConnection: ...
+    def on_error(self, handler: _ErrorHandler) -> TTSContextsWSConnection: ...
     @overload
     def on_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def on_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[TTSContextsConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[TTSContextsWSConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a handler for ``error`` events that don't have a ``context_id``.
 
-        Errors with a ``context_id`` are delivered through :meth:`AsyncTTSContext.receive` instead.
+        Errors with a ``context_id`` are delivered through :meth:`AsyncTTSWSContext.receive` instead.
 
         No checks are made to see if the handler has already been added.
         Multiple calls with the same handler register it multiple times.
@@ -518,18 +518,18 @@ class TTSContextsConnection:
 
         return decorator
 
-    def off_error(self, handler: _ErrorHandler) -> TTSContextsConnection:
+    def off_error(self, handler: _ErrorHandler) -> TTSContextsWSConnection:
         """Remove a previously registered error handler."""
         self._event_handler_registry.remove("error", handler)
         return self
 
     @overload
-    def once_error(self, handler: _ErrorHandler) -> TTSContextsConnection: ...
+    def once_error(self, handler: _ErrorHandler) -> TTSContextsWSConnection: ...
     @overload
     def once_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def once_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[TTSContextsConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[TTSContextsWSConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a one-time error handler. Automatically removed after first invocation.
 
         Supports both method and decorator forms; see :meth:`on_error`.
@@ -558,10 +558,10 @@ class TTSContextsConnection:
     def _send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
         connection = self._inner_connection
         if connection is None:
-            raise CartesiaError("TTSContextsConnection is not connected.")
+            raise CartesiaError("TTSContextsWSConnection is not connected.")
         connection.send(event)
 
-    def _unregister_context(self, context_id: str, ctx: TTSContext) -> None:
+    def _unregister_context(self, context_id: str, ctx: TTSWSContext) -> None:
         if self._contexts.get(context_id) is ctx:
             self._contexts.pop(context_id, None)
 
@@ -570,7 +570,7 @@ class TTSContextsConnection:
 
         with self._connect_lock:
             if self._permanently_closed:
-                raise CartesiaError("TTSContextsConnection is closed.")
+                raise CartesiaError("TTSContextsWSConnection is closed.")
             connection = self._inner_connection
             thread = self._reader_thread
             if connection is not None and thread is not None and thread.is_alive():
@@ -692,9 +692,9 @@ class TTSContextsConnection:
                 log.warning("Error exiting inner manager after disconnect", exc_info=True)
 
 
-class TTSContextsConnectionManager:
+class TTSContextsWSConnectionManager:
     """
-    Context manager over a :class:`TTSContextsConnection` that is returned by `tts.create_context_manager()`
+    Context manager over a :class:`TTSContextsWSConnection` that is returned by `cartesia.tts.contexts_ws()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -703,15 +703,15 @@ class TTSContextsConnectionManager:
     Note that if your application doesn't work well with the context manager approach then you
     can call :meth:`enter` directly to initiate a connection.
 
-    **Warning**: You must remember to close the connection with :meth:`TTSContextsConnection.close` if you use :meth:`enter`.
+    **Warning**: You must remember to close the connection with :meth:`TTSContextsWSConnection.close` if you use :meth:`enter`.
 
     ```py
     # using .__enter__()
-    with client.tts.create_context_manager(...) as connection:
+    with client.tts.contexts_ws(...) as connection:
         # ...
 
     # using .enter()
-    connection = client.tts.create_context_manager(...).enter()
+    connection = client.tts.contexts_ws(...).enter()
     # ...
     connection.close()
     ```
@@ -740,19 +740,19 @@ class TTSContextsConnectionManager:
         self._max_delay = max_delay
         self._max_queue_size = max_queue_size
         self._event_handler_registry = EventHandlerRegistry(use_lock=True)
-        self._contexts: TTSContextsConnection | None = None
+        self._connection: TTSContextsWSConnection | None = None
 
     @overload
-    def on_error(self, handler: _ErrorHandler) -> TTSContextsConnectionManager: ...
+    def on_error(self, handler: _ErrorHandler) -> TTSContextsWSConnectionManager: ...
     @overload
     def on_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def on_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[TTSContextsConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[TTSContextsWSConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register an error handler before the connection is established.
 
         The handler is transferred to the connection on enter.
-        See :meth:`TTSContextsConnection.on_error`.
+        See :meth:`TTSContextsWSConnection.on_error`.
         """
         if handler is not None:
             self._event_handler_registry.add("error", handler)
@@ -764,18 +764,18 @@ class TTSContextsConnectionManager:
 
         return decorator
 
-    def off_error(self, handler: _ErrorHandler) -> TTSContextsConnectionManager:
+    def off_error(self, handler: _ErrorHandler) -> TTSContextsWSConnectionManager:
         """Remove a previously registered error handler."""
         self._event_handler_registry.remove("error", handler)
         return self
 
     @overload
-    def once_error(self, handler: _ErrorHandler) -> TTSContextsConnectionManager: ...
+    def once_error(self, handler: _ErrorHandler) -> TTSContextsWSConnectionManager: ...
     @overload
     def once_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def once_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[TTSContextsConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[TTSContextsWSConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a one-time error handler before the connection is established."""
         if handler is not None:
             self._event_handler_registry.add("error", handler, once=True)
@@ -787,24 +787,24 @@ class TTSContextsConnectionManager:
 
         return decorator
 
-    def __enter__(self) -> TTSContextsConnection:
+    def __enter__(self) -> TTSContextsWSConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
 
-        **Warning**: You must remember to close the connection with :meth:`TTSContextsConnection.close`.
+        **Warning**: You must remember to close the connection with :meth:`TTSContextsWSConnection.close`.
 
         ```py
-        contexts = client.tts.create_context_manager(...).enter()
+        connection = client.tts.contexts_ws(...).enter()
         # ...
-        contexts.close()
+        connection.close()
         ```
         """
-        contexts = TTSContextsConnection(self)
-        self._event_handler_registry.merge_into(contexts._event_handler_registry)
-        contexts._ensure_connected()
-        self._contexts = contexts
-        return contexts
+        connection = TTSContextsWSConnection(self)
+        self._event_handler_registry.merge_into(connection._event_handler_registry)
+        connection._ensure_connected()
+        self._connection = connection
+        return connection
 
     enter = __enter__
 
@@ -814,8 +814,8 @@ class TTSContextsConnectionManager:
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self._contexts is not None:
-            self._contexts.close()
+        if self._connection is not None:
+            self._connection.close()
 
 
 # ---------------------------------------------------------------------------
@@ -823,7 +823,7 @@ class TTSContextsConnectionManager:
 # ---------------------------------------------------------------------------
 
 
-class AsyncTTSContext:
+class AsyncTTSWSContext:
     """
     Contexts are short-lived and designed to generate audio for a single transcript.
 
@@ -836,7 +836,7 @@ class AsyncTTSContext:
     def __init__(
         self,
         *,
-        contexts: AsyncTTSContextsConnection,
+        ws: AsyncTTSContextsWSConnection,
         timeout: float | None = None,
         context_id: str,
         model_id: str,
@@ -846,7 +846,7 @@ class AsyncTTSContext:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
     ) -> None:
-        self._contexts = contexts
+        self._ws = ws
         self._context_id = context_id
         self._queue: asyncio.Queue[Any] = asyncio.Queue()
         self._closed = False
@@ -923,7 +923,7 @@ class AsyncTTSContext:
             generation_config=generation_config,
             extra=kwargs,
         )
-        await self._contexts._send(request)
+        await self._ws._send(request)
 
     async def end(self) -> None:
         """Signal that no more transcript chunks will be sent.
@@ -957,7 +957,7 @@ class AsyncTTSContext:
         )
 
         try:
-            await self._contexts._send(request)
+            await self._ws._send(request)
         except WebSocketQueueFullError:
             raise
         except CartesiaError:
@@ -1001,7 +1001,7 @@ class AsyncTTSContext:
             generation_config=None,
             extra={},
         )
-        await self._contexts._send(request)
+        await self._ws._send(request)
 
     async def cancel(self) -> None:
         """Cancel this context to stop generating speech.
@@ -1016,7 +1016,7 @@ class AsyncTTSContext:
         if self._closed:
             return
         try:
-            await self._contexts._send(CancelContextRequest(cancel=True, context_id=self._context_id))
+            await self._ws._send(CancelContextRequest(cancel=True, context_id=self._context_id))
         except WebSocketQueueFullError:
             raise
         except CartesiaError:
@@ -1070,17 +1070,17 @@ class AsyncTTSContext:
         self._closed = True
         # Wake any pending receive() loop. The queue is unbounded so put_nowait can't raise.
         self._queue.put_nowait(_DISCONNECT_SENTINEL)
-        self._contexts._unregister_context(self._context_id, self)
+        self._ws._unregister_context(self._context_id, self)
 
 
-class AsyncTTSContextsConnection:
-    """Used to create instances of :class:`AsyncTTSContext` on a single WebSocket connection."""
+class AsyncTTSContextsWSConnection:
+    """Used to create instances of :class:`AsyncTTSWSContext` on a single WebSocket connection."""
 
-    def __init__(self, manager: AsyncTTSContextsConnectionManager) -> None:
+    def __init__(self, manager: AsyncTTSContextsWSConnectionManager) -> None:
         self._manager = manager
         self._inner_manager: AsyncTTSResourceConnectionManager | None = None
         self._inner_connection: AsyncTTSResourceConnection | None = None
-        self._contexts: Dict[str, AsyncTTSContext] = {}
+        self._contexts: Dict[str, AsyncTTSWSContext] = {}
         self._event_handler_registry = EventHandlerRegistry(use_lock=False)
         self._reader_task: asyncio.Task[None] | None = None
         self._connect_lock = asyncio.Lock()
@@ -1139,8 +1139,8 @@ class AsyncTTSContextsConnection:
         language: SupportedLanguage | None = None,
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
-    ) -> AsyncTTSContext:
-        """Create a context. AsyncTTSContexts are short-lived and designed to generate audio for a single transcript.
+    ) -> AsyncTTSWSContext:
+        """Create a context. AsyncTTSWSContexts are short-lived and designed to generate audio for a single transcript.
 
         See [the API docs](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) for details.
 
@@ -1151,7 +1151,7 @@ class AsyncTTSContextsConnection:
             context_id: Unique identifier for this context. If not provided,
                 a UUID will be auto-generated. Must be unique per WebSocket connection
                 if provided.
-            timeout: Client-side receive timeout in seconds. If set, :meth:`AsyncTTSContext.receive`
+            timeout: Client-side receive timeout in seconds. If set, :meth:`AsyncTTSWSContext.receive`
                 will yield a synthetic ``client_timeout`` :class:`WebSocketResponseError` and return when no
                 events arrive within the timeout.
             language: Language for this context.
@@ -1159,18 +1159,18 @@ class AsyncTTSContextsConnection:
             add_phoneme_timestamps: Include phoneme-level timestamps.
 
         Returns:
-            AsyncTTSContext for generating audio on the context.
+            AsyncTTSWSContext for generating audio on the context.
 
         Raises:
-            :class:`CartesiaError`: If an AsyncTTSContext with the same context_id already exists.
+            :class:`CartesiaError`: If an AsyncTTSWSContext with the same context_id already exists.
         """
         await self._ensure_connected()
         if context_id is None:
             context_id = str(uuid.uuid4())
         if context_id in self._contexts:
             raise CartesiaError(f"Duplicate context ID: {context_id}")
-        ctx = AsyncTTSContext(
-            contexts=self,
+        ctx = AsyncTTSWSContext(
+            ws=self,
             context_id=context_id,
             timeout=timeout,
             model_id=model_id,
@@ -1183,39 +1183,39 @@ class AsyncTTSContextsConnection:
         self._contexts[context_id] = ctx
         return ctx
 
-    def get_context(self, context_id: str) -> AsyncTTSContext | None:
+    def get_context(self, context_id: str) -> AsyncTTSWSContext | None:
         """
         Gets the context created by :meth:`context`.
-        Contexts are automatically cleaned up when :meth:`AsyncTTSContext.receive` returns.
+        Contexts are automatically cleaned up when :meth:`AsyncTTSWSContext.receive` returns.
 
         Args:
-            context_id: :attr:`AsyncTTSContext.context_id`
+            context_id: :attr:`AsyncTTSWSContext.context_id`
 
         Returns:
-            :class:`AsyncTTSContext` or ``None`` if it was cleaned up.
+            :class:`AsyncTTSWSContext` or ``None`` if it was cleaned up.
         """
         return self._contexts.get(context_id)
 
-    def list_contexts(self) -> List[AsyncTTSContext]:
+    def list_contexts(self) -> List[AsyncTTSWSContext]:
         """
         Lists all contexts created by :meth:`context` that have not been cleaned up.
-        Contexts are automatically cleaned up when :meth:`AsyncTTSContext.receive` returns.
+        Contexts are automatically cleaned up when :meth:`AsyncTTSWSContext.receive` returns.
 
         Returns:
-            A list of :class:`AsyncTTSContext`.
+            A list of :class:`AsyncTTSWSContext`.
         """
         return list(self._contexts.values())
 
     @overload
-    def on_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnection: ...
+    def on_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnection: ...
     @overload
     def on_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def on_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[AsyncTTSContextsConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[AsyncTTSContextsWSConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a handler for ``error`` events that don't have a ``context_id``.
 
-        Errors with a ``context_id`` are delivered through :meth:`AsyncTTSContext.receive` instead.
+        Errors with a ``context_id`` are delivered through :meth:`AsyncTTSWSContext.receive` instead.
 
         The handler may be ``async def`` — its returned coroutine is scheduled
         as a fire-and-forget task.
@@ -1242,18 +1242,18 @@ class AsyncTTSContextsConnection:
 
         return decorator
 
-    def off_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnection:
+    def off_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnection:
         """Remove a previously registered error handler."""
         self._event_handler_registry.remove("error", handler)
         return self
 
     @overload
-    def once_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnection: ...
+    def once_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnection: ...
     @overload
     def once_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def once_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[AsyncTTSContextsConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[AsyncTTSContextsWSConnection, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a one-time error handler. Automatically removed after first invocation.
 
         Supports both method and decorator forms; see :meth:`on_error`.
@@ -1282,10 +1282,10 @@ class AsyncTTSContextsConnection:
     async def _send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
         connection = self._inner_connection
         if connection is None:
-            raise CartesiaError("AsyncTTSContextsConnection is not connected.")
+            raise CartesiaError("AsyncTTSContextsWSConnection is not connected.")
         await connection.send(event)
 
-    def _unregister_context(self, context_id: str, ctx: AsyncTTSContext) -> None:
+    def _unregister_context(self, context_id: str, ctx: AsyncTTSWSContext) -> None:
         if self._contexts.get(context_id) is ctx:
             self._contexts.pop(context_id, None)
 
@@ -1294,7 +1294,7 @@ class AsyncTTSContextsConnection:
 
         async with self._connect_lock:
             if self._permanently_closed:
-                raise CartesiaError("AsyncTTSContextsConnection is closed.")
+                raise CartesiaError("AsyncTTSContextsWSConnection is closed.")
             connection = self._inner_connection
             task = self._reader_task
             if connection is not None and task is not None and not task.done():
@@ -1428,9 +1428,9 @@ class AsyncTTSContextsConnection:
                 log.warning("Error exiting inner manager after disconnect", exc_info=True)
 
 
-class AsyncTTSContextsConnectionManager:
+class AsyncTTSContextsWSConnectionManager:
     """
-    Context manager over a :class:`AsyncTTSContextsConnection` that is returned by `tts.create_context_manager()`
+    Context manager over a :class:`AsyncTTSContextsWSConnection` that is returned by `cartesia.tts.contexts_ws()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -1439,15 +1439,15 @@ class AsyncTTSContextsConnectionManager:
     Note that if your application doesn't work well with the context manager approach then you
     can call :meth:`enter` directly to initiate a connection.
 
-    **Warning**: You must remember to close the connection with :meth:`AsyncTTSContextsConnection.close` if you use :meth:`enter`.
+    **Warning**: You must remember to close the connection with :meth:`AsyncTTSContextsWSConnection.close` if you use :meth:`enter`.
 
     ```py
     # using .__aenter__()
-    async with client.tts.create_context_manager(...) as connection:
+    async with client.tts.contexts_ws(...) as connection:
         # ...
 
     # using .enter()
-    connection = await client.tts.create_context_manager(...).enter()
+    connection = await client.tts.contexts_ws(...).enter()
     # ...
     await connection.close()
     ```
@@ -1476,19 +1476,19 @@ class AsyncTTSContextsConnectionManager:
         self._max_delay = max_delay
         self._max_queue_size = max_queue_size
         self._event_handler_registry = EventHandlerRegistry(use_lock=False)
-        self._contexts: AsyncTTSContextsConnection | None = None
+        self._connection: AsyncTTSContextsWSConnection | None = None
 
     @overload
-    def on_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnectionManager: ...
+    def on_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnectionManager: ...
     @overload
     def on_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def on_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[AsyncTTSContextsConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[AsyncTTSContextsWSConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register an error handler before the connection is established.
 
         The handler is transferred to the connection on enter.
-        See :meth:`AsyncTTSContextsConnection.on_error`.
+        See :meth:`AsyncTTSContextsWSConnection.on_error`.
         """
         if handler is not None:
             self._event_handler_registry.add("error", handler)
@@ -1500,18 +1500,18 @@ class AsyncTTSContextsConnectionManager:
 
         return decorator
 
-    def off_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnectionManager:
+    def off_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnectionManager:
         """Remove a previously registered error handler."""
         self._event_handler_registry.remove("error", handler)
         return self
 
     @overload
-    def once_error(self, handler: _ErrorHandler) -> AsyncTTSContextsConnectionManager: ...
+    def once_error(self, handler: _ErrorHandler) -> AsyncTTSContextsWSConnectionManager: ...
     @overload
     def once_error(self) -> Callable[[_ErrorHandler], _ErrorHandler]: ...
     def once_error(
         self, handler: Optional[_ErrorHandler] = None
-    ) -> Union[AsyncTTSContextsConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
+    ) -> Union[AsyncTTSContextsWSConnectionManager, Callable[[_ErrorHandler], _ErrorHandler]]:
         """Register a one-time error handler before the connection is established."""
         if handler is not None:
             self._event_handler_registry.add("error", handler, once=True)
@@ -1523,24 +1523,24 @@ class AsyncTTSContextsConnectionManager:
 
         return decorator
 
-    async def __aenter__(self) -> AsyncTTSContextsConnection:
+    async def __aenter__(self) -> AsyncTTSContextsWSConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
 
-        **Warning**: You must remember to close the connection with :meth:`AsyncTTSContextsConnection.close`.
+        **Warning**: You must remember to close the connection with :meth:`AsyncTTSContextsWSConnection.close`.
 
         ```py
-        contexts = await client.tts.create_context_manager(...).enter()
+        connection = await client.tts.contexts_ws(...).enter()
         # ...
-        await contexts.close()
+        await connection.close()
         ```
         """
-        contexts = AsyncTTSContextsConnection(self)
-        self._event_handler_registry.merge_into(contexts._event_handler_registry)
-        await contexts._ensure_connected()
-        self._contexts = contexts
-        return contexts
+        connection = AsyncTTSContextsWSConnection(self)
+        self._event_handler_registry.merge_into(connection._event_handler_registry)
+        await connection._ensure_connected()
+        self._connection = connection
+        return connection
 
     enter = __aenter__
 
@@ -1550,5 +1550,5 @@ class AsyncTTSContextsConnectionManager:
         exc: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        if self._contexts is not None:
-            await self._contexts.close()
+        if self._connection is not None:
+            await self._connection.close()

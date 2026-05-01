@@ -32,7 +32,10 @@ from .voice_update_params import VoiceUpdateParams as VoiceUpdateParams
 from .dataset_create_params import DatasetCreateParams as DatasetCreateParams
 from .dataset_update_params import DatasetUpdateParams as DatasetUpdateParams
 from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
-from .stt_transcribe_params import SttTranscribeParams as SttTranscribeParams
+from .stt_transcribe_params import (
+    STTTranscribeParams as STTTranscribeParams,
+    SttTranscribeParams as SttTranscribeParams,
+)
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
@@ -45,7 +48,10 @@ from .generation_config_param import GenerationConfigParam as GenerationConfigPa
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
-from .stt_transcribe_response import SttTranscribeResponse as SttTranscribeResponse
+from .stt_transcribe_response import (
+    STTTranscribeResponse as STTTranscribeResponse,
+    SttTranscribeResponse as SttTranscribeResponse,
+)
 from .tts_generate_sse_params import (
     TTSGenerateSSEParams as TTSGenerateSSEParams,
     TTSGenerateSseParams as TTSGenerateSseParams,

@@ -21,9 +21,9 @@ import pytest
 from cartesia import Cartesia, AsyncCartesia, APIStatusError
 from cartesia.types import Voice, VoiceMetadata
 from cartesia.pagination import SyncCursorIDPage
-from cartesia.resources.tts import AsyncWebSocketContext
 from cartesia.types.supported_language import SupportedLanguage
 from cartesia.types.generation_request_param import GenerationRequestParam
+from cartesia.lib._tts.connection_manager_3_0_2 import AsyncWebSocketContext
 
 # Ignore asyncio resource warnings that occur during test teardown, and
 # DeprecationWarning from the legacy ``websocket_connect()`` API exercised
@@ -1215,12 +1215,12 @@ async def test_concurrent_tts_requests():
 
 
 # ============================================================================
-# create_context_manager() Tests (new TTSContextsConnection API)
+# contexts_ws() Tests (new TTSContextsWSConnection API)
 #
 # These tests exercise the new high-level wrapper introduced by
-# `tts.create_context_manager()`, which returns TTSContextsConnection /
-# AsyncTTSContextsConnection. The API surface is:
-#   .context(model_id=, voice=, output_format=, ...)  — create a TTSContext
+# `tts.contexts_ws()`, which returns TTSContextsWSConnection /
+# AsyncTTSContextsWSConnection. The API surface is:
+#   .context(model_id=, voice=, output_format=, ...)  — create a TTSWSContext
 #   ctx.push(transcript)                              — stream a chunk
 #   ctx.end()                                         — signal no-more-inputs
 #   ctx.flush()                                       — request a flush
@@ -1231,12 +1231,12 @@ async def test_concurrent_tts_requests():
 # ============================================================================
 
 
-def test_tts_create_context_manager_sync(client: Cartesia):
+def test_tts_contexts_ws_sync(client: Cartesia):
     """Basic sync: push -> end -> receive on the new context manager API."""
-    logger.info("Testing tts.create_context_manager() sync basic")
+    logger.info("Testing tts.contexts_ws() sync basic")
 
-    with client.tts.create_context_manager() as contexts:
-        ctx = contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ctx = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1255,13 +1255,13 @@ def test_tts_create_context_manager_sync(client: Cartesia):
 
 
 @pytest.mark.asyncio
-async def test_tts_create_context_manager_async():
+async def test_tts_contexts_ws_async():
     """Basic async: push -> end -> receive on the new context manager API."""
-    logger.info("Testing tts.create_context_manager() async basic")
+    logger.info("Testing tts.contexts_ws() async basic")
 
     async with create_async_client() as client:
-        async with client.tts.create_context_manager() as contexts:
-            ctx = await contexts.context(
+        async with client.tts.contexts_ws() as ws:
+            ctx = await ws.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1279,12 +1279,12 @@ async def test_tts_create_context_manager_async():
             _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
 
 
-def test_tts_create_context_manager_continue_false(client: Cartesia):
+def test_tts_contexts_ws_continue_false(client: Cartesia):
     """push(continue_=False) on the final chunk should obviate end()."""
-    logger.info("Testing create_context_manager() continue_=False")
+    logger.info("Testing contexts_ws() continue_=False")
 
-    with client.tts.create_context_manager() as contexts:
-        ctx = contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ctx = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1301,12 +1301,12 @@ def test_tts_create_context_manager_continue_false(client: Cartesia):
         _validate_audio_response(b"".join(audio_chunks), DEFAULT_OUTPUT_FORMAT)
 
 
-def test_tts_create_context_manager_flush_sync(client: Cartesia):
+def test_tts_contexts_ws_flush_sync(client: Cartesia):
     """flush() should produce flush_done events for each segment."""
-    logger.info("Testing create_context_manager() flush()")
+    logger.info("Testing contexts_ws() flush()")
 
-    with client.tts.create_context_manager() as contexts:
-        ctx = contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ctx = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1332,13 +1332,13 @@ def test_tts_create_context_manager_flush_sync(client: Cartesia):
 
 
 @pytest.mark.asyncio
-async def test_tts_create_context_manager_flush_async():
+async def test_tts_contexts_ws_flush_async():
     """Async flush()."""
-    logger.info("Testing async create_context_manager() flush()")
+    logger.info("Testing async contexts_ws() flush()")
 
     async with create_async_client() as client:
-        async with client.tts.create_context_manager() as contexts:
-            ctx = await contexts.context(
+        async with client.tts.contexts_ws() as ws:
+            ctx = await ws.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1363,14 +1363,14 @@ async def test_tts_create_context_manager_flush_async():
             assert flush_count == len(transcripts)
 
 
-def test_tts_create_context_manager_cancel_sync(client: Cartesia):
+def test_tts_contexts_ws_cancel_sync(client: Cartesia):
     """cancel() should stop generation and let the connection be reused."""
-    logger.info("Testing create_context_manager() cancel()")
+    logger.info("Testing contexts_ws() cancel()")
 
     long_transcript = "This is a long sentence that should generate many chunks. " * 10
 
-    with client.tts.create_context_manager() as contexts:
-        ctx = contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ctx = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1391,7 +1391,7 @@ def test_tts_create_context_manager_cancel_sync(client: Cartesia):
         assert ctx.is_closed
 
         # Connection should still be usable for a new context.
-        ctx2 = contexts.context(
+        ctx2 = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1408,19 +1408,19 @@ def test_tts_create_context_manager_cancel_sync(client: Cartesia):
 
 
 @pytest.mark.asyncio
-async def test_tts_create_context_manager_concurrent_contexts_async():
+async def test_tts_contexts_ws_concurrent_contexts_async():
     """Multiple concurrent contexts on a single connection."""
-    logger.info("Testing create_context_manager() concurrent contexts")
+    logger.info("Testing contexts_ws() concurrent contexts")
 
     async with create_async_client() as client:
-        async with client.tts.create_context_manager() as contexts:
-            ctx1 = await contexts.context(
+        async with client.tts.contexts_ws() as ws:
+            ctx1 = await ws.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
                 language=SAMPLE_LANGUAGE,
             )
-            ctx2 = await contexts.context(
+            ctx2 = await ws.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1444,14 +1444,14 @@ async def test_tts_create_context_manager_concurrent_contexts_async():
             _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
 
 
-def test_tts_create_context_manager_duplicate_context_id_raises(client: Cartesia):
+def test_tts_contexts_ws_duplicate_context_id_raises(client: Cartesia):
     """Creating a context with a duplicate id should raise CartesiaError."""
-    logger.info("Testing create_context_manager() duplicate context_id")
+    logger.info("Testing contexts_ws() duplicate context_id")
 
     from cartesia._exceptions import CartesiaError
 
-    with client.tts.create_context_manager() as contexts:
-        contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1459,7 +1459,7 @@ def test_tts_create_context_manager_duplicate_context_id_raises(client: Cartesia
             context_id="dup-id",
         )
         with pytest.raises(CartesiaError, match="Duplicate context ID"):
-            contexts.context(
+            ws.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
                 output_format=DEFAULT_OUTPUT_FORMAT,
@@ -1468,25 +1468,25 @@ def test_tts_create_context_manager_duplicate_context_id_raises(client: Cartesia
             )
 
 
-def test_tts_create_context_manager_get_and_list_contexts(client: Cartesia):
+def test_tts_contexts_ws_get_and_list_contexts(client: Cartesia):
     """get_context() and list_contexts() should return live contexts."""
-    logger.info("Testing create_context_manager() get/list contexts")
+    logger.info("Testing contexts_ws() get/list contexts")
 
-    with client.tts.create_context_manager() as contexts:
-        ctx = contexts.context(
+    with client.tts.contexts_ws() as ws:
+        ctx = ws.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
             language=SAMPLE_LANGUAGE,
             context_id="lookup-id",
         )
-        assert contexts.get_context("lookup-id") is ctx
-        assert ctx in contexts.list_contexts()
-        assert contexts.get_context("nonexistent") is None
+        assert ws.get_context("lookup-id") is ctx
+        assert ctx in ws.list_contexts()
+        assert ws.get_context("nonexistent") is None
 
         # After receive() drains, the context is automatically unregistered.
         ctx.push("hi")
         ctx.end()
         for _ in ctx.receive():
             pass
-        assert contexts.get_context("lookup-id") is None
+        assert ws.get_context("lookup-id") is None
