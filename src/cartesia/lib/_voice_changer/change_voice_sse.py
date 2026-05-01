@@ -1,3 +1,10 @@
+"""
+VoiceChangerResource.change_voice_sse() and AsyncVoiceChangerResource.change_voice_sse() implementation.
+
+.. deprecated::
+    Use VoiceChangerResource.generate_sse() or AsyncVoiceChangerResource.generate_sse() instead.
+"""
+
 from __future__ import annotations
 
 import warnings
@@ -36,11 +43,14 @@ def sync_change_voice_sse(
     timeout: float | httpx.Timeout | None | NotGiven,
 ) -> None:
     """
-    Deprecated Sync Voice Changer (SSE). This function is no longer maintained.
+    Sync Voice Changer (SSE).
+
+    .. deprecated::
+        Use cartesia.voice_changer.generate_sse() instead.
     """
 
     warnings.warn(
-        "Use .generate_sse() instead",
+        "Use cartesia.voice_changer.generate_sse() instead",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -88,11 +98,14 @@ async def async_change_voice_sse(
     timeout: float | httpx.Timeout | None | NotGiven,
 ) -> None:
     """
-    Deprecated Async Voice Changer (SSE). This function is no longer maintained.
+    Async Voice Changer (SSE).
+
+    .. deprecated::
+        Use cartesia.voice_changer.generate_sse() instead.
     """
 
     warnings.warn(
-        "Use .generate_sse() instead",
+        "Use cartesia.voice_changer.generate_sse() instead",
         DeprecationWarning,
         stacklevel=2,
     )

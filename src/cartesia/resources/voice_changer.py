@@ -201,9 +201,10 @@ class VoiceChangerResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> None:
         """
-        Make a Voice Changer (SSE) request without any added response handling.
+        Voice Changer (SSE) without any response handling.
 
-        Deprecated: Use .generate_sse() to have events parsed and streamed for you.
+        .. deprecated::
+            Use :meth:`generate_sse` for built in event parsing and streaming.
 
         Args:
           output_format_bit_rate: Required for `mp3` containers.
@@ -398,9 +399,10 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> None:
         """
-        Make a Voice Changer (SSE) request without any added response handling.
+        Voice Changer (SSE) without any response handling.
 
-        Deprecated: Use .generate_sse() to have events parsed and streamed for you.
+        .. deprecated::
+            Use :meth:`generate_sse` for built in event parsing and streaming.
 
         Args:
           output_format_bit_rate: Required for `mp3` containers.

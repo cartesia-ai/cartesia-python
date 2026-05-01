@@ -46,6 +46,14 @@ from .._exceptions import CartesiaError, WebSocketConnectionClosedError
 from .._send_queue import SendQueue
 from .._base_client import _merge_mappings, make_request_options
 from .._event_handler import EventHandlerRegistry
+from ..lib._tts.contexts import (
+    TTSContext as TTSContext,
+    AsyncTTSContext as AsyncTTSContext,
+    TTSContextsConnection as TTSContextsConnection,
+    AsyncTTSContextsConnection as AsyncTTSContextsConnection,
+    TTSContextsConnectionManager as TTSContextsConnectionManager,
+    AsyncTTSContextsConnectionManager as AsyncTTSContextsConnectionManager,
+)
 from ..types.model_speed import ModelSpeed
 from ..lib._tts.backcompat import BackcompatTTSResourceConnection, AsyncBackcompatTTSResourceConnection
 from ..types.tts_sse_event import TTSSSEEvent
@@ -55,6 +63,12 @@ from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
+from ..lib._tts.connection_manager_3_0_2 import (
+    WebSocketContext as WebSocketContext,  # imported for backward compatibility
+    AsyncWebSocketContext as AsyncWebSocketContext,  # imported for backward compatibility
+    TTSResourceConnectionManager_3_0_2,
+    AsyncTTSResourceConnectionManager_3_0_2,
+)
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebSocketConnectionOptions
 
@@ -64,7 +78,16 @@ if TYPE_CHECKING:
 
     from .._client import Cartesia, AsyncCartesia
 
-__all__ = ["TTSResource", "AsyncTTSResource"]
+__all__ = [
+    "TTSResource",
+    "AsyncTTSResource",
+    "TTSContext",
+    "AsyncTTSContext",
+    "TTSContextsConnection",
+    "AsyncTTSContextsConnection",
+    "TTSContextsConnectionManager",
+    "AsyncTTSContextsConnectionManager",
+]
 
 log: logging.Logger = logging.getLogger(__name__)
 
@@ -362,7 +385,7 @@ class TTSResource(SyncAPIResource):
             cast_to=BinaryAPIResponse,
         )
 
-    def websocket_connect(
+    def create_context_manager(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
@@ -372,8 +395,8 @@ class TTSResource(SyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> TTSResourceConnectionManager:
-        """Text-to-Speech (WebSocket).
+    ) -> TTSContextsConnectionManager:
+        """Text-to-Speech with context management.
 
         Supports:
           - Streaming
@@ -383,7 +406,7 @@ class TTSResource(SyncAPIResource):
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
         """
-        return TTSResourceConnectionManager(
+        return TTSContextsConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -414,11 +437,14 @@ class TTSResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Iterator[bytes]:
         """
-        Deprecated version of .generate().
+        Text-to-speech (Bytes).
+
+        .. deprecated::
+            Use :meth:`generate` instead.
         """
 
         warnings.warn(
-            "Use .generate() instead",
+            "Use cartesia.tts.generate() instead",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -442,6 +468,32 @@ class TTSResource(SyncAPIResource):
 
     sse = generate_sse  # alias for backward compatibility
 
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+    ) -> TTSResourceConnectionManager_3_0_2:
+        """
+        Text-to-Speech (WebSocket).
+
+        .. deprecated::
+            Use :meth:`create_context_manager` instead.
+        """
+
+        warnings.warn(
+            "Use cartesia.tts.create_context_manager() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        return TTSResourceConnectionManager_3_0_2(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+
     def websocket(
         self,
         extra_query: Query = {},
@@ -449,21 +501,26 @@ class TTSResource(SyncAPIResource):
         websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> BackcompatTTSResourceConnection:
         """
-        Deprecated version of .websocket_connect().
+        SDK v2 compatible Text-to-Speech (WebSocket).
+
+        .. deprecated::
+            Use :meth:`create_context_manager` instead.
         """
 
         warnings.warn(
-            "Use .websocket_connect() instead",
+            "Use cartesia.tts.create_context_manager() instead",
             DeprecationWarning,
             stacklevel=2,
         )
 
-        manager = self.websocket_connect(
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
+        return BackcompatTTSResourceConnection(
+            TTSResourceConnectionManager_3_0_2(
+                client=self._client,
+                extra_query=extra_query,
+                extra_headers=extra_headers,
+                websocket_connection_options=websocket_connection_options,
+            )
         )
-        return BackcompatTTSResourceConnection(manager)
 
 
 class AsyncTTSResource(AsyncAPIResource):
@@ -759,7 +816,7 @@ class AsyncTTSResource(AsyncAPIResource):
             cast_to=AsyncBinaryAPIResponse,
         )
 
-    def websocket_connect(
+    def create_context_manager(
         self,
         extra_query: Query = {},
         extra_headers: Headers = {},
@@ -769,8 +826,8 @@ class AsyncTTSResource(AsyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> AsyncTTSResourceConnectionManager:
-        """Text-to-Speech (WebSocket).
+    ) -> AsyncTTSContextsConnectionManager:
+        """Text-to-Speech with context management.
 
         Supports:
           - Streaming
@@ -780,7 +837,7 @@ class AsyncTTSResource(AsyncAPIResource):
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
         """
-        return AsyncTTSResourceConnectionManager(
+        return AsyncTTSContextsConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -811,11 +868,14 @@ class AsyncTTSResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> AsyncIterator[bytes]:
         """
-        Deprecated version of .generate().
+        Text-to-Speech (Bytes).
+
+        .. deprecated::
+            Use :meth:`generate` instead.
         """
 
         warnings.warn(
-            "Use .generate() instead",
+            "Use cartesia.tts.generate() instead",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -839,6 +899,32 @@ class AsyncTTSResource(AsyncAPIResource):
 
     sse = generate_sse  # Alias for backward compatibility
 
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+    ) -> AsyncTTSResourceConnectionManager_3_0_2:
+        """
+        Text-to-Speech (WebSocket).
+
+        .. deprecated::
+            Use :meth:`create_context_manager` instead.
+        """
+
+        warnings.warn(
+            "Use cartesia.tts.create_context_manager() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        return AsyncTTSResourceConnectionManager_3_0_2(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
+
     async def websocket(
         self,
         extra_query: Query = {},
@@ -846,21 +932,26 @@ class AsyncTTSResource(AsyncAPIResource):
         websocket_connection_options: WebSocketConnectionOptions = {},
     ) -> AsyncBackcompatTTSResourceConnection:
         """
-        Deprecated version of .websocket_connect().
+        SDK v2 compatible Text-to-Speech (WebSocket).
+
+        .. deprecated::
+            Use :meth:`create_context_manager` instead.
         """
 
         warnings.warn(
-            "Use .websocket_connect() instead",
+            "Use cartesia.tts.create_context_manager() instead",
             DeprecationWarning,
             stacklevel=2,
         )
 
-        manager = self.websocket_connect(
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
+        return AsyncBackcompatTTSResourceConnection(
+            AsyncTTSResourceConnectionManager_3_0_2(
+                client=self._client,
+                extra_query=extra_query,
+                extra_headers=extra_headers,
+                websocket_connection_options=websocket_connection_options,
+            )
         )
-        return AsyncBackcompatTTSResourceConnection(manager)
 
 
 class TTSResourceWithRawResponse:
@@ -1367,6 +1458,7 @@ class AsyncTTSResourceConnectionManager:
             additional_headers=_merge_mappings(
                 {
                     **self.__client.auth_headers,
+                    "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2026-03-01"),
                 },
                 extra_headers,
             ),
@@ -1807,6 +1899,7 @@ class TTSResourceConnectionManager:
             additional_headers=_merge_mappings(
                 {
                     **self.__client.auth_headers,
+                    "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2026-03-01"),
                 },
                 extra_headers,
             ),

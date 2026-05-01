@@ -11,6 +11,7 @@ from typing import IO
 from cartesia import (
     AsyncCartesia,
 )
+from cartesia.resources.tts import AsyncTTSContext
 
 # =============================================================================
 # TTS Bytes (Async)
@@ -24,6 +25,7 @@ async def tts_generate_async(client: AsyncCartesia) -> None:
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        language="en",
     )
     await response.write_to_file("output_async.wav")
     print("Saved audio to output_async.wav")
@@ -37,6 +39,7 @@ async def tts_bytes_async(client: AsyncCartesia) -> None:
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        language="en",
     )
 
     filename = "output_bytes_async.wav"
@@ -60,6 +63,7 @@ async def tts_sse_basic_async(client: AsyncCartesia) -> None:
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        language="en",
     )
 
     filename = f"tts_sse_async_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pcm"
@@ -85,6 +89,7 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        language="en",
         add_timestamps=True,
     )
 
@@ -114,21 +119,21 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
 
 
 async def tts_websocket_basic_async(client: AsyncCartesia) -> None:
-    """Async WebSocket usage with websocket_connect()."""
-    async with client.tts.websocket_connect() as connection:
-        ctx = connection.context()
-        await ctx.send(
+    """Async WebSocket usage with create_context_manager()."""
+    async with client.tts.create_context_manager() as connection:
+        ctx = await connection.context(
             model_id="sonic-3",
-            transcript="Hello, world!",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
-            _continue=False,
+            language="en",
         )
+        await ctx.push("Hello, world!")
+        await ctx.end()
 
         filename = f"tts_ws_basic_async_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pcm"
 
         with open(filename, "wb") as f:
-            async for response in connection:
+            async for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
                 elif response.done:
@@ -141,21 +146,18 @@ async def tts_websocket_basic_async(client: AsyncCartesia) -> None:
 async def tts_websocket_continuations_async(client: AsyncCartesia) -> None:
     """Async streaming multiple transcripts with continuations."""
     transcripts = ["The only thing we have to fear ", "is ", "fear itself."]
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
 
-    async with client.tts.websocket_connect() as connection:
-        ctx = connection.context()
+    async with client.tts.create_context_manager() as connection:
+        ctx = await connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        )
 
         for transcript in transcripts:
-            await ctx.send(
-                model_id="sonic-3",
-                transcript=transcript,
-                voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-                output_format=output_format,
-                continue_=True,
-            )
+            await ctx.push(transcript)
 
-        await ctx.no_more_inputs()
+        await ctx.end()
 
         filename = f"tts_ws_continuations_async_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pcm"
 
@@ -171,43 +173,28 @@ async def tts_websocket_continuations_async(client: AsyncCartesia) -> None:
 async def tts_websocket_flushing_async(client: AsyncCartesia) -> None:
     """Async manual flushing example."""
     transcripts = ["First transcript.", "Second transcript."]
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
 
-    async with client.tts.websocket_connect() as connection:
-        ctx = connection.context()
+    async with client.tts.create_context_manager() as connection:
+        ctx = await connection.context(
+            model_id="sonic-3",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            language="en",
+        )
 
         # 1. Send first transcript
         print("Sending first transcript...")
-        await ctx.send(
-            model_id="sonic-3",
-            transcript=transcripts[0],
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
-            continue_=True,
-        )
+        await ctx.push(transcripts[0])
 
         # 2. Flush!
         print("Flushing...")
-        await ctx.send(
-            model_id="sonic-3",
-            transcript="",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
-            continue_=True,
-            flush=True,
-        )
+        await ctx.flush()
 
         # 3. Send second transcript
         print("Sending second transcript...")
-        await ctx.send(
-            model_id="sonic-3",
-            transcript=transcripts[1],
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
-            continue_=True,
-        )
+        await ctx.push(transcripts[1])
 
-        await ctx.no_more_inputs()
+        await ctx.end()
 
         import datetime
 
@@ -240,13 +227,13 @@ async def tts_websocket_flushing_async(client: AsyncCartesia) -> None:
 
 async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
     """Async emotion changing example."""
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
 
-    async with client.tts.websocket_connect() as connection:
-        ctx = connection.context(
+    async with client.tts.create_context_manager() as connection:
+        ctx = await connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            language="en",
         )
 
         print("Sending neutral text...")
@@ -255,7 +242,7 @@ async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
         print("Sending angry text...")
         await ctx.push("loosen up a little!", generation_config={"emotion": "angry"})
 
-        await ctx.no_more_inputs()
+        await ctx.end()
 
         import datetime
 
@@ -272,13 +259,13 @@ async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
 
 async def tts_websocket_speed_async(client: AsyncCartesia) -> None:
     """Async speed changing example."""
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
 
-    async with client.tts.websocket_connect() as connection:
-        ctx = connection.context(
+    async with client.tts.create_context_manager() as connection:
+        ctx = await connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            language="en",
         )
 
         print("Sending normal speed text...")
@@ -287,7 +274,7 @@ async def tts_websocket_speed_async(client: AsyncCartesia) -> None:
         print("Sending fast speed text...")
         await ctx.push("But now I am speaking much faster!", generation_config={"speed": 1.5})
 
-        await ctx.no_more_inputs()
+        await ctx.end()
 
         import datetime
 
@@ -308,37 +295,36 @@ async def tts_websocket_concurrent_receives_async(client: AsyncCartesia) -> None
     The lazy-routing in receive() ensures that whichever task happens to read an
     event from the wire routes it to the correct context's queue.
     """
-    from cartesia.resources.tts import AsyncWebSocketContext
 
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
-
-    async with client.tts.websocket_connect() as connection:
-        ctx1 = connection.context(
+    async with client.tts.create_context_manager() as connection:
+        ctx1 = await connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            language="en",
         )
-        ctx2 = connection.context(
+        ctx2 = await connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
+            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            language="en",
         )
 
         # Send to both contexts
         await ctx1.push(
             "Context one is speaking now. This is a longer transcript to ensure that audio chunks from both contexts are interleaved on the wire. The quick brown fox jumps over the lazy dog."
         )
-        await ctx1.no_more_inputs()
+        await ctx1.end()
 
         await ctx2.push(
             "Context two has a different message. We want to verify that the routing logic correctly separates the audio streams. Pack my box with five dozen liquor jugs."
         )
-        await ctx2.no_more_inputs()
+        await ctx2.end()
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Receive concurrently via tasks, writing to files
-        async def collect(ctx: AsyncWebSocketContext, filename: str) -> None:
+        async def collect(ctx: AsyncTTSContext, filename: str) -> None:
             with open(filename, "wb") as f:
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -371,12 +357,17 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
     output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
     voice_id = "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"  # Standard voice
 
+    # TODO: ws()
     async with client.tts.websocket_connect() as connection:
         # Create 3 contexts
         contexts: list[AsyncWebSocketContext] = []
         for i in range(3):
             ctx = connection.context(
-                model_id="sonic-3", voice={"mode": "id", "id": voice_id}, output_format=output_format
+                context_id=None,
+                model_id="sonic-3",
+                voice={"mode": "id", "id": voice_id},
+                output_format=output_format,
+                language="en",
             )
             contexts.append(ctx)
             print(f"Created context {i}: {ctx._context_id}")

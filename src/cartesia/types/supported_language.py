@@ -1,10 +1,11 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing import Union
 from typing_extensions import Literal, TypeAlias
 
 __all__ = ["SupportedLanguage"]
 
-SupportedLanguage: TypeAlias = Literal[
+_SupportedLanguage = Literal[
     "en",
     "fr",
     "de",
@@ -48,3 +49,5 @@ SupportedLanguage: TypeAlias = Literal[
     "mr",
     "pa",
 ]
+
+SupportedLanguage: TypeAlias = Union[_SupportedLanguage, str]
