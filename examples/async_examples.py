@@ -350,76 +350,66 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
     Demonstrates using a single WebSocket connection to manage multiple contexts concurrently.
 
     We spawn separate tasks to push audio to 3 different contexts.
-    We use a single receiver loop to demultiplex the responses to the correct files.
+    We use a single receiver loop to de-multiplex the responses to the correct files.
     """
-    from cartesia.resources.tts import AsyncWebSocketContext
+    from cartesia.types import GenerationRequestParam
 
-    output_format = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
-    voice_id = "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"  # Standard voice
-
-    # TODO: ws()
-    async with client.tts.websocket_connect() as connection:
-        # Create 3 contexts
-        contexts: list[AsyncWebSocketContext] = []
-        for i in range(3):
-            ctx = connection.context(
-                context_id=None,
-                model_id="sonic-3",
-                voice={"mode": "id", "id": voice_id},
-                output_format=output_format,
-                language="en",
-            )
-            contexts.append(ctx)
-            print(f"Created context {i}: {ctx._context_id}")
+    async with client.tts.generate_ws() as connection:
+        all_quotes = [
+            ["Ask not what your country can do for you, ", "ask what you can do ", "for your country."],
+            ["I have a dream ", "that one day this nation ", "will rise up."],
+            ["In the end, it's not the years in your life that count. ", "It's the life ", "in your years."],
+        ]
 
         # Define a sender function
-        async def send_transcript(ctx_index: int, ctx: AsyncWebSocketContext) -> None:
-            all_quotes = [
-                ["Ask not what your country can do for you, ", "ask what you can do ", "for your country."],
-                ["I have a dream ", "that one day this nation ", "will rise up."],
-                ["In the end, it's not the years in your life that count. ", "It's the life ", "in your years."],
-            ]
+        async def send_transcript(ctx_index: int) -> None:
             transcripts = all_quotes[ctx_index]
-            for part in transcripts:
+            for part_idx, part in enumerate(transcripts):
                 print(f"Sending '{part.strip()}' to context {ctx_index}")
-                # Use the new push() helper
-                await ctx.push(part)
+                request: GenerationRequestParam = {
+                    "model_id": "sonic-3",
+                    "voice": {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+                    "output_format": {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+                    "context_id": str(ctx_index),
+                    "transcript": part,
+                    "language": "en",
+                    "continue": part_idx + 1 < len(transcripts),
+                }
+                await connection.send(request)
                 # Small delay to simulate real-time input and interleave requests
                 await asyncio.sleep(0.1)
 
-            await ctx.no_more_inputs()
             print(f"Finished sending to context {ctx_index}")
 
         # Start sender tasks
-        send_tasks = [asyncio.create_task(send_transcript(i, ctx)) for i, ctx in enumerate(contexts)]
+        send_tasks = [asyncio.create_task(send_transcript(i)) for i in range(len(all_quotes))]
 
         # Receiver loop
-        files: dict[str, IO[bytes]] = {}
-        active_contexts: set[str] = {ctx._context_id for ctx in contexts}
+        files: dict[int, IO[bytes]] = {}
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         print("Starting receiver loop...")
 
+        done_count = 0
+
         # Iterate over the connection directly to receive all events
         async for event in connection:
             if event.type == "chunk" and event.audio:
-                ctx_id = event.context_id
-                if ctx_id not in files:
-                    # Find which context index this matches for filename
-                    ctx_idx = next((i for i, c in enumerate(contexts) if c._context_id == ctx_id), "unknown")
-                    filename = f"tts_concurrent_{ctx_idx}_{timestamp}.pcm"
-                    files[ctx_id] = open(filename, "wb")
-                    print(f"Created file for context {ctx_idx}: {filename}")
+                ctx_index = int(event.context_id)
+                if ctx_index not in files:
+                    filename = f"tts_concurrent_{ctx_index}_{timestamp}.pcm"
+                    files[ctx_index] = open(filename, "wb")
+                    print(f"Created file for context {ctx_index}: {filename}")
 
-                files[ctx_id].write(event.audio)
+                files[ctx_index].write(event.audio)
 
             elif event.type == "done":
                 ctx_id = event.context_id
                 print(f"Context {ctx_id} finished.")
-                if ctx_id in active_contexts:
-                    active_contexts.remove(ctx_id)
 
-                if not active_contexts:
+                done_count += 1
+
+                if done_count == len(all_quotes):
                     print("All contexts finished.")
                     break
 
@@ -432,9 +422,8 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
 
         print("\nFinished.")
         print("You can play the generated audio files with these commands:")
-        for ctx_id, f in files.items():
-            ctx_idx = next((i for i, c in enumerate(contexts) if c._context_id == ctx_id), "unknown")
-            print(f"  Context {ctx_idx}: ffplay -f f32le -ar 44100 {f.name}")
+        for ctx_index, f in files.items():
+            print(f"  Context {ctx_index}: ffplay -f f32le -ar 44100 {f.name}")
 
 
 # =============================================================================
