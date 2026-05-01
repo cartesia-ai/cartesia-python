@@ -274,6 +274,39 @@ class TTSResource(SyncAPIResource):
             stream_cls=Stream[TTSSSEEvent],
         )
 
+    def generate_ws(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
+        max_queue_size: int = 1_048_576,
+    ) -> TTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
+
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
+        return TTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+            on_reconnecting=on_reconnecting,
+            max_retries=max_retries,
+            initial_delay=initial_delay,
+            max_delay=max_delay,
+            max_queue_size=max_queue_size,
+        )
+
     def infill(
         self,
         *,
@@ -358,39 +391,6 @@ class TTSResource(SyncAPIResource):
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=BinaryAPIResponse,
-        )
-
-    def websocket_connect(
-        self,
-        extra_query: Query = {},
-        extra_headers: Headers = {},
-        websocket_connection_options: WebSocketConnectionOptions = {},
-        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
-        max_retries: int = 5,
-        initial_delay: float = 0.5,
-        max_delay: float = 8.0,
-        max_queue_size: int = 1_048_576,
-    ) -> TTSResourceConnectionManager:
-        """Text-to-Speech (WebSocket).
-
-        Supports:
-          - Streaming
-          - Long-lived connections allow for lower latency by reusing a live network connection
-          - Timestamps
-          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
-          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
-          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
-        """
-        return TTSResourceConnectionManager(
-            client=self._client,
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
-            on_reconnecting=on_reconnecting,
-            max_retries=max_retries,
-            initial_delay=initial_delay,
-            max_delay=max_delay,
-            max_queue_size=max_queue_size,
         )
 
 
@@ -601,6 +601,39 @@ class AsyncTTSResource(AsyncAPIResource):
             stream_cls=AsyncStream[TTSSSEEvent],
         )
 
+    def generate_ws(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebSocketConnectionOptions = {},
+        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
+        max_retries: int = 5,
+        initial_delay: float = 0.5,
+        max_delay: float = 8.0,
+        max_queue_size: int = 1_048_576,
+    ) -> AsyncTTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
+
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
+        return AsyncTTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+            on_reconnecting=on_reconnecting,
+            max_retries=max_retries,
+            initial_delay=initial_delay,
+            max_delay=max_delay,
+            max_queue_size=max_queue_size,
+        )
+
     async def infill(
         self,
         *,
@@ -685,39 +718,6 @@ class AsyncTTSResource(AsyncAPIResource):
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=AsyncBinaryAPIResponse,
-        )
-
-    def websocket_connect(
-        self,
-        extra_query: Query = {},
-        extra_headers: Headers = {},
-        websocket_connection_options: WebSocketConnectionOptions = {},
-        on_reconnecting: Callable[[ReconnectingEvent], ReconnectingOverrides | None] | None = None,
-        max_retries: int = 5,
-        initial_delay: float = 0.5,
-        max_delay: float = 8.0,
-        max_queue_size: int = 1_048_576,
-    ) -> AsyncTTSResourceConnectionManager:
-        """Text-to-Speech (WebSocket).
-
-        Supports:
-          - Streaming
-          - Long-lived connections allow for lower latency by reusing a live network connection
-          - Timestamps
-          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
-          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
-          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
-        """
-        return AsyncTTSResourceConnectionManager(
-            client=self._client,
-            extra_query=extra_query,
-            extra_headers=extra_headers,
-            websocket_connection_options=websocket_connection_options,
-            on_reconnecting=on_reconnecting,
-            max_retries=max_retries,
-            initial_delay=initial_delay,
-            max_delay=max_delay,
-            max_queue_size=max_queue_size,
         )
 
 
@@ -1068,7 +1068,7 @@ class AsyncTTSResourceConnection:
 
 class AsyncTTSResourceConnectionManager:
     """
-    Context manager over a `AsyncTTSResourceConnection` that is returned by `tts.websocket_connect()`
+    Context manager over a `AsyncTTSResourceConnection` that is returned by `tts.generate_ws()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -1080,7 +1080,7 @@ class AsyncTTSResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = await client.tts.websocket_connect(...).enter()
+    connection = await client.tts.generate_ws(...).enter()
     # ...
     await connection.close()
     ```
@@ -1169,7 +1169,7 @@ class AsyncTTSResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = await client.tts.websocket_connect(...).enter()
+        connection = await client.tts.generate_ws(...).enter()
         # ...
         await connection.close()
         ```
@@ -1508,7 +1508,7 @@ class TTSResourceConnection:
 
 class TTSResourceConnectionManager:
     """
-    Context manager over a `TTSResourceConnection` that is returned by `tts.websocket_connect()`
+    Context manager over a `TTSResourceConnection` that is returned by `tts.generate_ws()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -1520,7 +1520,7 @@ class TTSResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = client.tts.websocket_connect(...).enter()
+    connection = client.tts.generate_ws(...).enter()
     # ...
     connection.close()
     ```
@@ -1609,7 +1609,7 @@ class TTSResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = client.tts.websocket_connect(...).enter()
+        connection = client.tts.generate_ws(...).enter()
         # ...
         connection.close()
         ```
