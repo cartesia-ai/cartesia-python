@@ -100,7 +100,7 @@ The 3.x SDK also aliases `.sse()` to `.generate_sse()` for backwards compatibili
 
 ## TTS WebSocket
 
-You can now call `client.tts.create_context_manager()` or `client.tts.generate_ws()` to get a Python context that
+You can now call `client.tts.contexts_ws()` or `client.tts.generate_ws()` to get a Python context that
 automatically closes the websocket.
 
 ### WebSocket Basic Usage
@@ -124,8 +124,8 @@ with open("output.pcm", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.create_context_manager() as connection:
-    ctx = connection.context(
+with client.tts.contexts_ws() as ws:
+    ctx = ws.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "voice-id"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -162,8 +162,8 @@ with open("output.raw", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.create_context_manager() as connection:
-    ctx = connection.context(
+with client.tts.contexts_ws() as ws:
+    ctx = ws.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "voice-id"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},

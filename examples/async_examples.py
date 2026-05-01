@@ -11,7 +11,7 @@ from typing import IO
 from cartesia import (
     AsyncCartesia,
 )
-from cartesia.resources.tts import AsyncTTSContext
+from cartesia.resources.tts import AsyncTTSWSContext
 
 # =============================================================================
 # TTS Bytes (Async)
@@ -119,9 +119,9 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
 
 
 async def tts_websocket_basic_async(client: AsyncCartesia) -> None:
-    """Async WebSocket usage with create_context_manager()."""
-    async with client.tts.create_context_manager() as connection:
-        ctx = await connection.context(
+    """Async WebSocket usage with contexts_ws()."""
+    async with client.tts.contexts_ws() as ws:
+        ctx = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -147,8 +147,8 @@ async def tts_websocket_continuations_async(client: AsyncCartesia) -> None:
     """Async streaming multiple transcripts with continuations."""
     transcripts = ["The only thing we have to fear ", "is ", "fear itself."]
 
-    async with client.tts.create_context_manager() as connection:
-        ctx = await connection.context(
+    async with client.tts.contexts_ws() as ws:
+        ctx = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -174,8 +174,8 @@ async def tts_websocket_flushing_async(client: AsyncCartesia) -> None:
     """Async manual flushing example."""
     transcripts = ["First transcript.", "Second transcript."]
 
-    async with client.tts.create_context_manager() as connection:
-        ctx = await connection.context(
+    async with client.tts.contexts_ws() as ws:
+        ctx = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -228,8 +228,8 @@ async def tts_websocket_flushing_async(client: AsyncCartesia) -> None:
 async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
     """Async emotion changing example."""
 
-    async with client.tts.create_context_manager() as connection:
-        ctx = await connection.context(
+    async with client.tts.contexts_ws() as ws:
+        ctx = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -260,8 +260,8 @@ async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
 async def tts_websocket_speed_async(client: AsyncCartesia) -> None:
     """Async speed changing example."""
 
-    async with client.tts.create_context_manager() as connection:
-        ctx = await connection.context(
+    async with client.tts.contexts_ws() as ws:
+        ctx = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -296,14 +296,14 @@ async def tts_websocket_concurrent_receives_async(client: AsyncCartesia) -> None
     event from the wire routes it to the correct context's queue.
     """
 
-    async with client.tts.create_context_manager() as connection:
-        ctx1 = await connection.context(
+    async with client.tts.contexts_ws() as ws:
+        ctx1 = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
         )
-        ctx2 = await connection.context(
+        ctx2 = await ws.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -324,7 +324,7 @@ async def tts_websocket_concurrent_receives_async(client: AsyncCartesia) -> None
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Receive concurrently via tasks, writing to files
-        async def collect(ctx: AsyncTTSContext, filename: str) -> None:
+        async def collect(ctx: AsyncTTSWSContext, filename: str) -> None:
             with open(filename, "wb") as f:
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -354,7 +354,7 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
     """
     from cartesia.types import GenerationRequestParam
 
-    async with client.tts.generate_ws() as connection:
+    async with client.tts.generate_ws() as ws:
         all_quotes = [
             ["Ask not what your country can do for you, ", "ask what you can do ", "for your country."],
             ["I have a dream ", "that one day this nation ", "will rise up."],
@@ -375,7 +375,7 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
                     "language": "en",
                     "continue": part_idx + 1 < len(transcripts),
                 }
-                await connection.send(request)
+                await ws.send(request)
                 # Small delay to simulate real-time input and interleave requests
                 await asyncio.sleep(0.1)
 
@@ -392,8 +392,8 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
 
         done_count = 0
 
-        # Iterate over the connection directly to receive all events
-        async for event in connection:
+        # Iterate over the ws directly to receive all events
+        async for event in ws:
             if event.type == "chunk" and event.audio:
                 ctx_index = int(event.context_id)
                 if ctx_index not in files:

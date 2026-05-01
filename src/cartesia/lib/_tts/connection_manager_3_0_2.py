@@ -235,12 +235,12 @@ class AsyncTTSResourceConnection_3_0_2:
 
 class AsyncTTSResourceConnectionManager_3_0_2:
     """
-    Context manager over a `AsyncTTSResourceConnection` that is returned by `tts.websocket_connect()`
+    Context manager over a `AsyncTTSResourceConnection` that is returned by `cartesia.tts.websocket_connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
     .. deprecated::
-        Created by ``tts.websocket_connect()``. Use ``tts.create_context_manager()`` instead.
+        Created by ``cartesia.tts.websocket_connect()``. Use ``cartesia.tts.contexts_ws()`` instead.
 
     ---
 
@@ -467,12 +467,12 @@ class TTSResourceConnection_3_0_2:
 
 class TTSResourceConnectionManager_3_0_2:
     """
-    Context manager over a `TTSResourceConnection` that is returned by `tts.websocket_connect()`
+    Context manager over a `TTSResourceConnection` that is returned by `cartesia.tts.websocket_connect()`
 
     This context manager ensures that the connection will be closed when it exits.
 
     .. deprecated::
-        Created by ``tts.websocket_connect()``. Use ``tts.create_context_manager()`` instead.
+        Created by ``cartesia.tts.websocket_connect()``. Use ``cartesia.tts.contexts_ws()`` instead.
 
     ---
 

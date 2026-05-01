@@ -226,7 +226,7 @@ async def test_slow_reader_does_not_block_fast_reader():
 
 
 # ---------------------------------------------------------------------------
-# Tests for the new TTSContextsConnection / AsyncTTSContextsConnection
+# Tests for the new TTSContextsWSConnection / AsyncTTSContextsWSConnection
 # background reader (in cartesia.lib._tts.contexts)
 #
 # These tests drive the bg reader manually via _reader_loop / _route_event,
@@ -242,8 +242,8 @@ from unittest.mock import MagicMock
 
 from cartesia.types import ReconnectingEvent
 from cartesia.lib._tts.contexts import (
-    TTSContextsConnection,
-    AsyncTTSContextsConnection,
+    TTSContextsWSConnection,
+    AsyncTTSContextsWSConnection,
 )
 from cartesia.types.websocket_response import Done, Chunk, Error as WSResponseError
 
@@ -252,7 +252,7 @@ _VOICE: Any = {"mode": "id", "id": "test-voice"}
 
 
 class _FakeManagerAttrs:
-    """Minimal stub matching the attributes TTSContextsConnection reads off the manager."""
+    """Minimal stub matching the attributes TTSContextsWSConnection reads off the manager."""
 
     def __init__(self, on_reconnecting: Any = None) -> None:
         self._client: Any = MagicMock()
@@ -323,16 +323,16 @@ class _MockAsyncInnerConnection:
         self._events.put_nowait(event)
 
 
-def _make_sync_conn() -> Tuple[TTSContextsConnection, _MockSyncInnerConnection]:
-    conn = TTSContextsConnection(cast(Any, _FakeManagerAttrs()))
+def _make_sync_conn() -> Tuple[TTSContextsWSConnection, _MockSyncInnerConnection]:
+    conn = TTSContextsWSConnection(cast(Any, _FakeManagerAttrs()))
     inner = _MockSyncInnerConnection()
     conn._inner_connection = cast(Any, inner)
     conn._ensure_connected = lambda: None  # type: ignore[method-assign]
     return conn, inner
 
 
-def _make_async_conn() -> Tuple[AsyncTTSContextsConnection, _MockAsyncInnerConnection]:
-    conn = AsyncTTSContextsConnection(cast(Any, _FakeManagerAttrs()))
+def _make_async_conn() -> Tuple[AsyncTTSContextsWSConnection, _MockAsyncInnerConnection]:
+    conn = AsyncTTSContextsWSConnection(cast(Any, _FakeManagerAttrs()))
     inner = _MockAsyncInnerConnection()
     conn._inner_connection = cast(Any, inner)
 
@@ -430,7 +430,7 @@ def test_sync_dispatcher_forwards_user_reconnecting_callback() -> None:
         received.append(event)
         return None
 
-    conn = TTSContextsConnection(cast(Any, _FakeManagerAttrs(on_reconnecting=user_cb)))
+    conn = TTSContextsWSConnection(cast(Any, _FakeManagerAttrs(on_reconnecting=user_cb)))
     inner: Any = MagicMock()
     conn._inner_connection = inner
     conn._ensure_connected = lambda: None  # type: ignore[method-assign]

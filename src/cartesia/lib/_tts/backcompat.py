@@ -49,7 +49,7 @@ class BackcompatTTSResourceConnection:
     Wrapper for TTSResourceConnection to provide v2-compatible API.
 
     .. deprecated::
-        Use ``tts.create_context_manager()`` instead.
+        Use ``cartesia.tts.contexts_ws()`` instead.
     """
 
     def __init__(self, manager: "TTSResourceConnectionManager_3_0_2"):
@@ -164,7 +164,7 @@ class AsyncBackcompatTTSResourceConnection:
     Wrapper for AsyncTTSResourceConnection to provide v2-compatible API.
 
     .. deprecated::
-        Use ``tts.create_context_manager()`` instead.
+        Use ``cartesia.tts.contexts_ws()`` instead.
     """
 
     def __init__(self, manager: "AsyncTTSResourceConnectionManager_3_0_2"):

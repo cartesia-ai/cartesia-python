@@ -17,11 +17,11 @@ from cartesia._types import omit
 from cartesia._exceptions import CartesiaError
 from cartesia.lib._tts.contexts import (
     _DISCONNECT_SENTINEL,
-    TTSContext,
-    AsyncTTSContext,
-    TTSContextsConnection,
-    AsyncTTSContextsConnection,
-    TTSContextsConnectionManager,
+    TTSWSContext,
+    AsyncTTSWSContext,
+    TTSContextsWSConnection,
+    AsyncTTSContextsWSConnection,
+    TTSContextsWSConnectionManager,
     _is_terminal,
     _build_generation_request,
 )
@@ -73,7 +73,7 @@ def _flush_done(context_id: str, flush_id: int = 1) -> FlushDone:
 
 
 class FakeContexts:
-    """Stub for TTSContextsConnection used in TTSContext unit tests."""
+    """Stub for TTSContextsWSConnection used in TTSWSContext unit tests."""
 
     def __init__(self) -> None:
         self.sent: List[Any] = []
@@ -90,7 +90,7 @@ class FakeContexts:
 
 
 class FakeAsyncContexts:
-    """Stub for AsyncTTSContextsConnection used in AsyncTTSContext unit tests."""
+    """Stub for AsyncTTSContextsWSConnection used in AsyncTTSWSContext unit tests."""
 
     def __init__(self) -> None:
         self.sent: List[Any] = []
@@ -107,7 +107,7 @@ class FakeAsyncContexts:
 
 
 class FakeManager:
-    """Minimal stub for TTSContextsConnectionManager / AsyncTTSContextsConnectionManager."""
+    """Minimal stub for TTSContextsWSConnectionManager / AsyncTTSContextsWSConnectionManager."""
 
     def __init__(self, on_reconnecting: Any = None) -> None:
         self._client: Any = MagicMock()
@@ -132,10 +132,10 @@ def _make_sync_ctx(
     language: Optional[str] = None,
     add_timestamps: Optional[bool] = None,
     add_phoneme_timestamps: Optional[bool] = None,
-) -> Tuple[TTSContext, FakeContexts]:
+) -> Tuple[TTSWSContext, FakeContexts]:
     fc = contexts or FakeContexts()
-    ctx = TTSContext(
-        contexts=cast(Any, fc),
+    ctx = TTSWSContext(
+        ws=cast(Any, fc),
         context_id=context_id,
         timeout=timeout,
         model_id=model_id,
@@ -159,10 +159,10 @@ def _make_async_ctx(
     language: Optional[str] = None,
     add_timestamps: Optional[bool] = None,
     add_phoneme_timestamps: Optional[bool] = None,
-) -> Tuple[AsyncTTSContext, FakeAsyncContexts]:
+) -> Tuple[AsyncTTSWSContext, FakeAsyncContexts]:
     fc = contexts or FakeAsyncContexts()
-    ctx = AsyncTTSContext(
-        contexts=cast(Any, fc),
+    ctx = AsyncTTSWSContext(
+        ws=cast(Any, fc),
         context_id=context_id,
         timeout=timeout,
         model_id=model_id,
@@ -175,9 +175,9 @@ def _make_async_ctx(
     return ctx, fc
 
 
-def _make_sync_connection(on_reconnecting: Any = None) -> TTSContextsConnection:
-    """Build a TTSContextsConnection with a mocked inner connection."""
-    conn = TTSContextsConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
+def _make_sync_connection(on_reconnecting: Any = None) -> TTSContextsWSConnection:
+    """Build a TTSContextsWSConnection with a mocked inner connection."""
+    conn = TTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
     inner: Any = MagicMock()
     inner.send = MagicMock()
     conn._inner_connection = inner
@@ -186,8 +186,8 @@ def _make_sync_connection(on_reconnecting: Any = None) -> TTSContextsConnection:
     return conn
 
 
-def _make_async_connection(on_reconnecting: Any = None) -> AsyncTTSContextsConnection:
-    conn = AsyncTTSContextsConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
+def _make_async_connection(on_reconnecting: Any = None) -> AsyncTTSContextsWSConnection:
+    conn = AsyncTTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
     inner: Any = MagicMock()
 
     async def _async_send(_event: Any) -> None:
@@ -322,11 +322,11 @@ class TestBuildGenerationRequest:
 
 
 # ---------------------------------------------------------------------------
-# TTSContext (sync)
+# TTSWSContext (sync)
 # ---------------------------------------------------------------------------
 
 
-class TestTTSContextSync:
+class TestTTSWSContextSync:
     def test_context_id_property(self) -> None:
         ctx, _ = _make_sync_ctx(context_id="abc-123")
         assert ctx.context_id == "abc-123"
@@ -569,11 +569,11 @@ class TestTTSContextSync:
 
 
 # ---------------------------------------------------------------------------
-# AsyncTTSContext
+# AsyncTTSWSContext
 # ---------------------------------------------------------------------------
 
 
-class TestAsyncTTSContext:
+class TestAsyncTTSWSContext:
     @pytest.mark.asyncio
     async def test_push_sends_request(self) -> None:
         ctx, fc = _make_async_ctx()
@@ -661,11 +661,11 @@ class TestAsyncTTSContext:
 
 
 # ---------------------------------------------------------------------------
-# TTSContextsConnection registry
+# TTSContextsWSConnection registry
 # ---------------------------------------------------------------------------
 
 
-class TestTTSContextsConnectionRegistry:
+class TestTTSContextsWSConnectionRegistry:
     def test_context_creates_with_uuid(self) -> None:
         conn = _make_sync_connection()
         ctx = conn.context(
@@ -729,11 +729,11 @@ class TestTTSContextsConnectionRegistry:
 
 
 # ---------------------------------------------------------------------------
-# TTSContextsConnection routing
+# TTSContextsWSConnection routing
 # ---------------------------------------------------------------------------
 
 
-class TestTTSContextsConnectionRouting:
+class TestTTSContextsWSConnectionRouting:
     def test_route_event_routes_to_context_queue(self) -> None:
         conn = _make_sync_connection()
         ctx = conn.context(
@@ -820,11 +820,11 @@ class TestTTSContextsConnectionRouting:
 
 
 # ---------------------------------------------------------------------------
-# TTSContextsConnection lifecycle events
+# TTSContextsWSConnection lifecycle events
 # ---------------------------------------------------------------------------
 
 
-class TestTTSContextsConnectionLifecycleEvents:
+class TestTTSContextsWSConnectionLifecycleEvents:
     def test_reconnecting_user_callback_invoked(self) -> None:
         """The user-supplied on_reconnecting callback is forwarded as-is."""
         received_user: List[ReconnectingEvent] = []
@@ -891,11 +891,11 @@ class TestTTSContextsConnectionLifecycleEvents:
 
 
 # ---------------------------------------------------------------------------
-# AsyncTTSContextsConnection (subset)
+# AsyncTTSContextsWSConnection (subset)
 # ---------------------------------------------------------------------------
 
 
-class TestAsyncTTSContextsConnection:
+class TestAsyncTTSContextsWSConnection:
     @pytest.mark.asyncio
     async def test_context_creates_and_registers(self) -> None:
         conn = _make_async_connection()
@@ -943,8 +943,8 @@ class TestAsyncTTSContextsConnection:
 
 
 class TestManagerHandlerPropagation:
-    def _new_mgr(self) -> TTSContextsConnectionManager:
-        return TTSContextsConnectionManager(
+    def _new_mgr(self) -> TTSContextsWSConnectionManager:
+        return TTSContextsWSConnectionManager(
             client=cast(Any, MagicMock()),
             extra_query={},
             extra_headers={},

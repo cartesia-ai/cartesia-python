@@ -101,8 +101,8 @@ client = Cartesia(
     api_key=os.getenv("CARTESIA_API_KEY"),
 )
 
-with client.tts.create_context_manager() as connection:
-    ctx = connection.context(
+with client.tts.contexts_ws() as ws:
+    ctx = ws.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={
