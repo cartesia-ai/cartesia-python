@@ -216,9 +216,7 @@ def tts_websocket_basic(client: Cartesia) -> None:
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
         )
-        ctx.push(
-            "Hello, world!",
-        )
+        ctx.push("Hello, world!")
         ctx.end()
 
         import datetime
