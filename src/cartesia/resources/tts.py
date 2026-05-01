@@ -319,6 +319,9 @@ class TTSResource(SyncAPIResource):
           - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+
+        See Also:
+            :meth:`create_context_manager`: The same API endpoint, with client-side context management for convenience.
         """
         return TTSResourceConnectionManager(
             client=self._client,
@@ -429,7 +432,7 @@ class TTSResource(SyncAPIResource):
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
     ) -> TTSContextsConnectionManager:
-        """Text-to-Speech with context management.
+        """Text-to-Speech (WebSocket) with built in context management for convenience.
 
         Supports:
           - Streaming
@@ -438,6 +441,9 @@ class TTSResource(SyncAPIResource):
           - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+
+        See Also:
+            :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
         return TTSContextsConnectionManager(
             client=self._client,
@@ -783,6 +789,9 @@ class AsyncTTSResource(AsyncAPIResource):
           - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+
+        See Also:
+            :meth:`create_context_manager`: The same API endpoint, with client-side context management for convenience.
         """
         return AsyncTTSResourceConnectionManager(
             client=self._client,
@@ -893,7 +902,7 @@ class AsyncTTSResource(AsyncAPIResource):
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
     ) -> AsyncTTSContextsConnectionManager:
-        """Text-to-Speech with context management.
+        """Text-to-Speech (WebSocket) with built in context management for convenience.
 
         Supports:
           - Streaming
@@ -902,6 +911,9 @@ class AsyncTTSResource(AsyncAPIResource):
           - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
           - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
           - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+
+        See Also:
+            :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
         return AsyncTTSContextsConnectionManager(
             client=self._client,
