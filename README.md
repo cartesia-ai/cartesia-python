@@ -11,22 +11,39 @@ by [websockets](https://websockets.readthedocs.io/en/stable/).
 
 ## Table of contents
 
-- [Documentation](#documentation)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Streaming inputs with Websockets](#streaming-inputs-with-websockets)
-- [Async usage](#async-usage)
-- [Examples](#examples)
-- [Using types](#using-types)
-- [Pagination](#pagination)
-- [Nested params](#nested-params)
-- [File uploads](#file-uploads)
-- [Handling errors](#handling-errors)
-- [Default Headers](#default-headers)
-- [Advanced](#advanced)
-- [Versioning](#versioning)
-- [Requirements](#requirements)
-- [Contributing](#contributing)
+- [Cartesia Python API library](#cartesia-python-api-library)
+  - [Table of contents](#table-of-contents)
+  - [Documentation](#documentation)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [Streaming inputs with Websockets](#streaming-inputs-with-websockets)
+  - [Async usage](#async-usage)
+  - [Examples](#examples)
+    - [With aiohttp](#with-aiohttp)
+  - [Using types](#using-types)
+  - [Pagination](#pagination)
+  - [Nested params](#nested-params)
+  - [File uploads](#file-uploads)
+  - [Handling errors](#handling-errors)
+    - [Retries](#retries)
+    - [Timeouts](#timeouts)
+  - [Default Headers](#default-headers)
+  - [Advanced](#advanced)
+    - [Logging](#logging)
+    - [How to tell whether `None` means `null` or missing](#how-to-tell-whether-none-means-null-or-missing)
+    - [Accessing raw response data (e.g. headers)](#accessing-raw-response-data-eg-headers)
+      - [`.with_streaming_response`](#with_streaming_response)
+    - [Making custom/undocumented requests](#making-customundocumented-requests)
+      - [Undocumented endpoints](#undocumented-endpoints)
+      - [Undocumented request params](#undocumented-request-params)
+      - [Undocumented response properties](#undocumented-response-properties)
+    - [Configuring the HTTP client](#configuring-the-http-client)
+    - [Managing HTTP resources](#managing-http-resources)
+  - [Versioning](#versioning)
+    - [Determining the installed version](#determining-the-installed-version)
+  - [Requirements](#requirements)
+  - [Contributing](#contributing)
+  - [More from Cartesia](#more-from-cartesia)
 
 ## Documentation
 
@@ -43,6 +60,8 @@ pip install 'cartesia[websockets]'
 ```
 
 ## Usage
+
+The full API of this library can be found in [api.md](api.md).
 
 ```python
 import os
@@ -82,7 +101,7 @@ client = Cartesia(
     api_key=os.getenv("CARTESIA_API_KEY"),
 )
 
-with client.tts.websocket_connect() as connection:
+with client.tts.create_context_manager() as connection:
     ctx = connection.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
@@ -91,12 +110,13 @@ with client.tts.websocket_connect() as connection:
             "encoding": "pcm_f32le",
             "sample_rate": 44100,
         },
+        language="en",
     )
 
     for part in ["The road ", "goes ever ", "on and ", "on."]:
         ctx.push(part)
 
-    ctx.no_more_inputs()
+    ctx.end()
 
     filename = f"cartesia_websocket_generated.pcm"
 

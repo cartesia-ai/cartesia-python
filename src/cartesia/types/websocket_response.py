@@ -164,6 +164,17 @@ class Error(BaseModel):
     title: Optional[str] = None
     """Human-readable error title."""
 
+    @property
+    def error(self) -> str:
+        """
+        Human-readable error message.
+
+        This property exists for backward compatibility
+        since previous versions of the SDK incorrectly included it.
+        """
+
+        return f"{self.status_code} {self.title}: {self.message}"
+
 
 class PhonemeTimestamps(BaseModel):
     context_id: str
