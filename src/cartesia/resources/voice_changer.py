@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from typing import Any, Mapping, Optional, cast
 from typing_extensions import Literal, deprecated
 
@@ -184,7 +183,7 @@ class VoiceChangerResource(SyncAPIResource):
 
     change_voice_bytes = generate  # Alias for backward compatibility
 
-    @deprecated("Use .generate_sse() instead")
+    @deprecated("change_voice_sse() is deprecated; use .generate_sse() instead")
     def change_voice_sse(
         self,
         *,
@@ -220,12 +219,6 @@ class VoiceChangerResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-
-        warnings.warn(
-            "Use cartesia.voice_changer.generate_sse() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         body = deepcopy_with_paths(
@@ -402,7 +395,7 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
 
     change_voice_bytes = generate  # Alias for backward compatibility
 
-    @deprecated("Use .generate_sse() instead")
+    @deprecated("change_voice_sse() is deprecated; use .generate_sse() instead")
     async def change_voice_sse(
         self,
         *,
@@ -438,12 +431,6 @@ class AsyncVoiceChangerResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-
-        warnings.warn(
-            "Use cartesia.voice_changer.generate_sse() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         body = deepcopy_with_paths(

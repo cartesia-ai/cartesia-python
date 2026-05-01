@@ -6,7 +6,6 @@ import json
 import time
 import random
 import logging
-import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Mapping, Callable, Iterator, Optional, Awaitable, cast
 from typing_extensions import AsyncIterator, deprecated
@@ -452,7 +451,7 @@ class TTSResource(SyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
-    @deprecated("Use .generate() instead")
+    @deprecated("bytes() is deprecated; use .generate() instead")
     def bytes(
         self,
         *,
@@ -478,12 +477,6 @@ class TTSResource(SyncAPIResource):
             Use :meth:`generate` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.generate() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         response = self.generate(
             model_id=model_id,
             output_format=output_format,
@@ -503,7 +496,7 @@ class TTSResource(SyncAPIResource):
 
     sse = generate_sse  # alias for backward compatibility
 
-    @deprecated("Use .contexts_ws() instead")
+    @deprecated("websocket_connect() is deprecated; use .contexts_ws() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -517,12 +510,6 @@ class TTSResource(SyncAPIResource):
             Use :meth:`contexts_ws` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.contexts_ws() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         return TTSResourceConnectionManager_3_0_2(
             client=self._client,
             extra_query=extra_query,
@@ -530,7 +517,7 @@ class TTSResource(SyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
-    @deprecated("Use .contexts_ws() instead")
+    @deprecated("websocket() is deprecated; use contexts_ws() instead")
     def websocket(
         self,
         extra_query: Query = {},
@@ -543,12 +530,6 @@ class TTSResource(SyncAPIResource):
         .. deprecated::
             Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.contexts_ws() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return BackcompatTTSResourceConnection(
             TTSResourceConnectionManager_3_0_2(
@@ -925,7 +906,7 @@ class AsyncTTSResource(AsyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
-    @deprecated("Use .generate() instead")
+    @deprecated("bytes() is deprecated; use .generate() instead")
     async def bytes(
         self,
         *,
@@ -951,12 +932,6 @@ class AsyncTTSResource(AsyncAPIResource):
             Use :meth:`generate` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.generate() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         response = await self.generate(
             model_id=model_id,
             output_format=output_format,
@@ -976,7 +951,7 @@ class AsyncTTSResource(AsyncAPIResource):
 
     sse = generate_sse  # Alias for backward compatibility
 
-    @deprecated("Use .contexts_ws() instead")
+    @deprecated("websocket_connect() is deprecated; use .contexts_ws() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -990,12 +965,6 @@ class AsyncTTSResource(AsyncAPIResource):
             Use :meth:`contexts_ws` instead.
         """
 
-        warnings.warn(
-            "Use cartesia.tts.contexts_ws() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
         return AsyncTTSResourceConnectionManager_3_0_2(
             client=self._client,
             extra_query=extra_query,
@@ -1003,7 +972,7 @@ class AsyncTTSResource(AsyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
-    @deprecated("Use .contexts_ws() instead")
+    @deprecated("websocket() is deprecated; use contexts_ws() instead")
     async def websocket(
         self,
         extra_query: Query = {},
@@ -1016,12 +985,6 @@ class AsyncTTSResource(AsyncAPIResource):
         .. deprecated::
             Use :meth:`contexts_ws` instead.
         """
-
-        warnings.warn(
-            "Use cartesia.tts.contexts_ws() instead",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         return AsyncBackcompatTTSResourceConnection(
             AsyncTTSResourceConnectionManager_3_0_2(
