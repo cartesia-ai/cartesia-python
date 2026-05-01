@@ -1,12 +1,12 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from .stt import (
-    SttResource,
-    AsyncSttResource,
-    SttResourceWithRawResponse,
-    AsyncSttResourceWithRawResponse,
-    SttResourceWithStreamingResponse,
-    AsyncSttResourceWithStreamingResponse,
+    STTResource,
+    AsyncSTTResource,
+    STTResourceWithRawResponse,
+    AsyncSTTResourceWithRawResponse,
+    STTResourceWithStreamingResponse,
+    AsyncSTTResourceWithStreamingResponse,
 )
 from .tts import (
     TTSResource,
@@ -104,12 +104,12 @@ __all__ = [
     "AsyncPronunciationDictsResourceWithRawResponse",
     "PronunciationDictsResourceWithStreamingResponse",
     "AsyncPronunciationDictsResourceWithStreamingResponse",
-    "SttResource",
-    "AsyncSttResource",
-    "SttResourceWithRawResponse",
-    "AsyncSttResourceWithRawResponse",
-    "SttResourceWithStreamingResponse",
-    "AsyncSttResourceWithStreamingResponse",
+    "STTResource",
+    "AsyncSTTResource",
+    "STTResourceWithRawResponse",
+    "AsyncSTTResourceWithRawResponse",
+    "STTResourceWithStreamingResponse",
+    "AsyncSTTResourceWithStreamingResponse",
     "TTSResource",
     "AsyncTTSResource",
     "TTSResourceWithRawResponse",

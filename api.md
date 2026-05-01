@@ -162,17 +162,17 @@ Methods:
 - <code title="get /pronunciation-dicts/">client.pronunciation_dicts.<a href="./src/cartesia/resources/pronunciation_dicts.py">list</a>(\*\*<a href="src/cartesia/types/pronunciation_dict_list_params.py">params</a>) -> <a href="./src/cartesia/types/pronunciation_dict.py">SyncCursorIDPage[PronunciationDict]</a></code>
 - <code title="delete /pronunciation-dicts/{id}">client.pronunciation_dicts.<a href="./src/cartesia/resources/pronunciation_dicts.py">delete</a>(id) -> None</code>
 
-# Stt
+# STT
 
 Types:
 
 ```python
-from cartesia.types import SttTranscribeResponse
+from cartesia.types import STTTranscribeResponse
 ```
 
 Methods:
 
-- <code title="post /stt">client.stt.<a href="./src/cartesia/resources/stt.py">transcribe</a>(\*\*<a href="src/cartesia/types/stt_transcribe_params.py">params</a>) -> <a href="./src/cartesia/types/stt_transcribe_response.py">SttTranscribeResponse</a></code>
+- <code title="post /stt">client.stt.<a href="./src/cartesia/resources/stt.py">transcribe</a>(\*\*<a href="src/cartesia/types/stt_transcribe_params.py">params</a>) -> <a href="./src/cartesia/types/stt_transcribe_response.py">STTTranscribeResponse</a></code>
 
 # TTS
 

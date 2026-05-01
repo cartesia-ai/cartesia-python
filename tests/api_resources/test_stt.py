@@ -9,19 +9,19 @@ import pytest
 
 from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from cartesia.types import SttTranscribeResponse
+from cartesia.types import STTTranscribeResponse
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
 
 
-class TestStt:
+class TestSTT:
     parametrize = pytest.mark.parametrize("client", [False, True], indirect=True, ids=["loose", "strict"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_transcribe(self, client: Cartesia) -> None:
         stt = client.stt.transcribe()
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -34,7 +34,7 @@ class TestStt:
             model="model",
             timestamp_granularities=["word"],
         )
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -44,7 +44,7 @@ class TestStt:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         stt = response.parse()
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -54,12 +54,12 @@ class TestStt:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             stt = response.parse()
-            assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+            assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
         assert cast(Any, response.is_closed) is True
 
 
-class TestAsyncStt:
+class TestAsyncSTT:
     parametrize = pytest.mark.parametrize(
         "async_client", [False, True, {"http_client": "aiohttp"}], indirect=True, ids=["loose", "strict", "aiohttp"]
     )
@@ -68,7 +68,7 @@ class TestAsyncStt:
     @parametrize
     async def test_method_transcribe(self, async_client: AsyncCartesia) -> None:
         stt = await async_client.stt.transcribe()
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -81,7 +81,7 @@ class TestAsyncStt:
             model="model",
             timestamp_granularities=["word"],
         )
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -91,7 +91,7 @@ class TestAsyncStt:
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
         stt = await response.parse()
-        assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+        assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -101,6 +101,6 @@ class TestAsyncStt:
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
             stt = await response.parse()
-            assert_matches_type(SttTranscribeResponse, stt, path=["response"])
+            assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
         assert cast(Any, response.is_closed) is True
