@@ -398,7 +398,7 @@ def test_tts_websocket_sync(client: Cartesia):
     """Test synchronous TTS WebSocket streaming."""
     logger.info("Testing tts.websocket_connect (WebSocket)")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         context_id = str(uuid.uuid4())
         connection.send(
             cast(
@@ -431,7 +431,7 @@ def test_tts_websocket_with_timestamps(client: Cartesia) -> None:
     """Test TTS WebSocket with word timestamps."""
     logger.info("Testing tts.websocket_connect with timestamps")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         context_id = str(uuid.uuid4())
         connection.send(
             cast(
@@ -480,7 +480,7 @@ async def test_tts_websocket_async():
     logger.info("Testing async tts.websocket_connect")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             context_id = str(uuid.uuid4())
             await connection.send(
                 cast(
@@ -511,7 +511,7 @@ def test_tts_websocket_context(client: Cartesia):
     """Test TTS WebSocket with context for continuations using .push()."""
     logger.info("Testing tts.websocket_connect with context")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         # context_id must be alphanumeric with underscores/hyphens only
         context_id = str(uuid.uuid4())
         ctx = connection.context(
@@ -546,7 +546,7 @@ async def test_tts_websocket_context_async():
     logger.info("Testing async tts.websocket_connect with context")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             # context_id must be alphanumeric with underscores/hyphens only
             context_id = str(uuid.uuid4())
             ctx = connection.context(context_id)
@@ -579,7 +579,7 @@ def test_tts_websocket_push_overrides(client: Cartesia):
     """Test TTS WebSocket .push() with dynamic parameter overrides."""
     logger.info("Testing tts.websocket_connect .push() overrides")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         ctx = connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -609,7 +609,7 @@ async def test_tts_websocket_concurrent_contexts_async():
     logger.info("Testing concurrent contexts on one WebSocket")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -657,7 +657,7 @@ async def test_tts_websocket_concurrent_receive_async():
     logger.info("Testing concurrent ctx.receive() on one WebSocket")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -706,7 +706,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
     logger.info("Testing recv lock is not held across yield")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -882,7 +882,7 @@ def test_tts_websocket_context_flush_sync(client: Cartesia):
     """
     logger.info("Testing sync context flush")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -924,7 +924,7 @@ async def test_tts_websocket_context_flush_async():
     logger.info("Testing async context flush")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -968,7 +968,7 @@ def test_tts_websocket_context_cancel_sync(client: Cartesia):
 
     long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1022,7 +1022,7 @@ async def test_tts_websocket_context_cancel_async():
     long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1076,7 +1076,7 @@ def test_tts_websocket_context_reuse_sync(client: Cartesia):
     """
     logger.info("Testing sync context reuse")
 
-    with client.tts.websocket_connect() as connection:
+    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1134,7 +1134,7 @@ async def test_tts_websocket_context_reuse_async():
     logger.info("Testing async context reuse")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:
+        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
