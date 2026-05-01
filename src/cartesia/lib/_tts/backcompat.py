@@ -97,12 +97,13 @@ class BackcompatTTSResourceConnection:
         ctx = self._connection.context(context_id)
 
         # Send the request
+        continue_ = kwargs.pop("continue_", False)
         ctx.send(
             model_id=model_id,
             transcript=transcript,
             voice=cast(VoiceSpecifierParam, voice),
             output_format=output_format,
-            continue_=False,
+            continue_=continue_,
             **kwargs,
         )
 
@@ -211,12 +212,13 @@ class AsyncBackcompatTTSResourceConnection:
         ctx = self._connection.context(context_id)
 
         # Send the request
+        continue_ = kwargs.pop("continue_", False)
         await ctx.send(
             model_id=model_id,
             transcript=transcript,
             voice=cast(VoiceSpecifierParam, voice),
             output_format=output_format,
-            continue_=False,
+            continue_=continue_,
             **kwargs,
         )
 
