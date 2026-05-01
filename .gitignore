@@ -1,4 +1,5 @@
 .prism.log
+.stdy.log
 _dev
 
 __pycache__
@@ -13,3 +14,5 @@ dist
 .envrc
 codegen.log
 Brewfile.lock.json
+
+*.pcm

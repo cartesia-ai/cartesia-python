@@ -11,10 +11,10 @@ from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
 
-__all__ = ["TTSGenerateSseParams", "OutputFormat"]
+__all__ = ["TTSGenerateSSEParams", "OutputFormat", "TTSGenerateSseParams"]
 
 
-class TTSGenerateSseParams(TypedDict, total=False):
+class TTSGenerateSSEParams(TypedDict, total=False):
     model_id: Required[str]
     """The ID of the model to use for the generation.
 
@@ -67,7 +67,7 @@ class TTSGenerateSseParams(TypedDict, total=False):
     """
 
     speed: ModelSpeed
-    """Use `generation_config.speed` for sonic-3. Speed setting for the model.
+    """Speed setting for the model.
 
     Defaults to `normal`. This feature is experimental and may not work for all
     voices. Influences the speed of the generated speech. Faster speeds may reduce
@@ -84,3 +84,6 @@ class OutputFormat(TypedDict, total=False):
     encoding: Required[RawEncoding]
 
     sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
+
+
+TTSGenerateSseParams = TTSGenerateSSEParams  # Alias for backward compatibility

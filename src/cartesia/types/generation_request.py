@@ -24,6 +24,12 @@ class OutputFormat(BaseModel):
 
 
 class GenerationRequest(BaseModel):
+    context_id: str
+    """A unique identifier for the context.
+
+    You can use any unique identifier, like a UUID or human ID.
+    """
+
     llm_model_id: str = FieldInfo(alias="model_id")
     """The ID of the model to use for the generation.
 
@@ -49,15 +55,6 @@ class GenerationRequest(BaseModel):
 
     If `false` (default), no word timestamps will be produced at all. If `true`, the
     server will return timestamp events containing word-level timing information.
-    """
-
-    context_id: Optional[str] = None
-    """A unique identifier for the context.
-
-    You can use any unique identifier, like a UUID or human ID.
-
-    Some customers use unique identifiers from their own systems (such as
-    conversation IDs) as context IDs.
     """
 
     continue_: Optional[bool] = FieldInfo(alias="continue", default=None)
@@ -106,7 +103,7 @@ class GenerationRequest(BaseModel):
     """
 
     speed: Optional[ModelSpeed] = None
-    """Use `generation_config.speed` for sonic-3. Speed setting for the model.
+    """Speed setting for the model.
 
     Defaults to `normal`. This feature is experimental and may not work for all
     voices. Influences the speed of the generated speech. Faster speeds may reduce

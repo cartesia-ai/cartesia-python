@@ -33,11 +33,14 @@ from ._exceptions import (
     AuthenticationError,
     InternalServerError,
     PermissionDeniedError,
+    WebSocketQueueFullError,
     UnprocessableEntityError,
     APIResponseValidationError,
+    WebSocketConnectionClosedError,
 )
 from ._base_client import DefaultHttpxClient, DefaultAioHttpClient, DefaultAsyncHttpxClient
 from ._utils._logs import setup_logging as _setup_logging
+from .types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides
 
 __all__ = [
     "types",
@@ -81,6 +84,10 @@ __all__ = [
     "DefaultHttpxClient",
     "DefaultAsyncHttpxClient",
     "DefaultAioHttpClient",
+    "ReconnectingEvent",
+    "ReconnectingOverrides",
+    "WebSocketQueueFullError",
+    "WebSocketConnectionClosedError",
 ]
 
 if not _t.TYPE_CHECKING:

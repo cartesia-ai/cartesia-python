@@ -16,8 +16,9 @@ from ..types import (
     voice_update_params,
     voice_localize_params,
 )
+from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
-from .._utils import extract_files, maybe_transform, deepcopy_minimal, async_maybe_transform
+from .._utils import extract_files, path_template, maybe_transform, async_maybe_transform
 from .._compat import cached_property
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
@@ -94,7 +95,7 @@ class VoicesResource(SyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._patch(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             body=maybe_transform(
                 {
                     "description": description,
@@ -212,7 +213,7 @@ class VoicesResource(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._delete(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -257,14 +258,15 @@ class VoicesResource(SyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "base_voice_id": base_voice_id,
                 "clip": clip,
                 "description": description,
                 "language": language,
                 "name": name,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
@@ -312,7 +314,7 @@ class VoicesResource(SyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return self._get(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,
@@ -445,7 +447,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return await self._patch(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             body=await async_maybe_transform(
                 {
                     "description": description,
@@ -563,7 +565,7 @@ class AsyncVoicesResource(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._delete(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
@@ -608,14 +610,15 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           timeout: Override the client-level default timeout for this request, in seconds
         """
-        body = deepcopy_minimal(
+        body = deepcopy_with_paths(
             {
                 "base_voice_id": base_voice_id,
                 "clip": clip,
                 "description": description,
                 "language": language,
                 "name": name,
-            }
+            },
+            [["clip"]],
         )
         files = extract_files(cast(Mapping[str, object], body), paths=[["clip"]])
         # It should be noted that the actual Content-Type header that will be
@@ -663,7 +666,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         if not id:
             raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
         return await self._get(
-            f"/voices/{id}",
+            path_template("/voices/{id}", id=id),
             options=make_request_options(
                 extra_headers=extra_headers,
                 extra_query=extra_query,

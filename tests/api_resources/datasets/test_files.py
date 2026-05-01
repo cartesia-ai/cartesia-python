@@ -136,7 +136,7 @@ class TestFiles:
     def test_method_upload_with_all_params(self, client: Cartesia) -> None:
         file = client.datasets.files.upload(
             id="id",
-            file=b"raw file contents",
+            file=b"Example data",
             purpose="purpose",
         )
         assert file is None
@@ -299,7 +299,7 @@ class TestAsyncFiles:
     async def test_method_upload_with_all_params(self, async_client: AsyncCartesia) -> None:
         file = await async_client.datasets.files.upload(
             id="id",
-            file=b"raw file contents",
+            file=b"Example data",
             purpose="purpose",
         )
         assert file is None

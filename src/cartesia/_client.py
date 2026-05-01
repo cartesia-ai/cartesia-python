@@ -22,7 +22,11 @@ from ._types import (
     RequestOptions,
     not_given,
 )
-from ._utils import is_given, get_async_library
+from ._utils import (
+    is_given,
+    is_mapping_t,
+    get_async_library,
+)
 from ._compat import cached_property
 from ._version import __version__
 from ._response import (
@@ -124,6 +128,15 @@ class Cartesia(SyncAPIClient):
             base_url = os.environ.get("CARTESIA_BASE_URL")
         if base_url is None:
             base_url = f"https://api.cartesia.ai"
+
+        custom_headers_env = os.environ.get("CARTESIA_CUSTOM_HEADERS")
+        if custom_headers_env is not None:
+            parsed: dict[str, str] = {}
+            for line in custom_headers_env.split("\n"):
+                colon = line.find(":")
+                if colon >= 0:
+                    parsed[line[:colon].strip()] = line[colon + 1 :].strip()
+            default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
 
         super().__init__(
             version=__version__,
@@ -228,7 +241,7 @@ class Cartesia(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "cartesia-version": "2025-11-04",
+            "cartesia-version": "2026-03-01",
             **self._custom_headers,
         }
 
@@ -399,6 +412,15 @@ class AsyncCartesia(AsyncAPIClient):
         if base_url is None:
             base_url = f"https://api.cartesia.ai"
 
+        custom_headers_env = os.environ.get("CARTESIA_CUSTOM_HEADERS")
+        if custom_headers_env is not None:
+            parsed: dict[str, str] = {}
+            for line in custom_headers_env.split("\n"):
+                colon = line.find(":")
+                if colon >= 0:
+                    parsed[line[:colon].strip()] = line[colon + 1 :].strip()
+            default_headers = {**parsed, **(default_headers if is_mapping_t(default_headers) else {})}
+
         super().__init__(
             version=__version__,
             base_url=base_url,
@@ -502,7 +524,7 @@ class AsyncCartesia(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "cartesia-version": "2025-11-04",
+            "cartesia-version": "2026-03-01",
             **self._custom_headers,
         }
 
