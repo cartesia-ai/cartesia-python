@@ -1,5 +1,71 @@
 # Changelog
 
+## 3.1.0-b1 (2026-05-01)
+
+Full Changelog: [v3.0.2...v3.1.0-b1](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.2...v3.1.0-b1)
+
+### Features
+
+* **api:** backward compatible schemas ([9e85cb2](https://github.com/cartesia-ai/cartesia-python/commit/9e85cb24fdb5f39cdfc41c6697bae5e76c3263d0))
+* **api:** improve sse support ([98575ff](https://github.com/cartesia-ai/cartesia-python/commit/98575fffaabb391ed63dd75f677dcbf4c6737b20))
+* **api:** mintlify examples ([fe0ecaf](https://github.com/cartesia-ai/cartesia-python/commit/fe0ecaf04c76d9282459232ae45f56c86d2c3a06))
+* **client:** add event handler implementation for websockets ([5e3a491](https://github.com/cartesia-ai/cartesia-python/commit/5e3a491ef5164122c6e7bfc6ca4c6059f3bbb7b3))
+* **client:** allow enqueuing to websockets even when not connected ([118133e](https://github.com/cartesia-ai/cartesia-python/commit/118133edc365bedc12e0fe099211d0c534b764d5))
+* **client:** support reconnection in websockets ([6558a0d](https://github.com/cartesia-ai/cartesia-python/commit/6558a0df09ce20961096d37673bd5cd7f5f6201e))
+* **client:** support sending raw data over websockets ([a127d78](https://github.com/cartesia-ai/cartesia-python/commit/a127d78351affcd13fde5be2d09f618aabe62a85))
+* **internal:** implement indices array format for query and form serialization ([4c876b3](https://github.com/cartesia-ai/cartesia-python/commit/4c876b34329adf46151caafff1e145ff98b4bd56))
+* support setting headers via env ([05acb32](https://github.com/cartesia-ai/cartesia-python/commit/05acb32d3a331f4786b5e5ac7bf1a4136d931708))
+* **tts:** create_context_manager ([dd83e40](https://github.com/cartesia-ai/cartesia-python/commit/dd83e403944420783a37b655a35521e28802123b))
+* **tts:** generate_ws ([15bbccf](https://github.com/cartesia-ai/cartesia-python/commit/15bbccfdd2c863459acce6f93cfb7999ec09a4ee))
+* **tts:** generate_ws ([c727c8a](https://github.com/cartesia-ai/cartesia-python/commit/c727c8ac67c4a1848b9329aac2053300449f1e4e))
+
+
+### Bug Fixes
+
+* **api:** make backward compatible ([e1e739c](https://github.com/cartesia-ai/cartesia-python/commit/e1e739c750266bf8052ef32a38acd1378a06c44a))
+* **api:** make backward compatible ([eba2328](https://github.com/cartesia-ai/cartesia-python/commit/eba23287ee12801e2e75704eb9a740a18dcb2940))
+* **api:** TTS WebSockets require context_id ([dbccae8](https://github.com/cartesia-ai/cartesia-python/commit/dbccae8b1ef3cb13845c1f16aa69ffdeef7dff20))
+* **api:** WebSocket Error Response should have fewer required properties ([2ab3768](https://github.com/cartesia-ai/cartesia-python/commit/2ab37684d69853c4b382ea240253ea1d53b5cb3f))
+* **client:** preserve hardcoded query params when merging with user params ([07061f5](https://github.com/cartesia-ai/cartesia-python/commit/07061f505d53b46726d27c00a0fff7828660a8c9))
+* **deps:** bump minimum typing-extensions version ([2960fb8](https://github.com/cartesia-ai/cartesia-python/commit/2960fb89caa77198a066b719c1d9ab45aed87cd4))
+* ensure file data are only sent as 1 parameter ([63c9488](https://github.com/cartesia-ai/cartesia-python/commit/63c9488f6cf31e48200d488c835270034a45c82d))
+* **manual:** lint ([e6666c0](https://github.com/cartesia-ai/cartesia-python/commit/e6666c053c14347405f24df08ecdc6063cc08d0d))
+* **manual:** release fixes ([d58b0ee](https://github.com/cartesia-ai/cartesia-python/commit/d58b0ee37239be8c298232b1a1ab63744fb86bdf))
+* **pydantic:** do not pass `by_alias` unless set ([b3dad90](https://github.com/cartesia-ai/cartesia-python/commit/b3dad90688ca0137b710db375aeccb0821ff0e11))
+* sanitize endpoint path params ([d0dfe8f](https://github.com/cartesia-ai/cartesia-python/commit/d0dfe8fa4d1bdffa9e095e952f31d3af8582ffcb))
+* **tts:** Fix errors relating to context_id incorrectly being optional ([8f9461a](https://github.com/cartesia-ai/cartesia-python/commit/8f9461a7b105d1caa5592da9bb1cc395109d806b))
+* **tts:** WebsocketResponse.Error ([56438a0](https://github.com/cartesia-ai/cartesia-python/commit/56438a04891d1657725a61cd2eb504624381a469))
+* use correct field name format for multipart file arrays ([d4e2141](https://github.com/cartesia-ai/cartesia-python/commit/d4e21413211827b8c771aced0a543d0b4a6b86e9))
+
+
+### Performance Improvements
+
+* **client:** optimize file structure copying in multipart requests ([7e8eb23](https://github.com/cartesia-ai/cartesia-python/commit/7e8eb2353ac29c965218f712e9feb05f948c7881))
+
+
+### Chores
+
+* **api:** migrate to cartesia-version 2026-03-01 ([a59bd05](https://github.com/cartesia-ai/cartesia-python/commit/a59bd05c1c653106cb06cf55d479e034baa1dc6b))
+* **ci:** bump uv version ([de7662b](https://github.com/cartesia-ai/cartesia-python/commit/de7662b1ebe760245aa1200de03ff9789bbac088))
+* **ci:** remove release-doctor workflow ([441755f](https://github.com/cartesia-ai/cartesia-python/commit/441755f19582602d2e6163225fdc1ffcdab8a11b))
+* **ci:** skip lint on metadata-only changes ([fe9f0c9](https://github.com/cartesia-ai/cartesia-python/commit/fe9f0c951474d8cb0e915bd924fd708a1a08b4bd))
+* **ci:** skip uploading artifacts on stainless-internal branches ([9f6be90](https://github.com/cartesia-ai/cartesia-python/commit/9f6be90e10b6a7f67ad1660ad9d5b2a3c3b8b4a3))
+* **internal:** add request options to SSE classes ([fa68332](https://github.com/cartesia-ai/cartesia-python/commit/fa68332613bd5ce851ee0ad7f8505ca10dbb0f71))
+* **internal:** make `test_proxy_environment_variables` more resilient ([fe46748](https://github.com/cartesia-ai/cartesia-python/commit/fe4674821c9111dbc1b69b467f454284a0771175))
+* **internal:** make `test_proxy_environment_variables` more resilient to env ([46ed179](https://github.com/cartesia-ai/cartesia-python/commit/46ed179c8c80f890263cf84177fad0fe1d911a65))
+* **internal:** more robust bootstrap script ([2628482](https://github.com/cartesia-ai/cartesia-python/commit/2628482d8376d30e5aabf9b7b085c3154ae82ce1))
+* **internal:** reformat pyproject.toml ([d4c875f](https://github.com/cartesia-ai/cartesia-python/commit/d4c875f6a5a6306ef38a9d1843603dcd4ea8a11f))
+* **internal:** tweak CI branches ([9dfe6d2](https://github.com/cartesia-ai/cartesia-python/commit/9dfe6d2a5ca5c911ccbf61faac50403601007086))
+* **internal:** update gitignore ([823c4ae](https://github.com/cartesia-ai/cartesia-python/commit/823c4aeb184f06b9170683f7371cbe0d047b7a8e))
+* **internal:** version bump ([b16a3e8](https://github.com/cartesia-ai/cartesia-python/commit/b16a3e8f23202bf2e8e56a2811f0a7c2cd0a6405))
+* **internal:** version bump ([aa1f88f](https://github.com/cartesia-ai/cartesia-python/commit/aa1f88fb72bb4b6937309880cc22a5bc8286b893))
+* **manual:** update readme and make websocket error backward compatible ([44b8f32](https://github.com/cartesia-ai/cartesia-python/commit/44b8f3261ef52e7b8ac839184d2289840a20ba0b))
+* match http protocol with ws protocol instead of wss ([cf9da80](https://github.com/cartesia-ai/cartesia-python/commit/cf9da80a214539a0dd24bb3ca7f3cde70d9cfbbd))
+* **tts:** add more descriptions ([b1cf472](https://github.com/cartesia-ai/cartesia-python/commit/b1cf472ada9b0114224cb28dfe61a1ddda8e6dd3))
+* **tts:** update migrating ([75073b1](https://github.com/cartesia-ai/cartesia-python/commit/75073b1afe76058ba50edde37f7b875425050b06))
+* update placeholder string ([03b3ef8](https://github.com/cartesia-ai/cartesia-python/commit/03b3ef85166eabeff9f6d57a15bd72da2608da61))
+* use proper capitalization for WebSockets ([9f28746](https://github.com/cartesia-ai/cartesia-python/commit/9f287461922d07f23a4a25ad0710c4d84fb8c5c7))
+
 ## 3.0.2 (2026-02-26)
 
 Full Changelog: [v3.0.1...v3.0.2](https://github.com/cartesia-ai/cartesia-python/compare/v3.0.1...v3.0.2)
