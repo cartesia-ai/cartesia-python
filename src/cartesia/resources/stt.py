@@ -22,7 +22,7 @@ from .._response import (
 from .._base_client import make_request_options
 from ..types.stt_transcribe_response import STTTranscribeResponse
 
-__all__ = ["STTResource", "AsyncSTTResource"]
+__all__ = ["STTResource", "SttResource", "AsyncSTTResource", "AsyncSttResource"]
 
 
 class STTResource(SyncAPIResource):
