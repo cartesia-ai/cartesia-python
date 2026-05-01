@@ -9,7 +9,7 @@ import logging
 import warnings
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Mapping, Callable, Iterator, Optional, Awaitable, cast
-from typing_extensions import AsyncIterator
+from typing_extensions import AsyncIterator, deprecated
 
 import httpx
 from pydantic import BaseModel
@@ -55,7 +55,11 @@ from ..lib._tts.contexts import (
     AsyncTTSContextsConnectionManager as AsyncTTSContextsConnectionManager,
 )
 from ..types.model_speed import ModelSpeed
-from ..lib._tts.backcompat import BackcompatTTSResourceConnection, AsyncBackcompatTTSResourceConnection
+from ..lib._tts.backcompat import (
+    BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,  # imported for backward compatibility
+    BackcompatTTSResourceConnection,
+    AsyncBackcompatTTSResourceConnection,
+)
 from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
 from ..types.websocket_response import Error, WebsocketResponse
@@ -457,6 +461,7 @@ class TTSResource(SyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
+    @deprecated("Use .generate() instead")
     def bytes(
         self,
         *,
@@ -507,6 +512,7 @@ class TTSResource(SyncAPIResource):
 
     sse = generate_sse  # alias for backward compatibility
 
+    @deprecated("Use .create_context_manager() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -533,6 +539,7 @@ class TTSResource(SyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
+    @deprecated("Use .create_context_manager() instead")
     def websocket(
         self,
         extra_query: Query = {},
@@ -927,6 +934,7 @@ class AsyncTTSResource(AsyncAPIResource):
             max_queue_size=max_queue_size,
         )
 
+    @deprecated("Use .generate() instead")
     async def bytes(
         self,
         *,
@@ -977,6 +985,7 @@ class AsyncTTSResource(AsyncAPIResource):
 
     sse = generate_sse  # Alias for backward compatibility
 
+    @deprecated("Use .create_context_manager() instead")
     def websocket_connect(
         self,
         extra_query: Query = {},
@@ -1003,6 +1012,7 @@ class AsyncTTSResource(AsyncAPIResource):
             websocket_connection_options=websocket_connection_options,
         )
 
+    @deprecated("Use .create_context_manager() instead")
     async def websocket(
         self,
         extra_query: Query = {},

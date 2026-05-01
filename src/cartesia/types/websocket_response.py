@@ -211,4 +211,4 @@ WebsocketResponse: TypeAlias = Annotated[
 TimestampsWordTimestamps = WordTimestamps
 
 # Alias for backward compatibility
-PhonemeTimestampsPhonemeTimestamps = PhonemeTimestamps
+PhonemeTimestampsPhonemeTimestamps = _phoneme_timestamps.PhonemeTimestamps

@@ -100,7 +100,7 @@ The 3.x SDK also aliases `.sse()` to `.generate_sse()` for backwards compatibili
 
 ## TTS WebSocket
 
-You can now call `client.tts.create_context_manager()` or `client.tts.generateWS()` to get a Python context that
+You can now call `client.tts.create_context_manager()` or `client.tts.generate_ws()` to get a Python context that
 automatically closes the websocket.
 
 ### WebSocket Basic Usage
