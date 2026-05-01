@@ -67,8 +67,6 @@ from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
 from ..lib._tts.connection_manager_3_0_2 import (
-    WebSocketContext as WebSocketContext,  # imported for backward compatibility
-    AsyncWebSocketContext as AsyncWebSocketContext,  # imported for backward compatibility
     TTSResourceConnectionManager_3_0_2,
     AsyncTTSResourceConnectionManager_3_0_2,
 )
