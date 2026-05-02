@@ -55,7 +55,7 @@ from ..lib.tts.contexts import (
 )
 from ..lib._tts.contexts import _TTSContextsWSConnectionManager, _AsyncTTSContextsWSConnectionManager
 from ..types.model_speed import ModelSpeed
-from ..lib._tts.backcompat import (
+from ..lib.tts.backcompat import (
     BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,
     BackcompatTTSResourceConnection as BackcompatTTSResourceConnection,
     AsyncBackcompatTTSResourceConnection as AsyncBackcompatTTSResourceConnection,
@@ -67,10 +67,7 @@ from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
-from ..lib._tts.connection_manager_3_0 import (
-    TTSResourceConnectionManager_3_0,
-    AsyncTTSResourceConnectionManager_3_0,
-)
+from ..lib.tts.connection_manager_3_0 import TTSResourceConnectionManager_3_0, AsyncTTSResourceConnectionManager_3_0
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebSocketConnectionOptions
 

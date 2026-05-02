@@ -22,8 +22,8 @@ from cartesia import Cartesia, AsyncCartesia, APIStatusError
 from cartesia.types import Voice, VoiceMetadata
 from cartesia.pagination import SyncCursorIDPage
 from cartesia.types.supported_language import SupportedLanguage
+from cartesia.lib.tts.connection_manager_3_0 import AsyncWebSocketContext_3_0
 from cartesia.types.generation_request_param import GenerationRequestParam
-from cartesia.lib._tts.connection_manager_3_0 import AsyncWebSocketContext
 
 # Ignore asyncio resource warnings that occur during test teardown, and
 # DeprecationWarning from the legacy ``websocket_connect()`` API exercised
@@ -629,7 +629,7 @@ async def test_tts_websocket_concurrent_contexts_async():
             await ctx2.no_more_inputs()
 
             # Receive concurrently via ctx.receive()
-            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+            async def collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -677,7 +677,7 @@ async def test_tts_websocket_concurrent_receive_async():
             await ctx2.no_more_inputs()
 
             # Receive concurrently via tasks
-            async def collect(ctx: AsyncWebSocketContext) -> bytes:
+            async def collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -725,7 +725,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
             await ctx2.no_more_inputs()
 
             # Slow consumer: sleeps 0.5s between every event
-            async def slow_collect(ctx: AsyncWebSocketContext) -> bytes:
+            async def slow_collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -734,7 +734,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
                 return b"".join(chunks)
 
             # Fast consumer: no delays
-            async def fast_collect(ctx: AsyncWebSocketContext) -> bytes:
+            async def fast_collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:

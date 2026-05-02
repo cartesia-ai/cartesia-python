@@ -17,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from cartesia.lib._tts.connection_manager_3_0 import AsyncTTSResourceConnection_3_0
+from cartesia.lib.tts.connection_manager_3_0 import AsyncTTSResourceConnection_3_0
 
 # ---------------------------------------------------------------------------
 # Mock WebSocket

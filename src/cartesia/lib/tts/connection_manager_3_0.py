@@ -193,7 +193,7 @@ class AsyncTTSResourceConnection_3_0:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
-    ) -> AsyncWebSocketContext:
+    ) -> AsyncWebSocketContext_3_0:
         """Create a context helper for managing conversational flows.
 
         Args:
@@ -208,7 +208,7 @@ class AsyncTTSResourceConnection_3_0:
             generation_config: Default generation_config for push().
 
         Returns:
-            AsyncWebSocketContext helper for simplified sending and receiving.
+            AsyncWebSocketContext_3_0 helper for simplified sending and receiving.
         """
         if context_id is not None and context_id in self._context_queues:
             raise ValueError(f"Context for context ID {context_id} already exists.")
@@ -217,7 +217,7 @@ class AsyncTTSResourceConnection_3_0:
         import asyncio
 
         self._context_queues[context_id] = asyncio.Queue()
-        return AsyncWebSocketContext(
+        return AsyncWebSocketContext_3_0(
             self,
             context_id,
             timeout=timeout,
@@ -429,7 +429,7 @@ class TTSResourceConnection_3_0:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
-    ) -> WebSocketContext:
+    ) -> WebSocketContext_3_0:
         """Create a context helper for managing conversational flows.
 
         Args:
@@ -444,14 +444,14 @@ class TTSResourceConnection_3_0:
             generation_config: Default generation_config for push().
 
         Returns:
-            WebSocketContext helper for simplified sending and receiving
+            WebSocketContext_3_0 helper for simplified sending and receiving
         """
         if context_id is not None and context_id in self._context_queues:
             raise ValueError(f"Context for context ID {context_id} already exists.")
         if context_id is None:
             context_id = str(uuid.uuid4())
         self._context_queues[context_id] = queue.Queue()
-        return WebSocketContext(
+        return WebSocketContext_3_0(
             self,
             context_id,
             timeout=timeout,
@@ -567,7 +567,7 @@ class TTSResourceConnectionManager_3_0:
             self.__connection.close()
 
 
-class WebSocketContext:
+class WebSocketContext_3_0:
     """
     Context helper for managing WebSocket conversations with automatic context_id handling.
 
@@ -802,7 +802,7 @@ class WebSocketContext:
                 self._connection._context_queues.pop(self._context_id, None)
 
 
-class AsyncWebSocketContext:
+class AsyncWebSocketContext_3_0:
     """
     Async context helper for managing WebSocket conversations with automatic context_id handling.
 

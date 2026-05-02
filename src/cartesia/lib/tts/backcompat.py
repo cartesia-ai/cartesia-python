@@ -16,8 +16,8 @@ from ...types.voice_specifier_param import VoiceSpecifierParam
 
 if TYPE_CHECKING:
     from .connection_manager_3_0 import (
-        WebSocketContext,
-        AsyncWebSocketContext,
+        WebSocketContext_3_0,
+        AsyncWebSocketContext_3_0,
         TTSResourceConnection_3_0,
         AsyncTTSResourceConnection_3_0,
         TTSResourceConnectionManager_3_0,
@@ -62,7 +62,7 @@ class BackcompatTTSResourceConnection:
             self._manager.__exit__(None, None, None)
             self._connection = None
 
-    def context(self, context_id: Optional[str] = None) -> "WebSocketContext":
+    def context(self, context_id: Optional[str] = None) -> "WebSocketContext_3_0":
         """Create a context helper (v2 compatible)."""
         if not self._connection:
             self.connect()
@@ -178,7 +178,7 @@ class AsyncBackcompatTTSResourceConnection:
             await self._manager.__aexit__(None, None, None)
             self._connection = None
 
-    def context(self, context_id: Optional[str] = None) -> "AsyncWebSocketContext":
+    def context(self, context_id: Optional[str] = None) -> "AsyncWebSocketContext_3_0":
         """Create a context helper (v2 compatible)."""
         if not self._connection:
             raise RuntimeError("Must call connect() before creating context")
