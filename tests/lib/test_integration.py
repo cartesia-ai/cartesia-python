@@ -23,7 +23,7 @@ from cartesia.types import Voice, VoiceMetadata
 from cartesia.pagination import SyncCursorIDPage
 from cartesia.types.supported_language import SupportedLanguage
 from cartesia.types.generation_request_param import GenerationRequestParam
-from cartesia.lib._tts.connection_manager_3_0_2 import AsyncWebSocketContext
+from cartesia.lib._tts.connection_manager_3_0 import AsyncWebSocketContext
 
 # Ignore asyncio resource warnings that occur during test teardown, and
 # DeprecationWarning from the legacy ``websocket_connect()`` API exercised

@@ -16,14 +16,14 @@ from cartesia.types import ReconnectingEvent
 from cartesia._types import omit
 from cartesia._exceptions import CartesiaError
 from cartesia.lib._tts.contexts import (
-    _DISCONNECT_SENTINEL,
-    TTSWSContext,
-    AsyncTTSWSContext,
-    TTSContextsWSConnection,
-    AsyncTTSContextsWSConnection,
-    TTSContextsWSConnectionManager,
+    _Sentinel,
     _is_terminal,
+    _TTSWSContext,
+    _AsyncTTSWSContext,
+    _TTSContextsWSConnection,
     _build_generation_request,
+    _AsyncTTSContextsWSConnection,
+    _TTSContextsWSConnectionManager,
 )
 from cartesia.types.websocket_response import Done, Chunk, Error, FlushDone
 
@@ -132,9 +132,9 @@ def _make_sync_ctx(
     language: Optional[str] = None,
     add_timestamps: Optional[bool] = None,
     add_phoneme_timestamps: Optional[bool] = None,
-) -> Tuple[TTSWSContext, FakeContexts]:
+) -> Tuple[_TTSWSContext, FakeContexts]:
     fc = contexts or FakeContexts()
-    ctx = TTSWSContext(
+    ctx = _TTSWSContext(
         ws=cast(Any, fc),
         context_id=context_id,
         timeout=timeout,
@@ -159,9 +159,9 @@ def _make_async_ctx(
     language: Optional[str] = None,
     add_timestamps: Optional[bool] = None,
     add_phoneme_timestamps: Optional[bool] = None,
-) -> Tuple[AsyncTTSWSContext, FakeAsyncContexts]:
+) -> Tuple[_AsyncTTSWSContext, FakeAsyncContexts]:
     fc = contexts or FakeAsyncContexts()
-    ctx = AsyncTTSWSContext(
+    ctx = _AsyncTTSWSContext(
         ws=cast(Any, fc),
         context_id=context_id,
         timeout=timeout,
@@ -175,9 +175,9 @@ def _make_async_ctx(
     return ctx, fc
 
 
-def _make_sync_connection(on_reconnecting: Any = None) -> TTSContextsWSConnection:
-    """Build a TTSContextsWSConnection with a mocked inner connection."""
-    conn = TTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
+def _make_sync_connection(on_reconnecting: Any = None) -> _TTSContextsWSConnection:
+    """Build a _TTSContextsWSConnection with a mocked inner connection."""
+    conn = _TTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
     inner: Any = MagicMock()
     inner.send = MagicMock()
     conn._inner_connection = inner
@@ -186,8 +186,8 @@ def _make_sync_connection(on_reconnecting: Any = None) -> TTSContextsWSConnectio
     return conn
 
 
-def _make_async_connection(on_reconnecting: Any = None) -> AsyncTTSContextsWSConnection:
-    conn = AsyncTTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
+def _make_async_connection(on_reconnecting: Any = None) -> _AsyncTTSContextsWSConnection:
+    conn = _AsyncTTSContextsWSConnection(cast(Any, FakeManager(on_reconnecting=on_reconnecting)))
     inner: Any = MagicMock()
 
     async def _async_send(_event: Any) -> None:
@@ -380,7 +380,7 @@ class TestTTSWSContextSync:
 
     def test_push_with_extra_kwargs(self) -> None:
         ctx, fc = _make_sync_ctx()
-        ctx.push("hi", duration=5.0)
+        ctx.push("hi", extra_args={"duration": 5.0})
         assert cast(Dict[str, Any], fc.sent[0])["duration"] == 5.0
 
     def test_push_inherits_constructor_defaults(self) -> None:
@@ -515,7 +515,7 @@ class TestTTSWSContextSync:
     def test_receive_terminates_on_sentinel(self) -> None:
         ctx, _ = _make_sync_ctx()
         ctx._queue.put_nowait(_chunk("ctx-id"))
-        ctx._queue.put_nowait(_DISCONNECT_SENTINEL)
+        ctx._queue.put_nowait(_Sentinel("disconnect"))
         ctx._queue.put_nowait(_chunk("ctx-id"))  # should NOT be yielded
         events = list(ctx.receive())
         assert len(events) == 1
@@ -943,8 +943,8 @@ class TestAsyncTTSContextsWSConnection:
 
 
 class TestManagerHandlerPropagation:
-    def _new_mgr(self) -> TTSContextsWSConnectionManager:
-        return TTSContextsWSConnectionManager(
+    def _new_mgr(self) -> _TTSContextsWSConnectionManager:
+        return _TTSContextsWSConnectionManager(
             client=cast(Any, MagicMock()),
             extra_query={},
             extra_headers={},

@@ -7,7 +7,6 @@ TTSResource.websocket() and AsyncTTSResource.websocket() implementation.
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, cast
 from typing_extensions import AsyncIterator
 
@@ -16,16 +15,14 @@ from pydantic import BaseModel
 from ...types.voice_specifier_param import VoiceSpecifierParam
 
 if TYPE_CHECKING:
-    from .connection_manager_3_0_2 import (
+    from .connection_manager_3_0 import (
         WebSocketContext,
         AsyncWebSocketContext,
-        TTSResourceConnection_3_0_2,
-        AsyncTTSResourceConnection_3_0_2,
-        TTSResourceConnectionManager_3_0_2,
-        AsyncTTSResourceConnectionManager_3_0_2,
+        TTSResourceConnection_3_0,
+        AsyncTTSResourceConnection_3_0,
+        TTSResourceConnectionManager_3_0,
+        AsyncTTSResourceConnectionManager_3_0,
     )
-
-log: logging.Logger = logging.getLogger(__name__)
 
 
 class BackcompatWebSocketTtsOutput(BaseModel):
@@ -52,9 +49,9 @@ class BackcompatTTSResourceConnection:
         Use ``cartesia.tts.contexts_ws()`` instead.
     """
 
-    def __init__(self, manager: "TTSResourceConnectionManager_3_0_2"):
+    def __init__(self, manager: "TTSResourceConnectionManager_3_0"):
         self._manager = manager
-        self._connection: Optional["TTSResourceConnection_3_0_2"] = None
+        self._connection: Optional["TTSResourceConnection_3_0"] = None
 
     def connect(self) -> None:
         if self._connection is None:
@@ -168,9 +165,9 @@ class AsyncBackcompatTTSResourceConnection:
         Use ``cartesia.tts.contexts_ws()`` instead.
     """
 
-    def __init__(self, manager: "AsyncTTSResourceConnectionManager_3_0_2"):
+    def __init__(self, manager: "AsyncTTSResourceConnectionManager_3_0"):
         self._manager = manager
-        self._connection: Optional["AsyncTTSResourceConnection_3_0_2"] = None
+        self._connection: Optional["AsyncTTSResourceConnection_3_0"] = None
 
     async def connect(self) -> None:
         if self._connection is None:
