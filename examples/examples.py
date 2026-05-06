@@ -1,7 +1,8 @@
 """
 Examples for Cartesia Python SDK v3.x
 
-These examples are extracted from MIGRATING.md for type inspection in editors.
+Run an example:
+    uv sync && CARTESIA_API_KEY=... uv run examples/examples.py <functionName>
 """
 
 from __future__ import annotations
