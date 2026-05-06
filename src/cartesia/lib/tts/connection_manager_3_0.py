@@ -45,27 +45,25 @@ if TYPE_CHECKING:
     from ..._client import Cartesia, AsyncCartesia
 
 
-log: logging.Logger = logging.getLogger(__name__)
-
-
-class AsyncTTSResourceConnection_3_0_2:
+class AsyncTTSResourceConnection_3_0:
     """
     Represents a live WebSocket connection to the TTS API
 
     .. deprecated::
-        Created by :class:`AsyncTTSResourceConnectionManager_3_0_2`.
+        Created by :class:`AsyncTTSResourceConnectionManager_3_0`.
     """
 
     _connection: AsyncWebsocketConnection
 
     def __init__(
-        self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager_3_0_2 | None = None
+        self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager_3_0 | None = None
     ) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
         self._processing_task: asyncio.Task[None] | None = None
         self._closing = False
+        self._logger = logging.getLogger(__name__)
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
         """
@@ -102,7 +100,7 @@ class AsyncTTSResourceConnection_3_0_2:
             message = await _asyncio.wait_for(self._connection.recv(decode=False), timeout=timeout)
         else:
             message = await self._connection.recv(decode=False)
-        log.debug(f"Received websocket message: %s", message)
+        self._logger.debug(f"Received websocket message: %s", message)
         return message
 
     # Dict[str, Any] is added for backward compatibility since WebsocketClientEventParam used to not require context_id
@@ -144,16 +142,16 @@ class AsyncTTSResourceConnection_3_0_2:
         try:
             while True:
                 raw = await self._connection.recv(decode=False)
-                log.debug("Received websocket message: %s", raw)
+                self._logger.debug("Received websocket message: %s", raw)
                 event = self.parse_event(raw)
                 event_ctx = event.context_id if hasattr(event, "context_id") else None
                 if event_ctx is not None and event_ctx in self._context_queues:
                     await self._context_queues[event_ctx].put(event)
                 else:
-                    log.debug("Received event for unregistered context %s", event_ctx)
+                    self._logger.debug("Received event for unregistered context %s", event_ctx)
         except ConnectionClosed:
             if not self._closing:
-                log.warning("WebSocket connection closed unexpectedly")
+                self._logger.warning("WebSocket connection closed unexpectedly")
 
     async def _ensure_connected(self) -> None:
         import asyncio as _asyncio
@@ -161,7 +159,7 @@ class AsyncTTSResourceConnection_3_0_2:
         from websockets.protocol import State
 
         if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
-            log.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
+            self._logger.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
             if self._processing_task is not None:
                 self._processing_task.cancel()
                 try:
@@ -195,7 +193,7 @@ class AsyncTTSResourceConnection_3_0_2:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
-    ) -> AsyncWebSocketContext:
+    ) -> AsyncWebSocketContext_3_0:
         """Create a context helper for managing conversational flows.
 
         Args:
@@ -210,7 +208,7 @@ class AsyncTTSResourceConnection_3_0_2:
             generation_config: Default generation_config for push().
 
         Returns:
-            AsyncWebSocketContext helper for simplified sending and receiving.
+            AsyncWebSocketContext_3_0 helper for simplified sending and receiving.
         """
         if context_id is not None and context_id in self._context_queues:
             raise ValueError(f"Context for context ID {context_id} already exists.")
@@ -219,7 +217,7 @@ class AsyncTTSResourceConnection_3_0_2:
         import asyncio
 
         self._context_queues[context_id] = asyncio.Queue()
-        return AsyncWebSocketContext(
+        return AsyncWebSocketContext_3_0(
             self,
             context_id,
             timeout=timeout,
@@ -233,7 +231,7 @@ class AsyncTTSResourceConnection_3_0_2:
         )
 
 
-class AsyncTTSResourceConnectionManager_3_0_2:
+class AsyncTTSResourceConnectionManager_3_0:
     """
     Context manager over a `AsyncTTSResourceConnection` that is returned by `cartesia.tts.websocket_connect()`
 
@@ -265,12 +263,13 @@ class AsyncTTSResourceConnectionManager_3_0_2:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: AsyncTTSResourceConnection_3_0_2 | None = None
+        self.__connection: AsyncTTSResourceConnection_3_0 | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
+        self._logger = logging.getLogger(__name__)
 
-    async def __aenter__(self) -> AsyncTTSResourceConnection_3_0_2:
+    async def __aenter__(self) -> AsyncTTSResourceConnection_3_0:
         """
         👋 If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -294,11 +293,11 @@ class AsyncTTSResourceConnectionManager_3_0_2:
                 **self.__extra_query,
             },
         )
-        log.debug("Connecting to %s", url)
+        self._logger.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
-            log.debug("Connection options: %s", self.__websocket_connection_options)
+            self._logger.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = AsyncTTSResourceConnection_3_0_2(
+        self.__connection = AsyncTTSResourceConnection_3_0(
             await connect(
                 str(url),
                 user_agent_header=self.__client.user_agent,
@@ -334,22 +333,23 @@ class AsyncTTSResourceConnectionManager_3_0_2:
             await self.__connection.close()
 
 
-class TTSResourceConnection_3_0_2:
+class TTSResourceConnection_3_0:
     """
     Represents a live WebSocket connection to the TTS API
 
     .. deprecated::
-        Created by :class:`TTSResourceConnectionManager_3_0_2`.
+        Created by :class:`TTSResourceConnectionManager_3_0`.
     """
 
     _connection: WebsocketConnection
 
     def __init__(
-        self, connection: WebsocketConnection, manager: TTSResourceConnectionManager_3_0_2 | None = None
+        self, connection: WebsocketConnection, manager: TTSResourceConnectionManager_3_0 | None = None
     ) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, queue.Queue[WebsocketResponse]] = {}
+        self._logger = logging.getLogger(__name__)
 
     def __iter__(self) -> Iterator[WebsocketResponse]:
         """
@@ -381,7 +381,7 @@ class TTSResourceConnection_3_0_2:
         then you can call `.parse_event(data)`.
         """
         message = self._connection.recv(decode=False, timeout=timeout)
-        log.debug(f"Received websocket message: %s", message)
+        self._logger.debug(f"Received websocket message: %s", message)
         return message
 
     # Dict[str, Any] is added for backward compatibility since WebsocketClientEventParam used to not require context_id
@@ -402,7 +402,7 @@ class TTSResourceConnection_3_0_2:
         from websockets.protocol import State
 
         if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
-            log.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
+            self._logger.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
             new_conn = self._manager.__enter__()
             self._connection = new_conn._connection
             self._context_queues.clear()
@@ -429,7 +429,7 @@ class TTSResourceConnection_3_0_2:
         add_timestamps: bool | None = None,
         add_phoneme_timestamps: bool | None = None,
         generation_config: GenerationConfigParam | None = None,
-    ) -> WebSocketContext:
+    ) -> WebSocketContext_3_0:
         """Create a context helper for managing conversational flows.
 
         Args:
@@ -444,14 +444,14 @@ class TTSResourceConnection_3_0_2:
             generation_config: Default generation_config for push().
 
         Returns:
-            WebSocketContext helper for simplified sending and receiving
+            WebSocketContext_3_0 helper for simplified sending and receiving
         """
         if context_id is not None and context_id in self._context_queues:
             raise ValueError(f"Context for context ID {context_id} already exists.")
         if context_id is None:
             context_id = str(uuid.uuid4())
         self._context_queues[context_id] = queue.Queue()
-        return WebSocketContext(
+        return WebSocketContext_3_0(
             self,
             context_id,
             timeout=timeout,
@@ -465,7 +465,7 @@ class TTSResourceConnection_3_0_2:
         )
 
 
-class TTSResourceConnectionManager_3_0_2:
+class TTSResourceConnectionManager_3_0:
     """
     Context manager over a `TTSResourceConnection` that is returned by `cartesia.tts.websocket_connect()`
 
@@ -497,12 +497,13 @@ class TTSResourceConnectionManager_3_0_2:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: TTSResourceConnection_3_0_2 | None = None
+        self.__connection: TTSResourceConnection_3_0 | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
+        self._logger = logging.getLogger(__name__)
 
-    def __enter__(self) -> TTSResourceConnection_3_0_2:
+    def __enter__(self) -> TTSResourceConnection_3_0:
         """
         👋 If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -526,11 +527,11 @@ class TTSResourceConnectionManager_3_0_2:
                 **self.__extra_query,
             },
         )
-        log.debug("Connecting to %s", url)
+        self._logger.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
-            log.debug("Connection options: %s", self.__websocket_connection_options)
+            self._logger.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = TTSResourceConnection_3_0_2(
+        self.__connection = TTSResourceConnection_3_0(
             connect(
                 str(url),
                 user_agent_header=self.__client.user_agent,
@@ -566,17 +567,17 @@ class TTSResourceConnectionManager_3_0_2:
             self.__connection.close()
 
 
-class WebSocketContext:
+class WebSocketContext_3_0:
     """
     Context helper for managing WebSocket conversations with automatic context_id handling.
 
     .. deprecated ::
-        Created by :meth:`TTSResourceConnection_3_0_2.connect`.
+        Created by :meth:`TTSResourceConnection_3_0.connect`.
     """
 
     def __init__(
         self,
-        connection: "TTSResourceConnection_3_0_2",
+        connection: "TTSResourceConnection_3_0",
         context_id: str,
         *,
         timeout: float | None = None,
@@ -801,17 +802,17 @@ class WebSocketContext:
                 self._connection._context_queues.pop(self._context_id, None)
 
 
-class AsyncWebSocketContext:
+class AsyncWebSocketContext_3_0:
     """
     Async context helper for managing WebSocket conversations with automatic context_id handling.
 
     .. deprecated ::
-        Created by :meth:`AsyncTTSResourceConnection_3_0_2.connect`.
+        Created by :meth:`AsyncTTSResourceConnection_3_0.connect`.
     """
 
     def __init__(
         self,
-        connection: "AsyncTTSResourceConnection_3_0_2",
+        connection: "AsyncTTSResourceConnection_3_0",
         context_id: str,
         *,
         timeout: float | None = None,

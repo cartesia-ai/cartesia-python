@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.0-b3 (2026-05-02)
+
+Full Changelog: [v3.1.0-b2...v3.1.0-b3](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b2...v3.1.0-b3)
+
+### Refactors
+
+* **tts:** export protocols rather than internal classes ([0524fcb](https://github.com/cartesia-ai/cartesia-python/commit/0524fcba2c20e570da251ce609e68925c4b90b31))
+* **tts:** move backcompat export ([3715ef3](https://github.com/cartesia-ai/cartesia-python/commit/3715ef3785d3937609bd07359434d1407a36350e))
+
 ## 3.1.0-b2 (2026-05-01)
 
 Full Changelog: [v3.1.0-b1...v3.1.0-b2](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b1...v3.1.0-b2)

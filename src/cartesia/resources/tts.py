@@ -45,7 +45,7 @@ from .._exceptions import CartesiaError, WebSocketConnectionClosedError
 from .._send_queue import SendQueue
 from .._base_client import _merge_mappings, make_request_options
 from .._event_handler import EventHandlerRegistry
-from ..lib._tts.contexts import (
+from ..lib.tts.contexts import (
     TTSWSContext as TTSWSContext,
     AsyncTTSWSContext as AsyncTTSWSContext,
     TTSContextsWSConnection as TTSContextsWSConnection,
@@ -53,11 +53,12 @@ from ..lib._tts.contexts import (
     TTSContextsWSConnectionManager as TTSContextsWSConnectionManager,
     AsyncTTSContextsWSConnectionManager as AsyncTTSContextsWSConnectionManager,
 )
+from ..lib._tts.contexts import _TTSContextsWSConnectionManager, _AsyncTTSContextsWSConnectionManager
 from ..types.model_speed import ModelSpeed
-from ..lib._tts.backcompat import (
-    BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,  # imported for backward compatibility
-    BackcompatTTSResourceConnection,
-    AsyncBackcompatTTSResourceConnection,
+from ..lib.tts.backcompat import (
+    BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,
+    BackcompatTTSResourceConnection as BackcompatTTSResourceConnection,
+    AsyncBackcompatTTSResourceConnection as AsyncBackcompatTTSResourceConnection,
 )
 from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
@@ -66,10 +67,7 @@ from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.websocket_client_event import WebsocketClientEvent
 from ..types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ..types.generation_config_param import GenerationConfigParam
-from ..lib._tts.connection_manager_3_0_2 import (
-    TTSResourceConnectionManager_3_0_2,
-    AsyncTTSResourceConnectionManager_3_0_2,
-)
+from ..lib.tts.connection_manager_3_0 import TTSResourceConnectionManager_3_0, AsyncTTSResourceConnectionManager_3_0
 from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebSocketConnectionOptions
 
@@ -437,7 +435,7 @@ class TTSResource(SyncAPIResource):
         See Also:
             :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
-        return TTSContextsWSConnectionManager(
+        return _TTSContextsWSConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -500,7 +498,7 @@ class TTSResource(SyncAPIResource):
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
-    ) -> TTSResourceConnectionManager_3_0_2:
+    ) -> TTSResourceConnectionManager_3_0:
         """
         Text-to-Speech (WebSocket).
 
@@ -508,7 +506,7 @@ class TTSResource(SyncAPIResource):
             Use :meth:`contexts_ws` instead.
         """
 
-        return TTSResourceConnectionManager_3_0_2(
+        return TTSResourceConnectionManager_3_0(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -530,7 +528,7 @@ class TTSResource(SyncAPIResource):
         """
 
         return BackcompatTTSResourceConnection(
-            TTSResourceConnectionManager_3_0_2(
+            TTSResourceConnectionManager_3_0(
                 client=self._client,
                 extra_query=extra_query,
                 extra_headers=extra_headers,
@@ -892,7 +890,7 @@ class AsyncTTSResource(AsyncAPIResource):
         See Also:
             :meth:`generate_ws`: The same API endpoint, without SDK context management.
         """
-        return AsyncTTSContextsWSConnectionManager(
+        return _AsyncTTSContextsWSConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -955,7 +953,7 @@ class AsyncTTSResource(AsyncAPIResource):
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
-    ) -> AsyncTTSResourceConnectionManager_3_0_2:
+    ) -> AsyncTTSResourceConnectionManager_3_0:
         """
         Text-to-Speech (WebSocket).
 
@@ -963,7 +961,7 @@ class AsyncTTSResource(AsyncAPIResource):
             Use :meth:`contexts_ws` instead.
         """
 
-        return AsyncTTSResourceConnectionManager_3_0_2(
+        return AsyncTTSResourceConnectionManager_3_0(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -985,7 +983,7 @@ class AsyncTTSResource(AsyncAPIResource):
         """
 
         return AsyncBackcompatTTSResourceConnection(
-            AsyncTTSResourceConnectionManager_3_0_2(
+            AsyncTTSResourceConnectionManager_3_0(
                 client=self._client,
                 extra_query=extra_query,
                 extra_headers=extra_headers,
