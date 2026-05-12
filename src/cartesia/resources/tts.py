@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, AsyncIterator, Iterator, Mapping, Optional, cast
+from typing import Any, Mapping, Iterator, Optional, AsyncIterator, cast
 from typing_extensions import deprecated
 
 import httpx
@@ -18,6 +18,17 @@ from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
 from .._utils import extract_files, maybe_transform, async_maybe_transform
 from .._compat import cached_property
+from ..lib._tts import (
+    WebSocketContext as WebSocketContext,
+    AsyncWebSocketContext as AsyncWebSocketContext,
+    TTSResourceConnection as TTSResourceConnection,
+    AsyncTTSResourceConnection as AsyncTTSResourceConnection,
+    BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,
+    TTSResourceConnectionManager as TTSResourceConnectionManager,
+    BackcompatTTSResourceConnection as BackcompatTTSResourceConnection,
+    AsyncTTSResourceConnectionManager as AsyncTTSResourceConnectionManager,
+    AsyncBackcompatTTSResourceConnection as AsyncBackcompatTTSResourceConnection,
+)
 from .._resource import SyncAPIResource, AsyncAPIResource
 from .._response import (
     BinaryAPIResponse,
@@ -36,15 +47,11 @@ from .._response import (
 from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
 from ..types.model_speed import ModelSpeed
-from ..lib.tts.backcompat import (
-    BackcompatWebSocketTtsOutput as BackcompatWebSocketTtsOutput,
-    BackcompatTTSResourceConnection as BackcompatTTSResourceConnection,
-    AsyncBackcompatTTSResourceConnection as AsyncBackcompatTTSResourceConnection,
-)
 from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.generation_config_param import GenerationConfigParam
+from ..types.websocket_connection_options import WebsocketConnectionOptions
 
 __all__ = ["TTSResource", "AsyncTTSResource"]
 
@@ -387,48 +394,56 @@ class TTSResource(SyncAPIResource):
 
     sse = generate_sse  # alias for backward compatibility
 
-    # def websocket_connect(
-    #     self,
-    #     extra_query: Query = {},
-    #     extra_headers: Headers = {},
-    #     websocket_connection_options: WebSocketConnectionOptions = {},
-    # ) -> TTSResourceConnectionManager:
-    #     """Text-to-Speech (WebSocket).
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> TTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
 
-    #     Supports:
-    #       - Streaming
-    #       - Long-lived connections allow for lower latency by reusing a live network connection
-    #       - Timestamps
-    #       - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
-    #       - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
-    #       - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
-    #     """
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
 
-    #     return TTSResourceConnectionManager(
-    #         client=self._client,
-    #         extra_query=extra_query,
-    #         extra_headers=extra_headers,
-    #         websocket_connection_options=websocket_connection_options,
-    #     )
+        return TTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
 
-    # def websocket(
-    #     self,
-    #     extra_query: Query = {},
-    #     extra_headers: Headers = {},
-    #     websocket_connection_options: WebSocketConnectionOptions = {},
-    # ) -> BackcompatTTSResourceConnection:
-    #     """
-    #     SDK v2 compatible Text-to-Speech (WebSocket).
-    #     """
+    def websocket(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> BackcompatTTSResourceConnection:
+        """
+        SDK v2 compatible Text-to-Speech (WebSocket).
 
-    #     return BackcompatTTSResourceConnection(
-    #         TTSResourceConnectionManager(
-    #             client=self._client,
-    #             extra_query=extra_query,
-    #             extra_headers=extra_headers,
-    #             websocket_connection_options=websocket_connection_options,
-    #         )
-    #     )
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
+
+        return BackcompatTTSResourceConnection(
+            TTSResourceConnectionManager(
+                client=self._client,
+                extra_query=extra_query,
+                extra_headers=extra_headers,
+                websocket_connection_options=websocket_connection_options,
+            )
+        )
 
 
 class AsyncTTSResource(AsyncAPIResource):
@@ -769,48 +784,56 @@ class AsyncTTSResource(AsyncAPIResource):
 
     sse = generate_sse  # Alias for backward compatibility
 
-    # def websocket_connect(
-    #     self,
-    #     extra_query: Query = {},
-    #     extra_headers: Headers = {},
-    #     websocket_connection_options: WebSocketConnectionOptions = {},
-    # ) -> AsyncTTSResourceConnectionManager:
-    #     """Text-to-Speech (WebSocket).
+    def websocket_connect(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> AsyncTTSResourceConnectionManager:
+        """Text-to-Speech (WebSocket).
 
-    #     Supports:
-    #       - Streaming
-    #       - Long-lived connections allow for lower latency by reusing a live network connection
-    #       - Timestamps
-    #       - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
-    #       - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
-    #       - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
-    #     """
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
 
-    #     return AsyncTTSResourceConnectionManager(
-    #         client=self._client,
-    #         extra_query=extra_query,
-    #         extra_headers=extra_headers,
-    #         websocket_connection_options=websocket_connection_options,
-    #     )
+        return AsyncTTSResourceConnectionManager(
+            client=self._client,
+            extra_query=extra_query,
+            extra_headers=extra_headers,
+            websocket_connection_options=websocket_connection_options,
+        )
 
-    # async def websocket(
-    #     self,
-    #     extra_query: Query = {},
-    #     extra_headers: Headers = {},
-    #     websocket_connection_options: WebSocketConnectionOptions = {},
-    # ) -> AsyncBackcompatTTSResourceConnection:
-    #     """
-    #     SDK v2 compatible Text-to-Speech (WebSocket).
-    #     """
+    async def websocket(
+        self,
+        extra_query: Query = {},
+        extra_headers: Headers = {},
+        websocket_connection_options: WebsocketConnectionOptions = {},
+    ) -> AsyncBackcompatTTSResourceConnection:
+        """
+        SDK v2 compatible Text-to-Speech (WebSocket).
 
-    #     return AsyncBackcompatTTSResourceConnection(
-    #         AsyncTTSResourceConnectionManager(
-    #             client=self._client,
-    #             extra_query=extra_query,
-    #             extra_headers=extra_headers,
-    #             websocket_connection_options=websocket_connection_options,
-    #         )
-    #     )
+        Supports:
+          - Streaming
+          - Long-lived connections allow for lower latency by reusing a live network connection
+          - Timestamps
+          - Multiple TTS [contexts](https://docs.cartesia.ai/use-the-api/tts-websocket/contexts) over the same connection
+          - [Context flushing](https://docs.cartesia.ai/use-the-api/tts-websocket/context-flushing-and-flush-i-ds)
+          - [Transcript buffering](https://docs.cartesia.ai/use-the-api/tts-websocket/buffering)
+        """
+
+        return AsyncBackcompatTTSResourceConnection(
+            AsyncTTSResourceConnectionManager(
+                client=self._client,
+                extra_query=extra_query,
+                extra_headers=extra_headers,
+                websocket_connection_options=websocket_connection_options,
+            )
+        )
 
 
 class TTSResourceWithRawResponse:

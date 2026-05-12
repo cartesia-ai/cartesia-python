@@ -20,19 +20,13 @@ import pytest
 
 from cartesia import Cartesia, AsyncCartesia, APIStatusError
 from cartesia.types import Voice, VoiceMetadata
+from cartesia.lib._tts import AsyncWebSocketContext
 from cartesia.pagination import SyncCursorIDPage
 from cartesia.types.supported_language import SupportedLanguage
-from cartesia.lib.tts.connection_manager_3_0 import AsyncWebSocketContext_3_0
 from cartesia.types.generation_request_param import GenerationRequestParam
 
-# Ignore asyncio resource warnings that occur during test teardown, and
-# DeprecationWarning from the legacy ``websocket_connect()`` API exercised
-# by these tests.
-pytestmark = pytest.mark.filterwarnings(
-    "ignore::pytest.PytestUnraisableExceptionWarning",
-    "ignore::ResourceWarning",
-    "ignore::DeprecationWarning",
-)
+# Ignore asyncio resource warnings that occur during test teardown
+pytestmark = pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning", "ignore::ResourceWarning")
 
 THISDIR = os.path.dirname(__file__)
 RESOURCES_DIR = os.path.join(THISDIR, "resources")
@@ -398,7 +392,7 @@ def test_tts_websocket_sync(client: Cartesia):
     """Test synchronous TTS WebSocket streaming."""
     logger.info("Testing tts.websocket_connect (WebSocket)")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
         connection.send(
             cast(
@@ -431,7 +425,7 @@ def test_tts_websocket_with_timestamps(client: Cartesia) -> None:
     """Test TTS WebSocket with word timestamps."""
     logger.info("Testing tts.websocket_connect with timestamps")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         context_id = str(uuid.uuid4())
         connection.send(
             cast(
@@ -480,7 +474,7 @@ async def test_tts_websocket_async():
     logger.info("Testing async tts.websocket_connect")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             context_id = str(uuid.uuid4())
             await connection.send(
                 cast(
@@ -511,7 +505,7 @@ def test_tts_websocket_context(client: Cartesia):
     """Test TTS WebSocket with context for continuations using .push()."""
     logger.info("Testing tts.websocket_connect with context")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         # context_id must be alphanumeric with underscores/hyphens only
         context_id = str(uuid.uuid4())
         ctx = connection.context(
@@ -546,7 +540,7 @@ async def test_tts_websocket_context_async():
     logger.info("Testing async tts.websocket_connect with context")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             # context_id must be alphanumeric with underscores/hyphens only
             context_id = str(uuid.uuid4())
             ctx = connection.context(context_id)
@@ -579,7 +573,7 @@ def test_tts_websocket_push_overrides(client: Cartesia):
     """Test TTS WebSocket .push() with dynamic parameter overrides."""
     logger.info("Testing tts.websocket_connect .push() overrides")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         ctx = connection.context(
             model_id="sonic-3",
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -609,7 +603,7 @@ async def test_tts_websocket_concurrent_contexts_async():
     logger.info("Testing concurrent contexts on one WebSocket")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -629,7 +623,7 @@ async def test_tts_websocket_concurrent_contexts_async():
             await ctx2.no_more_inputs()
 
             # Receive concurrently via ctx.receive()
-            async def collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -657,7 +651,7 @@ async def test_tts_websocket_concurrent_receive_async():
     logger.info("Testing concurrent ctx.receive() on one WebSocket")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -677,7 +671,7 @@ async def test_tts_websocket_concurrent_receive_async():
             await ctx2.no_more_inputs()
 
             # Receive concurrently via tasks
-            async def collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
+            async def collect(ctx: AsyncWebSocketContext) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -706,7 +700,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
     logger.info("Testing recv lock is not held across yield")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx1 = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -725,7 +719,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
             await ctx2.no_more_inputs()
 
             # Slow consumer: sleeps 0.5s between every event
-            async def slow_collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
+            async def slow_collect(ctx: AsyncWebSocketContext) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -734,7 +728,7 @@ async def test_tts_websocket_recv_lock_not_held_across_yield():
                 return b"".join(chunks)
 
             # Fast consumer: no delays
-            async def fast_collect(ctx: AsyncWebSocketContext_3_0) -> bytes:
+            async def fast_collect(ctx: AsyncWebSocketContext) -> bytes:
                 chunks: list[bytes] = []
                 async for response in ctx.receive():
                     if response.type == "chunk" and response.audio:
@@ -882,7 +876,7 @@ def test_tts_websocket_context_flush_sync(client: Cartesia):
     """
     logger.info("Testing sync context flush")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -924,7 +918,7 @@ async def test_tts_websocket_context_flush_async():
     logger.info("Testing async context flush")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -968,7 +962,7 @@ def test_tts_websocket_context_cancel_sync(client: Cartesia):
 
     long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1022,7 +1016,7 @@ async def test_tts_websocket_context_cancel_async():
     long_transcript = "This is a long sentence that should generate many audio chunks. " * 10
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1076,7 +1070,7 @@ def test_tts_websocket_context_reuse_sync(client: Cartesia):
     """
     logger.info("Testing sync context reuse")
 
-    with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+    with client.tts.websocket_connect() as connection:
         ctx = connection.context(
             model_id=DEFAULT_MODEL_ID,
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1134,7 +1128,7 @@ async def test_tts_websocket_context_reuse_async():
     logger.info("Testing async context reuse")
 
     async with create_async_client() as client:
-        async with client.tts.websocket_connect() as connection:  # pyright: ignore[reportDeprecated]
+        async with client.tts.websocket_connect() as connection:
             ctx = connection.context(
                 model_id=DEFAULT_MODEL_ID,
                 voice={"mode": "id", "id": SAMPLE_VOICE_ID},
@@ -1212,281 +1206,3 @@ async def test_concurrent_tts_requests():
         for i, audio_data in enumerate(results):
             _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
             logger.info(f"Request {i} completed with {len(audio_data)} bytes")
-
-
-# ============================================================================
-# contexts_ws() Tests (new TTSContextsWSConnection API)
-#
-# These tests exercise the new high-level wrapper introduced by
-# `tts.contexts_ws()`, which returns TTSContextsWSConnection /
-# AsyncTTSContextsWSConnection. The API surface is:
-#   .context(model_id=, voice=, output_format=, ...)  — create a TTSWSContext
-#   ctx.push(transcript)                              — stream a chunk
-#   ctx.end()                                         — signal no-more-inputs
-#   ctx.flush()                                       — request a flush
-#   ctx.cancel()                                      — cancel mid-generation
-#   async for ev in ctx.receive(): ...                — drain events
-#   .on_error(handler)                                — error events with no
-#                                                       open context to consume them
-# ============================================================================
-
-
-def test_tts_contexts_ws_sync(client: Cartesia):
-    """Basic sync: push -> end -> receive on the new context manager API."""
-    logger.info("Testing tts.contexts_ws() sync basic")
-
-    with client.tts.contexts_ws() as ws:
-        ctx = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-        )
-        ctx.push(SAMPLE_TRANSCRIPT)
-        ctx.end()
-
-        audio_chunks: list[bytes] = []
-        for response in ctx.receive():
-            if response.type == "chunk" and response.audio:
-                audio_chunks.append(response.audio)
-
-        audio_data = b"".join(audio_chunks)
-        _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
-
-
-@pytest.mark.asyncio
-async def test_tts_contexts_ws_async():
-    """Basic async: push -> end -> receive on the new context manager API."""
-    logger.info("Testing tts.contexts_ws() async basic")
-
-    async with create_async_client() as client:
-        async with client.tts.contexts_ws() as ws:
-            ctx = await ws.context(
-                model_id=DEFAULT_MODEL_ID,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
-                language=SAMPLE_LANGUAGE,
-            )
-            await ctx.push(SAMPLE_TRANSCRIPT)
-            await ctx.end()
-
-            audio_chunks: list[bytes] = []
-            async for response in ctx.receive():
-                if response.type == "chunk" and response.audio:
-                    audio_chunks.append(response.audio)
-
-            audio_data = b"".join(audio_chunks)
-            _validate_audio_response(audio_data, DEFAULT_OUTPUT_FORMAT)
-
-
-def test_tts_contexts_ws_continue_false(client: Cartesia):
-    """push(continue_=False) on the final chunk should obviate end()."""
-    logger.info("Testing contexts_ws() continue_=False")
-
-    with client.tts.contexts_ws() as ws:
-        ctx = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-        )
-        ctx.push("First part. ")
-        ctx.push("Second part.", continue_=False)
-
-        audio_chunks: list[bytes] = []
-        for response in ctx.receive():
-            if response.type == "chunk" and response.audio:
-                audio_chunks.append(response.audio)
-
-        _validate_audio_response(b"".join(audio_chunks), DEFAULT_OUTPUT_FORMAT)
-
-
-def test_tts_contexts_ws_flush_sync(client: Cartesia):
-    """flush() should produce flush_done events for each segment."""
-    logger.info("Testing contexts_ws() flush()")
-
-    with client.tts.contexts_ws() as ws:
-        ctx = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-        )
-
-        transcripts = ["Hello, world! ", "My name is Cartesia. "]
-        for transcript in transcripts:
-            ctx.push(transcript)
-            ctx.flush()
-        ctx.end()
-
-        audio_chunks: list[bytes] = []
-        flush_count = 0
-        for response in ctx.receive():
-            if response.type == "chunk" and response.audio:
-                audio_chunks.append(response.audio)
-            elif response.type == "flush_done":
-                flush_count += 1
-
-        _validate_audio_response(b"".join(audio_chunks), DEFAULT_OUTPUT_FORMAT)
-        assert flush_count == len(transcripts), f"Expected {len(transcripts)} flush_done events, got {flush_count}"
-
-
-@pytest.mark.asyncio
-async def test_tts_contexts_ws_flush_async():
-    """Async flush()."""
-    logger.info("Testing async contexts_ws() flush()")
-
-    async with create_async_client() as client:
-        async with client.tts.contexts_ws() as ws:
-            ctx = await ws.context(
-                model_id=DEFAULT_MODEL_ID,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
-                language=SAMPLE_LANGUAGE,
-            )
-
-            transcripts = ["Hello, world! ", "My name is Cartesia. "]
-            for transcript in transcripts:
-                await ctx.push(transcript)
-                await ctx.flush()
-            await ctx.end()
-
-            audio_chunks: list[bytes] = []
-            flush_count = 0
-            async for response in ctx.receive():
-                if response.type == "chunk" and response.audio:
-                    audio_chunks.append(response.audio)
-                elif response.type == "flush_done":
-                    flush_count += 1
-
-            _validate_audio_response(b"".join(audio_chunks), DEFAULT_OUTPUT_FORMAT)
-            assert flush_count == len(transcripts)
-
-
-def test_tts_contexts_ws_cancel_sync(client: Cartesia):
-    """cancel() should stop generation and let the connection be reused."""
-    logger.info("Testing contexts_ws() cancel()")
-
-    long_transcript = "This is a long sentence that should generate many chunks. " * 10
-
-    with client.tts.contexts_ws() as ws:
-        ctx = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-        )
-        ctx.push(long_transcript)
-        ctx.end()
-
-        chunks_received = 0
-        for response in ctx.receive():
-            if response.type == "chunk" and response.audio:
-                chunks_received += 1
-                if chunks_received >= 2:
-                    ctx.cancel()
-                    break
-
-        assert chunks_received >= 2
-        assert ctx.is_closed
-
-        # Connection should still be usable for a new context.
-        ctx2 = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-        )
-        ctx2.push("Short test after cancel.")
-        ctx2.end()
-
-        audio_chunks: list[bytes] = []
-        for response in ctx2.receive():
-            if response.type == "chunk" and response.audio:
-                audio_chunks.append(response.audio)
-        _validate_audio_response(b"".join(audio_chunks), DEFAULT_OUTPUT_FORMAT)
-
-
-@pytest.mark.asyncio
-async def test_tts_contexts_ws_concurrent_contexts_async():
-    """Multiple concurrent contexts on a single connection."""
-    logger.info("Testing contexts_ws() concurrent contexts")
-
-    async with create_async_client() as client:
-        async with client.tts.contexts_ws() as ws:
-            ctx1 = await ws.context(
-                model_id=DEFAULT_MODEL_ID,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
-                language=SAMPLE_LANGUAGE,
-            )
-            ctx2 = await ws.context(
-                model_id=DEFAULT_MODEL_ID,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
-                language=SAMPLE_LANGUAGE,
-            )
-
-            await ctx1.push("Context one audio.")
-            await ctx1.end()
-            await ctx2.push("Context two audio.")
-            await ctx2.end()
-
-            async def collect(ctx: Any) -> bytes:
-                chunks: list[bytes] = []
-                async for response in ctx.receive():
-                    if response.type == "chunk" and response.audio:
-                        chunks.append(response.audio)
-                return b"".join(chunks)
-
-            audio1, audio2 = await asyncio.gather(collect(ctx1), collect(ctx2))
-            _validate_audio_response(audio1, DEFAULT_OUTPUT_FORMAT)
-            _validate_audio_response(audio2, DEFAULT_OUTPUT_FORMAT)
-
-
-def test_tts_contexts_ws_duplicate_context_id_raises(client: Cartesia):
-    """Creating a context with a duplicate id should raise CartesiaError."""
-    logger.info("Testing contexts_ws() duplicate context_id")
-
-    from cartesia._exceptions import CartesiaError
-
-    with client.tts.contexts_ws() as ws:
-        ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-            context_id="dup-id",
-        )
-        with pytest.raises(CartesiaError, match="Duplicate context ID"):
-            ws.context(
-                model_id=DEFAULT_MODEL_ID,
-                voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-                output_format=DEFAULT_OUTPUT_FORMAT,
-                language=SAMPLE_LANGUAGE,
-                context_id="dup-id",
-            )
-
-
-def test_tts_contexts_ws_get_and_list_contexts(client: Cartesia):
-    """get_context() and list_contexts() should return live contexts."""
-    logger.info("Testing contexts_ws() get/list contexts")
-
-    with client.tts.contexts_ws() as ws:
-        ctx = ws.context(
-            model_id=DEFAULT_MODEL_ID,
-            voice={"mode": "id", "id": SAMPLE_VOICE_ID},
-            output_format=DEFAULT_OUTPUT_FORMAT,
-            language=SAMPLE_LANGUAGE,
-            context_id="lookup-id",
-        )
-        assert ws.get_context("lookup-id") is ctx
-        assert ctx in ws.list_contexts()
-        assert ws.get_context("nonexistent") is None
-
-        # After receive() drains, the context is automatically unregistered.
-        ctx.push("hi")
-        ctx.end()
-        for _ in ctx.receive():
-            pass
-        assert ws.get_context("lookup-id") is None
