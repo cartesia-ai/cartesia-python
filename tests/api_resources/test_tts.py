@@ -30,6 +30,7 @@ class TestTTS:
         tts = client.tts.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -51,9 +52,9 @@ class TestTTS:
         tts = client.tts.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
-                "container": "raw",
             },
             transcript="transcript",
             voice={
@@ -83,6 +84,7 @@ class TestTTS:
         tts = client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -105,6 +107,7 @@ class TestTTS:
         with client.tts.with_streaming_response.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -235,9 +238,9 @@ class TestTTS:
             left_audio=b"Example data",
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
-                "container": "raw",
             },
             right_audio=b"Example data",
             transcript="transcript",
@@ -287,6 +290,7 @@ class TestAsyncTTS:
         tts = await async_client.tts.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -308,9 +312,9 @@ class TestAsyncTTS:
         tts = await async_client.tts.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
-                "container": "raw",
             },
             transcript="transcript",
             voice={
@@ -340,6 +344,7 @@ class TestAsyncTTS:
         tts = await async_client.tts.with_raw_response.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -362,6 +367,7 @@ class TestAsyncTTS:
         async with async_client.tts.with_streaming_response.generate(
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
             },
@@ -492,9 +498,9 @@ class TestAsyncTTS:
             left_audio=b"Example data",
             model_id="model_id",
             output_format={
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 8000,
-                "container": "raw",
             },
             right_audio=b"Example data",
             transcript="transcript",

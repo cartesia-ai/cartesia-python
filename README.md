@@ -34,7 +34,7 @@ client = Cartesia(
 response = client.tts.generate(
     model_id="sonic-3",
     output_format={
-        "container": "wav",
+        "container": "raw",
         "encoding": "pcm_f32le",
         "sample_rate": 44100,
     },
@@ -63,7 +63,7 @@ async def main() -> None:
     response = await client.tts.generate(
         model_id="sonic-3",
         output_format={
-            "container": "wav",
+            "container": "raw",
             "encoding": "pcm_f32le",
             "sample_rate": 44100,
         },
@@ -107,7 +107,7 @@ async def main() -> None:
         response = await client.tts.generate(
             model_id="sonic-3",
             output_format={
-                "container": "wav",
+                "container": "raw",
                 "encoding": "pcm_f32le",
                 "sample_rate": 44100,
             },
@@ -206,6 +206,7 @@ client = Cartesia()
 response = client.tts.generate(
     model_id="model_id",
     output_format={
+        "container": "raw",
         "encoding": "pcm_f32le",
         "sample_rate": 8000,
     },
