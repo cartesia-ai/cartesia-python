@@ -3,23 +3,15 @@
 from __future__ import annotations
 
 from typing import Optional
-from typing_extensions import Literal, Required, TypedDict
+from typing_extensions import Required, TypedDict
 
 from .model_speed import ModelSpeed
-from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
+from .raw_output_format_param import RawOutputFormatParam as OutputFormat
 
 __all__ = ["GenerationRequestParam", "OutputFormat"]
-
-
-class OutputFormat(TypedDict, total=False):
-    container: Required[Literal["raw"]]
-
-    encoding: Required[RawEncoding]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
 
 
 _GenerationRequestParamReservedKeywords = TypedDict(

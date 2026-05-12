@@ -393,7 +393,7 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
         send_tasks = [asyncio.create_task(send_transcript(i, ctx)) for i, ctx in enumerate(contexts)]
 
         # Receiver loop
-        files: dict[Optional[str], IO[bytes]] = {}
+        files: dict[str, IO[bytes]] = {}
         active_contexts: set[Optional[str]] = {ctx._context_id for ctx in contexts}
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
