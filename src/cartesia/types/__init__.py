@@ -39,10 +39,6 @@ from .stt_transcribe_params import (
 from .voice_localize_params import VoiceLocalizeParams as VoiceLocalizeParams
 from .voice_specifier_param import VoiceSpecifierParam as VoiceSpecifierParam
 from .websocket_client_event import WebsocketClientEvent as WebsocketClientEvent
-from .websocket_reconnection import (
-    ReconnectingEvent as ReconnectingEvent,
-    ReconnectingOverrides as ReconnectingOverrides,
-)
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .generation_config_param import GenerationConfigParam as GenerationConfigParam
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
@@ -62,10 +58,7 @@ from .access_token_create_params import AccessTokenCreateParams as AccessTokenCr
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
 from .websocket_client_event_param import WebsocketClientEventParam as WebsocketClientEventParam
-from .websocket_connection_options import (
-    WebSocketConnectionOptions as WebSocketConnectionOptions,
-    WebsocketConnectionOptions as WebsocketConnectionOptions,
-)
+from .websocket_connection_options import WebsocketConnectionOptions as WebsocketConnectionOptions
 from .agent_list_templates_response import AgentListTemplatesResponse as AgentListTemplatesResponse
 from .pronunciation_dict_item_param import PronunciationDictItemParam as PronunciationDictItemParam
 from .voice_changer_generate_params import VoiceChangerGenerateParams as VoiceChangerGenerateParams
