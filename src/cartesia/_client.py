@@ -230,7 +230,7 @@ class Cartesia(SyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": "false",
-            "cartesia-version": "2026-03-01",
+            "cartesia-version": "2025-11-04",
             **self._custom_headers,
         }
 
@@ -500,7 +500,7 @@ class AsyncCartesia(AsyncAPIClient):
         return {
             **super().default_headers,
             "X-Stainless-Async": f"async:{get_async_library()}",
-            "cartesia-version": "2026-03-01",
+            "cartesia-version": "2025-11-04",
             **self._custom_headers,
         }
 
