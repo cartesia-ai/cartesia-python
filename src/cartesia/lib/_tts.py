@@ -48,12 +48,12 @@ class AsyncTTSResourceConnection:
     _connection: AsyncWebsocketConnection
 
     def __init__(
-        self, connection: AsyncWebsocketConnection, manager: AsyncTTSResourceConnectionManager | None = None
+        self, connection: AsyncWebsocketConnection, manager: Optional[AsyncTTSResourceConnectionManager] = None
     ) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
-        self._processing_task: asyncio.Task[None] | None = None
+        self._processing_task: Optional[asyncio.Task[None]] = None
         self._closing = False
         self._logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ class AsyncTTSResourceConnection:
         """
         return self.parse_event(await self.recv_bytes())
 
-    async def recv_bytes(self, timeout: float | None = None) -> bytes:
+    async def recv_bytes(self, timeout: Optional[float] = None) -> bytes:
         """Receive the next message from the connection as raw bytes.
 
         Canceling this method is safe. There's no risk of losing data.
@@ -95,7 +95,7 @@ class AsyncTTSResourceConnection:
         self._logger.debug(f"Received websocket message: %s", message)
         return message
 
-    async def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
+    async def send(self, event: Union[WebsocketClientEvent, WebsocketClientEventParam]) -> None:
         await self._ensure_connected()
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
@@ -161,7 +161,7 @@ class AsyncTTSResourceConnection:
             self._connection = new_conn._connection
             self._context_queues.clear()
 
-    def parse_event(self, data: str | bytes) -> WebsocketResponse:
+    def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
         """
         Converts a raw `str` or `bytes` message into a `WebsocketResponse` object.
 
@@ -175,17 +175,17 @@ class AsyncTTSResourceConnection:
         self,
         context_id: Optional[str] = None,
         *,
-        timeout: float | None = None,
-        model_id: str | None = None,
-        voice: VoiceSpecifierParam | None = None,
-        output_format: RawOutputFormatParam | Mapping[str, Any] | None = None,
-        language: SupportedLanguage | None = None,
-        add_timestamps: bool | None = None,
-        add_phoneme_timestamps: bool | None = None,
-        generation_config: GenerationConfigParam | None = None,
-        max_buffer_delay_ms: int | None = None,
-        pronunciation_dict_id: str | None = None,
-        use_normalized_timestamps: bool | None = None,
+        timeout: Optional[float] = None,
+        model_id: Optional[str] = None,
+        voice: Optional[VoiceSpecifierParam] = None,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
+        language: Optional[SupportedLanguage] = None,
+        add_timestamps: Optional[bool] = None,
+        add_phoneme_timestamps: Optional[bool] = None,
+        generation_config: Optional[GenerationConfigParam] = None,
+        max_buffer_delay_ms: Optional[int] = None,
+        pronunciation_dict_id: Optional[str] = None,
+        use_normalized_timestamps: Optional[bool] = None,
     ) -> AsyncWebSocketContext:
         """Create a context helper for managing conversational flows.
 
@@ -259,7 +259,7 @@ class AsyncTTSResourceConnectionManager:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: AsyncTTSResourceConnection | None = None
+        self.__connection: Optional[AsyncTTSResourceConnection] = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -323,7 +323,7 @@ class AsyncTTSResourceConnectionManager:
         return base_url.copy_with(raw_path=merge_raw_path)
 
     async def __aexit__(
-        self, exc_type: type[BaseException] | None, exc: BaseException | None, exc_tb: TracebackType | None
+        self, exc_type: Optional[type[BaseException]], exc: Optional[BaseException], exc_tb: Optional[TracebackType]
     ) -> None:
         if self.__connection is not None:
             await self.__connection.close()
@@ -334,7 +334,7 @@ class TTSResourceConnection:
 
     _connection: WebsocketConnection
 
-    def __init__(self, connection: WebsocketConnection, manager: TTSResourceConnectionManager | None = None) -> None:
+    def __init__(self, connection: WebsocketConnection, manager: Optional[TTSResourceConnectionManager] = None) -> None:
         self._connection = connection
         self._manager = manager
         self._context_queues: dict[str, queue.Queue[WebsocketResponse]] = {}
@@ -361,7 +361,7 @@ class TTSResourceConnection:
         """
         return self.parse_event(self.recv_bytes())
 
-    def recv_bytes(self, timeout: float | None = None) -> bytes:
+    def recv_bytes(self, timeout: Optional[float] = None) -> bytes:
         """Receive the next message from the connection as raw bytes.
 
         Canceling this method is safe. There's no risk of losing data.
@@ -373,7 +373,7 @@ class TTSResourceConnection:
         self._logger.debug(f"Received websocket message: %s", message)
         return message
 
-    def send(self, event: WebsocketClientEvent | WebsocketClientEventParam) -> None:
+    def send(self, event: Union[WebsocketClientEvent, WebsocketClientEventParam]) -> None:
         self._ensure_connected()
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
@@ -394,7 +394,7 @@ class TTSResourceConnection:
             self._connection = new_conn._connection
             self._context_queues.clear()
 
-    def parse_event(self, data: str | bytes) -> WebsocketResponse:
+    def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
         """
         Converts a raw `str` or `bytes` message into a `WebsocketResponse` object.
 
@@ -408,17 +408,17 @@ class TTSResourceConnection:
         self,
         context_id: Optional[str] = None,
         *,
-        timeout: float | None = None,
-        model_id: str | None = None,
-        voice: VoiceSpecifierParam | None = None,
-        output_format: RawOutputFormatParam | Mapping[str, Any] | None = None,
-        language: SupportedLanguage | None = None,
-        add_timestamps: bool | None = None,
-        add_phoneme_timestamps: bool | None = None,
-        generation_config: GenerationConfigParam | None = None,
-        max_buffer_delay_ms: int | None = None,
-        pronunciation_dict_id: str | None = None,
-        use_normalized_timestamps: bool | None = None,
+        timeout: Optional[float] = None,
+        model_id: Optional[str] = None,
+        voice: Optional[VoiceSpecifierParam] = None,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
+        language: Optional[SupportedLanguage] = None,
+        add_timestamps: Optional[bool] = None,
+        add_phoneme_timestamps: Optional[bool] = None,
+        generation_config: Optional[GenerationConfigParam] = None,
+        max_buffer_delay_ms: Optional[int] = None,
+        pronunciation_dict_id: Optional[str] = None,
+        use_normalized_timestamps: Optional[bool] = None,
     ) -> WebSocketContext:
         """Create a context helper for managing conversational flows.
 
@@ -490,7 +490,7 @@ class TTSResourceConnectionManager:
         websocket_connection_options: WebsocketConnectionOptions,
     ) -> None:
         self.__client = client
-        self.__connection: TTSResourceConnection | None = None
+        self.__connection: Optional[TTSResourceConnection] = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -554,7 +554,7 @@ class TTSResourceConnectionManager:
         return base_url.copy_with(raw_path=merge_raw_path)
 
     def __exit__(
-        self, exc_type: type[BaseException] | None, exc: BaseException | None, exc_tb: TracebackType | None
+        self, exc_type: Optional[type[BaseException]], exc: Optional[BaseException], exc_tb: Optional[TracebackType]
     ) -> None:
         if self.__connection is not None:
             self.__connection.close()
@@ -601,7 +601,7 @@ class WebSocketContext:
         *,
         transcript: str,
         voice: VoiceSpecifierParam,
-        model_id: Union[str, Omit] = omit,
+        model_id: Optional[str] = None,
         output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
         continue_: bool = True,
         language: Union[SupportedLanguage, None, Omit] = omit,
@@ -629,7 +629,7 @@ class WebSocketContext:
             }
 
         # Default model_id
-        if not isinstance(model_id, Omit):
+        if model_id is not None:
             pass
         elif self._model_id is not None:
             model_id = self._model_id
@@ -697,6 +697,7 @@ class WebSocketContext:
     def push(
         self,
         transcript: str,
+        *,
         continue_: bool = True,
         voice: Union[VoiceSpecifierParam, Omit] = omit,
         **kwargs: Any,
@@ -846,7 +847,7 @@ class AsyncWebSocketContext:
         *,
         transcript: str,
         voice: VoiceSpecifierParam,
-        model_id: Union[str, Omit] = omit,
+        model_id: Optional[str] = None,
         output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
         continue_: bool = True,
         language: Union[SupportedLanguage, None, Omit] = omit,
@@ -874,7 +875,7 @@ class AsyncWebSocketContext:
             }
 
         # Default model_id
-        if not isinstance(model_id, Omit):
+        if model_id is not None:
             pass
         elif self._model_id is not None:
             model_id = self._model_id
@@ -943,6 +944,7 @@ class AsyncWebSocketContext:
     async def push(
         self,
         transcript: str,
+        *,
         continue_: bool = True,
         voice: Union[VoiceSpecifierParam, Omit] = omit,
         **kwargs: Any,
@@ -1058,12 +1060,12 @@ class BackcompatTTSResourceConnection:
         *,
         model_id: str,
         transcript: str,
-        output_format: RawOutputFormatParam | Mapping[str, Any],
-        voice: VoiceSpecifierParam | Mapping[str, Any],
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any]],
+        voice: Union[VoiceSpecifierParam, Mapping[str, Any]],
         context_id: Optional[str] = None,
         stream: bool = True,
         **kwargs: Any,
-    ) -> "Iterator[BackcompatWebSocketTtsOutput] | BackcompatWebSocketTtsOutput":
+    ) -> Union[Iterator[BackcompatWebSocketTtsOutput], BackcompatWebSocketTtsOutput]:
         """Send a request and return responses (v2 compatible).
 
         If stream is True, returns an iterator of BackcompatWebSocketTtsOutput chunks.
@@ -1167,12 +1169,12 @@ class AsyncBackcompatTTSResourceConnection:
         *,
         model_id: str,
         transcript: str,
-        output_format: RawOutputFormatParam | Mapping[str, Any],
-        voice: VoiceSpecifierParam | Mapping[str, Any],
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any]],
+        voice: Union[VoiceSpecifierParam, Mapping[str, Any]],
         context_id: Optional[str] = None,
         stream: bool = True,
         **kwargs: Any,
-    ) -> "AsyncIterator[BackcompatWebSocketTtsOutput] | BackcompatWebSocketTtsOutput":
+    ) -> Union[AsyncIterator[BackcompatWebSocketTtsOutput], BackcompatWebSocketTtsOutput]:
         """Send a request and return responses (v2 compatible).
 
         If stream is True, returns an async iterator of BackcompatWebSocketTtsOutput chunks.
