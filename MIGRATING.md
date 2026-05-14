@@ -100,8 +100,7 @@ The 3.x SDK also aliases `.sse()` to `.generate_sse()` for backwards compatibili
 
 ## TTS WebSocket
 
-You can now call `client.tts.contexts_ws()` or `client.tts.generate_ws()` to get a Python context that
-automatically closes the websocket.
+You can now call `client.tts.websocket_connect()` to get a Python context that automatically closes the websocket.
 
 ### WebSocket Basic Usage
 
@@ -124,14 +123,14 @@ with open("output.pcm", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.contexts_ws() as ws:
+with client.tts.websocket_connect() as ws:
     ctx = ws.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "voice-id"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
     )
     ctx.push("Hello, world!")
-    ctx.end()
+    ctx.no_more_inputs()
 
     # Write chunks to file as they arrive.
     # You could also send chunks over the network, play them in real-time, etc.
@@ -162,7 +161,7 @@ with open("output.raw", "wb") as f:
 ws.close()
 
 # v3.x
-with client.tts.contexts_ws() as ws:
+with client.tts.websocket_connect() as ws:
     ctx = ws.context(
         model_id="sonic-3",
         voice={"mode": "id", "id": "voice-id"},
@@ -172,7 +171,7 @@ with client.tts.contexts_ws() as ws:
     for transcript in transcripts:
         ctx.push(transcript)
 
-    ctx.end()
+    ctx.no_more_inputs()
 
     # Write chunks to file as they arrive.
     # You could also send chunks over the network, play them in real-time, etc.

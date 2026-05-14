@@ -175,7 +175,7 @@ class TTSSSEErrorEvent(_TTSSSEEventBase):
         since previous versions of the SDK incorrectly included it.
         """
 
-        return f"{self.status_code} {self.title}: {self.message}"
+        return f"{self.title}: {self.message}"
 
 
 TTSSSEEvent: TypeAlias = Annotated[

@@ -11,7 +11,7 @@ import uuid
 import queue
 import logging
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Mapping, Iterator, Optional, cast
+from typing import TYPE_CHECKING, Any, Union, Mapping, Iterator, Optional, cast
 from typing_extensions import AsyncIterator
 
 import httpx
@@ -569,17 +569,17 @@ class WebSocketContext:
         connection: "TTSResourceConnection",
         context_id: str,
         *,
-        timeout: float | None = None,
-        model_id: str | None = None,
-        voice: VoiceSpecifierParam | None = None,
-        output_format: RawOutputFormatParam | Mapping[str, Any] | None = None,
-        language: SupportedLanguage | None = None,
-        add_timestamps: bool | None = None,
-        add_phoneme_timestamps: bool | None = None,
-        generation_config: GenerationConfigParam | None = None,
-        max_buffer_delay_ms: int | None = None,
-        pronunciation_dict_id: str | None = None,
-        use_normalized_timestamps: bool | None = None,
+        timeout: Optional[float] = None,
+        model_id: Optional[str] = None,
+        voice: Optional[VoiceSpecifierParam] = None,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
+        language: Optional[SupportedLanguage] = None,
+        add_timestamps: Optional[bool] = None,
+        add_phoneme_timestamps: Optional[bool] = None,
+        generation_config: Optional[GenerationConfigParam] = None,
+        max_buffer_delay_ms: Optional[int] = None,
+        pronunciation_dict_id: Optional[str] = None,
+        use_normalized_timestamps: Optional[bool] = None,
     ):
         self._connection = connection
         self._context_id = context_id
@@ -599,17 +599,17 @@ class WebSocketContext:
     def send(
         self,
         *,
-        model_id: str,
         transcript: str,
         voice: VoiceSpecifierParam,
-        output_format: Optional[RawOutputFormatParam | Mapping[str, Any]] = None,
+        model_id: Union[str, Omit] = omit,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
         continue_: bool = True,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Union[SupportedLanguage, None, Omit] = omit,
         speed: Optional[ModelSpeed] = None,
-        add_timestamps: Optional[bool] | Omit = omit,
-        add_phoneme_timestamps: Optional[bool] | Omit = omit,
-        flush: Optional[bool] | Omit = omit,
-        generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        add_timestamps: Union[bool, None, Omit] = omit,
+        add_phoneme_timestamps: Union[bool, None, Omit] = omit,
+        flush: Union[bool, None, Omit] = omit,
+        generation_config: Union[GenerationConfigParam, None, Omit] = omit,
         **kwargs: Any,
     ) -> None:
         """Send a generation request with automatic context_id management."""
@@ -628,6 +628,14 @@ class WebSocketContext:
                 "sample_rate": 44100,
             }
 
+        # Default model_id
+        if not isinstance(model_id, Omit):
+            pass
+        elif self._model_id is not None:
+            model_id = self._model_id
+        else:
+            model_id = "sonic-latest"
+
         # Build request parameters, excluding omitted values
         request_params: GenerationRequestParam = {
             "context_id": self._context_id,
@@ -636,12 +644,9 @@ class WebSocketContext:
             "voice": voice,
             "output_format": cast(RawOutputFormatParam, output_format),
             "continue": continue_,
-            "max_buffer_delay_ms": self._max_buffer_delay_ms,
-            "pronunciation_dict_id": self._pronunciation_dict_id,
-            "use_normalized_timestamps": self._use_normalized_timestamps,
         }
 
-        # Optional parameter with context value
+        # Optional parameters with context value
         if language is None:
             pass
         elif not isinstance(language, Omit):
@@ -692,23 +697,23 @@ class WebSocketContext:
     def push(
         self,
         transcript: str,
-        *,
-        flush: Optional[bool] | Omit = omit,
+        continue_: bool = True,
+        voice: Union[VoiceSpecifierParam, Omit] = omit,
         **kwargs: Any,
     ) -> None:
         """Send a generation request with continue_=True using context defaults."""
-        if self._model_id is None or self._voice is None:
-            raise ValueError(
-                "Context was initialized without required parameters (model_id, voice). Cannot use push()."
-            )
+
+        if not isinstance(voice, Omit):
+            pass
+        elif self._voice is not None:
+            voice = self._voice
+        else:
+            raise ValueError("Context was initialized without required parameters (voice).")
 
         self.send(
-            model_id=self._model_id,
             transcript=transcript,
-            voice=self._voice,
-            output_format=self._output_format,
-            continue_=True,
-            flush=flush,
+            continue_=continue_,
+            voice=voice,
             **kwargs,
         )
 
@@ -717,17 +722,14 @@ class WebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        model_id: str = self._model_id or "sonic-3"
         voice: VoiceSpecifierParam = self._voice or cast(
             VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
         )
 
         self.send(
-            model_id=model_id,
             transcript="",
             voice=voice,
             continue_=False,
-            generation_config=self._generation_config,
         )
         self._completed = True
 
@@ -812,17 +814,17 @@ class AsyncWebSocketContext:
         connection: "AsyncTTSResourceConnection",
         context_id: str,
         *,
-        timeout: float | None = None,
-        model_id: str | None = None,
-        voice: VoiceSpecifierParam | None = None,
-        output_format: RawOutputFormatParam | Mapping[str, Any] | None = None,
-        language: SupportedLanguage | None = None,
-        add_timestamps: bool | None = None,
-        add_phoneme_timestamps: bool | None = None,
-        generation_config: GenerationConfigParam | None = None,
-        max_buffer_delay_ms: int | None = None,
-        pronunciation_dict_id: str | None = None,
-        use_normalized_timestamps: bool | None = None,
+        timeout: Optional[float] = None,
+        model_id: Optional[str] = None,
+        voice: Optional[VoiceSpecifierParam] = None,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
+        language: Optional[SupportedLanguage] = None,
+        add_timestamps: Optional[bool] = None,
+        add_phoneme_timestamps: Optional[bool] = None,
+        generation_config: Optional[GenerationConfigParam] = None,
+        max_buffer_delay_ms: Optional[int] = None,
+        pronunciation_dict_id: Optional[str] = None,
+        use_normalized_timestamps: Optional[bool] = None,
     ):
         self._connection = connection
         self._context_id = context_id
@@ -842,17 +844,17 @@ class AsyncWebSocketContext:
     async def send(
         self,
         *,
-        model_id: str,
         transcript: str,
         voice: VoiceSpecifierParam,
-        output_format: Optional[RawOutputFormatParam | Mapping[str, Any]] = None,
+        model_id: Union[str, Omit] = omit,
+        output_format: Union[RawOutputFormatParam, Mapping[str, Any], None] = None,
         continue_: bool = True,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Union[SupportedLanguage, None, Omit] = omit,
         speed: Optional[ModelSpeed] = None,
-        add_timestamps: Optional[bool] | Omit = omit,
-        add_phoneme_timestamps: Optional[bool] | Omit = omit,
-        flush: Optional[bool] | Omit = omit,
-        generation_config: Optional[GenerationConfigParam] | Omit = omit,
+        add_timestamps: Union[bool, None, Omit] = omit,
+        add_phoneme_timestamps: Union[bool, None, Omit] = omit,
+        flush: Union[bool, None, Omit] = omit,
+        generation_config: Union[GenerationConfigParam, None, Omit] = omit,
         **kwargs: Any,
     ) -> None:
         """Send a generation request with automatic context_id management."""
@@ -871,6 +873,14 @@ class AsyncWebSocketContext:
                 "sample_rate": 44100,
             }
 
+        # Default model_id
+        if not isinstance(model_id, Omit):
+            pass
+        elif self._model_id is not None:
+            model_id = self._model_id
+        else:
+            model_id = "sonic-latest"
+
         # Build request parameters, excluding omitted values
         request_params: GenerationRequestParam = {
             "context_id": self._context_id,
@@ -879,12 +889,9 @@ class AsyncWebSocketContext:
             "voice": voice,
             "output_format": cast(RawOutputFormatParam, output_format),
             "continue": continue_,
-            "max_buffer_delay_ms": self._max_buffer_delay_ms,
-            "pronunciation_dict_id": self._pronunciation_dict_id,
-            "use_normalized_timestamps": self._use_normalized_timestamps,
         }
 
-        # Optional parameter with context value
+        # Optional parameters with context value
         if language is None:
             pass
         elif not isinstance(language, Omit):
@@ -936,23 +943,23 @@ class AsyncWebSocketContext:
     async def push(
         self,
         transcript: str,
-        *,
-        flush: Optional[bool] | Omit = omit,
+        continue_: bool = True,
+        voice: Union[VoiceSpecifierParam, Omit] = omit,
         **kwargs: Any,
     ) -> None:
         """Send a generation request with continue_=True using context defaults."""
-        if self._model_id is None or self._voice is None:
-            raise ValueError(
-                "Context was initialized without required parameters (model_id, voice). Cannot use push()."
-            )
+
+        if not isinstance(voice, Omit):
+            pass
+        elif self._voice is not None:
+            voice = self._voice
+        else:
+            raise ValueError("Context was initialized without required parameters (voice).")
 
         await self.send(
-            model_id=self._model_id,
             transcript=transcript,
-            voice=self._voice,
-            output_format=self._output_format,
-            continue_=True,
-            flush=flush,
+            continue_=continue_,
+            voice=voice,
             **kwargs,
         )
 
@@ -961,17 +968,14 @@ class AsyncWebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        model_id: str = self._model_id or "sonic-3"
         voice: VoiceSpecifierParam = self._voice or cast(
             VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
         )
 
         await self.send(
-            model_id=model_id,
             transcript="",
             voice=voice,
             continue_=False,
-            generation_config=self._generation_config,
         )
         self._completed = True
 
