@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.1.0-b4 (2026-05-15)
+
+Full Changelog: [v3.1.0-b3...v3.1.0-b4](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b3...v3.1.0-b4)
+
+### Features
+
+* **internal/types:** support eagerly validating pydantic iterators ([8d18837](https://github.com/cartesia-ai/cartesia-python/commit/8d18837a7de023019db29100ca959ccaaaa2beeb))
+
+
+### Bug Fixes
+
+* address newly introduced bugs ([92424e5](https://github.com/cartesia-ai/cartesia-python/commit/92424e5fae8d0a0ee5e427de661bc29ef800a356))
+* **client:** add missing f-string prefix in file type error message ([2e1527f](https://github.com/cartesia-ai/cartesia-python/commit/2e1527fc0b4ce281a8373a17a16fbe338add0f13))
+* fix examples ([351a34b](https://github.com/cartesia-ai/cartesia-python/commit/351a34b6c462203c80a0da529a0c6d6fbc53eaab))
+* **tts:** add container to RawOutputFormat type ([1c6a8b3](https://github.com/cartesia-ai/cartesia-python/commit/1c6a8b30ea2cbc2632c52ca9b66c3acc7b054a6b))
+* **tts:** change generation request to use the common raw output format param ([0d589e2](https://github.com/cartesia-ai/cartesia-python/commit/0d589e2e9245ef20db3b3bc6e31d87d99207f614))
+* **tts:** make tts ws backward compatible ([d144869](https://github.com/cartesia-ai/cartesia-python/commit/d144869a47865b38090c5deda07abf21faea8ea8))
+* **tts:** remove generate_ws method ([c716bae](https://github.com/cartesia-ai/cartesia-python/commit/c716baede568dd44da8a31f9e954689937627440))
+* **tts:** rollback to cartesia version 2025-11-04 to support voice embedding ([245c8c1](https://github.com/cartesia-ai/cartesia-python/commit/245c8c1043f44574b2602095940d8be8aa1ef135))
+* **voices:** correct required properties ([28ad6b4](https://github.com/cartesia-ai/cartesia-python/commit/28ad6b460c5f44ddaede2afc058705d1d04ba633))
+
+
+### Documentation
+
+* add example command to examples ([b610ce1](https://github.com/cartesia-ai/cartesia-python/commit/b610ce137e48eab2a1976c4710b65720804232d2))
+* **tts:** change infill example back to use sonic-3 ([1c60aca](https://github.com/cartesia-ai/cartesia-python/commit/1c60acaf90cc6e812c9169903f5cec90a618b7bb))
+
 ## 3.1.0-b3 (2026-05-02)
 
 Full Changelog: [v3.1.0-b2...v3.1.0-b3](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b2...v3.1.0-b3)
