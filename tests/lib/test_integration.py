@@ -575,7 +575,7 @@ def test_tts_websocket_push_overrides(client: Cartesia):
 
     with client.tts.websocket_connect() as connection:
         ctx = connection.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": SAMPLE_VOICE_ID},
             output_format=DEFAULT_OUTPUT_FORMAT,
             language=SAMPLE_LANGUAGE,

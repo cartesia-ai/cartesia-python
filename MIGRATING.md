@@ -23,7 +23,7 @@ helpers such as `.write_to_file`.
 ```python
 # v2.x
 output = client.tts.bytes(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "voice-id"},
     output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -34,7 +34,7 @@ with open("output.wav", "wb") as f:
 
 # v3.x
 response = client.tts.generate(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "voice-id"},
     output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -66,7 +66,7 @@ The v3.x SDK automatically decodes the base64-encoded `event.audio`.
 import base64
 
 stream = client.tts.sse(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "voice-id"},
     output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -82,7 +82,7 @@ for event in stream:
 
 # v3.x
 stream = client.tts.generate_sse(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "voice-id"},
     output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -108,7 +108,7 @@ You can now call `client.tts.websocket_connect()` to get a Python context that a
 # v2.x
 ws = client.tts.websocket()
 output = ws.send(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     transcript="Hello, world!",
     voice={"mode": "id", "id": "voice-id"},
     output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -125,7 +125,7 @@ ws.close()
 # v3.x
 with client.tts.websocket_connect() as ws:
     ctx = ws.context(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         voice={"mode": "id", "id": "voice-id"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
     )
@@ -148,7 +148,7 @@ ws = client.tts.websocket()
 ctx = ws.context()
 for transcript in transcripts:
     ctx.send(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript=transcript,
         voice={"mode": "id", "id": "voice-id"},
         output_format=output_format,
@@ -163,7 +163,7 @@ ws.close()
 # v3.x
 with client.tts.websocket_connect() as ws:
     ctx = ws.context(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         voice={"mode": "id", "id": "voice-id"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
     )
@@ -228,7 +228,7 @@ The infill API remains at `client.tts.infill()` but with `left_audio` and
 ```python
 # v2.x
 infill_audio, total_audio = client.tts.infill(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     language="en",
     transcript="Infill text",
     left_audio_path="left.wav",
@@ -239,7 +239,7 @@ infill_audio, total_audio = client.tts.infill(
 
 # v3.x
 response = client.tts.infill(
-    model_id="sonic-3",
+    model_id="sonic-latest",
     language="en",
     transcript="Infill text",
     left_audio="left.wav",   # left_audio and right_audio can be file paths or

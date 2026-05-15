@@ -34,7 +34,7 @@ def create_client() -> Cartesia:
 def tts_generate_to_file(client: Cartesia) -> None:
     """Use generate() and write_to_file() to write a wav file."""
     response = client.tts.generate(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -48,7 +48,7 @@ def tts_generate_to_file(client: Cartesia) -> None:
 def tts_bytes_to_file(client: Cartesia) -> None:
     """Backwards compatibility: use the bytes() method to write a wav file."""
     response = client.tts.bytes(  # pyright: ignore[reportDeprecated]
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -69,7 +69,7 @@ def tts_bytes_to_file(client: Cartesia) -> None:
 def tts_sse_basic(client: Cartesia) -> None:
     """Basic SSE streaming."""
     stream = client.tts.generate_sse(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -98,7 +98,7 @@ def tts_sse_basic(client: Cartesia) -> None:
 def tts_sse_with_timestamps(client: Cartesia) -> None:
     """SSE streaming with word timestamps."""
     stream = client.tts.generate_sse(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -131,7 +131,7 @@ def tts_sse_with_timestamps(client: Cartesia) -> None:
 def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
     """SSE streaming with phoneme timestamps."""
     stream = client.tts.generate_sse(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -164,7 +164,7 @@ def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
 def tts_sse_with_match(client: Cartesia) -> None:
     """SSE streaming using match statement."""
     stream = client.tts.generate_sse(
-        model_id="sonic-3",
+        model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
         output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
@@ -181,10 +181,9 @@ def tts_sse_with_match(client: Cartesia) -> None:
                 # Audio chunk - event.audio contains bytes
                 if event.audio:
                     f.write(event.audio)
-                    process_audio(event.audio)
             elif event.type == "timestamps":
                 # Word timestamps - event.word_timestamps
-                process_timestamps(event.word_timestamps)
+                print("got timestamps")
             elif event.type == "done":
                 # Stream complete
                 break
@@ -196,14 +195,6 @@ def tts_sse_with_match(client: Cartesia) -> None:
     print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
 
 
-def process_audio(audio: bytes) -> None:
-    pass
-
-
-def process_timestamps(timestamps: object) -> None:
-    pass
-
-
 # =============================================================================
 # TTS WebSocket
 # =============================================================================
@@ -213,8 +204,8 @@ def tts_websocket_basic(client: Cartesia) -> None:
     """Basic WebSocket usage with websocket_connect() context manager."""
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
-            voice={"mode": "id", "id": "voice-id"},
+            model_id="sonic-latest",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
         )
@@ -231,8 +222,8 @@ def tts_websocket_basic(client: Cartesia) -> None:
             for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
-                elif response.done:
-                    break
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
         print(f"Play with:\n  $ ffplay -f f32le -ar 44100 {filename}")
@@ -243,7 +234,7 @@ def tts_websocket_continuations(client: Cartesia) -> None:
     Useful for streaming transcripts generated by an LLM."""
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={
                 "container": "raw",
@@ -268,6 +259,8 @@ def tts_websocket_continuations(client: Cartesia) -> None:
             for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
         print(f"Play with:\n  $ ffplay -f f32le -ar 44100 {filename}")
@@ -279,7 +272,7 @@ def tts_websocket_flushing(client: Cartesia) -> None:
 
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
@@ -322,6 +315,9 @@ def tts_websocket_flushing(client: Cartesia) -> None:
             elif response.type == "flush_done":
                 print(f"Flush done received for flush_id: {response.flush_id}")
 
+            elif response.type == "error":
+                print(f"error: {response.message or response.title}")
+
         # Close all open files
         for f in files.values():
             f.close()
@@ -336,7 +332,7 @@ def tts_websocket_emotion(client: Cartesia) -> None:
     """Demonstrates changing emotion mid-stream using generation_config."""
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
@@ -358,6 +354,8 @@ def tts_websocket_emotion(client: Cartesia) -> None:
             for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -368,7 +366,7 @@ def tts_websocket_speed(client: Cartesia) -> None:
 
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
@@ -390,6 +388,8 @@ def tts_websocket_speed(client: Cartesia) -> None:
             for response in ctx.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -406,12 +406,12 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
 
     with client.tts.websocket_connect() as connection:
         ctx1 = connection.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format=output_format,
         )
         ctx2 = connection.context(
-            model_id="sonic-3",
+            model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format=output_format,
         )
@@ -437,6 +437,8 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
             for response in ctx1.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         # Receive from ctx2 — picks up queued events first
         filename2 = f"tts_concurrent_ctx2_{timestamp}.pcm"
@@ -444,6 +446,8 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
             for response in ctx2.receive():
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
+                elif response.type == "error":
+                    print(f"error: {response.message or response.title}")
 
         print(f"Saved context 1 audio to {filename1}")
         print(f"Saved context 2 audio to {filename2}")
@@ -456,8 +460,8 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
     """WebSocket response type handling."""
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
-            model_id="sonic-3",
-            voice={"mode": "id", "id": "voice-id"},
+            model_id="sonic-latest",
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
             language="en",
         )
@@ -477,11 +481,12 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
                 if response.type == "chunk" and response.audio:
                     f.write(response.audio)
                 elif response.type == "timestamps":
-                    process_timestamps(response.word_timestamps)
-                elif response.type == "done" or response.done:
-                    break
+                    print("got timestamps")
                 elif response.type == "error":
-                    raise Exception(f"{response.title}: {response.message}")
+                    print(f"error: {response.message or response.title}")
+
+                if response.done:
+                    break
 
         print(f"Saved audio to {filename}")
         print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
@@ -494,41 +499,76 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
 
 def voices_list(client: Cartesia) -> None:
     """List voices with pagination."""
-    voices = client.voices.list(limit=10)
-    for voice in voices:
-        print(voice.name)
+    print("loading page 1...")
+    page = client.voices.list()
+    voices = list(page.data)
+
+    # loaded 1 page
+    print("loaded", len(voices))
+
+    for i in range(2, 4):
+        if not page.has_next_page():
+            break
+        print(f"loading page {i}...")
+        page = page.get_next_page()
+        voices.extend(page.data)
+        print("loaded", len(voices))
+
+    print([voices[0], "..."])
 
 
-def voices_get(client: Cartesia) -> Any:
+def voices_get(client: Cartesia, *args: str) -> Any:
     """Get a specific voice."""
-    voice = client.voices.get("voice-id")
+    voice_id = args[0] if args else "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
+    voice = client.voices.get(voice_id)
+    if hasattr(voice, "embedding"):
+        voice.embedding = ["..."]  # pyright: ignore[reportAttributeAccessIssue]
+    print(voice)
     return voice
 
 
-def voices_clone(client: Cartesia) -> Any:
+def voices_clone(client: Cartesia, *args: str) -> Any:
     """Clone a voice from an audio clip."""
-    with open("sample.wav", "rb") as clip:
+    import sys
+
+    if len(args) < 2:
+        print("Usage: voices_clone <path to audio file> <language> [<name>]")
+        print(
+            "See https://docs.cartesia.ai/build-with-cartesia/tts-models/latest for supported languages: en, fr, de, es, ..."
+        )
+        sys.exit(1)
+    clip_path, language, *name_parts = args
+    name = " ".join(name_parts) if name_parts else "My Voice"
+    with open(clip_path, "rb") as clip:
         voice = client.voices.clone(
             clip=clip,
-            name="My Voice",
-            description="A custom voice",
-            language="en",
+            language=language,
+            name=name,
         )
+    print(f"Cloned voice: {voice.id}")
     return voice
 
 
-def voices_update(client: Cartesia, voice_id: str) -> None:
+def voices_update(client: Cartesia, *args: str) -> None:
     """Update a voice."""
-    client.voices.update(
-        voice_id,
-        name="Updated Name",
-        description="Updated description",
-    )
+    import sys
+
+    if len(args) < 2:
+        print("Usage: voices_update <voice_id> <name>")
+        sys.exit(1)
+    voice_id, *name_parts = args
+    voice = client.voices.update(voice_id, name=" ".join(name_parts))
+    print(voice)
 
 
-def voices_delete(client: Cartesia, voice_id: str) -> None:
+def voices_delete(client: Cartesia, *args: str) -> None:
     """Delete a voice."""
-    client.voices.delete(voice_id)
+    import sys
+
+    if not args:
+        print("Usage: voices_delete <voice_id>")
+        sys.exit(1)
+    client.voices.delete(args[0])
 
 
 # =============================================================================
@@ -536,17 +576,23 @@ def voices_delete(client: Cartesia, voice_id: str) -> None:
 # =============================================================================
 
 
-def infill_create(client: Cartesia) -> None:
+def infill_create(client: Cartesia, *args: str) -> None:
     """Create infill audio between two clips."""
     from pathlib import Path
+
+    if len(args) < 3:
+        print("Usage: stt_transcribe <audio_file_before> <audio_file_after> <transcript>")
+        sys.exit(1)
+
+    left_file, right_file, *transcript_parts = args
 
     # Can pass file paths directly (as Path objects)
     response = client.tts.infill(
         model_id="sonic-3",
         language="en",
-        transcript="Infill text",
-        left_audio=Path("left.wav"),
-        right_audio=Path("right.wav"),
+        transcript=" ".join(transcript_parts),
+        left_audio=Path(left_file),
+        right_audio=Path(right_file),
         voice_id="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
     )
@@ -560,9 +606,14 @@ def infill_create(client: Cartesia) -> None:
 # =============================================================================
 
 
-def stt_transcribe(client: Cartesia) -> None:
+def stt_transcribe(client: Cartesia, *args: str) -> None:
     """Transcribe audio with word timestamps."""
-    with open("audio.wav", "rb") as f:
+    import sys
+
+    if not args:
+        print("Usage: stt_transcribe <file_path>")
+        sys.exit(1)
+    with open(args[0], "rb") as f:
         response = client.stt.transcribe(
             file=f,
             model="ink-whisper",
@@ -583,23 +634,23 @@ def stt_transcribe(client: Cartesia) -> None:
 def error_handling_example(client: Cartesia) -> None:
     """Example of error handling with SDK exceptions."""
     try:
-        _response = client.tts.generate(
-            model_id="sonic-3",
+        client.tts.generate(
+            model_id="sonic-latest",
             transcript="Hello, world!",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={}, # type: ignore # bad request
             language="en",
         )
     except BadRequestError as e:
-        print(f"Bad request: {e}")
+        print(f"Bad request: {e.message}")
     except AuthenticationError as e:
-        print(f"Auth failed: {e}")
+        print(f"Auth failed: {e.message}")
     except NotFoundError as e:
-        print(f"Not found: {e}")
+        print(f"Not found: {e.message}")
     except RateLimitError as e:
-        print(f"Rate limited: {e}")
+        print(f"Rate limited: {e.message}")
     except APIError as e:
-        print(f"API error: {e}")
+        print(f"API error: {e.message}")
 
 
 if __name__ == "__main__":
@@ -610,7 +661,9 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python examples.py <function_name>")
         available_functions = [
-            name for name, obj in globals().items() if inspect.isfunction(obj) and obj.__module__ == __name__
+            name
+            for name, obj in globals().items()
+            if inspect.isfunction(obj) and obj.__module__ == __name__ and obj != create_client
         ]
         print(f"Available functions: {', '.join(available_functions)}")
         sys.exit(1)
@@ -627,15 +680,9 @@ if __name__ == "__main__":
         print("Error: CARTESIA_API_KEY environment variable not set.")
         sys.exit(1)
 
-    # Allow overriding version via env var (helpful if default version has issues)
-    extra_headers: dict[str, str] = {}
-    cartesia_version = os.environ.get("CARTESIA_VERSION")
-    if cartesia_version:
-        extra_headers["Cartesia-Version"] = cartesia_version
-
     try:
-        client = Cartesia(api_key=api_key, default_headers=extra_headers)
-        func(client)
+        client = Cartesia(api_key=api_key)
+        func(client, *sys.argv[2:])
     except Exception as e:
         print(f"An error occurred during execution: {e}")
         sys.exit(1)
