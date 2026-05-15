@@ -228,7 +228,7 @@ The infill API remains at `client.tts.infill()` but with `left_audio` and
 ```python
 # v2.x
 infill_audio, total_audio = client.tts.infill(
-    model_id="sonic-latest",
+    model_id="sonic-3",
     language="en",
     transcript="Infill text",
     left_audio_path="left.wav",
@@ -239,7 +239,7 @@ infill_audio, total_audio = client.tts.infill(
 
 # v3.x
 response = client.tts.infill(
-    model_id="sonic-latest",
+    model_id="sonic-3",
     language="en",
     transcript="Infill text",
     left_audio="left.wav",   # left_audio and right_audio can be file paths or
