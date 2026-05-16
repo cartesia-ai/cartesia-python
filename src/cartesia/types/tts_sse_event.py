@@ -19,7 +19,17 @@ __all__ = [
 ]
 
 
-class TTSSSEChunkEvent(BaseModel):
+class _TTSSSEEventBase(BaseModel):
+    """Used for backward compatibility with v3.0.2"""
+
+    id: None = None
+    """Not used. Included for backward compatibility with v3.0.2"""
+
+    retry: None = None
+    """Not used. Included for backward compatibility with v3.0.2"""
+
+
+class TTSSSEChunkEvent(_TTSSSEEventBase):
     """Audio data chunk."""
 
     data: str
@@ -59,7 +69,7 @@ class TTSSSEChunkEvent(BaseModel):
             return None
 
 
-class TTSSSETimestampsEvent(BaseModel):
+class TTSSSETimestampsEvent(_TTSSSEEventBase):
     """Word-level timing information."""
 
     done: Literal[False]
@@ -86,7 +96,7 @@ class TTSSSETimestampsEvent(BaseModel):
         return self.word_timestamps
 
 
-class TTSSSEPhonemeTimestampsEvent(BaseModel):
+class TTSSSEPhonemeTimestampsEvent(_TTSSSEEventBase):
     """Phoneme-level timing information."""
 
     done: Literal[False]
@@ -113,7 +123,7 @@ class TTSSSEPhonemeTimestampsEvent(BaseModel):
         return self.phoneme_timestamps
 
 
-class TTSSSEDoneEvent(BaseModel):
+class TTSSSEDoneEvent(_TTSSSEEventBase):
     """Generation completion signal. Final event in the stream."""
 
     done: Literal[True]
@@ -129,7 +139,7 @@ class TTSSSEDoneEvent(BaseModel):
     """The context ID echoed back from the request, if one was provided."""
 
 
-class TTSSSEErrorEvent(BaseModel):
+class TTSSSEErrorEvent(_TTSSSEEventBase):
     """Error information for the TTS SSE request."""
 
     done: bool
@@ -165,7 +175,7 @@ class TTSSSEErrorEvent(BaseModel):
         since previous versions of the SDK incorrectly included it.
         """
 
-        return f"{self.status_code} {self.title}: {self.message}"
+        return f"{self.title}: {self.message}"
 
 
 TTSSSEEvent: TypeAlias = Annotated[

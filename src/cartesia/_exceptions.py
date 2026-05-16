@@ -15,8 +15,6 @@ __all__ = [
     "UnprocessableEntityError",
     "RateLimitError",
     "InternalServerError",
-    "WebSocketConnectionClosedError",
-    "WebSocketQueueFullError",
 ]
 
 
@@ -107,20 +105,4 @@ class RateLimitError(APIStatusError):
 
 
 class InternalServerError(APIStatusError):
-    pass
-
-
-class WebSocketConnectionClosedError(CartesiaError):
-    """Raised when a WebSocket connection closes with unsent messages."""
-
-    unsent_messages: list[str]
-
-    def __init__(self, message: str, *, unsent_messages: list[str]) -> None:
-        super().__init__(message)
-        self.unsent_messages = unsent_messages
-
-
-class WebSocketQueueFullError(CartesiaError):
-    """Raised when the outgoing WebSocket message queue exceeds its byte-size limit."""
-
     pass

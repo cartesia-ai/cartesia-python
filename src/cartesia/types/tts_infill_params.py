@@ -41,11 +41,11 @@ class TTSInfillParams(TypedDict, total=False):
 
 
 class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["raw"]
+    container: Literal["raw"]  # type: ignore
 
 
 class OutputFormatWavOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["wav"]
+    container: Literal["wav"]  # type: ignore
 
 
 class OutputFormatMP3OutputFormat(TypedDict, total=False):

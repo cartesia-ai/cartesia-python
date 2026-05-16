@@ -61,9 +61,9 @@ class VoicesResource(SyncAPIResource):
         self,
         id: str,
         *,
-        description: str,
-        name: str,
+        description: str | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
+        name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -99,8 +99,8 @@ class VoicesResource(SyncAPIResource):
             body=maybe_transform(
                 {
                     "description": description,
-                    "name": name,
                     "gender": gender,
+                    "name": name,
                 },
                 voice_update_params.VoiceUpdateParams,
             ),
@@ -223,11 +223,11 @@ class VoicesResource(SyncAPIResource):
     def clone(
         self,
         *,
+        clip: FileTypes,
+        language: SupportedLanguage,
+        name: str,
         base_voice_id: Optional[str] | Omit = omit,
-        clip: FileTypes | Omit = omit,
         description: Optional[str] | Omit = omit,
-        language: SupportedLanguage | Omit = omit,
-        name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -242,13 +242,13 @@ class VoicesResource(SyncAPIResource):
         about 5 seconds long.
 
         Args:
-          base_voice_id: Optional base voice ID that the cloned voice is derived from.
-
-          description: A description for the voice.
-
           language: The language of the voice.
 
           name: The name of the voice.
+
+          base_voice_id: Optional base voice ID that the cloned voice is derived from.
+
+          description: A description for the voice.
 
           extra_headers: Send extra headers
 
@@ -260,11 +260,11 @@ class VoicesResource(SyncAPIResource):
         """
         body = deepcopy_with_paths(
             {
-                "base_voice_id": base_voice_id,
                 "clip": clip,
-                "description": description,
                 "language": language,
                 "name": name,
+                "base_voice_id": base_voice_id,
+                "description": description,
             },
             [["clip"]],
         )
@@ -413,9 +413,9 @@ class AsyncVoicesResource(AsyncAPIResource):
         self,
         id: str,
         *,
-        description: str,
-        name: str,
+        description: str | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
+        name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -451,8 +451,8 @@ class AsyncVoicesResource(AsyncAPIResource):
             body=await async_maybe_transform(
                 {
                     "description": description,
-                    "name": name,
                     "gender": gender,
+                    "name": name,
                 },
                 voice_update_params.VoiceUpdateParams,
             ),
@@ -575,11 +575,11 @@ class AsyncVoicesResource(AsyncAPIResource):
     async def clone(
         self,
         *,
+        clip: FileTypes,
+        language: SupportedLanguage,
+        name: str,
         base_voice_id: Optional[str] | Omit = omit,
-        clip: FileTypes | Omit = omit,
         description: Optional[str] | Omit = omit,
-        language: SupportedLanguage | Omit = omit,
-        name: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -594,13 +594,13 @@ class AsyncVoicesResource(AsyncAPIResource):
         about 5 seconds long.
 
         Args:
-          base_voice_id: Optional base voice ID that the cloned voice is derived from.
-
-          description: A description for the voice.
-
           language: The language of the voice.
 
           name: The name of the voice.
+
+          base_voice_id: Optional base voice ID that the cloned voice is derived from.
+
+          description: A description for the voice.
 
           extra_headers: Send extra headers
 
@@ -612,11 +612,11 @@ class AsyncVoicesResource(AsyncAPIResource):
         """
         body = deepcopy_with_paths(
             {
-                "base_voice_id": base_voice_id,
                 "clip": clip,
-                "description": description,
                 "language": language,
                 "name": name,
+                "base_voice_id": base_voice_id,
+                "description": description,
             },
             [["clip"]],
         )

@@ -26,8 +26,6 @@ class TestVoices:
     def test_method_update(self, client: Cartesia) -> None:
         voice = client.voices.update(
             id="id",
-            description="description",
-            name="name",
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -37,8 +35,8 @@ class TestVoices:
         voice = client.voices.update(
             id="id",
             description="description",
-            name="name",
             gender="masculine",
+            name="name",
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -47,8 +45,6 @@ class TestVoices:
     def test_raw_response_update(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.update(
             id="id",
-            description="description",
-            name="name",
         )
 
         assert response.is_closed is True
@@ -61,8 +57,6 @@ class TestVoices:
     def test_streaming_response_update(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.update(
             id="id",
-            description="description",
-            name="name",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -78,8 +72,6 @@ class TestVoices:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             client.voices.with_raw_response.update(
                 id="",
-                description="description",
-                name="name",
             )
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
@@ -169,16 +161,8 @@ class TestVoices:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_clone(self, client: Cartesia) -> None:
-        voice = client.voices.clone()
-        assert_matches_type(VoiceMetadata, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    def test_method_clone_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.clone(
-            base_voice_id="base_voice_id",
             clip=b"Example data",
-            description="description",
             language="en",
             name="name",
         )
@@ -186,8 +170,24 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    def test_method_clone_with_all_params(self, client: Cartesia) -> None:
+        voice = client.voices.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+            base_voice_id="base_voice_id",
+            description="description",
+        )
+        assert_matches_type(VoiceMetadata, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     def test_raw_response_clone(self, client: Cartesia) -> None:
-        response = client.voices.with_raw_response.clone()
+        response = client.voices.with_raw_response.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -197,7 +197,11 @@ class TestVoices:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_clone(self, client: Cartesia) -> None:
-        with client.voices.with_streaming_response.clone() as response:
+        with client.voices.with_streaming_response.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -327,8 +331,6 @@ class TestAsyncVoices:
     async def test_method_update(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.update(
             id="id",
-            description="description",
-            name="name",
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -338,8 +340,8 @@ class TestAsyncVoices:
         voice = await async_client.voices.update(
             id="id",
             description="description",
-            name="name",
             gender="masculine",
+            name="name",
         )
         assert_matches_type(Voice, voice, path=["response"])
 
@@ -348,8 +350,6 @@ class TestAsyncVoices:
     async def test_raw_response_update(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.update(
             id="id",
-            description="description",
-            name="name",
         )
 
         assert response.is_closed is True
@@ -362,8 +362,6 @@ class TestAsyncVoices:
     async def test_streaming_response_update(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.update(
             id="id",
-            description="description",
-            name="name",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -379,8 +377,6 @@ class TestAsyncVoices:
         with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
             await async_client.voices.with_raw_response.update(
                 id="",
-                description="description",
-                name="name",
             )
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
@@ -470,16 +466,8 @@ class TestAsyncVoices:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_clone(self, async_client: AsyncCartesia) -> None:
-        voice = await async_client.voices.clone()
-        assert_matches_type(VoiceMetadata, voice, path=["response"])
-
-    @pytest.mark.skip(reason="Mock server tests are disabled")
-    @parametrize
-    async def test_method_clone_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.clone(
-            base_voice_id="base_voice_id",
             clip=b"Example data",
-            description="description",
             language="en",
             name="name",
         )
@@ -487,8 +475,24 @@ class TestAsyncVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    async def test_method_clone_with_all_params(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+            base_voice_id="base_voice_id",
+            description="description",
+        )
+        assert_matches_type(VoiceMetadata, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     async def test_raw_response_clone(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.voices.with_raw_response.clone()
+        response = await async_client.voices.with_raw_response.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -498,7 +502,11 @@ class TestAsyncVoices:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_clone(self, async_client: AsyncCartesia) -> None:
-        async with async_client.voices.with_streaming_response.clone() as response:
+        async with async_client.voices.with_streaming_response.clone(
+            clip=b"Example data",
+            language="en",
+            name="name",
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
