@@ -20,6 +20,6 @@ class MetricListResponse(BaseModel):
 
     next_page: Optional[str] = None
     """
-    The ID of the last Metric in the current response as a cursor for the next page
-    of results.
+    Use the last ID from `data` instead. An ID that can be passed as
+    `starting_after` to get the next page of metrics.
     """
