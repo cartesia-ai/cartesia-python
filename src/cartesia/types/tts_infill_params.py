@@ -6,6 +6,7 @@ from typing import Union
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .._types import FileTypes
+from .raw_encoding import RawEncoding
 from .raw_output_format_param import RawOutputFormatParam
 
 __all__ = [
@@ -44,8 +45,12 @@ class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
     container: Literal["raw"]  # type: ignore
 
 
-class OutputFormatWavOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["wav"]  # type: ignore
+class OutputFormatWavOutputFormat(TypedDict, total=False):
+    container: Required[Literal["wav"]]
+
+    encoding: Required[RawEncoding]
+
+    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
 
 
 class OutputFormatMP3OutputFormat(TypedDict, total=False):
