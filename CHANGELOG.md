@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.1.0-b6 (2026-05-18)
+
+Full Changelog: [v3.1.0-b5...v3.1.0-b6](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b5...v3.1.0-b6)
+
+### Features
+
+* **api:** add next_page to all paginated endpoints ([0744129](https://github.com/cartesia-ai/cartesia-python/commit/074412901a3287640d587b353b137e586eff704c))
+
+
+### Bug Fixes
+
+* **api:** undo next_page deprecation ([8226acb](https://github.com/cartesia-ai/cartesia-python/commit/8226acb8c607ff888e89a8f6d4a89e1ee1010f08))
+
+
+### Documentation
+
+* **metrics:** remove comment about next page function ([381c86b](https://github.com/cartesia-ai/cartesia-python/commit/381c86bfebb83e6f872fade5c2b153a9778a9dc3))
+
 ## 3.1.0-b5 (2026-05-18)
 
 Full Changelog: [v3.1.0-b4...v3.1.0-b5](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b4...v3.1.0-b5)
