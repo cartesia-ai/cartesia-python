@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.1.0-b5 (2026-05-18)
+
+Full Changelog: [v3.1.0-b4...v3.1.0-b5](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b4...v3.1.0-b5)
+
+### Features
+
+* **api:** deprecate next_page ([5848128](https://github.com/cartesia-ai/cartesia-python/commit/5848128e12b67e0b352c34411841895b5e7ff4ff))
+* **voices:** add voice country ([095cf14](https://github.com/cartesia-ai/cartesia-python/commit/095cf14c3c7599d708c59609d4394a7fad8bf041))
+
+
+### Bug Fixes
+
+* **tts:** wav output format type ([24f587e](https://github.com/cartesia-ai/cartesia-python/commit/24f587ef4043473373b566684f523d68cd7dc981))
+
 ## 3.1.0-b4 (2026-05-15)
 
 Full Changelog: [v3.1.0-b3...v3.1.0-b4](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b3...v3.1.0-b4)
