@@ -226,7 +226,7 @@ wheels = [
 
 [[package]]
 name = "cartesia"
-version = "3.1.0b4"
+version = "3.1.0b5"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },
