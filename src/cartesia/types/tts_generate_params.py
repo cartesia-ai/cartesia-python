@@ -6,6 +6,7 @@ from typing import Union, Optional
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .model_speed import ModelSpeed
+from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
@@ -74,8 +75,12 @@ class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
     container: Literal["raw"]  # type: ignore
 
 
-class OutputFormatWavOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["wav"]  # type: ignore
+class OutputFormatWavOutputFormat(TypedDict, total=False):
+    container: Required[Literal["wav"]]
+
+    encoding: Required[RawEncoding]
+
+    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
 
 
 class OutputFormatMP3OutputFormat(TypedDict, total=False):

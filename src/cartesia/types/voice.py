@@ -35,6 +35,12 @@ class Voice(BaseModel):
     name: str
     """The name of the voice."""
 
+    country: Optional[str] = None
+    """
+    The country associated with the voice, as an ISO 3166-1 alpha-2 code when
+    available (e.g. `US`, `GB`, `FR`).
+    """
+
     gender: Optional[GenderPresentation] = None
     """The gender of the voice, if specified."""
 
