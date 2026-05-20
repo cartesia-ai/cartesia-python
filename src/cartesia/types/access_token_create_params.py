@@ -31,7 +31,8 @@ class Grants(TypedDict, total=False):
     agent: Optional[bool]
     """
     The `agent` grant allows the token to be used to access the Agent websocket
-    calling [endpoint](/line/integrations/web-calls#connection).
+    calling
+    [endpoint](https://docs.cartesia.ai/line/integrations/web-calls#connection).
     """
 
     stt: Optional[bool]

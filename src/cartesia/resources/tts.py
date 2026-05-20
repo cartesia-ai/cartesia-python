@@ -93,17 +93,18 @@ class TTSResource(SyncAPIResource):
 
         Args:
           model_id: The ID of the model to use for the generation. See
-              [Models](/build-with-cartesia/tts-models) for available models.
+              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+              models.
 
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
 
               See
-              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
           language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](/build-with-cartesia/tts-models).
+              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -183,7 +184,8 @@ class TTSResource(SyncAPIResource):
 
         Args:
           model_id: The ID of the model to use for the generation. See
-              [Models](/build-with-cartesia/tts-models) for available models.
+              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+              models.
 
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
@@ -199,11 +201,11 @@ class TTSResource(SyncAPIResource):
               `sonic-3` and have no effect on earlier models.
 
               See
-              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
           language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](/build-with-cartesia/tts-models).
+              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -387,17 +389,18 @@ class AsyncTTSResource(AsyncAPIResource):
 
         Args:
           model_id: The ID of the model to use for the generation. See
-              [Models](/build-with-cartesia/tts-models) for available models.
+              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+              models.
 
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
 
               See
-              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
           language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](/build-with-cartesia/tts-models).
+              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -477,7 +480,8 @@ class AsyncTTSResource(AsyncAPIResource):
 
         Args:
           model_id: The ID of the model to use for the generation. See
-              [Models](/build-with-cartesia/tts-models) for available models.
+              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
+              models.
 
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
@@ -493,11 +497,11 @@ class AsyncTTSResource(AsyncAPIResource):
               `sonic-3` and have no effect on earlier models.
 
               See
-              [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+              [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
           language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](/build-with-cartesia/tts-models).
+              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.

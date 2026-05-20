@@ -18,7 +18,8 @@ class TTSGenerateSSEParams(TypedDict, total=False):
     model_id: Required[str]
     """The ID of the model to use for the generation.
 
-    See [Models](/build-with-cartesia/tts-models) for available models.
+    See [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for
+    available models.
     """
 
     output_format: Required[OutputFormat]
@@ -50,14 +51,15 @@ class TTSGenerateSSEParams(TypedDict, total=False):
     These are only for `sonic-3` and have no effect on earlier models.
 
     See
-    [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion)
+    [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
     for a guide on this option.
     """
 
     language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
 
-    For valid options, see [Models](/build-with-cartesia/tts-models).
+    For valid options, see
+    [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
     """
 
     pronunciation_dict_id: Optional[str]
