@@ -13,7 +13,7 @@ class GenerationConfigParam(TypedDict, total=False):
 
     These are only for `sonic-3` and have no effect on earlier models.
 
-    See [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
+    See [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
     """
 
     emotion: Union[
