@@ -638,7 +638,7 @@ def error_handling_example(client: Cartesia) -> None:
             model_id="sonic-latest",
             transcript="Hello, world!",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={}, # type: ignore # bad request
+            output_format={},  # type: ignore # bad request
             language="en",
         )
     except BadRequestError as e:

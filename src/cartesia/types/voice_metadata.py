@@ -24,7 +24,8 @@ class VoiceMetadata(BaseModel):
     language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
 
-    For valid options, see [Models](/build-with-cartesia/tts-models).
+    For valid options, see
+    [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
     """
 
     name: str

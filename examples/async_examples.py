@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from typing import IO, Optional
+from typing import IO
 
 from cartesia import (
     AsyncCartesia,
@@ -364,8 +364,9 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
     """
     Demonstrates using a single WebSocket connection to manage multiple contexts concurrently.
 
-    We spawn separate tasks to push audio to 3 different contexts.
-    We use a single receiver loop to de-multiplex the responses to the correct files.
+    We spawn separate sender and receiver tasks per context. The connection runs a
+    background listener that routes events into per-context queues, and each
+    ``ctx.receive()`` iterator drains its own queue.
     """
     from cartesia.resources.tts import AsyncWebSocketContext
 
@@ -382,7 +383,6 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
             contexts.append(ctx)
             print(f"Created context {i}: {ctx._context_id}")
 
-        # Define a sender function
         async def send_transcript(ctx_index: int, ctx: AsyncWebSocketContext) -> None:
             all_quotes = [
                 ["Ask not what your country can do for you, ", "ask what you can do ", "for your country."],
@@ -392,7 +392,6 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
             transcripts = all_quotes[ctx_index]
             for part in transcripts:
                 print(f"Sending '{part.strip()}' to context {ctx_index}")
-                # Use the new push() helper
                 await ctx.push(part)
                 # Small delay to simulate real-time input and interleave requests
                 await asyncio.sleep(0.1)
@@ -400,51 +399,37 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
             await ctx.no_more_inputs()
             print(f"Finished sending to context {ctx_index}")
 
-        # Start sender tasks
-        send_tasks = [asyncio.create_task(send_transcript(i, ctx)) for i, ctx in enumerate(contexts)]
-
-        # Receiver loop
-        files: dict[str, IO[bytes]] = {}
-        active_contexts: set[Optional[str]] = {ctx._context_id for ctx in contexts}
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filenames: dict[str, str] = {}
 
-        print("Starting receiver loop...")
+        async def receive_for(ctx_index: int, ctx: AsyncWebSocketContext) -> None:
+            filename = f"tts_concurrent_{ctx_index}_{timestamp}.pcm"
+            filenames[ctx._context_id or ""] = filename
+            file_created = False
+            with open(filename, "wb") as f:
+                async for event in ctx.receive():
+                    if event.type == "chunk" and event.audio:
+                        if not file_created:
+                            print(f"Created file for context {ctx_index}: {filename}")
+                            file_created = True
+                        f.write(event.audio)
+                    elif event.type == "done":
+                        print(f"Context {ctx._context_id} finished.")
+                        return
+                    elif event.type == "error":
+                        raise RuntimeError(f"Context {ctx_index} error: {getattr(event, 'error', 'Unknown')}")
 
-        # Iterate over the connection directly to receive all events
-        async for event in connection:
-            if event.type == "chunk" and event.audio:
-                ctx_id = event.context_id
-                if ctx_id not in files:
-                    # Find which context index this matches for filename
-                    ctx_idx = next((i for i, c in enumerate(contexts) if c._context_id == ctx_id), "unknown")
-                    filename = f"tts_concurrent_{ctx_idx}_{timestamp}.pcm"
-                    files[ctx_id] = open(filename, "wb")
-                    print(f"Created file for context {ctx_idx}: {filename}")
+        send_tasks = [asyncio.create_task(send_transcript(i, ctx)) for i, ctx in enumerate(contexts)]
+        recv_tasks = [asyncio.create_task(receive_for(i, ctx)) for i, ctx in enumerate(contexts)]
 
-                files[ctx_id].write(event.audio)
-
-            elif event.type == "done":
-                ctx_id = event.context_id
-                print(f"Context {ctx_id} finished.")
-                if ctx_id in active_contexts:
-                    active_contexts.remove(ctx_id)
-
-                if not active_contexts:
-                    print("All contexts finished.")
-                    break
-
-        # Clean up
-        for f in files.values():
-            f.close()
-
-        # Ensure all send tasks are done (they should be by now if we got "done" events)
-        await asyncio.gather(*send_tasks)
+        await asyncio.gather(*send_tasks, *recv_tasks)
+        print("All contexts finished.")
 
         print("\nFinished.")
         print("You can play the generated audio files with these commands:")
-        for ctx_id, f in files.items():
+        for ctx_id, filename in filenames.items():
             ctx_idx = next((i for i, c in enumerate(contexts) if c._context_id == ctx_id), "unknown")
-            print(f"  Context {ctx_idx}: ffplay -f f32le -ar 44100 {f.name}")
+            print(f"  Context {ctx_idx}: ffplay -f f32le -ar 44100 {filename}")
 
 
 # =============================================================================
