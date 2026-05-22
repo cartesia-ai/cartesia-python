@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import uuid
 import queue
+import asyncio
 import logging
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Mapping, Iterator, Optional, cast
@@ -34,8 +35,6 @@ from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
 if TYPE_CHECKING:
-    import asyncio
-
     from websockets.sync.client import ClientConnection as WebsocketConnection
     from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
 
@@ -263,6 +262,7 @@ class AsyncTTSResourceConnectionManager:
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
+        self.__lock = asyncio.Lock()
         self._logger = logging.getLogger(__name__)
 
     async def __aenter__(self) -> AsyncTTSResourceConnection:
@@ -278,38 +278,42 @@ class AsyncTTSResourceConnectionManager:
         await connection.close()
         ```
         """
-        try:
-            from websockets.asyncio.client import connect
-        except ImportError as exc:
-            raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
+        async with self.__lock:
+            if self.__connection is not None:
+                return self.__connection
 
-        url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                **self.__extra_query,
-            },
-        )
-        self._logger.debug("Connecting to %s", url)
-        if self.__websocket_connection_options:
-            self._logger.debug("Connection options: %s", self.__websocket_connection_options)
+            try:
+                from websockets.asyncio.client import connect
+            except ImportError as exc:
+                raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
-        self.__connection = AsyncTTSResourceConnection(
-            await connect(
-                str(url),
-                user_agent_header=self.__client.user_agent,
-                additional_headers=_merge_mappings(
-                    {
-                        **self.__client.auth_headers,
-                        "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
-                    },
-                    self.__extra_headers,
+            url = self._prepare_url().copy_with(
+                params={
+                    **self.__client.base_url.params,
+                    **self.__extra_query,
+                },
+            )
+            self._logger.debug("Connecting to %s", url)
+            if self.__websocket_connection_options:
+                self._logger.debug("Connection options: %s", self.__websocket_connection_options)
+
+            self.__connection = AsyncTTSResourceConnection(
+                await connect(
+                    str(url),
+                    user_agent_header=self.__client.user_agent,
+                    additional_headers=_merge_mappings(
+                        {
+                            **self.__client.auth_headers,
+                            "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
+                        },
+                        self.__extra_headers,
+                    ),
+                    **self.__websocket_connection_options,
                 ),
-                **self.__websocket_connection_options,
-            ),
-            manager=self,
-        )
+                manager=self,
+            )
 
-        return self.__connection
+            return self.__connection
 
     enter = __aenter__
 
@@ -509,6 +513,9 @@ class TTSResourceConnectionManager:
         connection.close()
         ```
         """
+        if self.__connection is not None:
+            return self.__connection
+
         try:
             from websockets.sync.client import connect
         except ImportError as exc:
