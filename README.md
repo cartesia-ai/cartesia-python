@@ -53,7 +53,7 @@ The REST API documentation can be found on [docs.cartesia.ai](https://docs.carte
 
 ```sh
 # install from PyPI
-pip install --pre cartesia
+pip install cartesia
 
 # for websocket support
 pip install 'cartesia[websockets]'
@@ -190,7 +190,7 @@ You can enable this by installing `aiohttp`:
 
 ```sh
 # install from PyPI
-pip install --pre 'cartesia[aiohttp]'
+pip install 'cartesia[aiohttp]'
 ```
 
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:

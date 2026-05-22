@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.1.0 (2026-05-22)
+
+Full Changelog: [v3.1.0-b6...v3.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b6...v3.1.0)
+
+### Bug Fixes
+
+* **tts:** prevent orphaned ws connections from multiple enter calls ([d9c2b91](https://github.com/cartesia-ai/cartesia-python/commit/d9c2b910cb67c2c5c0398dd65ae6c68a1fd2e75b))
+
+
+### Documentation
+
+* **api:** fix doc links ([cf73e5d](https://github.com/cartesia-ai/cartesia-python/commit/cf73e5dea1217ed835012660aa48aabc04f26885))
+
 ## 3.1.0-b6 (2026-05-18)
 
 Full Changelog: [v3.1.0-b5...v3.1.0-b6](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b5...v3.1.0-b6)
