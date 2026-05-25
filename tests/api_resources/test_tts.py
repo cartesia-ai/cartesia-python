@@ -28,7 +28,7 @@ class TestTTS:
     def test_method_generate(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -50,7 +50,7 @@ class TestTTS:
     def test_method_generate_with_all_params(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = client.tts.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -82,7 +82,7 @@ class TestTTS:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         tts = client.tts.with_raw_response.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -105,7 +105,7 @@ class TestTTS:
     def test_streaming_response_generate(self, client: Cartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         with client.tts.with_streaming_response.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -130,7 +130,7 @@ class TestTTS:
     @parametrize
     def test_method_generate_sse(self, client: Cartesia) -> None:
         tts_stream = client.tts.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -148,7 +148,7 @@ class TestTTS:
     @parametrize
     def test_method_generate_sse_with_all_params(self, client: Cartesia) -> None:
         tts_stream = client.tts.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -178,7 +178,7 @@ class TestTTS:
     @parametrize
     def test_raw_response_generate_sse(self, client: Cartesia) -> None:
         response = client.tts.with_raw_response.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -199,7 +199,7 @@ class TestTTS:
     @parametrize
     def test_streaming_response_generate_sse(self, client: Cartesia) -> None:
         with client.tts.with_streaming_response.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -236,7 +236,7 @@ class TestTTS:
         tts = client.tts.infill(
             language="language",
             left_audio=b"Example data",
-            model_id="model_id",
+            model_id="sonic-3",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -288,7 +288,7 @@ class TestAsyncTTS:
     async def test_method_generate(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -310,7 +310,7 @@ class TestAsyncTTS:
     async def test_method_generate_with_all_params(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         tts = await async_client.tts.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -342,7 +342,7 @@ class TestAsyncTTS:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
 
         tts = await async_client.tts.with_raw_response.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -365,7 +365,7 @@ class TestAsyncTTS:
     async def test_streaming_response_generate(self, async_client: AsyncCartesia, respx_mock: MockRouter) -> None:
         respx_mock.post("/tts/bytes").mock(return_value=httpx.Response(200, json={"foo": "bar"}))
         async with async_client.tts.with_streaming_response.generate(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -390,7 +390,7 @@ class TestAsyncTTS:
     @parametrize
     async def test_method_generate_sse(self, async_client: AsyncCartesia) -> None:
         tts_stream = await async_client.tts.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -408,7 +408,7 @@ class TestAsyncTTS:
     @parametrize
     async def test_method_generate_sse_with_all_params(self, async_client: AsyncCartesia) -> None:
         tts_stream = await async_client.tts.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -438,7 +438,7 @@ class TestAsyncTTS:
     @parametrize
     async def test_raw_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         response = await async_client.tts.with_raw_response.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -459,7 +459,7 @@ class TestAsyncTTS:
     @parametrize
     async def test_streaming_response_generate_sse(self, async_client: AsyncCartesia) -> None:
         async with async_client.tts.with_streaming_response.generate_sse(
-            model_id="model_id",
+            model_id="sonic-3.5",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",
@@ -496,7 +496,7 @@ class TestAsyncTTS:
         tts = await async_client.tts.infill(
             language="language",
             left_audio=b"Example data",
-            model_id="model_id",
+            model_id="sonic-3",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_f32le",

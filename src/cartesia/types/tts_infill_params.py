@@ -6,6 +6,7 @@ from typing import Union
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
 from .._types import FileTypes
+from .infill_model import InfillModel
 from .raw_encoding import RawEncoding
 from .raw_output_format_param import RawOutputFormatParam
 
@@ -24,10 +25,12 @@ class TTSInfillParams(TypedDict, total=False):
 
     left_audio: FileTypes
 
-    model_id: str
-    """The ID of the model to use for generating audio.
+    model_id: InfillModel
+    """Infill models.
 
-    Any model other than the first `"sonic"` model is supported.
+    See
+    [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+    for all options.
     """
 
     output_format: OutputFormat

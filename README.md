@@ -307,7 +307,7 @@ from cartesia import Cartesia
 client = Cartesia()
 
 response = client.tts.generate(
-    model_id="model_id",
+    model_id="sonic-3.5",
     output_format={
         "container": "raw",
         "encoding": "pcm_f32le",

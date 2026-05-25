@@ -6,7 +6,7 @@ from typing import Optional
 
 import httpx
 
-from ..types import fine_tune_list_params, fine_tune_create_params, fine_tune_list_voices_params
+from ..types import FineTuneBaseModel, fine_tune_list_params, fine_tune_create_params, fine_tune_list_voices_params
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from .._utils import path_template, maybe_transform, async_maybe_transform
 from .._compat import cached_property
@@ -21,6 +21,7 @@ from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.fine_tune import FineTune
+from ..types.fine_tune_base_model import FineTuneBaseModel
 
 __all__ = ["FineTunesResource", "AsyncFineTunesResource"]
 
@@ -51,7 +52,7 @@ class FineTunesResource(SyncAPIResource):
         dataset: str,
         description: str,
         language: str,
-        model_id: str,
+        model_id: FineTuneBaseModel,
         name: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -70,7 +71,9 @@ class FineTunesResource(SyncAPIResource):
 
           language: Language code for the fine-tune
 
-          model_id: Base model ID to fine-tune from
+          model_id: Base model for a fine-tune. See
+              [the docs](https://docs.cartesia.ai/api-reference/fine-tunes/create#body-model-id)
+              for all options.
 
           name: Name for the new fine-tune
 
@@ -311,7 +314,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         dataset: str,
         description: str,
         language: str,
-        model_id: str,
+        model_id: FineTuneBaseModel,
         name: str,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -330,7 +333,9 @@ class AsyncFineTunesResource(AsyncAPIResource):
 
           language: Language code for the fine-tune
 
-          model_id: Base model ID to fine-tune from
+          model_id: Base model for a fine-tune. See
+              [the docs](https://docs.cartesia.ai/api-reference/fine-tunes/create#body-model-id)
+              for all options.
 
           name: Name for the new fine-tune
 

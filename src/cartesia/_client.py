@@ -57,9 +57,9 @@ if TYPE_CHECKING:
         voice_changer,
         pronunciation_dicts,
     )
-    from .resources.stt import STTResource, AsyncSTTResource
     from .resources.tts import TTSResource, AsyncTTSResource
     from .resources.voices import VoicesResource, AsyncVoicesResource
+    from .resources.stt.stt import STTResource, AsyncSTTResource
     from .resources.fine_tunes import FineTunesResource, AsyncFineTunesResource
     from .resources.access_token import AccessTokenResource, AsyncAccessTokenResource
     from .resources.agents.agents import AgentsResource, AsyncAgentsResource
