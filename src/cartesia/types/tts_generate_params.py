@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from typing import Union, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
+from .tts_model import TTSModel
 from .model_speed import ModelSpeed
-from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
+from .mp3_output_format_param import MP3OutputFormatParam
 from .raw_output_format_param import RawOutputFormatParam
+from .wav_output_format_param import WAVOutputFormatParam
 
 __all__ = [
     "TTSGenerateParams",
@@ -22,11 +24,11 @@ __all__ = [
 
 
 class TTSGenerateParams(TypedDict, total=False):
-    model_id: Required[str]
-    """The ID of the model to use for the generation.
+    model_id: Required[TTSModel]
+    """Text-to-speech models.
 
-    See [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for
-    available models.
+    See [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest)
+    for all options.
     """
 
     output_format: Required[OutputFormat]
@@ -73,24 +75,8 @@ class TTSGenerateParams(TypedDict, total=False):
     """
 
 
-class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["raw"]  # type: ignore
+OutputFormat: TypeAlias = Union[RawOutputFormatParam, WAVOutputFormatParam, MP3OutputFormatParam]
 
-
-class OutputFormatWavOutputFormat(TypedDict, total=False):
-    container: Required[Literal["wav"]]
-
-    encoding: Required[RawEncoding]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-
-class OutputFormatMP3OutputFormat(TypedDict, total=False):
-    bit_rate: Required[Literal[32000, 64000, 96000, 128000, 192000]]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-    container: Literal["mp3"]
-
-
-OutputFormat: TypeAlias = Union[OutputFormatRawOutputFormat, OutputFormatWavOutputFormat, OutputFormatMP3OutputFormat]
+OutputFormatRawOutputFormat = RawOutputFormatParam  # alias for backward compatibility
+OutputFormatWavOutputFormat = WAVOutputFormatParam  # alias for backward compatibility
+OutputFormatMP3OutputFormat = MP3OutputFormatParam  # alias for backward compatibility

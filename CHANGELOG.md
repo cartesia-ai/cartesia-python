@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.2.0-b1 (2026-05-25)
+
+Full Changelog: [v3.1.0...v3.2.0-b1](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0...v3.2.0-b1)
+
+### Features
+
+* **api:** add realtime stt and model enums ([0c4d859](https://github.com/cartesia-ai/cartesia-python/commit/0c4d85924d8c5e0836acd99619bc429a3b41bcbb))
+* **tts:** export each output format type ([e460d15](https://github.com/cartesia-ai/cartesia-python/commit/e460d1589092481b003e46d4765ab5819caeccd9))
+
+
+### Bug Fixes
+
+* **api:** make backward compatible and fix generated code ([c3ce3c7](https://github.com/cartesia-ai/cartesia-python/commit/c3ce3c753793d030c2ff4fc43ffbd883d90ba18c))
+* **stt:** remove query params that were omitted ([6218d64](https://github.com/cartesia-ai/cartesia-python/commit/6218d64b6ea78ba88e67c402e3aac0744f3524ab))
+* **tts:** make output format types backward compatible ([23d43f5](https://github.com/cartesia-ai/cartesia-python/commit/23d43f53cc5d5ea2904f745c1006a05cc65e39c7))
+
+
+### Documentation
+
+* **api:** improve formatting and grammar ([24036f2](https://github.com/cartesia-ai/cartesia-python/commit/24036f263004cc4ba103eeffee6ff237211d869c))
+* **readme:** change examples to use sonic-latest ([892316e](https://github.com/cartesia-ai/cartesia-python/commit/892316e8f8b1eda357e7093e6002fd9dc27cc8b6))
+* **stt:** add stt websocket examples ([cad9819](https://github.com/cartesia-ai/cartesia-python/commit/cad9819d6fb70b90777e18d3f45f2cce4adfe465))
+* **stt:** change examples to respect pcm_s32le wav input ([dfe4c42](https://github.com/cartesia-ai/cartesia-python/commit/dfe4c4283c578a0b3bd9a3633bc8e9106f81bdc7))
+
 ## 3.1.0 (2026-05-22)
 
 Full Changelog: [v3.1.0-b6...v3.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0-b6...v3.1.0)

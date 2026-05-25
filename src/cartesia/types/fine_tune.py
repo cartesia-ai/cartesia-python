@@ -25,7 +25,7 @@ class FineTune(BaseModel):
     """Language code of the fine-tune"""
 
     llm_model_id: str = FieldInfo(alias="model_id")
-    """Base model identifier to fine-tune from"""
+    """Base model identifier for the fine-tune"""
 
     name: str
     """Name of the fine-tune"""

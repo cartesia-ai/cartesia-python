@@ -7,25 +7,37 @@ from typing_extensions import Literal
 
 import httpx
 
-from ..types import stt_transcribe_params
-from .._files import deepcopy_with_paths
-from .._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
-from .._utils import extract_files, maybe_transform, async_maybe_transform
-from .._compat import cached_property
-from .._resource import SyncAPIResource, AsyncAPIResource
-from .._response import (
+from ...types import STTEncoding, STTBatchModel, stt_transcribe_params
+from ..._files import deepcopy_with_paths
+from ..._types import Body, Omit, Query, Headers, NotGiven, FileTypes, omit, not_given
+from ..._utils import extract_files, maybe_transform, async_maybe_transform
+from ..._compat import cached_property
+from ..._resource import SyncAPIResource, AsyncAPIResource
+from ..._response import (
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .._base_client import make_request_options
-from ..types.stt_transcribe_response import STTTranscribeResponse
+from .external_vad import ExternalVADResource, AsyncExternalVADResource
+from ..._base_client import make_request_options
+from .turn_detecting import TurnDetectingResource, AsyncTurnDetectingResource
+from ...types.stt_encoding import STTEncoding
+from ...types.stt_batch_model import STTBatchModel
+from ...types.stt_transcribe_response import STTTranscribeResponse
 
-__all__ = ["STTResource", "SttResource", "AsyncSTTResource", "AsyncSttResource"]
+__all__ = ["STTResource", "AsyncSTTResource"]
 
 
 class STTResource(SyncAPIResource):
+    @cached_property
+    def turn_detecting(self) -> TurnDetectingResource:
+        return TurnDetectingResource(self._client)
+
+    @cached_property
+    def external_vad(self) -> ExternalVADResource:
+        return ExternalVADResource(self._client)
+
     @cached_property
     def with_raw_response(self) -> STTResourceWithRawResponse:
         """
@@ -48,8 +60,7 @@ class STTResource(SyncAPIResource):
     def transcribe(
         self,
         *,
-        encoding: Optional[Literal["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"]]
-        | Omit = omit,
+        encoding: Optional[STTEncoding] | Omit = omit,
         sample_rate: Optional[int] | Omit = omit,
         file: FileTypes | Omit = omit,
         language: Optional[
@@ -157,7 +168,7 @@ class STTResource(SyncAPIResource):
             ]
         ]
         | Omit = omit,
-        model: str | Omit = omit,
+        model: STTBatchModel | Omit = omit,
         timestamp_granularities: Optional[List[Literal["word"]]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -176,14 +187,8 @@ class STTResource(SyncAPIResource):
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm
 
-        **Response format:** Returns JSON with transcribed text, duration, and language.
-        Include `timestamp_granularities: ["word"]` to get word-level timestamps.
-        **Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of
-        audio processed.
-
-        <Note>
-        For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai).
-        </Note>
+        See [the API docs](https://docs.cartesia.ai/api-reference/stt/transcribe) for
+        details.
 
         Args:
           encoding: The encoding format to process the audio as. If not specified, the audio file
@@ -203,8 +208,9 @@ class STTResource(SyncAPIResource):
 
           language: The language of the input audio in ISO-639-1 format. Defaults to `en`.
 
-          model: ID of the model to use for transcription. Use `ink-whisper` for the latest
-              Cartesia Whisper model.
+          model: Models that support batch speech-to-text transcription. See
+              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+              all options.
 
           timestamp_granularities: The timestamp granularities to populate for this transcription. Currently only
               `word` level timestamps are supported.
@@ -254,6 +260,14 @@ class STTResource(SyncAPIResource):
 
 class AsyncSTTResource(AsyncAPIResource):
     @cached_property
+    def turn_detecting(self) -> AsyncTurnDetectingResource:
+        return AsyncTurnDetectingResource(self._client)
+
+    @cached_property
+    def external_vad(self) -> AsyncExternalVADResource:
+        return AsyncExternalVADResource(self._client)
+
+    @cached_property
     def with_raw_response(self) -> AsyncSTTResourceWithRawResponse:
         """
         This property can be used as a prefix for any HTTP method call to return
@@ -275,8 +289,7 @@ class AsyncSTTResource(AsyncAPIResource):
     async def transcribe(
         self,
         *,
-        encoding: Optional[Literal["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"]]
-        | Omit = omit,
+        encoding: Optional[STTEncoding] | Omit = omit,
         sample_rate: Optional[int] | Omit = omit,
         file: FileTypes | Omit = omit,
         language: Optional[
@@ -384,7 +397,7 @@ class AsyncSTTResource(AsyncAPIResource):
             ]
         ]
         | Omit = omit,
-        model: str | Omit = omit,
+        model: STTBatchModel | Omit = omit,
         timestamp_granularities: Optional[List[Literal["word"]]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -403,14 +416,8 @@ class AsyncSTTResource(AsyncAPIResource):
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm
 
-        **Response format:** Returns JSON with transcribed text, duration, and language.
-        Include `timestamp_granularities: ["word"]` to get word-level timestamps.
-        **Pricing:** Batch transcription is priced at **1 credit per 2 seconds** of
-        audio processed.
-
-        <Note>
-        For migrating from the OpenAI SDK, see our [OpenAI Whisper to Cartesia Ink Migration Guide](https://docs.cartesia.ai/api-reference/stt/migrate-from-open-ai).
-        </Note>
+        See [the API docs](https://docs.cartesia.ai/api-reference/stt/transcribe) for
+        details.
 
         Args:
           encoding: The encoding format to process the audio as. If not specified, the audio file
@@ -430,8 +437,9 @@ class AsyncSTTResource(AsyncAPIResource):
 
           language: The language of the input audio in ISO-639-1 format. Defaults to `en`.
 
-          model: ID of the model to use for transcription. Use `ink-whisper` for the latest
-              Cartesia Whisper model.
+          model: Models that support batch speech-to-text transcription. See
+              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+              all options.
 
           timestamp_granularities: The timestamp granularities to populate for this transcription. Currently only
               `word` level timestamps are supported.
@@ -513,12 +521,3 @@ class AsyncSTTResourceWithStreamingResponse:
         self.transcribe = async_to_streamed_response_wrapper(
             stt.transcribe,
         )
-
-
-# Aliases for backward compatibility
-SttResource = STTResource
-AsyncSttResource = AsyncSTTResource
-SttResourceWithRawResponse = STTResourceWithRawResponse
-AsyncSttResourceWithRawResponse = AsyncSTTResourceWithRawResponse
-SttResourceWithStreamingResponse = STTResourceWithStreamingResponse
-AsyncSttResourceWithStreamingResponse = AsyncSTTResourceWithStreamingResponse

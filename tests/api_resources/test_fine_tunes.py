@@ -9,7 +9,10 @@ import pytest
 
 from cartesia import Cartesia, AsyncCartesia
 from tests.utils import assert_matches_type
-from cartesia.types import Voice, FineTune
+from cartesia.types import (
+    Voice,
+    FineTune,
+)
 from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -25,7 +28,7 @@ class TestFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
@@ -37,7 +40,7 @@ class TestFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         )
 
@@ -53,7 +56,7 @@ class TestFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         ) as response:
             assert not response.is_closed
@@ -252,7 +255,7 @@ class TestAsyncFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
@@ -264,7 +267,7 @@ class TestAsyncFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         )
 
@@ -280,7 +283,7 @@ class TestAsyncFineTunes:
             dataset="dataset",
             description="description",
             language="language",
-            model_id="model_id",
+            model_id="sonic-3-2026-01-12",
             name="name",
         ) as response:
             assert not response.is_closed

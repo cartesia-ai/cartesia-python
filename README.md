@@ -53,7 +53,7 @@ The REST API documentation can be found on [docs.cartesia.ai](https://docs.carte
 
 ```sh
 # install from PyPI
-pip install cartesia
+pip install --pre cartesia
 
 # for websocket support
 pip install 'cartesia[websockets]'
@@ -72,7 +72,7 @@ client = Cartesia(
 )
 
 response = client.tts.generate(
-    model_id="sonic-latest",
+    model_id="sonic-3.5",
     output_format={
         "container": "wav",
         "encoding": "pcm_f32le",
@@ -146,7 +146,7 @@ client = AsyncCartesia(
 
 async def main() -> None:
     response = await client.tts.generate(
-        model_id="sonic-latest",
+        model_id="sonic-3.5",
         output_format={
             "container": "wav",
             "encoding": "pcm_f32le",
@@ -190,7 +190,7 @@ You can enable this by installing `aiohttp`:
 
 ```sh
 # install from PyPI
-pip install 'cartesia[aiohttp]'
+pip install --pre 'cartesia[aiohttp]'
 ```
 
 Then you can enable it by instantiating the client with `http_client=DefaultAioHttpClient()`:
@@ -208,7 +208,7 @@ async def main() -> None:
         http_client=DefaultAioHttpClient(),
     ) as client:
         response = await client.tts.generate(
-            model_id="sonic-latest",
+            model_id="sonic-3.5",
             output_format={
                 "container": "wav",
                 "encoding": "pcm_f32le",
@@ -307,7 +307,7 @@ from cartesia import Cartesia
 client = Cartesia()
 
 response = client.tts.generate(
-    model_id="model_id",
+    model_id="sonic-3.5",
     output_format={
         "container": "raw",
         "encoding": "pcm_f32le",

@@ -31,7 +31,7 @@ class TestSTT:
             sample_rate=0,
             file=b"Example data",
             language="en",
-            model="model",
+            model="ink-whisper",
             timestamp_granularities=["word"],
         )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])
@@ -78,7 +78,7 @@ class TestAsyncSTT:
             sample_rate=0,
             file=b"Example data",
             language="en",
-            model="model",
+            model="ink-whisper",
             timestamp_granularities=["word"],
         )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])

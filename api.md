@@ -1,3 +1,9 @@
+# Shared Types
+
+```python
+from cartesia.types import PhonemeTimestamps, WordTimestamps
+```
+
 # Cartesia
 
 Types:
@@ -135,7 +141,7 @@ Methods:
 Types:
 
 ```python
-from cartesia.types import FineTune
+from cartesia.types import FineTune, FineTuneBaseModel
 ```
 
 Methods:
@@ -167,12 +173,48 @@ Methods:
 Types:
 
 ```python
-from cartesia.types import STTTranscribeResponse
+from cartesia.types import STTBatchModel, STTEncoding, STTErrorResponse, STTTranscribeResponse
 ```
 
 Methods:
 
-- <code title="post /stt">client.stt.<a href="./src/cartesia/resources/stt.py">transcribe</a>(\*\*<a href="src/cartesia/types/stt_transcribe_params.py">params</a>) -> <a href="./src/cartesia/types/stt_transcribe_response.py">STTTranscribeResponse</a></code>
+- <code title="post /stt">client.stt.<a href="./src/cartesia/resources/stt/stt.py">transcribe</a>(\*\*<a href="src/cartesia/types/stt_transcribe_params.py">params</a>) -> <a href="./src/cartesia/types/stt_transcribe_response.py">STTTranscribeResponse</a></code>
+
+## TurnDetecting
+
+Types:
+
+```python
+from cartesia.types.stt import (
+    STTRealtimeTurnDetectingModel,
+    STTTurnsCloseCommand,
+    STTTurnsConnected,
+    STTTurnsTurnEagerEnd,
+    STTTurnsTurnEnd,
+    STTTurnsTurnResume,
+    STTTurnsTurnStart,
+    STTTurnsTurnUpdate,
+    STTTurnsWebsocketQueryParams,
+    STTTurnsWebsocketRequest,
+    STTTurnsWebsocketResponse,
+)
+```
+
+## ExternalVAD
+
+Types:
+
+```python
+from cartesia.types.stt import (
+    STTExternalVADDoneResponse,
+    STTExternalVADFlushDoneResponse,
+    STTExternalVADQueryParams,
+    STTExternalVADTranscriptResponse,
+    STTExternalVADWebsocketRequest,
+    STTExternalVADWebsocketResponse,
+    STTRealtimeExternalVADModel,
+)
+```
 
 # TTS
 
@@ -182,16 +224,18 @@ Types:
 from cartesia.types import (
     GenerationConfig,
     GenerationRequest,
+    InfillModel,
     ModelSpeed,
+    MP3OutputFormat,
     OutputFormatContainer,
-    PhonemeTimestamps,
     RawEncoding,
     RawOutputFormat,
+    TTSModel,
     TTSSSEEvent,
     VoiceSpecifier,
+    WAVOutputFormat,
     WebsocketClientEvent,
     WebsocketResponse,
-    WordTimestamps,
 )
 ```
 

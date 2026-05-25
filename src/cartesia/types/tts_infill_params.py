@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from typing import Union
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing_extensions import TypeAlias, TypedDict
 
 from .._types import FileTypes
-from .raw_encoding import RawEncoding
+from .infill_model import InfillModel
+from .mp3_output_format_param import MP3OutputFormatParam
 from .raw_output_format_param import RawOutputFormatParam
+from .wav_output_format_param import WAVOutputFormatParam
 
 __all__ = [
     "TTSInfillParams",
@@ -24,10 +26,12 @@ class TTSInfillParams(TypedDict, total=False):
 
     left_audio: FileTypes
 
-    model_id: str
-    """The ID of the model to use for generating audio.
+    model_id: InfillModel
+    """Infill models.
 
-    Any model other than the first `"sonic"` model is supported.
+    See
+    [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+    for all options.
     """
 
     output_format: OutputFormat
@@ -41,24 +45,8 @@ class TTSInfillParams(TypedDict, total=False):
     """The ID of the voice to use for generating audio"""
 
 
-class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["raw"]  # type: ignore
+OutputFormat: TypeAlias = Union[RawOutputFormatParam, WAVOutputFormatParam, MP3OutputFormatParam]
 
-
-class OutputFormatWavOutputFormat(TypedDict, total=False):
-    container: Required[Literal["wav"]]
-
-    encoding: Required[RawEncoding]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-
-class OutputFormatMP3OutputFormat(TypedDict, total=False):
-    bit_rate: Required[Literal[32000, 64000, 96000, 128000, 192000]]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-    container: Literal["mp3"]
-
-
-OutputFormat: TypeAlias = Union[OutputFormatRawOutputFormat, OutputFormatWavOutputFormat, OutputFormatMP3OutputFormat]
+OutputFormatRawOutputFormat = RawOutputFormatParam  # alias for backward compatibility
+OutputFormatWavOutputFormat = WAVOutputFormatParam  # alias for backward compatibility
+OutputFormatMP3OutputFormat = MP3OutputFormatParam  # alias for backward compatibility
