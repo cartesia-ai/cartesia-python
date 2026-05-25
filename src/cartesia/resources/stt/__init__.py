@@ -22,4 +22,18 @@ __all__ = [
     "AsyncSTTResourceWithRawResponse",
     "STTResourceWithStreamingResponse",
     "AsyncSTTResourceWithStreamingResponse",
+    "SttResource",
+    "AsyncSttResource",
+    "SttResourceWithRawResponse",
+    "AsyncSttResourceWithRawResponse",
+    "SttResourceWithStreamingResponse",
+    "AsyncSttResourceWithStreamingResponse",
 ]
+
+# Aliases for backward compatibility
+SttResource = STTResource
+AsyncSttResource = AsyncSTTResource
+SttResourceWithRawResponse = STTResourceWithRawResponse
+AsyncSttResourceWithRawResponse = AsyncSTTResourceWithRawResponse
+SttResourceWithStreamingResponse = STTResourceWithStreamingResponse
+AsyncSttResourceWithStreamingResponse = AsyncSTTResourceWithStreamingResponse

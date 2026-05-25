@@ -26,7 +26,7 @@ from ...types.stt_encoding import STTEncoding
 from ...types.stt_batch_model import STTBatchModel
 from ...types.stt_transcribe_response import STTTranscribeResponse
 
-__all__ = ["STTResource", "SttResource", "AsyncSTTResource", "AsyncSttResource"]
+__all__ = ["STTResource", "AsyncSTTResource"]
 
 
 class STTResource(SyncAPIResource):
@@ -533,12 +533,3 @@ class AsyncSTTResourceWithStreamingResponse:
         self.transcribe = async_to_streamed_response_wrapper(
             stt.transcribe,
         )
-
-
-# Aliases for backward compatibility
-SttResource = STTResource
-AsyncSttResource = AsyncSTTResource
-SttResourceWithRawResponse = STTResourceWithRawResponse
-AsyncSttResourceWithRawResponse = AsyncSTTResourceWithRawResponse
-SttResourceWithStreamingResponse = STTResourceWithStreamingResponse
-AsyncSttResourceWithStreamingResponse = AsyncSTTResourceWithStreamingResponse

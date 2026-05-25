@@ -11,11 +11,9 @@ from typing import TYPE_CHECKING, Any, Union, Callable, Iterator, Awaitable, cas
 from typing_extensions import Literal, AsyncIterator
 
 import httpx
-from pydantic import BaseModel
 
 from ...types import STTEncoding
 from ..._types import Omit, Query, Headers, omit
-from ..._utils import maybe_transform, async_maybe_transform
 from ..._models import construct_type_unchecked
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ...types.stt import STTRealtimeExternalVADModel
@@ -216,11 +214,7 @@ class AsyncExternalVADResourceConnection:
         return message
 
     async def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(await async_maybe_transform(event, STTExternalVADWebsocketRequest))
-        )
+        data = event
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
             return
@@ -483,11 +477,7 @@ class AsyncExternalVADResourceConnectionManager:
         This can be called before entering the context manager. Queued messages
         are automatically sent once the WebSocket connection opens.
         """
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(event)
-        )
+        data = event
         self.__send_queue.enqueue(data)
 
     def on(
@@ -687,11 +677,7 @@ class ExternalVADResourceConnection:
         return message
 
     def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(maybe_transform(event, STTExternalVADWebsocketRequest))
-        )
+        data = event
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
             return
@@ -942,11 +928,7 @@ class ExternalVADResourceConnectionManager:
         This can be called before entering the context manager. Queued messages
         are automatically sent once the WebSocket connection opens.
         """
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(event)
-        )
+        data = event
         self.__send_queue.enqueue(data)
 
     def on(
