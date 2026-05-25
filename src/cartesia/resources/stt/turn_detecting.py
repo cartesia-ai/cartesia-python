@@ -565,13 +565,15 @@ class AsyncTurnDetectingResourceConnectionManager:
             raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                "encoding": self.__encoding,
-                "model": self.__model,
-                "sample_rate": self.__sample_rate,
-                **extra_query,
-            },
+            params=_merge_mappings(
+                self.__client.base_url.params,
+                {
+                    "encoding": self.__encoding,
+                    "model": self.__model,
+                    "sample_rate": self.__sample_rate,
+                    **extra_query,
+                },
+            ),
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
@@ -582,6 +584,7 @@ class AsyncTurnDetectingResourceConnectionManager:
             user_agent_header=self.__client.user_agent,
             additional_headers=_merge_mappings(
                 {
+                    **self.__client.default_headers,
                     **self.__client.auth_headers,
                 },
                 extra_headers,
@@ -1015,13 +1018,15 @@ class TurnDetectingResourceConnectionManager:
             raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                "encoding": self.__encoding,
-                "model": self.__model,
-                "sample_rate": self.__sample_rate,
-                **extra_query,
-            },
+            params=_merge_mappings(
+                self.__client.base_url.params,
+                {
+                    "encoding": self.__encoding,
+                    "model": self.__model,
+                    "sample_rate": self.__sample_rate,
+                    **extra_query,
+                },
+            ),
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
@@ -1032,6 +1037,7 @@ class TurnDetectingResourceConnectionManager:
             user_agent_header=self.__client.user_agent,
             additional_headers=_merge_mappings(
                 {
+                    **self.__client.default_headers,
                     **self.__client.auth_headers,
                 },
                 extra_headers,

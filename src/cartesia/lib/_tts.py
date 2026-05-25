@@ -288,10 +288,7 @@ class AsyncTTSResourceConnectionManager:
                 raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
             url = self._prepare_url().copy_with(
-                params={
-                    **self.__client.base_url.params,
-                    **self.__extra_query,
-                },
+                params=_merge_mappings(self.__client.base_url.params, self.__extra_query),
             )
             self._logger.debug("Connecting to %s", url)
             if self.__websocket_connection_options:
@@ -303,8 +300,8 @@ class AsyncTTSResourceConnectionManager:
                     user_agent_header=self.__client.user_agent,
                     additional_headers=_merge_mappings(
                         {
+                            **self.__client.default_headers,
                             **self.__client.auth_headers,
-                            "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
                         },
                         self.__extra_headers,
                     ),
@@ -522,10 +519,7 @@ class TTSResourceConnectionManager:
             raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                **self.__extra_query,
-            },
+            params=_merge_mappings(self.__client.base_url.params, self.__extra_query),
         )
         self._logger.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
@@ -537,8 +531,8 @@ class TTSResourceConnectionManager:
                 user_agent_header=self.__client.user_agent,
                 additional_headers=_merge_mappings(
                     {
+                        **self.__client.default_headers,
                         **self.__client.auth_headers,
-                        "Cartesia-Version": self.__client.default_headers.get("cartesia-version", "2025-11-04"),
                     },
                     self.__extra_headers,
                 ),

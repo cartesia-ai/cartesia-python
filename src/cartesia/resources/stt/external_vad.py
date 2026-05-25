@@ -566,16 +566,18 @@ class AsyncExternalVADResourceConnectionManager:
             raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                "encoding": self.__encoding,
-                "model": self.__model,
-                "sample_rate": self.__sample_rate,
-                "language": self.__language,
-                "max_silence_duration_secs": self.__max_silence_duration_secs,
-                "min_volume": self.__min_volume,
-                **extra_query,
-            },
+            params=_merge_mappings(
+                self.__client.base_url.params,
+                {
+                    "encoding": self.__encoding,
+                    "model": self.__model,
+                    "sample_rate": self.__sample_rate,
+                    "language": self.__language,
+                    "max_silence_duration_secs": self.__max_silence_duration_secs,
+                    "min_volume": self.__min_volume,
+                    **extra_query,
+                },
+            ),
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
@@ -586,6 +588,7 @@ class AsyncExternalVADResourceConnectionManager:
             user_agent_header=self.__client.user_agent,
             additional_headers=_merge_mappings(
                 {
+                    **self.__client.default_headers,
                     **self.__client.auth_headers,
                 },
                 extra_headers,
@@ -1017,16 +1020,18 @@ class ExternalVADResourceConnectionManager:
             raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
 
         url = self._prepare_url().copy_with(
-            params={
-                **self.__client.base_url.params,
-                "encoding": self.__encoding,
-                "model": self.__model,
-                "sample_rate": self.__sample_rate,
-                "language": self.__language,
-                "max_silence_duration_secs": self.__max_silence_duration_secs,
-                "min_volume": self.__min_volume,
-                **extra_query,
-            },
+            params=_merge_mappings(
+                self.__client.base_url.params,
+                {
+                    "encoding": self.__encoding,
+                    "model": self.__model,
+                    "sample_rate": self.__sample_rate,
+                    "language": self.__language,
+                    "max_silence_duration_secs": self.__max_silence_duration_secs,
+                    "min_volume": self.__min_volume,
+                    **extra_query,
+                },
+            ),
         )
         log.debug("Connecting to %s", url)
         if self.__websocket_connection_options:
@@ -1037,6 +1042,7 @@ class ExternalVADResourceConnectionManager:
             user_agent_header=self.__client.user_agent,
             additional_headers=_merge_mappings(
                 {
+                    **self.__client.default_headers,
                     **self.__client.auth_headers,
                 },
                 extra_headers,
