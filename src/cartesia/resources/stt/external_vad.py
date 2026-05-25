@@ -67,9 +67,13 @@ class ExternalVADResource(SyncAPIResource):
 
         This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using the turn detecting method instead.
 
-        **Basic Usage**:
-
-        1. Connect to the WebSocket with appropriate query parameters 2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages 3. Send `finalize` as a WebSocket text message when the user is done speaking 4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative) 5. Repeat 2-4 6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
+        Basic usage:
+        1. Connect to the WebSocket with appropriate query parameters
+        2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages
+        3. Send `finalize` as a WebSocket text message when the user is done speaking
+        4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative)
+        5. Repeat 2-4
+        6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
 
         See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """
@@ -117,9 +121,13 @@ class AsyncExternalVADResource(AsyncAPIResource):
 
         This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using the turn detecting method instead.
 
-        **Basic Usage**:
-
-        1. Connect to the WebSocket with appropriate query parameters 2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages 3. Send `finalize` as a WebSocket text message when the user is done speaking 4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative) 5. Repeat 2-4 6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
+        Basic usage:
+        1. Connect to the WebSocket with appropriate query parameters
+        2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages
+        3. Send `finalize` as a WebSocket text message when the user is done speaking
+        4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative)
+        5. Repeat 2-4
+        6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
 
         See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """

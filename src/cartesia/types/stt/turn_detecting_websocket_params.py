@@ -16,7 +16,7 @@ class TurnDetectingWebsocketParams(TypedDict, total=False):
 
     model: Required[STTRealtimeTurnDetectingModel]
     """
-    Models that support realtime speech-to-text in turn-detection mode. This mode
+    Models that support realtime speech-to-text with turn-detection. This mode
     detects when the user is speaking and emits turn events. See
     [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
     all options.
