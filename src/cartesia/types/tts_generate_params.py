@@ -3,23 +3,18 @@
 from __future__ import annotations
 
 from typing import Union, Optional
-from typing_extensions import Literal, Required, TypeAlias, TypedDict
+from typing_extensions import Required, TypeAlias, TypedDict
 
 from .tts_model import TTSModel
 from .model_speed import ModelSpeed
-from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
+from .mp3_output_format_param import MP3OutputFormatParam
 from .raw_output_format_param import RawOutputFormatParam
+from .wav_output_format_param import WAVOutputFormatParam
 
-__all__ = [
-    "TTSGenerateParams",
-    "OutputFormat",
-    "OutputFormatRawOutputFormat",
-    "OutputFormatWavOutputFormat",
-    "OutputFormatMP3OutputFormat",
-]
+__all__ = ["TTSGenerateParams", "OutputFormat"]
 
 
 class TTSGenerateParams(TypedDict, total=False):
@@ -74,24 +69,4 @@ class TTSGenerateParams(TypedDict, total=False):
     """
 
 
-class OutputFormatRawOutputFormat(RawOutputFormatParam, total=False):
-    container: Literal["raw"]  # type: ignore
-
-
-class OutputFormatWavOutputFormat(TypedDict, total=False):
-    container: Required[Literal["wav"]]
-
-    encoding: Required[RawEncoding]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-
-class OutputFormatMP3OutputFormat(TypedDict, total=False):
-    bit_rate: Required[Literal[32000, 64000, 96000, 128000, 192000]]
-
-    sample_rate: Required[Literal[8000, 16000, 22050, 24000, 44100, 48000]]
-
-    container: Literal["mp3"]
-
-
-OutputFormat: TypeAlias = Union[OutputFormatRawOutputFormat, OutputFormatWavOutputFormat, OutputFormatMP3OutputFormat]
+OutputFormat: TypeAlias = Union[RawOutputFormatParam, WAVOutputFormatParam, MP3OutputFormatParam]
