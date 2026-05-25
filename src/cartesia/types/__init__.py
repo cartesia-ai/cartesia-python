@@ -63,8 +63,8 @@ from .tts_generate_sse_params import (
     TTSGenerateSseParams as TTSGenerateSseParams,
 )
 from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
-from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
+from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams

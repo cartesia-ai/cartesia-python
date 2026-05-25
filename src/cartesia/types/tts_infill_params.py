@@ -11,7 +11,13 @@ from .mp3_output_format_param import MP3OutputFormatParam
 from .raw_output_format_param import RawOutputFormatParam
 from .wav_output_format_param import WAVOutputFormatParam
 
-__all__ = ["TTSInfillParams", "OutputFormat"]
+__all__ = [
+    "TTSInfillParams",
+    "OutputFormat",
+    "OutputFormatRawOutputFormat",
+    "OutputFormatWavOutputFormat",
+    "OutputFormatMP3OutputFormat",
+]
 
 
 class TTSInfillParams(TypedDict, total=False):
@@ -40,3 +46,7 @@ class TTSInfillParams(TypedDict, total=False):
 
 
 OutputFormat: TypeAlias = Union[RawOutputFormatParam, WAVOutputFormatParam, MP3OutputFormatParam]
+
+OutputFormatRawOutputFormat = RawOutputFormatParam  # alias for backward compatibility
+OutputFormatWavOutputFormat = WAVOutputFormatParam  # alias for backward compatibility
+OutputFormatMP3OutputFormat = MP3OutputFormatParam  # alias for backward compatibility
