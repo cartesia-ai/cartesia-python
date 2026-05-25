@@ -7,17 +7,12 @@ Run an example:
 
 from __future__ import annotations
 
-from typing import IO, Any
+from typing_extensions import TYPE_CHECKING
 
-from cartesia import (
-    APIError,
-    Cartesia,
-    NotFoundError,
-    RateLimitError,
-    BadRequestError,
-    AuthenticationError,
-)
-from cartesia.types import RawOutputFormatParam
+from cartesia import Cartesia
+
+if TYPE_CHECKING:
+    from cartesia.types import Voice, VoiceMetadata
 
 # =============================================================================
 # Client Initialization
@@ -37,7 +32,7 @@ def tts_generate_to_file(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
     response.write_to_file("output.wav")
@@ -51,7 +46,7 @@ def tts_bytes_to_file(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
     with open("output.wav", "wb") as f:
@@ -72,7 +67,7 @@ def tts_sse_basic(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
 
@@ -92,7 +87,7 @@ def tts_sse_basic(client: Cartesia) -> None:
                 raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
-    print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+    print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_sse_with_timestamps(client: Cartesia) -> None:
@@ -101,7 +96,7 @@ def tts_sse_with_timestamps(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
         add_timestamps=True,
     )
@@ -125,7 +120,7 @@ def tts_sse_with_timestamps(client: Cartesia) -> None:
                 raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
-    print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+    print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
@@ -134,7 +129,7 @@ def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
         add_phoneme_timestamps=True,
     )
@@ -158,7 +153,7 @@ def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
                 raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
-    print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+    print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_sse_with_match(client: Cartesia) -> None:
@@ -167,7 +162,7 @@ def tts_sse_with_match(client: Cartesia) -> None:
         model_id="sonic-latest",
         transcript="Hello, world!",
         voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-        output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
 
@@ -192,7 +187,7 @@ def tts_sse_with_match(client: Cartesia) -> None:
                 raise Exception(f"{event.title}: {event.message}")
 
     print(f"Saved audio to {filename}")
-    print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+    print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 # =============================================================================
@@ -206,7 +201,7 @@ def tts_websocket_basic(client: Cartesia) -> None:
         ctx = ws.context(
             model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
         ctx.push("Hello, world!")
@@ -226,7 +221,7 @@ def tts_websocket_basic(client: Cartesia) -> None:
                     print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
-        print(f"Play with:\n  $ ffplay -f f32le -ar 44100 {filename}")
+        print(f"Play with:\n  $ ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_websocket_continuations(client: Cartesia) -> None:
@@ -238,7 +233,7 @@ def tts_websocket_continuations(client: Cartesia) -> None:
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={
                 "container": "raw",
-                "encoding": "pcm_f32le",
+                "encoding": "pcm_s16le",
                 "sample_rate": 44100,
             },
             language="en",
@@ -263,18 +258,20 @@ def tts_websocket_continuations(client: Cartesia) -> None:
                     print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
-        print(f"Play with:\n  $ ffplay -f f32le -ar 44100 {filename}")
+        print(f"Play with:\n  $ ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_websocket_flushing(client: Cartesia) -> None:
     """Demonstrates manual flushing to separate audio from different transcripts."""
+    from typing_extensions import IO
+
     transcripts = ["Stay hungry, ", "stay foolish."]
 
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )  # Auto-generates context_id
 
@@ -325,7 +322,7 @@ def tts_websocket_flushing(client: Cartesia) -> None:
         print("\nFinished.")
         print("You can play the generated audio files with these commands:")
         for flush_id, f in files.items():
-            print(f"  Flush ID {flush_id}: ffplay -f f32le -ar 44100 {f.name}")
+            print(f"  Flush ID {flush_id}: ffplay -f s16le -ar 44100 {f.name}")
 
 
 def tts_websocket_emotion(client: Cartesia) -> None:
@@ -334,7 +331,7 @@ def tts_websocket_emotion(client: Cartesia) -> None:
         ctx = ws.context(
             model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
 
@@ -358,7 +355,7 @@ def tts_websocket_emotion(client: Cartesia) -> None:
                     print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
-        print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+        print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_websocket_speed(client: Cartesia) -> None:
@@ -368,7 +365,7 @@ def tts_websocket_speed(client: Cartesia) -> None:
         ctx = ws.context(
             model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
 
@@ -392,7 +389,7 @@ def tts_websocket_speed(client: Cartesia) -> None:
                     print(f"error: {response.message or response.title}")
 
         print(f"Saved audio to {filename}")
-        print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+        print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 def tts_websocket_concurrent_receives(client: Cartesia) -> None:
@@ -402,7 +399,9 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
     them sequentially — but the lazy-routing in receive() ensures that events
     consumed while reading context 1 are queued for context 2 (and vice-versa).
     """
-    output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100}
+    from cartesia.types import RawOutputFormatParam
+
+    output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100}
 
     with client.tts.websocket_connect() as connection:
         ctx1 = connection.context(
@@ -452,8 +451,8 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
         print(f"Saved context 1 audio to {filename1}")
         print(f"Saved context 2 audio to {filename2}")
         print(f"Play with:")
-        print(f"  ffplay -f f32le -ar 44100 {filename1}")
-        print(f"  ffplay -f f32le -ar 44100 {filename2}")
+        print(f"  ffplay -f s16le -ar 44100 {filename1}")
+        print(f"  ffplay -f s16le -ar 44100 {filename2}")
 
 
 def tts_websocket_response_handling(client: Cartesia) -> None:
@@ -462,7 +461,7 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
         ctx = ws.context(
             model_id="sonic-latest",
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={"container": "raw", "encoding": "pcm_f32le", "sample_rate": 44100},
+            output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
         ctx.push(
@@ -489,7 +488,7 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
                     break
 
         print(f"Saved audio to {filename}")
-        print(f"Play with: ffplay -f f32le -ar 44100 {filename}")
+        print(f"Play with: ffplay -f s16le -ar 44100 {filename}")
 
 
 # =============================================================================
@@ -517,7 +516,7 @@ def voices_list(client: Cartesia) -> None:
     print([voices[0], "..."])
 
 
-def voices_get(client: Cartesia, *args: str) -> Any:
+def voices_get(client: Cartesia, *args: str) -> "Voice":
     """Get a specific voice."""
     voice_id = args[0] if args else "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
     voice = client.voices.get(voice_id)
@@ -527,7 +526,7 @@ def voices_get(client: Cartesia, *args: str) -> Any:
     return voice
 
 
-def voices_clone(client: Cartesia, *args: str) -> Any:
+def voices_clone(client: Cartesia, *args: str) -> "VoiceMetadata":
     """Clone a voice from an audio clip."""
     import sys
 
@@ -594,7 +593,7 @@ def infill_create(client: Cartesia, *args: str) -> None:
         left_audio=Path(left_file),
         right_audio=Path(right_file),
         voice_id="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
-        output_format={"container": "wav", "encoding": "pcm_f32le", "sample_rate": 44100},
+        output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
     )
     response.write_to_file("infill_output.wav")
     print(f"Saved audio to infill_output.wav")
@@ -626,6 +625,179 @@ def stt_transcribe(client: Cartesia, *args: str) -> None:
             print(f"{word.word}: {word.start}s - {word.end}s")
 
 
+def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
+    """Realtime STT with native turn detection (recommended for voice agents).
+
+    The model signals when a user turn starts and ends, so your agent reacts
+    to events rather than running its own VAD.
+
+    Pass a mono uncompressed PCM WAV file (16-bit or 32-bit) as an argument,
+    or call with no args to synthesize sample audio via TTS.
+    """
+    import sys
+    import time
+    import wave
+
+    from cartesia.types import STTEncoding, RawOutputFormatParam
+
+    encoding: STTEncoding
+    chunks: list[bytes]
+    if args:
+        with wave.open(args[0], "rb") as wf:
+            if wf.getnchannels() != 1:
+                print(f"Error: WAV must be mono, got {wf.getnchannels()} channels.")
+                sys.exit(1)
+            if wf.getcomptype() != "NONE":
+                print(f"Error: WAV must be uncompressed PCM, got {wf.getcomptype()!r}.")
+                sys.exit(1)
+            sample_width = wf.getsampwidth()
+            if sample_width == 2:
+                encoding = "pcm_s16le"
+            elif sample_width == 4:
+                encoding = "pcm_s16le"
+            else:
+                print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
+                sys.exit(1)
+            sample_rate = wf.getframerate()
+            chunks = []
+            while True:
+                data = wf.readframes(sample_rate // 10)  # 100ms per chunk
+                if not data:
+                    break
+                chunks.append(data)
+    else:
+        output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
+        encoding = output_format["encoding"]
+        sample_rate = output_format["sample_rate"]
+        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
+        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
+        audio = client.tts.generate(
+            model_id="sonic-latest",
+            transcript=transcript,
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
+            language="en",
+        ).read()
+        chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
+        chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
+
+    with client.stt.turn_detecting.websocket(
+        encoding=encoding,
+        model="ink-2",
+        sample_rate=sample_rate,
+    ) as connection:
+        for chunk in chunks:
+            connection.send_raw(chunk)
+            time.sleep(0.1)  # each chunk is 100ms of audio — pace sends to match real time
+
+        # Flush remaining audio and close the session cleanly.
+        connection.send({"type": "close"})
+
+        for event in connection:
+            if event.type == "connected":
+                print(f"Connected: {event.request_id}")
+            elif event.type == "turn.start":
+                print("Turn started")
+            elif event.type == "turn.update":
+                # event.transcript is cumulative within a turn.
+                print(f"  {event.transcript}")
+            elif event.type == "turn.eager_end":
+                print(f"[preview] Eager end: {event.transcript!r}")
+            elif event.type == "turn.resume":
+                print("[preview] Turn resumed")
+            elif event.type == "turn.end":
+                print(f"Turn ended: {event.transcript!r}")
+            elif event.type == "error":
+                print(f"Error: {event.title}: {event.message}")
+
+
+def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
+    """Realtime STT without turn detection (push-to-talk style).
+
+    You control when the model emits transcripts by sending `finalize`.
+    Transcript events are deltas — concatenate `text` from `is_final` events
+    (without stripping whitespace) to assemble the full transcript.
+
+    Pass a mono uncompressed PCM WAV file (16-bit or 32-bit) as an argument,
+    or call with no args to synthesize sample audio via TTS.
+    """
+    import sys
+    import time
+    import wave
+
+    from cartesia.types import STTEncoding, RawOutputFormatParam
+
+    encoding: STTEncoding
+    chunks: list[bytes]
+    if args:
+        with wave.open(args[0], "rb") as wf:
+            if wf.getnchannels() != 1:
+                print(f"Error: WAV must be mono, got {wf.getnchannels()} channels.")
+                sys.exit(1)
+            if wf.getcomptype() != "NONE":
+                print(f"Error: WAV must be uncompressed PCM, got {wf.getcomptype()!r}.")
+                sys.exit(1)
+            sample_width = wf.getsampwidth()
+            if sample_width == 2:
+                encoding = "pcm_s16le"
+            elif sample_width == 4:
+                encoding = "pcm_s16le"
+            else:
+                print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
+                sys.exit(1)
+            sample_rate = wf.getframerate()
+            chunks = []
+            while True:
+                data = wf.readframes(sample_rate // 10)  # 100ms per chunk
+                if not data:
+                    break
+                chunks.append(data)
+    else:
+        output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
+        encoding = output_format["encoding"]
+        sample_rate = output_format["sample_rate"]
+        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
+        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
+        audio = client.tts.generate(
+            model_id="sonic-latest",
+            transcript=transcript,
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format=output_format,
+            language="en",
+        ).read()
+        chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
+        chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
+
+    with client.stt.external_vad.websocket(
+        encoding=encoding,
+        model="ink-whisper",
+        sample_rate=sample_rate,
+    ) as connection:
+        for chunk in chunks:
+            connection.send_raw(chunk)
+            time.sleep(0.1)  # each chunk is 100ms of audio — pace sends to match real time
+
+        # Trigger transcription of buffered audio, then close cleanly.
+        connection.send("finalize")
+        connection.send("close")
+
+        transcript = ""
+        for event in connection:
+            if event.type == "transcript":
+                label = "final" if event.is_final else "interim"
+                print(f"[{label}] {event.text!r}")
+                if event.is_final:
+                    transcript += event.text
+            elif event.type == "flush_done":
+                print("Flush acknowledged")
+            elif event.type == "done":
+                print("Connection closing")
+            elif event.type == "error":
+                print(f"Error: {event.title}: {event.message}")
+
+        print(f"\nFull transcript: {transcript!r}")
+
+
 # =============================================================================
 # Error Handling
 # =============================================================================
@@ -633,16 +805,18 @@ def stt_transcribe(client: Cartesia, *args: str) -> None:
 
 def error_handling_example(client: Cartesia) -> None:
     """Example of error handling with SDK exceptions."""
+    from cartesia import APIError, NotFoundError, RateLimitError, BadRequestError, AuthenticationError
+
     try:
         client.tts.generate(
             model_id="sonic-latest",
-            transcript="Hello, world!",
+            transcript="",  # empty transcript will cause a 400 bad request response
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format={},  # type: ignore # bad request
+            output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
     except BadRequestError as e:
-        print(f"Bad request: {e.message}")
+        print(f"Bad request (expected): {e.message}")
     except AuthenticationError as e:
         print(f"Auth failed: {e.message}")
     except NotFoundError as e:
