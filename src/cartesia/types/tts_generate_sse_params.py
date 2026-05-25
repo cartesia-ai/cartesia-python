@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Optional
 from typing_extensions import Literal, Required, TypedDict
 
+from .tts_model import TTSModel
 from .model_speed import ModelSpeed
 from .raw_encoding import RawEncoding
 from .supported_language import SupportedLanguage
@@ -15,11 +16,11 @@ __all__ = ["TTSGenerateSSEParams", "OutputFormat"]
 
 
 class TTSGenerateSSEParams(TypedDict, total=False):
-    model_id: Required[str]
-    """The ID of the model to use for the generation.
+    model_id: Required[TTSModel]
+    """Text-to-speech models.
 
-    See [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for
-    available models.
+    See [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest)
+    for all options.
     """
 
     output_format: Required[OutputFormat]

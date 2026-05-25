@@ -7,7 +7,9 @@ from typing import Any, Mapping, Optional, cast
 import httpx
 
 from ..types import (
+    TTSModel,
     ModelSpeed,
+    InfillModel,
     SupportedLanguage,
     tts_infill_params,
     tts_generate_params,
@@ -34,7 +36,9 @@ from .._response import (
 )
 from .._streaming import Stream, AsyncStream
 from .._base_client import make_request_options
+from ..types.tts_model import TTSModel
 from ..types.model_speed import ModelSpeed
+from ..types.infill_model import InfillModel
 from ..types.tts_sse_event import TTSSSEEvent
 from ..types.supported_language import SupportedLanguage
 from ..types.voice_specifier_param import VoiceSpecifierParam
@@ -66,7 +70,7 @@ class TTSResource(SyncAPIResource):
     def generate(
         self,
         *,
-        model_id: str,
+        model_id: TTSModel,
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
@@ -92,9 +96,9 @@ class TTSResource(SyncAPIResource):
         for details.
 
         Args:
-          model_id: The ID of the model to use for the generation. See
-              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-              models.
+          model_id: Text-to-speech models. See
+              [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+              all options.
 
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
@@ -150,7 +154,7 @@ class TTSResource(SyncAPIResource):
     def generate_sse(
         self,
         *,
-        model_id: str,
+        model_id: TTSModel,
         output_format: tts_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
@@ -183,9 +187,9 @@ class TTSResource(SyncAPIResource):
         for details.
 
         Args:
-          model_id: The ID of the model to use for the generation. See
-              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-              models.
+          model_id: Text-to-speech models. See
+              [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+              all options.
 
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
@@ -257,7 +261,7 @@ class TTSResource(SyncAPIResource):
         *,
         language: str | Omit = omit,
         left_audio: FileTypes | Omit = omit,
-        model_id: str | Omit = omit,
+        model_id: InfillModel | Omit = omit,
         output_format: tts_infill_params.OutputFormat | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
@@ -295,8 +299,9 @@ class TTSResource(SyncAPIResource):
         Args:
           language: The language of the transcript
 
-          model_id: The ID of the model to use for generating audio. Any model other than the first
-              `"sonic"` model is supported.
+          model_id: Infill models. See
+              [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+              for all options.
 
           transcript: The infill text to generate
 
@@ -362,7 +367,7 @@ class AsyncTTSResource(AsyncAPIResource):
     async def generate(
         self,
         *,
-        model_id: str,
+        model_id: TTSModel,
         output_format: tts_generate_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
@@ -388,9 +393,9 @@ class AsyncTTSResource(AsyncAPIResource):
         for details.
 
         Args:
-          model_id: The ID of the model to use for the generation. See
-              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-              models.
+          model_id: Text-to-speech models. See
+              [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+              all options.
 
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
@@ -446,7 +451,7 @@ class AsyncTTSResource(AsyncAPIResource):
     async def generate_sse(
         self,
         *,
-        model_id: str,
+        model_id: TTSModel,
         output_format: tts_generate_sse_params.OutputFormat,
         transcript: str,
         voice: VoiceSpecifierParam,
@@ -479,9 +484,9 @@ class AsyncTTSResource(AsyncAPIResource):
         for details.
 
         Args:
-          model_id: The ID of the model to use for the generation. See
-              [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models) for available
-              models.
+          model_id: Text-to-speech models. See
+              [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
+              all options.
 
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
@@ -553,7 +558,7 @@ class AsyncTTSResource(AsyncAPIResource):
         *,
         language: str | Omit = omit,
         left_audio: FileTypes | Omit = omit,
-        model_id: str | Omit = omit,
+        model_id: InfillModel | Omit = omit,
         output_format: tts_infill_params.OutputFormat | Omit = omit,
         right_audio: FileTypes | Omit = omit,
         transcript: str | Omit = omit,
@@ -591,8 +596,9 @@ class AsyncTTSResource(AsyncAPIResource):
         Args:
           language: The language of the transcript
 
-          model_id: The ID of the model to use for generating audio. Any model other than the first
-              `"sonic"` model is supported.
+          model_id: Infill models. See
+              [the docs](https://docs.cartesia.ai/api-reference/infill/bytes#body-model-id)
+              for all options.
 
           transcript: The infill text to generate
 

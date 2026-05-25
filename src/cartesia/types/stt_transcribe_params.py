@@ -6,12 +6,14 @@ from typing import List, Optional
 from typing_extensions import Literal, TypedDict
 
 from .._types import FileTypes
+from .stt_encoding import STTEncoding
+from .stt_batch_model import STTBatchModel
 
 __all__ = ["STTTranscribeParams"]
 
 
 class STTTranscribeParams(TypedDict, total=False):
-    encoding: Optional[Literal["pcm_s16le", "pcm_s32le", "pcm_f16le", "pcm_f32le", "pcm_mulaw", "pcm_alaw"]]
+    encoding: Optional[STTEncoding]
     """The encoding format to process the audio as.
 
     If not specified, the audio file will be decoded automatically.
@@ -138,10 +140,11 @@ class STTTranscribeParams(TypedDict, total=False):
     ]
     """The language of the input audio in ISO-639-1 format. Defaults to `en`."""
 
-    model: str
-    """ID of the model to use for transcription.
-
-    Use `ink-whisper` for the latest Cartesia Whisper model.
+    model: STTBatchModel
+    """
+    Models that support batch speech-to-text transcription. See
+    [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+    all options.
     """
 
     timestamp_granularities: Optional[List[Literal["word"]]]

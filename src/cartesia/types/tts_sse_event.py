@@ -5,8 +5,8 @@ from typing_extensions import Literal, Annotated, TypeAlias
 
 from .._utils import PropertyInfo
 from .._models import BaseModel
-from .word_timestamps import WordTimestamps
-from .phoneme_timestamps import PhonemeTimestamps
+from .shared.word_timestamps import WordTimestamps
+from .shared.phoneme_timestamps import PhonemeTimestamps
 
 __all__ = [
     "TTSSSEEvent",
