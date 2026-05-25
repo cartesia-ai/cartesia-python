@@ -42,12 +42,14 @@ from .websocket_reconnection import (
 )
 from .fine_tune_create_params import FineTuneCreateParams as FineTuneCreateParams
 from .generation_config_param import GenerationConfigParam as GenerationConfigParam
+from .mp3_output_format_param import MP3OutputFormatParam as MP3OutputFormatParam
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
 from .stt_transcribe_response import STTTranscribeResponse as STTTranscribeResponse
 from .tts_generate_sse_params import TTSGenerateSSEParams as TTSGenerateSSEParams
 from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
+from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
