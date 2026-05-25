@@ -654,7 +654,7 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
             if sample_width == 2:
                 encoding = "pcm_s16le"
             elif sample_width == 4:
-                encoding = "pcm_s16le"
+                encoding = "pcm_s32le"
             else:
                 print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
                 sys.exit(1)
