@@ -481,7 +481,7 @@ async def stt_turn_detecting_websocket_async(client: AsyncCartesia, *args: str) 
             if sample_width == 2:
                 encoding = "pcm_s16le"
             elif sample_width == 4:
-                encoding = "pcm_s16le"
+                encoding = "pcm_s32le"
             else:
                 print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
                 sys.exit(1)
@@ -509,6 +509,10 @@ async def stt_turn_detecting_websocket_async(client: AsyncCartesia, *args: str) 
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
+    full_transcript = ""
+
     async with client.stt.turn_detecting.websocket(
         encoding=encoding,
         model="ink-2",
@@ -526,21 +530,26 @@ async def stt_turn_detecting_websocket_async(client: AsyncCartesia, *args: str) 
         async def receive_events() -> None:
             async for event in connection:
                 if event.type == "connected":
-                    print(f"Connected: {event.request_id}")
+                    print(f"connected      | request_id={event.request_id}")
                 elif event.type == "turn.start":
-                    print("Turn started")
+                    print("turn.start     |")
                 elif event.type == "turn.update":
-                    print(f"  {event.transcript}")
+                    # event.transcript is cumulative within a turn.
+                    print(f"turn.update    | {event.transcript}")
                 elif event.type == "turn.eager_end":
-                    print(f"[preview] Eager end: {event.transcript!r}")
+                    print(f"turn.eager_end | {event.transcript}")
                 elif event.type == "turn.resume":
-                    print("[preview] Turn resumed")
+                    print("turn.resume     |")
                 elif event.type == "turn.end":
-                    print(f"Turn ended: {event.transcript!r}")
+                    print(f"turn.end       | {event.transcript}")
+                    nonlocal full_transcript
+                    full_transcript += event.transcript
                 elif event.type == "error":
-                    print(f"Error: {event.title}: {event.message}")
+                    print(f"error          | {event.message}")
 
         await asyncio.gather(send_audio(), receive_events())
+
+        print(f"\nFull transcript: {full_transcript!r}")
 
 
 async def stt_external_vad_websocket_async(client: AsyncCartesia, *args: str) -> None:
@@ -606,7 +615,7 @@ async def stt_external_vad_websocket_async(client: AsyncCartesia, *args: str) ->
 
     async with client.stt.external_vad.websocket(
         encoding=encoding,
-        model="ink-whisper",
+        model="ink-2",
         sample_rate=sample_rate,
     ) as connection:
 
@@ -622,16 +631,15 @@ async def stt_external_vad_websocket_async(client: AsyncCartesia, *args: str) ->
             nonlocal transcript
             async for event in connection:
                 if event.type == "transcript":
-                    label = "final" if event.is_final else "interim"
-                    print(f"[{label}] {event.text!r}")
                     if event.is_final:
+                        print(f"transcript | {event.text}")
                         transcript += event.text
                 elif event.type == "flush_done":
-                    print("Flush acknowledged")
+                    print("flush_done |")
                 elif event.type == "done":
-                    print("Connection closing")
+                    print("done       |")
                 elif event.type == "error":
-                    print(f"Error: {event.title}: {event.message}")
+                    print(f"error    | {event.message}")
 
         await asyncio.gather(send_audio(), receive_events())
 

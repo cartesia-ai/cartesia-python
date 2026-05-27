@@ -669,17 +669,21 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
         output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
         encoding = output_format["encoding"]
         sample_rate = output_format["sample_rate"]
-        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
-        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
+        generation_transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
+        print(f"No WAV file provided — synthesizing audio with TTS: {generation_transcript!r}")
         audio = client.tts.generate(
             model_id="sonic-latest",
-            transcript=transcript,
+            transcript=generation_transcript,
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
             language="en",
         ).read()
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
+
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
+    full_transcript = ""
 
     with client.stt.turn_detecting.websocket(
         encoding=encoding,
@@ -695,20 +699,23 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
 
         for event in connection:
             if event.type == "connected":
-                print(f"Connected: {event.request_id}")
+                print(f"connected      | request_id={event.request_id}")
             elif event.type == "turn.start":
-                print("Turn started")
+                print("turn.start     |")
             elif event.type == "turn.update":
                 # event.transcript is cumulative within a turn.
-                print(f"  {event.transcript}")
+                print(f"turn.update    | {event.transcript}")
             elif event.type == "turn.eager_end":
-                print(f"[preview] Eager end: {event.transcript!r}")
+                print(f"turn.eager_end | {event.transcript}")
             elif event.type == "turn.resume":
-                print("[preview] Turn resumed")
+                print("turn.resume     |")
             elif event.type == "turn.end":
-                print(f"Turn ended: {event.transcript!r}")
+                print(f"turn.end       | {event.transcript}")
+                full_transcript += event.transcript
             elif event.type == "error":
-                print(f"Error: {event.title}: {event.message}")
+                print(f"error          | {event.message}")
+
+        print(f"\nFull transcript: {full_transcript!r}")
 
 
 def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
@@ -741,7 +748,7 @@ def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
             if sample_width == 2:
                 encoding = "pcm_s16le"
             elif sample_width == 4:
-                encoding = "pcm_s16le"
+                encoding = "pcm_s32le"
             else:
                 print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
                 sys.exit(1)
@@ -770,7 +777,7 @@ def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
 
     with client.stt.external_vad.websocket(
         encoding=encoding,
-        model="ink-whisper",
+        model="ink-2",
         sample_rate=sample_rate,
     ) as connection:
         for chunk in chunks:
@@ -784,16 +791,15 @@ def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
         transcript = ""
         for event in connection:
             if event.type == "transcript":
-                label = "final" if event.is_final else "interim"
-                print(f"[{label}] {event.text!r}")
                 if event.is_final:
+                    print(f"transcript | {event.text}")
                     transcript += event.text
             elif event.type == "flush_done":
-                print("Flush acknowledged")
+                print("flush_done |")
             elif event.type == "done":
-                print("Connection closing")
+                print("done       |")
             elif event.type == "error":
-                print(f"Error: {event.title}: {event.message}")
+                print(f"error    | {event.message}")
 
         print(f"\nFull transcript: {transcript!r}")
 
