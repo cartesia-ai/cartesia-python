@@ -8,17 +8,15 @@ import random
 import logging
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Union, Callable, Iterator, Awaitable, cast
-from typing_extensions import AsyncIterator
+from typing_extensions import Literal, AsyncIterator
 
 import httpx
-from pydantic import BaseModel
 
 from ...types import STTEncoding
-from ..._types import Query, Headers
-from ..._utils import maybe_transform, async_maybe_transform
+from ..._types import Omit, Query, Headers, omit
 from ..._models import construct_type_unchecked
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ...types.stt import STTRealtimeTurnDetectingModel
+from ...types.stt import STTManualFinalizeModel
 from ..._exceptions import CartesiaError, WebSocketConnectionClosedError
 from ..._send_queue import SendQueue
 from ..._base_client import _merge_mappings
@@ -27,10 +25,9 @@ from ...types.stt_encoding import STTEncoding
 from ...types.stt_error_response import STTErrorResponse
 from ...types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ...types.websocket_connection_options import WebSocketConnectionOptions
-from ...types.stt.stt_turns_websocket_request import STTTurnsWebsocketRequest
-from ...types.stt.stt_turns_websocket_response import STTTurnsWebsocketResponse
-from ...types.stt.stt_realtime_turn_detecting_model import STTRealtimeTurnDetectingModel
-from ...types.stt.stt_turns_websocket_request_param import STTTurnsWebsocketRequestParam
+from ...types.stt.stt_manual_finalize_model import STTManualFinalizeModel
+from ...types.stt.stt_manual_finalize_websocket_request import STTManualFinalizeWebsocketRequest
+from ...types.stt.stt_manual_finalize_websocket_response import STTManualFinalizeWebsocketResponse
 
 if TYPE_CHECKING:
     from websockets.sync.client import ClientConnection as WebSocketConnection
@@ -38,18 +35,21 @@ if TYPE_CHECKING:
 
     from ..._client import Cartesia, AsyncCartesia
 
-__all__ = ["TurnDetectingResource", "AsyncTurnDetectingResource"]
+__all__ = ["ManualFinalizeResource", "AsyncManualFinalizeResource"]
 
 log: logging.Logger = logging.getLogger(__name__)
 
 
-class TurnDetectingResource(SyncAPIResource):
+class ManualFinalizeResource(SyncAPIResource):
     def websocket(
         self,
         *,
         encoding: STTEncoding,
-        model: STTRealtimeTurnDetectingModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
+        language: Literal["en"] | Omit = omit,
+        max_silence_duration_secs: float | Omit = omit,
+        min_volume: float | Omit = omit,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
@@ -58,27 +58,26 @@ class TurnDetectingResource(SyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> TurnDetectingResourceConnectionManager:
-        """Realtime Speech-to-Text with user turn detection.
+    ) -> ManualFinalizeResourceConnectionManager:
+        """Realtime speech-to-text without turn detection.
 
-        This is the recommended STT method for building voice agents.
+        This is the recommended endpoint for "push-to-talk" apps.
 
-        The API is organized around **user turns** (human user starts talking, stops talking), not transcript segments. The model itself signals when a user turn begins and ends, so your agent reacts to events rather than running its own voice activity detection.
+        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using `auto finalize` instead.
 
-        Supports:
-          - Streaming transcription
-          - Native turn detection (`turn.start`, `turn.update`, `turn.end`)
-          - Eager end-of-turn prediction (`turn.eager_end`, `turn.resume`)
-          - Long-lived connections that reuse a live network connection for low latency
+        Basic usage:
+          1. Connect to the WebSocket with appropriate query parameters
+          2. Send audio in small chunks (e.g. 100ms) using the `send raw` method
+          3. Send `finalize` when the user is done speaking using the `send` method
+          4. Receive transcripts (each message is a delta and is not cumulative)
+          5. Repeat 2-4
+          6. Send `close` finalize any buffered audio and close the session cleanly using the `send` method
+          7. Receive the remaining transcript chunks
 
 
-        **All emitted text is final** — the model does not revise previous output. The `transcript` field is cumulative within a turn.
-
-        See [the API docs](https://docs.cartesia.ai/api-reference/stt/turns/websocket) for all details.
-
-        See [Turns](https://docs.cartesia.ai/use-the-api/stt/turns/turns) for details on handling turn events.
+        See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """
-        return TurnDetectingResourceConnectionManager(
+        return ManualFinalizeResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -91,16 +90,22 @@ class TurnDetectingResource(SyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            language=language,
+            max_silence_duration_secs=max_silence_duration_secs,
+            min_volume=min_volume,
         )
 
 
-class AsyncTurnDetectingResource(AsyncAPIResource):
+class AsyncManualFinalizeResource(AsyncAPIResource):
     def websocket(
         self,
         *,
         encoding: STTEncoding,
-        model: STTRealtimeTurnDetectingModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
+        language: Literal["en"] | Omit = omit,
+        max_silence_duration_secs: float | Omit = omit,
+        min_volume: float | Omit = omit,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
@@ -109,27 +114,26 @@ class AsyncTurnDetectingResource(AsyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> AsyncTurnDetectingResourceConnectionManager:
-        """Realtime Speech-to-Text with user turn detection.
+    ) -> AsyncManualFinalizeResourceConnectionManager:
+        """Realtime speech-to-text without turn detection.
 
-        This is the recommended STT method for building voice agents.
+        This is the recommended endpoint for "push-to-talk" apps.
 
-        The API is organized around **user turns** (human user starts talking, stops talking), not transcript segments. The model itself signals when a user turn begins and ends, so your agent reacts to events rather than running its own voice activity detection.
+        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using `auto finalize` instead.
 
-        Supports:
-          - Streaming transcription
-          - Native turn detection (`turn.start`, `turn.update`, `turn.end`)
-          - Eager end-of-turn prediction (`turn.eager_end`, `turn.resume`)
-          - Long-lived connections that reuse a live network connection for low latency
+        Basic usage:
+          1. Connect to the WebSocket with appropriate query parameters
+          2. Send audio in small chunks (e.g. 100ms) using the `send raw` method
+          3. Send `finalize` when the user is done speaking using the `send` method
+          4. Receive transcripts (each message is a delta and is not cumulative)
+          5. Repeat 2-4
+          6. Send `close` finalize any buffered audio and close the session cleanly using the `send` method
+          7. Receive the remaining transcript chunks
 
 
-        **All emitted text is final** — the model does not revise previous output. The `transcript` field is cumulative within a turn.
-
-        See [the API docs](https://docs.cartesia.ai/api-reference/stt/turns/websocket) for all details.
-
-        See [Turns](https://docs.cartesia.ai/use-the-api/stt/turns/turns) for details on handling turn events.
+        See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """
-        return AsyncTurnDetectingResourceConnectionManager(
+        return AsyncManualFinalizeResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -142,11 +146,14 @@ class AsyncTurnDetectingResource(AsyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            language=language,
+            max_silence_duration_secs=max_silence_duration_secs,
+            min_volume=min_volume,
         )
 
 
-class AsyncTurnDetectingResourceConnection:
-    """Represents a live WebSocket connection to the TurnDetecting API"""
+class AsyncManualFinalizeResourceConnection:
+    """Represents a live WebSocket connection to the ManualFinalize API"""
 
     _connection: AsyncWebSocketConnection
 
@@ -176,7 +183,7 @@ class AsyncTurnDetectingResourceConnection:
         self._send_queue = send_queue or SendQueue()
         self._event_handler_registry = EventHandlerRegistry(use_lock=False)
 
-    async def __aiter__(self) -> AsyncIterator[STTTurnsWebsocketResponse]:
+    async def __aiter__(self) -> AsyncIterator[STTManualFinalizeWebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
@@ -198,9 +205,9 @@ class AsyncTurnDetectingResourceConnection:
                         ) from exc
                     raise
 
-    async def recv(self) -> STTTurnsWebsocketResponse:
+    async def recv(self) -> STTManualFinalizeWebsocketResponse:
         """
-        Receive the next message from the connection and parses it into a `STTTurnsWebsocketResponse` object.
+        Receive the next message from the connection and parses it into a `STTManualFinalizeWebsocketResponse` object.
 
         Canceling this method is safe. There's no risk of losing data.
         """
@@ -211,19 +218,15 @@ class AsyncTurnDetectingResourceConnection:
 
         Canceling this method is safe. There's no risk of losing data.
 
-        If you want to parse the message into a `STTTurnsWebsocketResponse` object like `.recv()` does,
+        If you want to parse the message into a `STTManualFinalizeWebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
         message = await self._connection.recv(decode=False)
         log.debug(f"Received WebSocket message: %s", message)
         return message
 
-    async def send(self, event: STTTurnsWebsocketRequest | STTTurnsWebsocketRequestParam) -> None:
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(await async_maybe_transform(event, STTTurnsWebsocketRequestParam))
-        )
+    async def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
+        data = event
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
             return
@@ -244,15 +247,15 @@ class AsyncTurnDetectingResourceConnection:
         self._intentionally_closed = True
         await self._connection.close(code=code, reason=reason)
 
-    def parse_event(self, data: str | bytes) -> STTTurnsWebsocketResponse:
+    def parse_event(self, data: str | bytes) -> STTManualFinalizeWebsocketResponse:
         """
-        Converts a raw `str` or `bytes` message into a `STTTurnsWebsocketResponse` object.
+        Converts a raw `str` or `bytes` message into a `STTManualFinalizeWebsocketResponse` object.
 
         This is helpful if you're using `.recv_bytes()`.
         """
         return cast(
-            STTTurnsWebsocketResponse,
-            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTTurnsWebsocketResponse)),
+            STTManualFinalizeWebsocketResponse,
+            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTManualFinalizeWebsocketResponse)),
         )
 
     async def _reconnect(self, exc: Exception) -> bool:
@@ -344,7 +347,7 @@ class AsyncTurnDetectingResourceConnection:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncTurnDetectingResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Adds the handler to the end of the handlers list for the given event type.
 
         No checks are made to see if the handler has already been added. Multiple calls
@@ -353,11 +356,11 @@ class AsyncTurnDetectingResourceConnection:
 
         Can be used as a method (returns ``self`` for chaining)::
 
-            connection.on("connected", my_handler)
+            connection.on("transcript", my_handler)
 
         Or as a decorator::
 
-            @connection.on("connected")
+            @connection.on("transcript")
             async def my_handler(event): ...
         """
         if handler is not None:
@@ -370,14 +373,14 @@ class AsyncTurnDetectingResourceConnection:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncTurnDetectingResourceConnection:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncManualFinalizeResourceConnection:
         """Remove a previously registered event handler."""
         self._event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncTurnDetectingResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler.
 
         Automatically removed after first invocation.
@@ -423,9 +426,9 @@ class AsyncTurnDetectingResourceConnection:
                     await result
 
 
-class AsyncTurnDetectingResourceConnectionManager:
+class AsyncManualFinalizeResourceConnectionManager:
     """
-    Context manager over a `AsyncTurnDetectingResourceConnection` that is returned by `stt.turn_detecting.websocket()`
+    Context manager over a `AsyncManualFinalizeResourceConnection` that is returned by `stt.manual_finalize.websocket()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -437,7 +440,7 @@ class AsyncTurnDetectingResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = await client.stt.turn_detecting.websocket(...).enter()
+    connection = await client.stt.manual_finalize.websocket(...).enter()
     # ...
     await connection.close()
     ```
@@ -448,8 +451,11 @@ class AsyncTurnDetectingResourceConnectionManager:
         *,
         client: AsyncCartesia,
         encoding: STTEncoding,
-        model: STTRealtimeTurnDetectingModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
+        language: Literal["en"] | Omit = omit,
+        max_silence_duration_secs: float | Omit = omit,
+        min_volume: float | Omit = omit,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
@@ -463,7 +469,10 @@ class AsyncTurnDetectingResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
-        self.__connection: AsyncTurnDetectingResourceConnection | None = None
+        self.__language = language
+        self.__max_silence_duration_secs = max_silence_duration_secs
+        self.__min_volume = min_volume
+        self.__connection: AsyncManualFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -474,26 +483,22 @@ class AsyncTurnDetectingResourceConnectionManager:
         self.__send_queue = SendQueue(max_bytes=max_queue_size)
         self.__event_handler_registry = EventHandlerRegistry(use_lock=False)
 
-    def send(self, event: STTTurnsWebsocketRequest | STTTurnsWebsocketRequestParam) -> None:
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         """Queue a message to be sent when the connection is established.
 
         This can be called before entering the context manager. Queued messages
         are automatically sent once the WebSocket connection opens.
         """
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(event)
-        )
+        data = event
         self.__send_queue.enqueue(data)
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncTurnDetectingResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register an event handler before the connection is established.
 
         Handlers are transferred to the connection on enter. Supports the
-        same method and decorator forms as ``AsyncTurnDetectingResourceConnection.on``.
+        same method and decorator forms as ``AsyncManualFinalizeResourceConnection.on``.
         """
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler)
@@ -505,14 +510,14 @@ class AsyncTurnDetectingResourceConnectionManager:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncTurnDetectingResourceConnectionManager:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncManualFinalizeResourceConnectionManager:
         """Remove a previously registered event handler."""
         self.__event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncTurnDetectingResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler before the connection is established."""
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler, once=True)
@@ -524,7 +529,7 @@ class AsyncTurnDetectingResourceConnectionManager:
 
         return decorator
 
-    async def __aenter__(self) -> AsyncTurnDetectingResourceConnection:
+    async def __aenter__(self) -> AsyncManualFinalizeResourceConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -532,14 +537,14 @@ class AsyncTurnDetectingResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = await client.stt.turn_detecting.websocket(...).enter()
+        connection = await client.stt.manual_finalize.websocket(...).enter()
         # ...
         await connection.close()
         ```
         """
         ws = await self._connect_ws(self.__extra_query, self.__extra_headers)
 
-        self.__connection = AsyncTurnDetectingResourceConnection(
+        self.__connection = AsyncManualFinalizeResourceConnection(
             ws,
             make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
             on_reconnecting=self.__on_reconnecting,
@@ -571,6 +576,9 @@ class AsyncTurnDetectingResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "language": self.__language,
+                    "max_silence_duration_secs": self.__max_silence_duration_secs,
+                    "min_volume": self.__min_volume,
                     **extra_query,
                 },
             ),
@@ -600,7 +608,7 @@ class AsyncTurnDetectingResourceConnectionManager:
             ws_scheme = "ws" if scheme == "http" else "wss"
             base_url = self.__client._base_url.copy_with(scheme=ws_scheme)
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/stt/turns/websocket"
+        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/stt/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     async def __aexit__(
@@ -610,8 +618,8 @@ class AsyncTurnDetectingResourceConnectionManager:
             await self.__connection.close()
 
 
-class TurnDetectingResourceConnection:
-    """Represents a live WebSocket connection to the TurnDetecting API"""
+class ManualFinalizeResourceConnection:
+    """Represents a live WebSocket connection to the ManualFinalize API"""
 
     _connection: WebSocketConnection
 
@@ -641,7 +649,7 @@ class TurnDetectingResourceConnection:
         self._send_queue = send_queue or SendQueue()
         self._event_handler_registry = EventHandlerRegistry(use_lock=True)
 
-    def __iter__(self) -> Iterator[STTTurnsWebsocketResponse]:
+    def __iter__(self) -> Iterator[STTManualFinalizeWebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
@@ -663,9 +671,9 @@ class TurnDetectingResourceConnection:
                         ) from exc
                     raise
 
-    def recv(self) -> STTTurnsWebsocketResponse:
+    def recv(self) -> STTManualFinalizeWebsocketResponse:
         """
-        Receive the next message from the connection and parses it into a `STTTurnsWebsocketResponse` object.
+        Receive the next message from the connection and parses it into a `STTManualFinalizeWebsocketResponse` object.
 
         Canceling this method is safe. There's no risk of losing data.
         """
@@ -676,19 +684,15 @@ class TurnDetectingResourceConnection:
 
         Canceling this method is safe. There's no risk of losing data.
 
-        If you want to parse the message into a `STTTurnsWebsocketResponse` object like `.recv()` does,
+        If you want to parse the message into a `STTManualFinalizeWebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
         message = self._connection.recv(decode=False)
         log.debug(f"Received WebSocket message: %s", message)
         return message
 
-    def send(self, event: STTTurnsWebsocketRequest | STTTurnsWebsocketRequestParam) -> None:
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(maybe_transform(event, STTTurnsWebsocketRequestParam))
-        )
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
+        data = event
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
             return
@@ -709,15 +713,15 @@ class TurnDetectingResourceConnection:
         self._intentionally_closed = True
         self._connection.close(code=code, reason=reason)
 
-    def parse_event(self, data: str | bytes) -> STTTurnsWebsocketResponse:
+    def parse_event(self, data: str | bytes) -> STTManualFinalizeWebsocketResponse:
         """
-        Converts a raw `str` or `bytes` message into a `STTTurnsWebsocketResponse` object.
+        Converts a raw `str` or `bytes` message into a `STTManualFinalizeWebsocketResponse` object.
 
         This is helpful if you're using `.recv_bytes()`.
         """
         return cast(
-            STTTurnsWebsocketResponse,
-            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTTurnsWebsocketResponse)),
+            STTManualFinalizeWebsocketResponse,
+            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTManualFinalizeWebsocketResponse)),
         )
 
     def _reconnect(self, exc: Exception) -> bool:
@@ -803,7 +807,7 @@ class TurnDetectingResourceConnection:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[TurnDetectingResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Adds the handler to the end of the handlers list for the given event type.
 
         No checks are made to see if the handler has already been added. Multiple calls
@@ -812,11 +816,11 @@ class TurnDetectingResourceConnection:
 
         Can be used as a method (returns ``self`` for chaining)::
 
-            connection.on("connected", my_handler)
+            connection.on("transcript", my_handler)
 
         Or as a decorator::
 
-            @connection.on("connected")
+            @connection.on("transcript")
             def my_handler(event): ...
         """
         if handler is not None:
@@ -829,14 +833,14 @@ class TurnDetectingResourceConnection:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> TurnDetectingResourceConnection:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> ManualFinalizeResourceConnection:
         """Remove a previously registered event handler."""
         self._event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[TurnDetectingResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler.
 
         Automatically removed after first invocation.
@@ -876,9 +880,9 @@ class TurnDetectingResourceConnection:
                 handler(event)
 
 
-class TurnDetectingResourceConnectionManager:
+class ManualFinalizeResourceConnectionManager:
     """
-    Context manager over a `TurnDetectingResourceConnection` that is returned by `stt.turn_detecting.websocket()`
+    Context manager over a `ManualFinalizeResourceConnection` that is returned by `stt.manual_finalize.websocket()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -890,7 +894,7 @@ class TurnDetectingResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = client.stt.turn_detecting.websocket(...).enter()
+    connection = client.stt.manual_finalize.websocket(...).enter()
     # ...
     connection.close()
     ```
@@ -901,8 +905,11 @@ class TurnDetectingResourceConnectionManager:
         *,
         client: Cartesia,
         encoding: STTEncoding,
-        model: STTRealtimeTurnDetectingModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
+        language: Literal["en"] | Omit = omit,
+        max_silence_duration_secs: float | Omit = omit,
+        min_volume: float | Omit = omit,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
@@ -916,7 +923,10 @@ class TurnDetectingResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
-        self.__connection: TurnDetectingResourceConnection | None = None
+        self.__language = language
+        self.__max_silence_duration_secs = max_silence_duration_secs
+        self.__min_volume = min_volume
+        self.__connection: ManualFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -927,26 +937,22 @@ class TurnDetectingResourceConnectionManager:
         self.__send_queue = SendQueue(max_bytes=max_queue_size)
         self.__event_handler_registry = EventHandlerRegistry(use_lock=True)
 
-    def send(self, event: STTTurnsWebsocketRequest | STTTurnsWebsocketRequestParam) -> None:
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         """Queue a message to be sent when the connection is established.
 
         This can be called before entering the context manager. Queued messages
         are automatically sent once the WebSocket connection opens.
         """
-        data = (
-            event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
-            if isinstance(event, BaseModel)
-            else json.dumps(event)
-        )
+        data = event
         self.__send_queue.enqueue(data)
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[TurnDetectingResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register an event handler before the connection is established.
 
         Handlers are transferred to the connection on enter. Supports the
-        same method and decorator forms as ``TurnDetectingResourceConnection.on``.
+        same method and decorator forms as ``ManualFinalizeResourceConnection.on``.
         """
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler)
@@ -958,14 +964,14 @@ class TurnDetectingResourceConnectionManager:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> TurnDetectingResourceConnectionManager:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> ManualFinalizeResourceConnectionManager:
         """Remove a previously registered event handler."""
         self.__event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[TurnDetectingResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler before the connection is established."""
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler, once=True)
@@ -977,7 +983,7 @@ class TurnDetectingResourceConnectionManager:
 
         return decorator
 
-    def __enter__(self) -> TurnDetectingResourceConnection:
+    def __enter__(self) -> ManualFinalizeResourceConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -985,14 +991,14 @@ class TurnDetectingResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = client.stt.turn_detecting.websocket(...).enter()
+        connection = client.stt.manual_finalize.websocket(...).enter()
         # ...
         connection.close()
         ```
         """
         ws = self._connect_ws(self.__extra_query, self.__extra_headers)
 
-        self.__connection = TurnDetectingResourceConnection(
+        self.__connection = ManualFinalizeResourceConnection(
             ws,
             make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
             on_reconnecting=self.__on_reconnecting,
@@ -1024,6 +1030,9 @@ class TurnDetectingResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "language": self.__language,
+                    "max_silence_duration_secs": self.__max_silence_duration_secs,
+                    "min_volume": self.__min_volume,
                     **extra_query,
                 },
             ),
@@ -1053,7 +1062,7 @@ class TurnDetectingResourceConnectionManager:
             ws_scheme = "ws" if scheme == "http" else "wss"
             base_url = self.__client._base_url.copy_with(scheme=ws_scheme)
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/stt/turns/websocket"
+        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/stt/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     def __exit__(

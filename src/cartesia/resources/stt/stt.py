@@ -19,9 +19,9 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .external_vad import ExternalVADResource, AsyncExternalVADResource
+from .auto_finalize import AutoFinalizeResource, AsyncAutoFinalizeResource
 from ..._base_client import make_request_options
-from .turn_detecting import TurnDetectingResource, AsyncTurnDetectingResource
+from .manual_finalize import ManualFinalizeResource, AsyncManualFinalizeResource
 from ...types.stt_encoding import STTEncoding
 from ...types.stt_batch_model import STTBatchModel
 from ...types.stt_transcribe_response import STTTranscribeResponse
@@ -31,12 +31,12 @@ __all__ = ["STTResource", "AsyncSTTResource"]
 
 class STTResource(SyncAPIResource):
     @cached_property
-    def turn_detecting(self) -> TurnDetectingResource:
-        return TurnDetectingResource(self._client)
+    def auto_finalize(self) -> AutoFinalizeResource:
+        return AutoFinalizeResource(self._client)
 
     @cached_property
-    def external_vad(self) -> ExternalVADResource:
-        return ExternalVADResource(self._client)
+    def manual_finalize(self) -> ManualFinalizeResource:
+        return ManualFinalizeResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> STTResourceWithRawResponse:
@@ -60,116 +60,115 @@ class STTResource(SyncAPIResource):
     def transcribe(
         self,
         *,
+        file: FileTypes,
+        model: STTBatchModel,
         encoding: Optional[STTEncoding] | Omit = omit,
         sample_rate: Optional[int] | Omit = omit,
-        file: FileTypes | Omit = omit,
-        language: Optional[
-            Literal[
-                "en",
-                "zh",
-                "de",
-                "es",
-                "ru",
-                "ko",
-                "fr",
-                "ja",
-                "pt",
-                "tr",
-                "pl",
-                "ca",
-                "nl",
-                "ar",
-                "sv",
-                "it",
-                "id",
-                "hi",
-                "fi",
-                "vi",
-                "he",
-                "uk",
-                "el",
-                "ms",
-                "cs",
-                "ro",
-                "da",
-                "hu",
-                "ta",
-                "no",
-                "th",
-                "ur",
-                "hr",
-                "bg",
-                "lt",
-                "la",
-                "mi",
-                "ml",
-                "cy",
-                "sk",
-                "te",
-                "fa",
-                "lv",
-                "bn",
-                "sr",
-                "az",
-                "sl",
-                "kn",
-                "et",
-                "mk",
-                "br",
-                "eu",
-                "is",
-                "hy",
-                "ne",
-                "mn",
-                "bs",
-                "kk",
-                "sq",
-                "sw",
-                "gl",
-                "mr",
-                "pa",
-                "si",
-                "km",
-                "sn",
-                "yo",
-                "so",
-                "af",
-                "oc",
-                "ka",
-                "be",
-                "tg",
-                "sd",
-                "gu",
-                "am",
-                "yi",
-                "lo",
-                "uz",
-                "fo",
-                "ht",
-                "ps",
-                "tk",
-                "nn",
-                "mt",
-                "sa",
-                "lb",
-                "my",
-                "bo",
-                "tl",
-                "mg",
-                "as",
-                "tt",
-                "haw",
-                "ln",
-                "ha",
-                "ba",
-                "jw",
-                "su",
-                "yue",
-            ]
+        language: Literal[
+            "en",
+            "zh",
+            "de",
+            "es",
+            "ru",
+            "ko",
+            "fr",
+            "ja",
+            "pt",
+            "tr",
+            "pl",
+            "ca",
+            "nl",
+            "ar",
+            "sv",
+            "it",
+            "id",
+            "hi",
+            "fi",
+            "vi",
+            "he",
+            "uk",
+            "el",
+            "ms",
+            "cs",
+            "ro",
+            "da",
+            "hu",
+            "ta",
+            "no",
+            "th",
+            "ur",
+            "hr",
+            "bg",
+            "lt",
+            "la",
+            "mi",
+            "ml",
+            "cy",
+            "sk",
+            "te",
+            "fa",
+            "lv",
+            "bn",
+            "sr",
+            "az",
+            "sl",
+            "kn",
+            "et",
+            "mk",
+            "br",
+            "eu",
+            "is",
+            "hy",
+            "ne",
+            "mn",
+            "bs",
+            "kk",
+            "sq",
+            "sw",
+            "gl",
+            "mr",
+            "pa",
+            "si",
+            "km",
+            "sn",
+            "yo",
+            "so",
+            "af",
+            "oc",
+            "ka",
+            "be",
+            "tg",
+            "sd",
+            "gu",
+            "am",
+            "yi",
+            "lo",
+            "uz",
+            "fo",
+            "ht",
+            "ps",
+            "tk",
+            "nn",
+            "mt",
+            "sa",
+            "lb",
+            "my",
+            "bo",
+            "tl",
+            "mg",
+            "as",
+            "tt",
+            "haw",
+            "ln",
+            "ha",
+            "ba",
+            "jw",
+            "su",
+            "yue",
         ]
+        | str
         | Omit = omit,
-        model: STTBatchModel | Omit = omit,
-        timestamp_granularities: Optional[List[Literal["word"]]] | Omit = omit,
+        timestamp_granularities: List[Literal["word"]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -178,11 +177,7 @@ class STTResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> STTTranscribeResponse:
         """
-        Transcribes audio files into text using Cartesia's Speech-to-Text API.
-
-        Upload an audio file and receive a complete transcription response. Supports
-        arbitrarily long audio files with automatic intelligent chunking for longer
-        audio.
+        Transcribes audio files into text.
 
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm
@@ -191,26 +186,15 @@ class STTResource(SyncAPIResource):
         details.
 
         Args:
-          encoding: The encoding format to process the audio as. If not specified, the audio file
-              will be decoded automatically.
+          model: Models that support batch speech-to-text transcription. See
+              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+              all options.
 
-              **Supported formats:**
-
-              - `pcm_s16le` - 16-bit signed integer PCM, little-endian (recommended for best
-                performance)
-              - `pcm_s32le` - 32-bit signed integer PCM, little-endian
-              - `pcm_f16le` - 16-bit floating point PCM, little-endian
-              - `pcm_f32le` - 32-bit floating point PCM, little-endian
-              - `pcm_mulaw` - 8-bit μ-law encoded PCM
-              - `pcm_alaw` - 8-bit A-law encoded PCM
+          encoding: The encoding format for audio data sent to the STT WebSocket.
 
           sample_rate: The sample rate of the audio in Hz.
 
           language: The language of the input audio in ISO-639-1 format. Defaults to `en`.
-
-          model: Models that support batch speech-to-text transcription. See
-              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
-              all options.
 
           timestamp_granularities: The timestamp granularities to populate for this transcription. Currently only
               `word` level timestamps are supported.
@@ -226,8 +210,8 @@ class STTResource(SyncAPIResource):
         body = deepcopy_with_paths(
             {
                 "file": file,
-                "language": language,
                 "model": model,
+                "language": language,
                 "timestamp_granularities": timestamp_granularities,
             },
             [["file"]],
@@ -260,12 +244,12 @@ class STTResource(SyncAPIResource):
 
 class AsyncSTTResource(AsyncAPIResource):
     @cached_property
-    def turn_detecting(self) -> AsyncTurnDetectingResource:
-        return AsyncTurnDetectingResource(self._client)
+    def auto_finalize(self) -> AsyncAutoFinalizeResource:
+        return AsyncAutoFinalizeResource(self._client)
 
     @cached_property
-    def external_vad(self) -> AsyncExternalVADResource:
-        return AsyncExternalVADResource(self._client)
+    def manual_finalize(self) -> AsyncManualFinalizeResource:
+        return AsyncManualFinalizeResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncSTTResourceWithRawResponse:
@@ -289,116 +273,115 @@ class AsyncSTTResource(AsyncAPIResource):
     async def transcribe(
         self,
         *,
+        file: FileTypes,
+        model: STTBatchModel,
         encoding: Optional[STTEncoding] | Omit = omit,
         sample_rate: Optional[int] | Omit = omit,
-        file: FileTypes | Omit = omit,
-        language: Optional[
-            Literal[
-                "en",
-                "zh",
-                "de",
-                "es",
-                "ru",
-                "ko",
-                "fr",
-                "ja",
-                "pt",
-                "tr",
-                "pl",
-                "ca",
-                "nl",
-                "ar",
-                "sv",
-                "it",
-                "id",
-                "hi",
-                "fi",
-                "vi",
-                "he",
-                "uk",
-                "el",
-                "ms",
-                "cs",
-                "ro",
-                "da",
-                "hu",
-                "ta",
-                "no",
-                "th",
-                "ur",
-                "hr",
-                "bg",
-                "lt",
-                "la",
-                "mi",
-                "ml",
-                "cy",
-                "sk",
-                "te",
-                "fa",
-                "lv",
-                "bn",
-                "sr",
-                "az",
-                "sl",
-                "kn",
-                "et",
-                "mk",
-                "br",
-                "eu",
-                "is",
-                "hy",
-                "ne",
-                "mn",
-                "bs",
-                "kk",
-                "sq",
-                "sw",
-                "gl",
-                "mr",
-                "pa",
-                "si",
-                "km",
-                "sn",
-                "yo",
-                "so",
-                "af",
-                "oc",
-                "ka",
-                "be",
-                "tg",
-                "sd",
-                "gu",
-                "am",
-                "yi",
-                "lo",
-                "uz",
-                "fo",
-                "ht",
-                "ps",
-                "tk",
-                "nn",
-                "mt",
-                "sa",
-                "lb",
-                "my",
-                "bo",
-                "tl",
-                "mg",
-                "as",
-                "tt",
-                "haw",
-                "ln",
-                "ha",
-                "ba",
-                "jw",
-                "su",
-                "yue",
-            ]
+        language: Literal[
+            "en",
+            "zh",
+            "de",
+            "es",
+            "ru",
+            "ko",
+            "fr",
+            "ja",
+            "pt",
+            "tr",
+            "pl",
+            "ca",
+            "nl",
+            "ar",
+            "sv",
+            "it",
+            "id",
+            "hi",
+            "fi",
+            "vi",
+            "he",
+            "uk",
+            "el",
+            "ms",
+            "cs",
+            "ro",
+            "da",
+            "hu",
+            "ta",
+            "no",
+            "th",
+            "ur",
+            "hr",
+            "bg",
+            "lt",
+            "la",
+            "mi",
+            "ml",
+            "cy",
+            "sk",
+            "te",
+            "fa",
+            "lv",
+            "bn",
+            "sr",
+            "az",
+            "sl",
+            "kn",
+            "et",
+            "mk",
+            "br",
+            "eu",
+            "is",
+            "hy",
+            "ne",
+            "mn",
+            "bs",
+            "kk",
+            "sq",
+            "sw",
+            "gl",
+            "mr",
+            "pa",
+            "si",
+            "km",
+            "sn",
+            "yo",
+            "so",
+            "af",
+            "oc",
+            "ka",
+            "be",
+            "tg",
+            "sd",
+            "gu",
+            "am",
+            "yi",
+            "lo",
+            "uz",
+            "fo",
+            "ht",
+            "ps",
+            "tk",
+            "nn",
+            "mt",
+            "sa",
+            "lb",
+            "my",
+            "bo",
+            "tl",
+            "mg",
+            "as",
+            "tt",
+            "haw",
+            "ln",
+            "ha",
+            "ba",
+            "jw",
+            "su",
+            "yue",
         ]
+        | str
         | Omit = omit,
-        model: STTBatchModel | Omit = omit,
-        timestamp_granularities: Optional[List[Literal["word"]]] | Omit = omit,
+        timestamp_granularities: List[Literal["word"]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -407,11 +390,7 @@ class AsyncSTTResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> STTTranscribeResponse:
         """
-        Transcribes audio files into text using Cartesia's Speech-to-Text API.
-
-        Upload an audio file and receive a complete transcription response. Supports
-        arbitrarily long audio files with automatic intelligent chunking for longer
-        audio.
+        Transcribes audio files into text.
 
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm
@@ -420,26 +399,15 @@ class AsyncSTTResource(AsyncAPIResource):
         details.
 
         Args:
-          encoding: The encoding format to process the audio as. If not specified, the audio file
-              will be decoded automatically.
+          model: Models that support batch speech-to-text transcription. See
+              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
+              all options.
 
-              **Supported formats:**
-
-              - `pcm_s16le` - 16-bit signed integer PCM, little-endian (recommended for best
-                performance)
-              - `pcm_s32le` - 32-bit signed integer PCM, little-endian
-              - `pcm_f16le` - 16-bit floating point PCM, little-endian
-              - `pcm_f32le` - 32-bit floating point PCM, little-endian
-              - `pcm_mulaw` - 8-bit μ-law encoded PCM
-              - `pcm_alaw` - 8-bit A-law encoded PCM
+          encoding: The encoding format for audio data sent to the STT WebSocket.
 
           sample_rate: The sample rate of the audio in Hz.
 
           language: The language of the input audio in ISO-639-1 format. Defaults to `en`.
-
-          model: Models that support batch speech-to-text transcription. See
-              [the docs](https://docs.cartesia.ai/api-reference/stt/transcribe#body-model) for
-              all options.
 
           timestamp_granularities: The timestamp granularities to populate for this transcription. Currently only
               `word` level timestamps are supported.
@@ -455,8 +423,8 @@ class AsyncSTTResource(AsyncAPIResource):
         body = deepcopy_with_paths(
             {
                 "file": file,
-                "language": language,
                 "model": model,
+                "language": language,
                 "timestamp_granularities": timestamp_granularities,
             },
             [["file"]],

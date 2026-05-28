@@ -4,10 +4,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["STTExternalVADDoneResponse"]
+__all__ = ["STTManualFinalizeDoneResponse"]
 
 
-class STTExternalVADDoneResponse(BaseModel):
+class STTManualFinalizeDoneResponse(BaseModel):
     """
     Acknowledgment for the `close` command, sent after all buffered audio has been processed and before the connection closes.
     """

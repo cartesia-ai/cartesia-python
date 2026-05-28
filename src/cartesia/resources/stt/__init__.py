@@ -8,14 +8,14 @@ from .stt import (
     STTResourceWithStreamingResponse,
     AsyncSTTResourceWithStreamingResponse,
 )
-from .external_vad import ExternalVADResource, AsyncExternalVADResource
-from .turn_detecting import TurnDetectingResource, AsyncTurnDetectingResource
+from .auto_finalize import AutoFinalizeResource, AsyncAutoFinalizeResource
+from .manual_finalize import ManualFinalizeResource, AsyncManualFinalizeResource
 
 __all__ = [
-    "TurnDetectingResource",
-    "AsyncTurnDetectingResource",
-    "ExternalVADResource",
-    "AsyncExternalVADResource",
+    "AutoFinalizeResource",
+    "AsyncAutoFinalizeResource",
+    "ManualFinalizeResource",
+    "AsyncManualFinalizeResource",
     "STTResource",
     "AsyncSTTResource",
     "STTResourceWithRawResponse",

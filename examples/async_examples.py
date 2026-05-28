@@ -445,11 +445,61 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
 
 
 # =============================================================================
+# STT (Speech-to-Text) (Async)
+# =============================================================================
+
+
+async def stt_transcribe_async(client: AsyncCartesia, *args: str) -> None:
+    """Transcribe an audio file with word timestamps.
+
+    Pass a path to an audio file, or omit it to generate a sample WAV via TTS.
+    """
+    import datetime
+
+    async def generate_sample_wav() -> tuple[str, str]:
+        transcript = "The quick brown fox jumps over the lazy dog."
+        language = "en"
+        print(f"No audio file provided. Generating a sample for: {transcript!r}")
+        response = await client.tts.generate(
+            model_id="sonic-latest",
+            transcript=transcript,
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 16000},
+            language=language,
+        )
+        path = f"stt_sample_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+        await response.write_to_file(path)
+        print(f"Saved sample audio to {path}")
+        return path, language
+
+    if args:
+        if len(args) < 2:
+            print("Usage: stt_transcribe_async <audio_file> <language_code>")
+            print("Example: stt_transcribe_async my_audio.wav en")
+            sys.exit(1)
+        file_path, language = args
+    else:
+        file_path, language = await generate_sample_wav()
+
+    with open(file_path, "rb") as f:
+        response = await client.stt.transcribe(
+            file=f,
+            model="ink-whisper",
+            language=language,
+            timestamp_granularities=["word"],  # Optional: get word timestamps
+        )
+    print(response.text)
+    if response.words:
+        for word in response.words:
+            print(f"{word.word}: {word.start}s - {word.end}s")
+
+
+# =============================================================================
 # STT Realtime WebSockets (Async)
 # =============================================================================
 
 
-async def stt_turn_detecting_websocket_async(client: AsyncCartesia, *args: str) -> None:
+async def stt_auto_finalize_websocket_async(client: AsyncCartesia, *args: str) -> None:
     """Async realtime STT with native turn detection (recommended for voice agents).
 
     The model signals when a user turn starts and ends, so your agent reacts
@@ -468,99 +518,6 @@ async def stt_turn_detecting_websocket_async(client: AsyncCartesia, *args: str) 
     from cartesia.types import STTEncoding, RawOutputFormatParam
 
     encoding: STTEncoding
-    chunks: list[bytes]
-    if args:
-        with wave.open(args[0], "rb") as wf:
-            if wf.getnchannels() != 1:
-                print(f"Error: WAV must be mono, got {wf.getnchannels()} channels.")
-                sys.exit(1)
-            if wf.getcomptype() != "NONE":
-                print(f"Error: WAV must be uncompressed PCM, got {wf.getcomptype()!r}.")
-                sys.exit(1)
-            sample_width = wf.getsampwidth()
-            if sample_width == 2:
-                encoding = "pcm_s16le"
-            elif sample_width == 4:
-                encoding = "pcm_s16le"
-            else:
-                print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
-                sys.exit(1)
-            sample_rate = wf.getframerate()
-            chunks = []
-            while True:
-                data = wf.readframes(sample_rate // 10)  # 100ms per chunk
-                if not data:
-                    break
-                chunks.append(data)
-    else:
-        output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
-        encoding = output_format["encoding"]
-        sample_rate = output_format["sample_rate"]
-        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
-        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
-        tts_response = await client.tts.generate(
-            model_id="sonic-latest",
-            transcript=transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
-            language="en",
-        )
-        audio = await tts_response.read()
-        chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
-        chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
-
-    async with client.stt.turn_detecting.websocket(
-        encoding=encoding,
-        model="ink-2",
-        sample_rate=sample_rate,
-    ) as connection:
-
-        async def send_audio() -> None:
-            for chunk in chunks:
-                await connection.send_raw(chunk)
-                # Pace at real-time (100ms per chunk)
-                await asyncio.sleep(0.1)
-            # Flush remaining audio and close the session.
-            await connection.send({"type": "close"})
-
-        async def receive_events() -> None:
-            async for event in connection:
-                if event.type == "connected":
-                    print(f"Connected: {event.request_id}")
-                elif event.type == "turn.start":
-                    print("Turn started")
-                elif event.type == "turn.update":
-                    print(f"  {event.transcript}")
-                elif event.type == "turn.eager_end":
-                    print(f"[preview] Eager end: {event.transcript!r}")
-                elif event.type == "turn.resume":
-                    print("[preview] Turn resumed")
-                elif event.type == "turn.end":
-                    print(f"Turn ended: {event.transcript!r}")
-                elif event.type == "error":
-                    print(f"Error: {event.title}: {event.message}")
-
-        await asyncio.gather(send_audio(), receive_events())
-
-
-async def stt_external_vad_websocket_async(client: AsyncCartesia, *args: str) -> None:
-    """Async realtime STT without turn detection (push-to-talk style).
-
-    You control when the model emits transcripts by sending `finalize`.
-    Transcript events are deltas — concatenate `text` from `is_final` events
-    (without stripping whitespace) to assemble the full transcript.
-
-    Pass a mono uncompressed PCM WAV file (16-bit or 32-bit) as an argument,
-    or call with no args to synthesize sample audio via TTS.
-    """
-    import sys
-    import wave
-    import asyncio
-
-    from cartesia.types import STTEncoding, RawOutputFormatParam
-
-    encoding: STTEncoding
-    sample_rate: int
     chunks: list[bytes]
     if args:
         with wave.open(args[0], "rb") as wf:
@@ -602,40 +559,127 @@ async def stt_external_vad_websocket_async(client: AsyncCartesia, *args: str) ->
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
-    transcript = ""
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
+    full_transcript = ""
 
-    async with client.stt.external_vad.websocket(
+    async with client.stt.auto_finalize.websocket(
         encoding=encoding,
-        model="ink-whisper",
+        model="ink-2",
         sample_rate=sample_rate,
     ) as connection:
 
         async def send_audio() -> None:
             for chunk in chunks:
                 await connection.send_raw(chunk)
+                # Pace at real-time (100ms per chunk)
                 await asyncio.sleep(0.1)
-            # Trigger transcription of buffered audio, then close cleanly.
-            await connection.send("finalize")
-            await connection.send("close")
+            # Flush remaining audio and close the session.
+            await connection.send({"type": "close"})
 
         async def receive_events() -> None:
-            nonlocal transcript
             async for event in connection:
-                if event.type == "transcript":
-                    label = "final" if event.is_final else "interim"
-                    print(f"[{label}] {event.text!r}")
-                    if event.is_final:
-                        transcript += event.text
-                elif event.type == "flush_done":
-                    print("Flush acknowledged")
-                elif event.type == "done":
-                    print("Connection closing")
+                if event.type == "connected":
+                    print(f"connected      | request_id={event.request_id}")
+                elif event.type == "turn.start":
+                    print("turn.start     |")
+                elif event.type == "turn.update":
+                    # event.transcript is cumulative within a turn.
+                    print(f"turn.update    | {event.transcript}")
+                elif event.type == "turn.eager_end":
+                    print(f"turn.eager_end | {event.transcript}")
+                elif event.type == "turn.resume":
+                    print("turn.resume     |")
+                elif event.type == "turn.end":
+                    print(f"turn.end       | {event.transcript}")
+                    nonlocal full_transcript
+                    full_transcript += event.transcript
                 elif event.type == "error":
-                    print(f"Error: {event.title}: {event.message}")
+                    print(f"error          | {event.message}")
 
         await asyncio.gather(send_audio(), receive_events())
 
-    print(f"\nFull transcript: {transcript!r}")
+        print(f"\nFull transcript: {full_transcript!r}")
+
+
+async def stt_manual_finalize_websocket_async(client: AsyncCartesia, *args: str) -> None:
+    """Async realtime STT (manual finalize): recommended for push-to-talk apps.
+
+    Generates test audio via TTS, pushes it into the STT WebSocket in real-time
+    100ms chunks, then sends `finalize` to trigger transcription of the buffered
+    audio. Sends audio and receives events concurrently via ``asyncio.gather``.
+
+    You control when the model emits transcripts by sending `finalize`.
+    Transcript events are deltas — concatenate `text` from `is_final` events
+    (without stripping whitespace) to assemble the full transcript.
+
+    Pass the transcript to synthesize as arguments, or call with no args to use
+    a default sample transcript.
+    """
+    import re
+    import asyncio
+    from typing_extensions import Literal
+
+    encoding: Literal["pcm_s16le"] = "pcm_s16le"
+    sample_rate: Literal[16000] = 16000
+
+    input_text = (
+        " ".join(args)
+        if args
+        else "The quick brown fox jumps over the lazy dog. Sandy sells seashells on the sea shore."
+    )
+    print(f"Generating audio for: {input_text!r}")
+
+    full_transcript = ""
+
+    async with client.stt.manual_finalize.websocket(
+        encoding=encoding,
+        model="ink-2",
+        sample_rate=sample_rate,
+    ) as connection:
+
+        async def generate_audio_and_push(utterance: str) -> None:
+            tts_response = await client.tts.generate(
+                model_id="sonic-latest",
+                transcript=utterance,
+                voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+                output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
+                language="en",
+            )
+            audio = await tts_response.read()
+            chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
+            for i in range(0, len(audio), chunk_bytes):
+                await connection.send_raw(audio[i : i + chunk_bytes])
+                await asyncio.sleep(0.1)  # each chunk is 100ms of audio — pace sends to match real time
+            # Triggers transcription of buffered audio.
+            await connection.send("finalize")
+
+        async def send_audio() -> None:
+            # Split the transcript on full stops to simulate multiple user utterances.
+            # In a real app you would run voice activity detection (VAD) on the user's
+            # audio stream to decide when to send the `finalize` command.
+            for utterance in (u for u in input_text.split(".") if re.search(r"\w", u)):
+                await generate_audio_and_push(utterance)
+            # Flush remaining audio, get a `done` ack, then close the socket.
+            await connection.send("close")
+
+        async def receive_events() -> None:
+            nonlocal full_transcript
+            async for event in connection:
+                if event.type == "transcript":
+                    if event.is_final:
+                        print(f"transcript | {event.text}")
+                        full_transcript += event.text
+                elif event.type == "flush_done":
+                    print("flush_done |")
+                elif event.type == "done":
+                    print("done       |")
+                elif event.type == "error":
+                    print(f"error    | {event.message}")
+
+        await asyncio.gather(send_audio(), receive_events())
+
+    print(f"\nFull transcript: {full_transcript!r}")
 
 
 # =============================================================================

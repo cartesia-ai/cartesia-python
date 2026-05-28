@@ -1,6 +1,6 @@
 [project]
 name = "cartesia"
-version = "3.2.0-b1"
+version = "3.2.0"
 description = "The official Python library for the cartesia API"
 dynamic = ["readme"]
 license = "Apache-2.0"
@@ -57,7 +57,7 @@ conflicts = [
 [dependency-groups]
 # version pins are in uv.lock
 dev = [
-    "pyright==1.1.399",
+    "pyright==1.1.409",
     "mypy==1.17",
     "respx",
     "pytest",

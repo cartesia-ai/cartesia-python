@@ -606,17 +606,42 @@ def infill_create(client: Cartesia, *args: str) -> None:
 
 
 def stt_transcribe(client: Cartesia, *args: str) -> None:
-    """Transcribe audio with word timestamps."""
-    import sys
+    """Transcribe an audio file with word timestamps.
 
-    if not args:
-        print("Usage: stt_transcribe <file_path>")
-        sys.exit(1)
-    with open(args[0], "rb") as f:
+    Pass a path to an audio file, or omit it to generate a sample WAV via TTS.
+    """
+    import datetime
+
+    def generate_sample_wav() -> tuple[str, str]:
+        transcript = "The quick brown fox jumps over the lazy dog."
+        language = "en"
+        print(f"No audio file provided. Generating a sample for: {transcript!r}")
+        response = client.tts.generate(
+            model_id="sonic-latest",
+            transcript=transcript,
+            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 16000},
+            language=language,
+        )
+        path = f"stt_sample_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+        response.write_to_file(path)
+        print(f"Saved sample audio to {path}")
+        return path, language
+
+    if args:
+        if len(args) < 2:
+            print("Usage: stt_transcribe <audio_file> <language_code>")
+            print("Example: stt_transcribe my_audio.wav en")
+            sys.exit(1)
+        file_path, language = args
+    else:
+        file_path, language = generate_sample_wav()
+
+    with open(file_path, "rb") as f:
         response = client.stt.transcribe(
             file=f,
             model="ink-whisper",
-            language="en",
+            language=language,
             timestamp_granularities=["word"],  # Optional: get word timestamps
         )
     print(response.text)
@@ -625,7 +650,7 @@ def stt_transcribe(client: Cartesia, *args: str) -> None:
             print(f"{word.word}: {word.start}s - {word.end}s")
 
 
-def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
+def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
     """Realtime STT with native turn detection (recommended for voice agents).
 
     The model signals when a user turn starts and ends, so your agent reacts
@@ -669,11 +694,11 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
         output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
         encoding = output_format["encoding"]
         sample_rate = output_format["sample_rate"]
-        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
-        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
+        generation_transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
+        print(f"No WAV file provided — synthesizing audio with TTS: {generation_transcript!r}")
         audio = client.tts.generate(
             model_id="sonic-latest",
-            transcript=transcript,
+            transcript=generation_transcript,
             voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
             output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
             language="en",
@@ -681,7 +706,11 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
-    with client.stt.turn_detecting.websocket(
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
+    full_transcript = ""
+
+    with client.stt.auto_finalize.websocket(
         encoding=encoding,
         model="ink-2",
         sample_rate=sample_rate,
@@ -695,107 +724,97 @@ def stt_turn_detecting_websocket(client: Cartesia, *args: str) -> None:
 
         for event in connection:
             if event.type == "connected":
-                print(f"Connected: {event.request_id}")
+                print(f"connected      | request_id={event.request_id}")
             elif event.type == "turn.start":
-                print("Turn started")
+                print("turn.start     |")
             elif event.type == "turn.update":
                 # event.transcript is cumulative within a turn.
-                print(f"  {event.transcript}")
+                print(f"turn.update    | {event.transcript}")
             elif event.type == "turn.eager_end":
-                print(f"[preview] Eager end: {event.transcript!r}")
+                print(f"turn.eager_end | {event.transcript}")
             elif event.type == "turn.resume":
-                print("[preview] Turn resumed")
+                print("turn.resume     |")
             elif event.type == "turn.end":
-                print(f"Turn ended: {event.transcript!r}")
+                print(f"turn.end       | {event.transcript}")
+                full_transcript += event.transcript
             elif event.type == "error":
-                print(f"Error: {event.title}: {event.message}")
+                print(f"error          | {event.message}")
+
+        print(f"\nFull transcript: {full_transcript!r}")
 
 
-def stt_external_vad_websocket(client: Cartesia, *args: str) -> None:
-    """Realtime STT without turn detection (push-to-talk style).
+def stt_manual_finalize_websocket(client: Cartesia, *args: str) -> None:
+    """Realtime STT (manual finalize): recommended for push-to-talk apps.
+
+    Generates test audio via TTS, pushes it into the STT WebSocket in real-time
+    100ms chunks, then sends `finalize` to trigger transcription of the buffered
+    audio.
 
     You control when the model emits transcripts by sending `finalize`.
     Transcript events are deltas — concatenate `text` from `is_final` events
     (without stripping whitespace) to assemble the full transcript.
 
-    Pass a mono uncompressed PCM WAV file (16-bit or 32-bit) as an argument,
-    or call with no args to synthesize sample audio via TTS.
+    Pass the transcript to synthesize as arguments, or call with no args to use
+    a default sample transcript.
     """
-    import sys
+    import re
     import time
-    import wave
+    from typing_extensions import Literal
 
-    from cartesia.types import STTEncoding, RawOutputFormatParam
+    encoding: Literal["pcm_s16le"] = "pcm_s16le"
+    sample_rate: Literal[16000] = 16000
 
-    encoding: STTEncoding
-    chunks: list[bytes]
-    if args:
-        with wave.open(args[0], "rb") as wf:
-            if wf.getnchannels() != 1:
-                print(f"Error: WAV must be mono, got {wf.getnchannels()} channels.")
-                sys.exit(1)
-            if wf.getcomptype() != "NONE":
-                print(f"Error: WAV must be uncompressed PCM, got {wf.getcomptype()!r}.")
-                sys.exit(1)
-            sample_width = wf.getsampwidth()
-            if sample_width == 2:
-                encoding = "pcm_s16le"
-            elif sample_width == 4:
-                encoding = "pcm_s16le"
-            else:
-                print(f"Error: unsupported sample width {sample_width} bytes (expected 2 or 4).")
-                sys.exit(1)
-            sample_rate = wf.getframerate()
-            chunks = []
-            while True:
-                data = wf.readframes(sample_rate // 10)  # 100ms per chunk
-                if not data:
-                    break
-                chunks.append(data)
-    else:
-        output_format: RawOutputFormatParam = {"container": "raw", "encoding": "pcm_s16le", "sample_rate": 16000}
-        encoding = output_format["encoding"]
-        sample_rate = output_format["sample_rate"]
-        transcript = "Hello, world! The quick brown fox jumps over the lazy dog."
-        print(f"No WAV file provided — synthesizing audio with TTS: {transcript!r}")
-        audio = client.tts.generate(
-            model_id="sonic-latest",
-            transcript=transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
-            output_format=output_format,
-            language="en",
-        ).read()
-        chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
-        chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
+    input_text = (
+        " ".join(args)
+        if args
+        else "The quick brown fox jumps over the lazy dog. Sandy sells seashells on the sea shore."
+    )
+    print(f"Generating audio for: {input_text!r}")
 
-    with client.stt.external_vad.websocket(
+    with client.stt.manual_finalize.websocket(
         encoding=encoding,
-        model="ink-whisper",
+        model="ink-2",
         sample_rate=sample_rate,
     ) as connection:
-        for chunk in chunks:
-            connection.send_raw(chunk)
-            time.sleep(0.1)  # each chunk is 100ms of audio — pace sends to match real time
 
-        # Trigger transcription of buffered audio, then close cleanly.
-        connection.send("finalize")
+        def generate_audio_and_push(utterance: str) -> None:
+            audio = client.tts.generate(
+                model_id="sonic-latest",
+                transcript=utterance,
+                voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+                output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
+                language="en",
+            ).read()
+            chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
+            for i in range(0, len(audio), chunk_bytes):
+                connection.send_raw(audio[i : i + chunk_bytes])
+                time.sleep(0.1)  # each chunk is 100ms of audio — pace sends to match real time
+            # Triggers transcription of buffered audio.
+            connection.send("finalize")
+
+        # Split the transcript on full stops to simulate multiple user utterances.
+        # In a real app you would run voice activity detection (VAD) on the user's
+        # audio stream to decide when to send the `finalize` command.
+        for utterance in (u for u in input_text.split(".") if re.search(r"\w", u)):
+            generate_audio_and_push(utterance)
+
+        # Flush remaining audio, get a `done` ack, then close the socket.
         connection.send("close")
 
-        transcript = ""
+        full_transcript = ""
         for event in connection:
             if event.type == "transcript":
-                label = "final" if event.is_final else "interim"
-                print(f"[{label}] {event.text!r}")
                 if event.is_final:
-                    transcript += event.text
+                    print(f"transcript | {event.text}")
+                    full_transcript += event.text
             elif event.type == "flush_done":
-                print("Flush acknowledged")
+                print("flush_done |")
             elif event.type == "done":
-                print("Connection closing")
+                print("done       |")
             elif event.type == "error":
-                print(f"Error: {event.title}: {event.message}")
+                print(f"error    | {event.message}")
 
-        print(f"\nFull transcript: {transcript!r}")
+        print(f"\nFull transcript: {full_transcript!r}")
 
 
 # =============================================================================

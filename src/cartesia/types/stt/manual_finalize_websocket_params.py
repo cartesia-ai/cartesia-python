@@ -5,20 +5,19 @@ from __future__ import annotations
 from typing_extensions import Literal, Required, TypedDict
 
 from ..stt_encoding import STTEncoding
-from .stt_realtime_external_vad_model import STTRealtimeExternalVADModel
+from .stt_manual_finalize_model import STTManualFinalizeModel
 
-__all__ = ["ExternalVADWebsocketParams"]
+__all__ = ["ManualFinalizeWebsocketParams"]
 
 
-class ExternalVADWebsocketParams(TypedDict, total=False):
+class ManualFinalizeWebsocketParams(TypedDict, total=False):
     encoding: Required[STTEncoding]
     """The encoding format for audio data sent to the STT WebSocket."""
 
-    model: Required[STTRealtimeExternalVADModel]
+    model: Required[STTManualFinalizeModel]
     """
-    Models that support realtime speech-to-text with external VAD (voice activity
-    detection). This mode expects you to send the `finalize` command to trigger
-    transcription. See
+    Models that support realtime speech-to-text (manual finalize). This mode expects
+    you to send the `finalize` command to trigger transcription. See
     [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
     all options.
     """
