@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.2.0 (2026-05-28)
+
+Full Changelog: [v3.2.0-b1...v3.2.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.2.0-b1...v3.2.0)
+
+### Bug Fixes
+
+* **stt:** correct transcribe params ([5a0be8e](https://github.com/cartesia-ai/cartesia-python/commit/5a0be8ea4c1a6842d61d8bfed4efc9248e3f1d4d))
+
+
+### Documentation
+
+* **stt:** improve examples ([5764f51](https://github.com/cartesia-ai/cartesia-python/commit/5764f5135b4a6a6a0b8b7cb0ee1cce22ae8c60f9))
+
+
+### Refactors
+
+* **stt:** fix errors from refactor ([69b0f2c](https://github.com/cartesia-ai/cartesia-python/commit/69b0f2cbe3858710bf3e82cb4b48da0170c35197))
+* **stt:** rename external vad to manual finalize ([b757bc5](https://github.com/cartesia-ai/cartesia-python/commit/b757bc585a4d1c04303ac9bbcddbc8faaee2a7b5))
+
 ## 3.2.0-b1 (2026-05-25)
 
 Full Changelog: [v3.1.0...v3.2.0-b1](https://github.com/cartesia-ai/cartesia-python/compare/v3.1.0...v3.2.0-b1)
