@@ -4,10 +4,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["STTExternalVADFlushDoneResponse"]
+__all__ = ["STTManualFinalizeFlushDoneResponse"]
 
 
-class STTExternalVADFlushDoneResponse(BaseModel):
+class STTManualFinalizeFlushDoneResponse(BaseModel):
     """
     Acknowledgment that buffered audio has been processed in response to a `finalize` command.
     """

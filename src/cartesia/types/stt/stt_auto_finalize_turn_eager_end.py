@@ -4,20 +4,17 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["STTTurnsTurnUpdate"]
+__all__ = ["STTAutoFinalizeTurnEagerEnd"]
 
 
-class STTTurnsTurnUpdate(BaseModel):
-    """Fires repeatedly as the model transcribes the current user turn."""
+class STTAutoFinalizeTurnEagerEnd(BaseModel):
+    """[PREVIEW] Fires when the model predicts that the user might be done speaking."""
 
     request_id: str
     """Unique identifier for this connection. Does not change between turns."""
 
     transcript: str
-    """Cumulative text for the current turn, i.e.
+    """Cumulative text for the current turn."""
 
-    the full text transcribed so far in this turn, not a delta.
-    """
-
-    type: Literal["turn.update"]
+    type: Literal["turn.eager_end"]
     """Event type identifier."""

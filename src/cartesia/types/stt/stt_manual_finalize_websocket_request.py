@@ -2,6 +2,6 @@
 
 from typing_extensions import Literal, TypeAlias
 
-__all__ = ["STTExternalVADWebsocketRequest"]
+__all__ = ["STTManualFinalizeWebsocketRequest"]
 
-STTExternalVADWebsocketRequest: TypeAlias = Literal["finalize", "close"]
+STTManualFinalizeWebsocketRequest: TypeAlias = Literal["finalize", "close"]

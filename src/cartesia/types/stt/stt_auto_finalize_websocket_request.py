@@ -1,19 +1,19 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from __future__ import annotations
+from typing_extensions import Literal
 
-from typing_extensions import Literal, Required, TypedDict
+from ..._models import BaseModel
 
-__all__ = ["STTTurnsWebsocketRequestParam"]
+__all__ = ["STTAutoFinalizeWebsocketRequest"]
 
 
-class STTTurnsWebsocketRequestParam(TypedDict, total=False):
+class STTAutoFinalizeWebsocketRequest(BaseModel):
     """Sent as a JSON-encoded WebSocket text frame to close the session cleanly.
 
     All buffered audio will be processed by the model into events before the connection closes.
     """
 
-    type: Required[Literal["close"]]
+    type: Literal["close"]
     """Command type.
 
     Send this as a JSON-encoded WebSocket text frame to close the session.

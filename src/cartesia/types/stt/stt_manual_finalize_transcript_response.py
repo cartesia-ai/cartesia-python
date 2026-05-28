@@ -6,10 +6,10 @@ from typing_extensions import Literal
 from ..._models import BaseModel
 from ..shared.word_timestamps import WordTimestamps
 
-__all__ = ["STTExternalVADTranscriptResponse"]
+__all__ = ["STTManualFinalizeTranscriptResponse"]
 
 
-class STTExternalVADTranscriptResponse(BaseModel):
+class STTManualFinalizeTranscriptResponse(BaseModel):
     """A transcript chunk."""
 
     is_final: bool

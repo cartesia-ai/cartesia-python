@@ -4,10 +4,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["STTTurnsConnected"]
+__all__ = ["STTAutoFinalizeConnected"]
 
 
-class STTTurnsConnected(BaseModel):
+class STTAutoFinalizeConnected(BaseModel):
     """Fires once when the WebSocket connection is established.
 
     You do not need to wait for this event before sending audio.
