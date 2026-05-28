@@ -60,7 +60,7 @@ async def test_async_tts_websocket_extra_query_omits_values(
     assert dict(captured_url.params) == {"keep": "1"}
 
 
-def test_stt_external_vad_websocket_query_omits_values(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_stt_manual_finalize_websocket_query_omits_values(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured_url: httpx.URL | None = None
 
     def fake_connect(uri: str, *_args: Any, **_kwargs: Any) -> object:
@@ -70,7 +70,7 @@ def test_stt_external_vad_websocket_query_omits_values(client: Cartesia, monkeyp
 
     monkeypatch.setattr("websockets.sync.client.connect", fake_connect)
 
-    client.stt.external_vad.websocket(
+    client.stt.manual_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -86,7 +86,7 @@ def test_stt_external_vad_websocket_query_omits_values(client: Cartesia, monkeyp
     }
 
 
-async def test_async_stt_external_vad_websocket_query_omits_values(
+async def test_async_stt_manual_finalize_websocket_query_omits_values(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured_url: httpx.URL | None = None
@@ -98,7 +98,7 @@ async def test_async_stt_external_vad_websocket_query_omits_values(
 
     monkeypatch.setattr("websockets.asyncio.client.connect", fake_connect)
 
-    await async_client.stt.external_vad.websocket(
+    await async_client.stt.manual_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -114,7 +114,7 @@ async def test_async_stt_external_vad_websocket_query_omits_values(
     }
 
 
-def test_stt_turn_detecting_websocket_query_omits_values(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_stt_auto_finalize_websocket_query_omits_values(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured_url: httpx.URL | None = None
 
     def fake_connect(uri: str, *_args: Any, **_kwargs: Any) -> object:
@@ -124,7 +124,7 @@ def test_stt_turn_detecting_websocket_query_omits_values(client: Cartesia, monke
 
     monkeypatch.setattr("websockets.sync.client.connect", fake_connect)
 
-    client.stt.turn_detecting.websocket(
+    client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -140,7 +140,7 @@ def test_stt_turn_detecting_websocket_query_omits_values(client: Cartesia, monke
     }
 
 
-async def test_async_stt_turn_detecting_websocket_query_omits_values(
+async def test_async_stt_auto_finalize_websocket_query_omits_values(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured_url: httpx.URL | None = None
@@ -152,7 +152,7 @@ async def test_async_stt_turn_detecting_websocket_query_omits_values(
 
     monkeypatch.setattr("websockets.asyncio.client.connect", fake_connect)
 
-    await async_client.stt.turn_detecting.websocket(
+    await async_client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,

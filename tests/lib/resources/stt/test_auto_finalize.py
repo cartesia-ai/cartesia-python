@@ -11,7 +11,7 @@ from websockets.exceptions import ConnectionClosedError
 from cartesia import Cartesia, AsyncCartesia
 from cartesia._exceptions import CartesiaError, WebSocketConnectionClosedError
 from cartesia.types.websocket_reconnection import ReconnectingOverrides
-from cartesia.types.stt.stt_turns_websocket_request import STTTurnsWebsocketRequest
+from cartesia.types.stt.stt_auto_finalize_websocket_request import STTAutoFinalizeWebsocketRequest
 
 from ._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
@@ -27,7 +27,7 @@ def _err_close(code: int = 1006, reason: str = "boom") -> ConnectionClosedError:
 
 def test_websocket_url_uses_turns_path(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
-    client.stt.turn_detecting.websocket(
+    client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -45,14 +45,14 @@ def test_websocket_url_uses_turns_path(client: Cartesia, monkeypatch: pytest.Mon
 def test_websocket_url_uses_wss_scheme_for_https_base(monkeypatch: pytest.MonkeyPatch) -> None:
     with Cartesia(base_url="https://example.com/api", token="t", _strict_response_validation=False) as c:
         captured = install_sync_connect(monkeypatch, FakeSyncWS)
-        c.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+        c.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
         assert captured["calls"][0]["url"].scheme == "wss"
 
 
 def test_websocket_url_uses_ws_scheme_for_http_base(monkeypatch: pytest.MonkeyPatch) -> None:
     with Cartesia(base_url="http://example.com/api", token="t", _strict_response_validation=False) as c:
         captured = install_sync_connect(monkeypatch, FakeSyncWS)
-        c.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+        c.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
         assert captured["calls"][0]["url"].scheme == "ws"
 
 
@@ -64,7 +64,7 @@ def test_websocket_url_uses_explicit_websocket_base_url(monkeypatch: pytest.Monk
         _strict_response_validation=False,
     ) as c:
         captured = install_sync_connect(monkeypatch, FakeSyncWS)
-        c.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+        c.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
         url = captured["calls"][0]["url"]
         assert url.host == "ws.example.com"
         assert url.scheme == "wss"
@@ -73,7 +73,7 @@ def test_websocket_url_uses_explicit_websocket_base_url(monkeypatch: pytest.Monk
 
 def test_websocket_passes_auth_and_user_agent_headers(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
-    client.stt.turn_detecting.websocket(
+    client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -89,7 +89,7 @@ def test_websocket_passes_auth_and_user_agent_headers(client: Cartesia, monkeypa
 
 def test_websocket_connection_options_threaded_to_connect(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
-    client.stt.turn_detecting.websocket(
+    client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -102,7 +102,7 @@ async def test_async_websocket_url_uses_turns_path(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured = install_async_connect(monkeypatch, FakeAsyncWS)
-    await async_client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    await async_client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     url = captured["calls"][0]["url"]
     assert url.path.endswith("/stt/turns/websocket")
     assert dict(url.params) == {
@@ -119,9 +119,9 @@ async def test_async_websocket_url_uses_turns_path(
 
 def test_manager_send_queued_pre_enter_is_flushed_on_enter(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
-    manager = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
     manager.send({"type": "close"})
-    manager.send(STTTurnsWebsocketRequest(type="close"))
+    manager.send(STTAutoFinalizeWebsocketRequest(type="close"))
     manager.enter()
     ws: FakeSyncWS = captured["last_ws"]
     assert len(ws.sent) == 2
@@ -131,7 +131,7 @@ def test_manager_send_queued_pre_enter_is_flushed_on_enter(client: Cartesia, mon
 
 def test_manager_on_handlers_transfer_to_connection_on_enter(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    manager = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
 
     def _h(event: Any) -> None: ...
 
@@ -141,7 +141,7 @@ def test_manager_on_handlers_transfer_to_connection_on_enter(client: Cartesia, m
 
 
 def test_manager_on_method_form_returns_self_for_chaining(client: Cartesia) -> None:
-    manager = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
 
     def handler(event: Any) -> None: ...
 
@@ -151,7 +151,7 @@ def test_manager_on_method_form_returns_self_for_chaining(client: Cartesia) -> N
 
 
 def test_manager_once_decorator_form_returns_fn(client: Cartesia) -> None:
-    manager = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
 
     decorator = manager.once("turn.end")
     assert callable(decorator)
@@ -166,7 +166,7 @@ async def test_async_manager_send_queued_pre_enter_is_flushed_on_enter(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured = install_async_connect(monkeypatch, FakeAsyncWS)
-    manager = async_client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = async_client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
     manager.send({"type": "close"})
     await manager.enter()
     ws: FakeAsyncWS = captured["last_ws"]
@@ -187,7 +187,7 @@ _ERROR_PAYLOAD = json.dumps({"type": "error", "message": "kaboom"})
 
 def test_parse_event_round_trips_all_turn_event_types(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     assert conn.parse_event(_CONNECTED_PAYLOAD).type == "connected"
     assert conn.parse_event(_TURN_START_PAYLOAD).type == "turn.start"
     update = conn.parse_event(_TURN_UPDATE_PAYLOAD)
@@ -203,7 +203,7 @@ def test_recv_and_recv_bytes_pull_from_underlying_ws(client: Cartesia, monkeypat
         return FakeSyncWS().queue(_CONNECTED_PAYLOAD, _TURN_START_PAYLOAD)
 
     install_sync_connect(monkeypatch, factory)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     raw = conn.recv_bytes()
     assert raw == _CONNECTED_PAYLOAD.encode("utf-8")
     event = conn.recv()
@@ -217,7 +217,7 @@ async def test_async_recv_pulls_from_underlying_ws(
         return FakeAsyncWS().queue(_TURN_END_PAYLOAD)
 
     install_async_connect(monkeypatch, factory)
-    conn = await async_client.stt.turn_detecting.websocket(
+    conn = await async_client.stt.auto_finalize.websocket(
         encoding="pcm_s16le", model="ink-2", sample_rate=16_000
     ).enter()
     event = await conn.recv()
@@ -231,18 +231,20 @@ async def test_async_recv_pulls_from_underlying_ws(
 
 def test_send_serializes_base_model_with_api_names(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    manager = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
+    manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
     conn = manager.enter()
-    conn.send(STTTurnsWebsocketRequest(type="close"))
+    conn.send(STTAutoFinalizeWebsocketRequest(type="close"))
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
     assert ws.sent == [
-        STTTurnsWebsocketRequest(type="close").to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
+        STTAutoFinalizeWebsocketRequest(type="close").to_json(
+            use_api_names=True, exclude_defaults=True, exclude_unset=True
+        )
     ]
 
 
 def test_send_serializes_typed_dict_to_json(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     conn.send({"type": "close"})
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
     assert ws.sent == [json.dumps({"type": "close"})]
@@ -250,7 +252,7 @@ def test_send_serializes_typed_dict_to_json(client: Cartesia, monkeypatch: pytes
 
 def test_send_queues_message_when_reconnecting(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     conn._is_reconnecting = True
     conn.send({"type": "close"})
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
@@ -265,7 +267,7 @@ def test_send_requeues_and_reraises_on_failure(client: Cartesia, monkeypatch: py
             raise RuntimeError("nope")
 
     install_sync_connect(monkeypatch, BoomWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     with pytest.raises(RuntimeError, match="nope"):
         conn.send({"type": "close"})
     assert len(conn._send_queue) == 1
@@ -273,7 +275,7 @@ def test_send_requeues_and_reraises_on_failure(client: Cartesia, monkeypatch: py
 
 def test_send_raw_passes_through_when_connected(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     conn.send_raw(b"raw-bytes")
     conn.send_raw("raw-str")
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
@@ -282,7 +284,7 @@ def test_send_raw_passes_through_when_connected(client: Cartesia, monkeypatch: p
 
 def test_send_raw_queues_string_form_when_reconnecting(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     conn._is_reconnecting = True
     conn.send_raw(b"raw-bytes")
     assert len(conn._send_queue) == 1
@@ -298,7 +300,7 @@ async def test_async_send_queues_during_reconnect_and_flushes_on_reconnect_succe
     factories = iter([first, second])
     install_async_connect(monkeypatch, lambda: next(factories))
 
-    conn = await async_client.stt.turn_detecting.websocket(
+    conn = await async_client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -326,7 +328,7 @@ async def test_async_send_queues_during_reconnect_and_flushes_on_reconnect_succe
 
 def test_close_marks_intentional_and_passes_through(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     conn.close(code=4242, reason="bye")
     assert conn._intentionally_closed is True
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
@@ -335,7 +337,7 @@ def test_close_marks_intentional_and_passes_through(client: Cartesia, monkeypatc
 
 def test_manager_context_exit_closes_connection(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    with client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000) as conn:
+    with client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000) as conn:
         ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
     assert ws.closed is True
 
@@ -344,7 +346,7 @@ async def test_async_manager_context_exit_closes_connection(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     install_async_connect(monkeypatch, FakeAsyncWS)
-    async with async_client.stt.turn_detecting.websocket(
+    async with async_client.stt.auto_finalize.websocket(
         encoding="pcm_s16le", model="ink-2", sample_rate=16_000
     ) as conn:
         ws: FakeAsyncWS = conn._connection  # type: ignore[assignment]
@@ -361,7 +363,7 @@ def test_iter_yields_events_until_clean_close(client: Cartesia, monkeypatch: pyt
         monkeypatch,
         lambda: FakeSyncWS().queue(_CONNECTED_PAYLOAD, _TURN_END_PAYLOAD),
     )
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     events = list(conn)
     assert [e.type for e in events] == ["connected", "turn.end"]
 
@@ -377,7 +379,7 @@ def test_iter_reconnects_on_recoverable_close(client: Cartesia, monkeypatch: pyt
     def on_reconnect(event: Any) -> None:
         seen_events.append(event)
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -408,7 +410,7 @@ def test_iter_raises_websocket_closed_with_unsent_messages_when_reconnect_fails(
 
     install_sync_connect(monkeypatch, factory)
 
-    manager = client.stt.turn_detecting.websocket(
+    manager = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -441,7 +443,7 @@ def test_iter_reraises_when_reconnect_fails_with_empty_queue(client: Cartesia, m
 
     install_sync_connect(monkeypatch, factory)
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -457,7 +459,7 @@ def test_iter_reraises_when_reconnect_fails_with_empty_queue(client: Cartesia, m
 
 def test_reconnect_returns_false_without_on_reconnecting(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     # The connection manager only forwards `make_ws` when on_reconnecting is set,
     # so without it, _reconnect should bail immediately.
     assert conn._reconnect(_err_close()) is False
@@ -465,7 +467,7 @@ def test_reconnect_returns_false_without_on_reconnecting(client: Cartesia, monke
 
 def test_reconnect_returns_false_on_non_recoverable_close(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -481,7 +483,7 @@ def test_reconnect_returns_false_when_handler_aborts(client: Cartesia, monkeypat
     def on_reconnect(_event: Any) -> ReconnectingOverrides:
         return {"abort": True}
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -498,7 +500,7 @@ def test_reconnect_returns_false_when_handler_raises(client: Cartesia, monkeypat
     def raises(_evt: Any) -> None:
         raise ValueError("user code blew up")
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -518,7 +520,7 @@ def test_reconnect_applies_overrides_from_handler(client: Cartesia, monkeypatch:
     def handler(_evt: Any) -> ReconnectingOverrides:
         return {"extra_query": {"reauth": "1"}, "extra_headers": {"X-New": "yes"}}
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -540,7 +542,7 @@ def test_reconnect_bails_if_intentionally_closed_during_delay(
 ) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
 
-    conn = client.stt.turn_detecting.websocket(
+    conn = client.stt.auto_finalize.websocket(
         encoding="pcm_s16le",
         model="ink-2",
         sample_rate=16_000,
@@ -549,7 +551,7 @@ def test_reconnect_bails_if_intentionally_closed_during_delay(
         max_delay=0,
     ).enter()
 
-    import cartesia.resources.stt.turn_detecting as module
+    import cartesia.resources.stt.auto_finalize as module
 
     def fake_sleep(_delay: float) -> None:
         conn._intentionally_closed = True
@@ -565,7 +567,7 @@ def test_reconnect_bails_if_intentionally_closed_during_delay(
 
 def test_dispatch_events_calls_specific_and_generic_handlers(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, lambda: FakeSyncWS().queue(_CONNECTED_PAYLOAD, _TURN_END_PAYLOAD))
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     seen: List[str] = []
 
     def on_specific(event: Any) -> None:
@@ -587,7 +589,7 @@ def test_dispatch_events_raises_cartesia_error_on_unhandled_error_event(
     client: Cartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     install_sync_connect(monkeypatch, lambda: FakeSyncWS().queue(_ERROR_PAYLOAD))
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     with pytest.raises(CartesiaError):
         conn.dispatch_events()
 
@@ -596,7 +598,7 @@ def test_dispatch_events_does_not_raise_when_error_handler_registered(
     client: Cartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     install_sync_connect(monkeypatch, lambda: FakeSyncWS().queue(_ERROR_PAYLOAD))
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
     seen: List[Any] = []
 
     def handler(event: Any) -> None:
@@ -611,7 +613,7 @@ async def test_async_dispatch_events_awaits_coroutine_handlers(
     async_client: AsyncCartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     install_async_connect(monkeypatch, lambda: FakeAsyncWS().queue(_TURN_END_PAYLOAD))
-    conn = await async_client.stt.turn_detecting.websocket(
+    conn = await async_client.stt.auto_finalize.websocket(
         encoding="pcm_s16le", model="ink-2", sample_rate=16_000
     ).enter()
     seen: List[Any] = []
@@ -631,7 +633,7 @@ async def test_async_dispatch_events_awaits_coroutine_handlers(
 
 def test_connection_on_method_form_returns_self(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
 
     def handler(event: Any) -> None: ...
 
@@ -641,7 +643,7 @@ def test_connection_on_method_form_returns_self(client: Cartesia, monkeypatch: p
 
 def test_connection_on_decorator_form_returns_callable(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
 
     decorator = conn.on("turn.start")
     assert callable(decorator)
@@ -657,7 +659,7 @@ def test_connection_once_handler_is_removed_after_first_dispatch(
     client: Cartesia, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     install_sync_connect(monkeypatch, lambda: FakeSyncWS().queue(_TURN_END_PAYLOAD, _TURN_END_PAYLOAD))
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
 
     seen: List[Any] = []
 
@@ -673,7 +675,7 @@ def test_connection_once_handler_is_removed_after_first_dispatch(
 
 def test_connection_off_removes_handler(client: Cartesia, monkeypatch: pytest.MonkeyPatch) -> None:
     install_sync_connect(monkeypatch, FakeSyncWS)
-    conn = client.stt.turn_detecting.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
+    conn = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000).enter()
 
     def handler(e: Any) -> None: ...
 

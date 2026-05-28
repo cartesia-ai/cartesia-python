@@ -166,6 +166,7 @@ class STTResource(SyncAPIResource):
             "su",
             "yue",
         ]
+        | str
         | Omit = omit,
         timestamp_granularities: List[Literal["word"]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -378,6 +379,7 @@ class AsyncSTTResource(AsyncAPIResource):
             "su",
             "yue",
         ]
+        | str
         | Omit = omit,
         timestamp_granularities: List[Literal["word"]] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.

@@ -57,7 +57,7 @@ conflicts = [
 [dependency-groups]
 # version pins are in uv.lock
 dev = [
-    "pyright==1.1.399",
+    "pyright==1.1.409",
     "mypy==1.17",
     "respx",
     "pytest",
