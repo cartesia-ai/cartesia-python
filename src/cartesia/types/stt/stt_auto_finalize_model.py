@@ -2,6 +2,6 @@
 
 from typing_extensions import Literal, TypeAlias
 
-__all__ = ["STTExternalVADWebsocketRequest"]
+__all__ = ["STTAutoFinalizeModel"]
 
-STTExternalVADWebsocketRequest: TypeAlias = Literal["finalize", "close"]
+STTAutoFinalizeModel: TypeAlias = Literal["ink-2"]

@@ -180,39 +180,36 @@ Methods:
 
 - <code title="post /stt">client.stt.<a href="./src/cartesia/resources/stt/stt.py">transcribe</a>(\*\*<a href="src/cartesia/types/stt_transcribe_params.py">params</a>) -> <a href="./src/cartesia/types/stt_transcribe_response.py">STTTranscribeResponse</a></code>
 
-## TurnDetecting
+## AutoFinalize
 
 Types:
 
 ```python
 from cartesia.types.stt import (
-    STTRealtimeTurnDetectingModel,
-    STTTurnsCloseCommand,
-    STTTurnsConnected,
-    STTTurnsTurnEagerEnd,
-    STTTurnsTurnEnd,
-    STTTurnsTurnResume,
-    STTTurnsTurnStart,
-    STTTurnsTurnUpdate,
-    STTTurnsWebsocketQueryParams,
-    STTTurnsWebsocketRequest,
-    STTTurnsWebsocketResponse,
+    STTAutoFinalizeConnected,
+    STTAutoFinalizeModel,
+    STTAutoFinalizeTurnEagerEnd,
+    STTAutoFinalizeTurnEnd,
+    STTAutoFinalizeTurnResume,
+    STTAutoFinalizeTurnStart,
+    STTAutoFinalizeTurnUpdate,
+    STTAutoFinalizeWebsocketRequest,
+    STTAutoFinalizeWebsocketResponse,
 )
 ```
 
-## ExternalVAD
+## ManualFinalize
 
 Types:
 
 ```python
 from cartesia.types.stt import (
-    STTExternalVADDoneResponse,
-    STTExternalVADFlushDoneResponse,
-    STTExternalVADQueryParams,
-    STTExternalVADTranscriptResponse,
-    STTExternalVADWebsocketRequest,
-    STTExternalVADWebsocketResponse,
-    STTRealtimeExternalVADModel,
+    STTManualFinalizeDoneResponse,
+    STTManualFinalizeFlushDoneResponse,
+    STTManualFinalizeModel,
+    STTManualFinalizeTranscriptResponse,
+    STTManualFinalizeWebsocketRequest,
+    STTManualFinalizeWebsocketResponse,
 )
 ```
 

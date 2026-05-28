@@ -5,19 +5,19 @@ from __future__ import annotations
 from typing_extensions import Required, TypedDict
 
 from ..stt_encoding import STTEncoding
-from .stt_realtime_turn_detecting_model import STTRealtimeTurnDetectingModel
+from .stt_auto_finalize_model import STTAutoFinalizeModel
 
-__all__ = ["TurnDetectingWebsocketParams"]
+__all__ = ["AutoFinalizeWebsocketParams"]
 
 
-class TurnDetectingWebsocketParams(TypedDict, total=False):
+class AutoFinalizeWebsocketParams(TypedDict, total=False):
     encoding: Required[STTEncoding]
     """The encoding format for audio data sent to the STT WebSocket."""
 
-    model: Required[STTRealtimeTurnDetectingModel]
+    model: Required[STTAutoFinalizeModel]
     """
-    Models that support realtime speech-to-text with turn-detection. This mode
-    detects when the user is speaking and emits turn events. See
+    Models that support realtime speech-to-text (auto finalize). This mode detects
+    when the user is speaking and emits turn events. See
     [the docs](https://docs.cartesia.ai/build-with-cartesia/stt-models/latest) for
     all options.
     """

@@ -2,6 +2,6 @@
 
 from typing_extensions import Literal, TypeAlias
 
-__all__ = ["STTRealtimeTurnDetectingModel"]
+__all__ = ["STTManualFinalizeModel"]
 
-STTRealtimeTurnDetectingModel: TypeAlias = Literal["ink-2"]
+STTManualFinalizeModel: TypeAlias = Literal["ink-2", "ink-whisper", "ink-whisper-2025-06-04"]

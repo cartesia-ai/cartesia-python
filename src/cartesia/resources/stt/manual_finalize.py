@@ -18,7 +18,7 @@ from ..._types import Omit, Query, Headers, omit
 from ..._utils import maybe_transform, async_maybe_transform
 from ..._models import construct_type_unchecked
 from ..._resource import SyncAPIResource, AsyncAPIResource
-from ...types.stt import STTRealtimeExternalVADModel
+from ...types.stt import STTManualFinalizeModel
 from ..._exceptions import CartesiaError, WebSocketConnectionClosedError
 from ..._send_queue import SendQueue
 from ..._base_client import _merge_mappings
@@ -27,9 +27,9 @@ from ...types.stt_encoding import STTEncoding
 from ...types.stt_error_response import STTErrorResponse
 from ...types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ...types.websocket_connection_options import WebSocketConnectionOptions
-from ...types.stt.stt_realtime_external_vad_model import STTRealtimeExternalVADModel
-from ...types.stt.stt_external_vad_websocket_request import STTExternalVADWebsocketRequest
-from ...types.stt.stt_external_vad_websocket_response import STTExternalVADWebsocketResponse
+from ...types.stt.stt_manual_finalize_model import STTManualFinalizeModel
+from ...types.stt.stt_manual_finalize_websocket_request import STTManualFinalizeWebsocketRequest
+from ...types.stt.stt_manual_finalize_websocket_response import STTManualFinalizeWebsocketResponse
 
 if TYPE_CHECKING:
     from websockets.sync.client import ClientConnection as WebSocketConnection
@@ -37,17 +37,17 @@ if TYPE_CHECKING:
 
     from ..._client import Cartesia, AsyncCartesia
 
-__all__ = ["ExternalVADResource", "AsyncExternalVADResource"]
+__all__ = ["ManualFinalizeResource", "AsyncManualFinalizeResource"]
 
 log: logging.Logger = logging.getLogger(__name__)
 
 
-class ExternalVADResource(SyncAPIResource):
+class ManualFinalizeResource(SyncAPIResource):
     def websocket(
         self,
         *,
         encoding: STTEncoding,
-        model: STTRealtimeExternalVADModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
@@ -60,24 +60,26 @@ class ExternalVADResource(SyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> ExternalVADResourceConnectionManager:
+    ) -> ManualFinalizeResourceConnectionManager:
         """Realtime speech-to-text without turn detection.
 
-        A bidirectional WebSocket connection for real-time speech transcription that works with external voice activity detection (VAD). It is the recommended endpoint for "push-to-talk" apps.
+        This is the recommended endpoint for "push-to-talk" apps.
 
-        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using the turn detecting method instead.
+        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using `auto finalize` instead.
 
         Basic usage:
-        1. Connect to the WebSocket with appropriate query parameters
-        2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages
-        3. Send `finalize` as a WebSocket text message when the user is done speaking
-        4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative)
-        5. Repeat 2-4
-        6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
+          1. Connect to the WebSocket with appropriate query parameters
+          2. Send audio in small chunks (e.g. 100ms) using the `send raw` method
+          3. Send `finalize` when the user is done speaking using the `send` method
+          4. Receive transcripts (each message is a delta and is not cumulative)
+          5. Repeat 2-4
+          6. Send `close` finalize any buffered audio and close the session cleanly using the `send` method
+          7. Receive the remaining transcript chunks
+
 
         See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """
-        return ExternalVADResourceConnectionManager(
+        return ManualFinalizeResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -96,12 +98,12 @@ class ExternalVADResource(SyncAPIResource):
         )
 
 
-class AsyncExternalVADResource(AsyncAPIResource):
+class AsyncManualFinalizeResource(AsyncAPIResource):
     def websocket(
         self,
         *,
         encoding: STTEncoding,
-        model: STTRealtimeExternalVADModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
@@ -114,24 +116,26 @@ class AsyncExternalVADResource(AsyncAPIResource):
         initial_delay: float = 0.5,
         max_delay: float = 8.0,
         max_queue_size: int = 1_048_576,
-    ) -> AsyncExternalVADResourceConnectionManager:
+    ) -> AsyncManualFinalizeResourceConnectionManager:
         """Realtime speech-to-text without turn detection.
 
-        A bidirectional WebSocket connection for real-time speech transcription that works with external voice activity detection (VAD). It is the recommended endpoint for "push-to-talk" apps.
+        This is the recommended endpoint for "push-to-talk" apps.
 
-        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using the turn detecting method instead.
+        This API relies on the `finalize` command to trigger transcription. If you do not know when the user starts and stops speaking, consider using `auto finalize` instead.
 
         Basic usage:
-        1. Connect to the WebSocket with appropriate query parameters
-        2. Send audio in small chunks (e.g. 100ms) as WebSocket binary messages
-        3. Send `finalize` as a WebSocket text message when the user is done speaking
-        4. Receive transcripts as JSON encoded WebSocket text messages (each message is a delta and is not cumulative)
-        5. Repeat 2-4
-        6. Send `close` as a WebSocket text message to finalize any buffered audio and close the session cleanly
+          1. Connect to the WebSocket with appropriate query parameters
+          2. Send audio in small chunks (e.g. 100ms) using the `send raw` method
+          3. Send `finalize` when the user is done speaking using the `send` method
+          4. Receive transcripts (each message is a delta and is not cumulative)
+          5. Repeat 2-4
+          6. Send `close` finalize any buffered audio and close the session cleanly using the `send` method
+          7. Receive the remaining transcript chunks
+
 
         See [the API docs](https://docs.cartesia.ai/api-reference/stt/stt) for all details.
         """
-        return AsyncExternalVADResourceConnectionManager(
+        return AsyncManualFinalizeResourceConnectionManager(
             client=self._client,
             extra_query=extra_query,
             extra_headers=extra_headers,
@@ -150,8 +154,8 @@ class AsyncExternalVADResource(AsyncAPIResource):
         )
 
 
-class AsyncExternalVADResourceConnection:
-    """Represents a live WebSocket connection to the ExternalVAD API"""
+class AsyncManualFinalizeResourceConnection:
+    """Represents a live WebSocket connection to the ManualFinalize API"""
 
     _connection: AsyncWebSocketConnection
 
@@ -181,7 +185,7 @@ class AsyncExternalVADResourceConnection:
         self._send_queue = send_queue or SendQueue()
         self._event_handler_registry = EventHandlerRegistry(use_lock=False)
 
-    async def __aiter__(self) -> AsyncIterator[STTExternalVADWebsocketResponse]:
+    async def __aiter__(self) -> AsyncIterator[STTManualFinalizeWebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
@@ -203,9 +207,9 @@ class AsyncExternalVADResourceConnection:
                         ) from exc
                     raise
 
-    async def recv(self) -> STTExternalVADWebsocketResponse:
+    async def recv(self) -> STTManualFinalizeWebsocketResponse:
         """
-        Receive the next message from the connection and parses it into a `STTExternalVADWebsocketResponse` object.
+        Receive the next message from the connection and parses it into a `STTManualFinalizeWebsocketResponse` object.
 
         Canceling this method is safe. There's no risk of losing data.
         """
@@ -216,18 +220,18 @@ class AsyncExternalVADResourceConnection:
 
         Canceling this method is safe. There's no risk of losing data.
 
-        If you want to parse the message into a `STTExternalVADWebsocketResponse` object like `.recv()` does,
+        If you want to parse the message into a `STTManualFinalizeWebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
         message = await self._connection.recv(decode=False)
         log.debug(f"Received WebSocket message: %s", message)
         return message
 
-    async def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
+    async def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
             if isinstance(event, BaseModel)
-            else json.dumps(await async_maybe_transform(event, STTExternalVADWebsocketRequest))
+            else json.dumps(await async_maybe_transform(event, STTManualFinalizeWebsocketRequest))
         )
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
@@ -249,15 +253,15 @@ class AsyncExternalVADResourceConnection:
         self._intentionally_closed = True
         await self._connection.close(code=code, reason=reason)
 
-    def parse_event(self, data: str | bytes) -> STTExternalVADWebsocketResponse:
+    def parse_event(self, data: str | bytes) -> STTManualFinalizeWebsocketResponse:
         """
-        Converts a raw `str` or `bytes` message into a `STTExternalVADWebsocketResponse` object.
+        Converts a raw `str` or `bytes` message into a `STTManualFinalizeWebsocketResponse` object.
 
         This is helpful if you're using `.recv_bytes()`.
         """
         return cast(
-            STTExternalVADWebsocketResponse,
-            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTExternalVADWebsocketResponse)),
+            STTManualFinalizeWebsocketResponse,
+            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTManualFinalizeWebsocketResponse)),
         )
 
     async def _reconnect(self, exc: Exception) -> bool:
@@ -349,7 +353,7 @@ class AsyncExternalVADResourceConnection:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncExternalVADResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Adds the handler to the end of the handlers list for the given event type.
 
         No checks are made to see if the handler has already been added. Multiple calls
@@ -375,14 +379,14 @@ class AsyncExternalVADResourceConnection:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncExternalVADResourceConnection:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncManualFinalizeResourceConnection:
         """Remove a previously registered event handler."""
         self._event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncExternalVADResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler.
 
         Automatically removed after first invocation.
@@ -428,9 +432,9 @@ class AsyncExternalVADResourceConnection:
                     await result
 
 
-class AsyncExternalVADResourceConnectionManager:
+class AsyncManualFinalizeResourceConnectionManager:
     """
-    Context manager over a `AsyncExternalVADResourceConnection` that is returned by `stt.external_vad.websocket()`
+    Context manager over a `AsyncManualFinalizeResourceConnection` that is returned by `stt.manual_finalize.websocket()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -442,7 +446,7 @@ class AsyncExternalVADResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = await client.stt.external_vad.websocket(...).enter()
+    connection = await client.stt.manual_finalize.websocket(...).enter()
     # ...
     await connection.close()
     ```
@@ -453,7 +457,7 @@ class AsyncExternalVADResourceConnectionManager:
         *,
         client: AsyncCartesia,
         encoding: STTEncoding,
-        model: STTRealtimeExternalVADModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
@@ -474,7 +478,7 @@ class AsyncExternalVADResourceConnectionManager:
         self.__language = language
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
-        self.__connection: AsyncExternalVADResourceConnection | None = None
+        self.__connection: AsyncManualFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -485,7 +489,7 @@ class AsyncExternalVADResourceConnectionManager:
         self.__send_queue = SendQueue(max_bytes=max_queue_size)
         self.__event_handler_registry = EventHandlerRegistry(use_lock=False)
 
-    def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         """Queue a message to be sent when the connection is established.
 
         This can be called before entering the context manager. Queued messages
@@ -500,11 +504,11 @@ class AsyncExternalVADResourceConnectionManager:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncExternalVADResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register an event handler before the connection is established.
 
         Handlers are transferred to the connection on enter. Supports the
-        same method and decorator forms as ``AsyncExternalVADResourceConnection.on``.
+        same method and decorator forms as ``AsyncManualFinalizeResourceConnection.on``.
         """
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler)
@@ -516,14 +520,14 @@ class AsyncExternalVADResourceConnectionManager:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncExternalVADResourceConnectionManager:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> AsyncManualFinalizeResourceConnectionManager:
         """Remove a previously registered event handler."""
         self.__event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[AsyncExternalVADResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[AsyncManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler before the connection is established."""
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler, once=True)
@@ -535,7 +539,7 @@ class AsyncExternalVADResourceConnectionManager:
 
         return decorator
 
-    async def __aenter__(self) -> AsyncExternalVADResourceConnection:
+    async def __aenter__(self) -> AsyncManualFinalizeResourceConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -543,14 +547,14 @@ class AsyncExternalVADResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = await client.stt.external_vad.websocket(...).enter()
+        connection = await client.stt.manual_finalize.websocket(...).enter()
         # ...
         await connection.close()
         ```
         """
         ws = await self._connect_ws(self.__extra_query, self.__extra_headers)
 
-        self.__connection = AsyncExternalVADResourceConnection(
+        self.__connection = AsyncManualFinalizeResourceConnection(
             ws,
             make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
             on_reconnecting=self.__on_reconnecting,
@@ -621,8 +625,8 @@ class AsyncExternalVADResourceConnectionManager:
             await self.__connection.close()
 
 
-class ExternalVADResourceConnection:
-    """Represents a live WebSocket connection to the ExternalVAD API"""
+class ManualFinalizeResourceConnection:
+    """Represents a live WebSocket connection to the ManualFinalize API"""
 
     _connection: WebSocketConnection
 
@@ -652,7 +656,7 @@ class ExternalVADResourceConnection:
         self._send_queue = send_queue or SendQueue()
         self._event_handler_registry = EventHandlerRegistry(use_lock=True)
 
-    def __iter__(self) -> Iterator[STTExternalVADWebsocketResponse]:
+    def __iter__(self) -> Iterator[STTManualFinalizeWebsocketResponse]:
         """
         An infinite-iterator that will continue to yield events until
         the connection is closed.
@@ -674,9 +678,9 @@ class ExternalVADResourceConnection:
                         ) from exc
                     raise
 
-    def recv(self) -> STTExternalVADWebsocketResponse:
+    def recv(self) -> STTManualFinalizeWebsocketResponse:
         """
-        Receive the next message from the connection and parses it into a `STTExternalVADWebsocketResponse` object.
+        Receive the next message from the connection and parses it into a `STTManualFinalizeWebsocketResponse` object.
 
         Canceling this method is safe. There's no risk of losing data.
         """
@@ -687,18 +691,18 @@ class ExternalVADResourceConnection:
 
         Canceling this method is safe. There's no risk of losing data.
 
-        If you want to parse the message into a `STTExternalVADWebsocketResponse` object like `.recv()` does,
+        If you want to parse the message into a `STTManualFinalizeWebsocketResponse` object like `.recv()` does,
         then you can call `.parse_event(data)`.
         """
         message = self._connection.recv(decode=False)
         log.debug(f"Received WebSocket message: %s", message)
         return message
 
-    def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         data = (
             event.to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
             if isinstance(event, BaseModel)
-            else json.dumps(maybe_transform(event, STTExternalVADWebsocketRequest))
+            else json.dumps(maybe_transform(event, STTManualFinalizeWebsocketRequest))
         )
         if self._is_reconnecting:
             self._send_queue.enqueue(data)
@@ -720,15 +724,15 @@ class ExternalVADResourceConnection:
         self._intentionally_closed = True
         self._connection.close(code=code, reason=reason)
 
-    def parse_event(self, data: str | bytes) -> STTExternalVADWebsocketResponse:
+    def parse_event(self, data: str | bytes) -> STTManualFinalizeWebsocketResponse:
         """
-        Converts a raw `str` or `bytes` message into a `STTExternalVADWebsocketResponse` object.
+        Converts a raw `str` or `bytes` message into a `STTManualFinalizeWebsocketResponse` object.
 
         This is helpful if you're using `.recv_bytes()`.
         """
         return cast(
-            STTExternalVADWebsocketResponse,
-            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTExternalVADWebsocketResponse)),
+            STTManualFinalizeWebsocketResponse,
+            construct_type_unchecked(value=json.loads(data), type_=cast(Any, STTManualFinalizeWebsocketResponse)),
         )
 
     def _reconnect(self, exc: Exception) -> bool:
@@ -814,7 +818,7 @@ class ExternalVADResourceConnection:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[ExternalVADResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Adds the handler to the end of the handlers list for the given event type.
 
         No checks are made to see if the handler has already been added. Multiple calls
@@ -840,14 +844,14 @@ class ExternalVADResourceConnection:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> ExternalVADResourceConnection:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> ManualFinalizeResourceConnection:
         """Remove a previously registered event handler."""
         self._event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[ExternalVADResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnection, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler.
 
         Automatically removed after first invocation.
@@ -887,9 +891,9 @@ class ExternalVADResourceConnection:
                 handler(event)
 
 
-class ExternalVADResourceConnectionManager:
+class ManualFinalizeResourceConnectionManager:
     """
-    Context manager over a `ExternalVADResourceConnection` that is returned by `stt.external_vad.websocket()`
+    Context manager over a `ManualFinalizeResourceConnection` that is returned by `stt.manual_finalize.websocket()`
 
     This context manager ensures that the connection will be closed when it exits.
 
@@ -901,7 +905,7 @@ class ExternalVADResourceConnectionManager:
     **Warning**: You must remember to close the connection with `.close()`.
 
     ```py
-    connection = client.stt.external_vad.websocket(...).enter()
+    connection = client.stt.manual_finalize.websocket(...).enter()
     # ...
     connection.close()
     ```
@@ -912,7 +916,7 @@ class ExternalVADResourceConnectionManager:
         *,
         client: Cartesia,
         encoding: STTEncoding,
-        model: STTRealtimeExternalVADModel,
+        model: STTManualFinalizeModel,
         sample_rate: int,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
@@ -933,7 +937,7 @@ class ExternalVADResourceConnectionManager:
         self.__language = language
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
-        self.__connection: ExternalVADResourceConnection | None = None
+        self.__connection: ManualFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
         self.__websocket_connection_options = websocket_connection_options
@@ -944,7 +948,7 @@ class ExternalVADResourceConnectionManager:
         self.__send_queue = SendQueue(max_bytes=max_queue_size)
         self.__event_handler_registry = EventHandlerRegistry(use_lock=True)
 
-    def send(self, event: STTExternalVADWebsocketRequest | STTExternalVADWebsocketRequest) -> None:
+    def send(self, event: STTManualFinalizeWebsocketRequest | STTManualFinalizeWebsocketRequest) -> None:
         """Queue a message to be sent when the connection is established.
 
         This can be called before entering the context manager. Queued messages
@@ -959,11 +963,11 @@ class ExternalVADResourceConnectionManager:
 
     def on(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[ExternalVADResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register an event handler before the connection is established.
 
         Handlers are transferred to the connection on enter. Supports the
-        same method and decorator forms as ``ExternalVADResourceConnection.on``.
+        same method and decorator forms as ``ManualFinalizeResourceConnection.on``.
         """
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler)
@@ -975,14 +979,14 @@ class ExternalVADResourceConnectionManager:
 
         return decorator
 
-    def off(self, event_type: str, handler: Callable[..., Any]) -> ExternalVADResourceConnectionManager:
+    def off(self, event_type: str, handler: Callable[..., Any]) -> ManualFinalizeResourceConnectionManager:
         """Remove a previously registered event handler."""
         self.__event_handler_registry.remove(event_type, handler)
         return self
 
     def once(
         self, event_type: str, handler: Callable[..., Any] | None = None
-    ) -> Union[ExternalVADResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
+    ) -> Union[ManualFinalizeResourceConnectionManager, Callable[[Callable[..., Any]], Callable[..., Any]]]:
         """Register a one-time event handler before the connection is established."""
         if handler is not None:
             self.__event_handler_registry.add(event_type, handler, once=True)
@@ -994,7 +998,7 @@ class ExternalVADResourceConnectionManager:
 
         return decorator
 
-    def __enter__(self) -> ExternalVADResourceConnection:
+    def __enter__(self) -> ManualFinalizeResourceConnection:
         """
         If your application doesn't work well with the context manager approach then you
         can call this method directly to initiate a connection.
@@ -1002,14 +1006,14 @@ class ExternalVADResourceConnectionManager:
         **Warning**: You must remember to close the connection with `.close()`.
 
         ```py
-        connection = client.stt.external_vad.websocket(...).enter()
+        connection = client.stt.manual_finalize.websocket(...).enter()
         # ...
         connection.close()
         ```
         """
         ws = self._connect_ws(self.__extra_query, self.__extra_headers)
 
-        self.__connection = ExternalVADResourceConnection(
+        self.__connection = ManualFinalizeResourceConnection(
             ws,
             make_ws=self._connect_ws if self.__on_reconnecting is not None else None,
             on_reconnecting=self.__on_reconnecting,

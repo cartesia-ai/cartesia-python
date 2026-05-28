@@ -19,9 +19,9 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .external_vad import ExternalVADResource, AsyncExternalVADResource
+from .auto_finalize import AutoFinalizeResource, AsyncAutoFinalizeResource
 from ..._base_client import make_request_options
-from .turn_detecting import TurnDetectingResource, AsyncTurnDetectingResource
+from .manual_finalize import ManualFinalizeResource, AsyncManualFinalizeResource
 from ...types.stt_encoding import STTEncoding
 from ...types.stt_batch_model import STTBatchModel
 from ...types.stt_transcribe_response import STTTranscribeResponse
@@ -31,12 +31,12 @@ __all__ = ["STTResource", "AsyncSTTResource"]
 
 class STTResource(SyncAPIResource):
     @cached_property
-    def turn_detecting(self) -> TurnDetectingResource:
-        return TurnDetectingResource(self._client)
+    def auto_finalize(self) -> AutoFinalizeResource:
+        return AutoFinalizeResource(self._client)
 
     @cached_property
-    def external_vad(self) -> ExternalVADResource:
-        return ExternalVADResource(self._client)
+    def manual_finalize(self) -> ManualFinalizeResource:
+        return ManualFinalizeResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> STTResourceWithRawResponse:
@@ -176,11 +176,7 @@ class STTResource(SyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> STTTranscribeResponse:
         """
-        Transcribes audio files into text using Cartesia's Speech-to-Text API.
-
-        Upload an audio file and receive a complete transcription response. Supports
-        arbitrarily long audio files with automatic intelligent chunking for longer
-        audio.
+        Transcribes audio files into text.
 
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm
@@ -247,12 +243,12 @@ class STTResource(SyncAPIResource):
 
 class AsyncSTTResource(AsyncAPIResource):
     @cached_property
-    def turn_detecting(self) -> AsyncTurnDetectingResource:
-        return AsyncTurnDetectingResource(self._client)
+    def auto_finalize(self) -> AsyncAutoFinalizeResource:
+        return AsyncAutoFinalizeResource(self._client)
 
     @cached_property
-    def external_vad(self) -> AsyncExternalVADResource:
-        return AsyncExternalVADResource(self._client)
+    def manual_finalize(self) -> AsyncManualFinalizeResource:
+        return AsyncManualFinalizeResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncSTTResourceWithRawResponse:
@@ -392,11 +388,7 @@ class AsyncSTTResource(AsyncAPIResource):
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> STTTranscribeResponse:
         """
-        Transcribes audio files into text using Cartesia's Speech-to-Text API.
-
-        Upload an audio file and receive a complete transcription response. Supports
-        arbitrarily long audio files with automatic intelligent chunking for longer
-        audio.
+        Transcribes audio files into text.
 
         **Supported audio formats:** flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav,
         webm

@@ -4,10 +4,10 @@ from typing_extensions import Literal
 
 from ..._models import BaseModel
 
-__all__ = ["STTTurnsTurnResume"]
+__all__ = ["STTAutoFinalizeTurnResume"]
 
 
-class STTTurnsTurnResume(BaseModel):
+class STTAutoFinalizeTurnResume(BaseModel):
     """[PREVIEW] Fires after `turn.eager_end` if the user turn has not actually ended."""
 
     request_id: str
