@@ -20,18 +20,21 @@ class TestSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_transcribe(self, client: Cartesia) -> None:
-        stt = client.stt.transcribe()
+        stt = client.stt.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_method_transcribe_with_all_params(self, client: Cartesia) -> None:
         stt = client.stt.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
             encoding="pcm_s16le",
             sample_rate=0,
-            file=b"Example data",
             language="en",
-            model="ink-whisper",
             timestamp_granularities=["word"],
         )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])
@@ -39,7 +42,10 @@ class TestSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_raw_response_transcribe(self, client: Cartesia) -> None:
-        response = client.stt.with_raw_response.transcribe()
+        response = client.stt.with_raw_response.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -49,7 +55,10 @@ class TestSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     def test_streaming_response_transcribe(self, client: Cartesia) -> None:
-        with client.stt.with_streaming_response.transcribe() as response:
+        with client.stt.with_streaming_response.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
@@ -67,18 +76,21 @@ class TestAsyncSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_transcribe(self, async_client: AsyncCartesia) -> None:
-        stt = await async_client.stt.transcribe()
+        stt = await async_client.stt.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_method_transcribe_with_all_params(self, async_client: AsyncCartesia) -> None:
         stt = await async_client.stt.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
             encoding="pcm_s16le",
             sample_rate=0,
-            file=b"Example data",
             language="en",
-            model="ink-whisper",
             timestamp_granularities=["word"],
         )
         assert_matches_type(STTTranscribeResponse, stt, path=["response"])
@@ -86,7 +98,10 @@ class TestAsyncSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_raw_response_transcribe(self, async_client: AsyncCartesia) -> None:
-        response = await async_client.stt.with_raw_response.transcribe()
+        response = await async_client.stt.with_raw_response.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        )
 
         assert response.is_closed is True
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -96,7 +111,10 @@ class TestAsyncSTT:
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
     async def test_streaming_response_transcribe(self, async_client: AsyncCartesia) -> None:
-        async with async_client.stt.with_streaming_response.transcribe() as response:
+        async with async_client.stt.with_streaming_response.transcribe(
+            file=b"Example data",
+            model="ink-whisper",
+        ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
 
