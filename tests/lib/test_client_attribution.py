@@ -11,7 +11,6 @@ from cartesia._types import Omit
 
 from .resources.stt._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
-EXPECTED_USER_AGENT_PREFIX = "Cartesia/Python "
 EXPECTED_CLIENT_HEADER_PREFIX = "cartesia-python/"
 
 
@@ -38,10 +37,9 @@ def _stt_manual_finalize_connect(client: Cartesia) -> None:
 def _expected_identity(client: Cartesia | AsyncCartesia) -> tuple[str, str]:
     user_agent = client.user_agent
     client_header = client.client_header
-    assert user_agent.startswith(EXPECTED_USER_AGENT_PREFIX)
     assert client_header.startswith(EXPECTED_CLIENT_HEADER_PREFIX)
-    assert user_agent.endswith(client._version)
     assert client_header.endswith(client._version)
+    assert user_agent == client_header
     return user_agent, client_header
 
 

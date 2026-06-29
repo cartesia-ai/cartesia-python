@@ -699,7 +699,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
     @property
     def user_agent(self) -> str:
-        return f"Cartesia/Python {self._version}"
+        return self.client_header
 
     @property
     def client_header(self) -> str:
