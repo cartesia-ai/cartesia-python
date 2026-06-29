@@ -2,14 +2,37 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import pytest
 
 from cartesia import Cartesia, AsyncCartesia
+from cartesia._types import Omit
 
 from .resources.stt._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
 EXPECTED_USER_AGENT_PREFIX = "Cartesia/Python "
 EXPECTED_CLIENT_HEADER_PREFIX = "cartesia-python/"
+
+
+def _rest_default_headers(client: Cartesia) -> dict[str, str | Omit]:
+    return client.default_headers
+
+
+def _stt_auto_finalize_connect(client: Cartesia) -> None:
+    client.stt.auto_finalize.websocket(
+        encoding="pcm_s16le",
+        model="ink-2",
+        sample_rate=16_000,
+    ).enter()
+
+
+def _stt_manual_finalize_connect(client: Cartesia) -> None:
+    client.stt.manual_finalize.websocket(
+        encoding="pcm_s16le",
+        model="ink-2",
+        sample_rate=16_000,
+    ).enter()
 
 
 def _expected_identity(client: Cartesia | AsyncCartesia) -> tuple[str, str]:
@@ -25,13 +48,13 @@ def _expected_identity(client: Cartesia | AsyncCartesia) -> tuple[str, str]:
 @pytest.mark.parametrize(
     "service_name,get_headers",
     [
-        ("REST default_headers", lambda client: client.default_headers),
+        ("REST default_headers", _rest_default_headers),
     ],
 )
 def test_rest_identifies_as_cartesia_python(
     client: Cartesia,
     service_name: str,
-    get_headers,
+    get_headers: Callable[[Cartesia], dict[str, str | Omit]],
 ) -> None:
     user_agent, client_header = _expected_identity(client)
     headers = get_headers(client)
@@ -52,29 +75,15 @@ def test_tts_websocket_identifies_as_cartesia_python(client: Cartesia, monkeypat
 @pytest.mark.parametrize(
     "service_name,connect",
     [
-        (
-            "STT auto-finalize WebSocket",
-            lambda client: client.stt.auto_finalize.websocket(
-                encoding="pcm_s16le",
-                model="ink-2",
-                sample_rate=16_000,
-            ).enter(),
-        ),
-        (
-            "STT manual-finalize WebSocket",
-            lambda client: client.stt.manual_finalize.websocket(
-                encoding="pcm_s16le",
-                model="ink-2",
-                sample_rate=16_000,
-            ).enter(),
-        ),
+        ("STT auto-finalize WebSocket", _stt_auto_finalize_connect),
+        ("STT manual-finalize WebSocket", _stt_manual_finalize_connect),
     ],
 )
 def test_stt_websocket_identifies_as_cartesia_python(
     client: Cartesia,
     monkeypatch: pytest.MonkeyPatch,
     service_name: str,
-    connect,
+    connect: Callable[[Cartesia], None],
 ) -> None:
     user_agent, client_header = _expected_identity(client)
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
