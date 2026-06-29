@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from cartesia import AsyncCartesia, Cartesia
+from cartesia import Cartesia, AsyncCartesia
 
-from .resources.stt._fakes import FakeAsyncWS, FakeSyncWS, install_async_connect, install_sync_connect
+from .resources.stt._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
 EXPECTED_USER_AGENT_PREFIX = "Cartesia/Python "
 EXPECTED_CLIENT_HEADER_PREFIX = "cartesia-python/"
