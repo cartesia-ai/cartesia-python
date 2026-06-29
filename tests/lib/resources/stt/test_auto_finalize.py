@@ -81,6 +81,7 @@ def test_websocket_passes_auth_and_user_agent_headers(client: Cartesia, monkeypa
     ).enter()
     call = captured["calls"][0]
     assert call["user_agent_header"] == client.user_agent
+    assert call["additional_headers"]["X-Cartesia-Client"] == client.client_header
     assert call["additional_headers"]["X-Test"] == "1"
     # auth header from the client should be threaded through
     for key, value in client.auth_headers.items():

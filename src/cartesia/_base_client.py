@@ -674,6 +674,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             "Accept": "application/json",
             "Content-Type": "application/json",
             "User-Agent": self.user_agent,
+            "X-Cartesia-Client": self.client_header,
             **self.platform_headers(),
             **self.auth_headers,
             **self._custom_headers,
@@ -698,7 +699,11 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
 
     @property
     def user_agent(self) -> str:
-        return f"{self.__class__.__name__}/Python {self._version}"
+        return f"Cartesia/Python {self._version}"
+
+    @property
+    def client_header(self) -> str:
+        return f"cartesia-python/{self._version}"
 
     @property
     def base_url(self) -> URL:
