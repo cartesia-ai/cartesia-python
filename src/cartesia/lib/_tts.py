@@ -1009,7 +1009,10 @@ class AsyncWebSocketContext:
                         event = await _asyncio.wait_for(my_queue.get(), timeout=self._timeout)
                     else:
                         event = await my_queue.get()
-                except TimeoutError:
+                except (TimeoutError, _asyncio.TimeoutError):
+                    # Before Python 3.11, asyncio.wait_for raises asyncio.TimeoutError,
+                    # which is not the builtin TimeoutError; catch both so the context
+                    # queue is always cleaned up on timeout.
                     done = True
                     raise
 
