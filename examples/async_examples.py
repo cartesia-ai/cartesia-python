@@ -477,7 +477,7 @@ async def stt_transcribe_async(client: AsyncCartesia, *args: str) -> None:
             print("Usage: stt_transcribe_async <audio_file> <language_code>")
             print("Example: stt_transcribe_async my_audio.wav en")
             sys.exit(1)
-        file_path, language = args
+        file_path, language, *_ = args
     else:
         file_path, language = await generate_sample_wav()
 
