@@ -28,6 +28,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     if: github.repository == 'cartesia-ai/cartesia-python-staging'
+    environment: production
     env:
       PRODUCTION_REPO: cartesia-ai/cartesia-python
     steps:

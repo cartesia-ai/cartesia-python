@@ -38,6 +38,7 @@ jobs:
   dispatch:
     runs-on: ubuntu-latest
     if: github.repository == 'cartesia-ai/cartesia-python-staging'
+    environment: production
     env:
       CONFIG_REPO: cartesia-ai/stainless
     steps:
