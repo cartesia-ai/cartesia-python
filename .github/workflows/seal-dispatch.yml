@@ -1,0 +1,103 @@
+name: Seal custom code (dispatch)
+
+# Optional, eager variant of the config repo's scheduled tracking-file sync.
+#
+# When genuine out-of-band custom code is merged to this SDK repo's `main`
+# (a direct staging commit, or a contribution pulled back from production),
+# notify the config repo to reseal so the custom-code tracking JSON absorbs it
+# promptly instead of waiting for the config repo's poll. stlc-authored commits
+# are skipped by the loop guards below, so the bot's own pushes (the "Build SDK"
+# squash commit and any regen commit) cannot trigger a reseal loop.
+#
+# This workflow is itself custom code on the SDK repo: seal it once with
+# `stlc build --commit` to bootstrap, after which scaffold preservation keeps it
+# across regenerations. If you would rather keep things simple, drop this file
+# and rely on the config repo's scheduled `stlc-sync-tracking.yml` poll alone.
+#
+# Lives in the STAGING repo. Mints a config-repo-scoped token from the stlc
+# GitHub App (STLC_APP_ID / STLC_APP_PRIVATE_KEY) to send the repository_dispatch;
+# the app must have Contents:Write on the config repo (cartesia-ai/stainless).
+#
+# NOTE: the receiving end is not wired up yet — the config repo's
+# stlc-sync-tracking.yml must add a `repository_dispatch: types: [seal-custom-code]`
+# trigger to act on this. Until then this dispatch is a no-op (the reseal still
+# happens on the config repo's scheduled poll).
+on:
+  push:
+    # main only. stlc preview/integrated/codegen branches never push to main.
+    branches: [main]
+
+concurrency:
+  group: seal-dispatch-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    if: github.repository == 'cartesia-ai/cartesia-python-staging'
+    env:
+      CONFIG_REPO: cartesia-ai/stainless
+    steps:
+      - name: Loop-guard — decide whether to reseal
+        id: guard
+        env:
+          HEAD_MSG: ${{ github.event.head_commit.message }}
+          HEAD_AUTHOR_NAME: ${{ github.event.head_commit.author.name }}
+        run: |
+          set -euo pipefail
+
+          # Loop guard 1: skip the stlc "Build SDK" squash commit (it carries
+          # the Stainless-Generated-From trailer in its message).
+          if printf '%s' "$HEAD_MSG" | grep -q 'Stainless-Generated-From'; then
+            echo "Head commit is an stlc build — skipping reseal dispatch."
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          # Loop guard 2: skip stlc-bot commits (e.g. a regen commit).
+          if [ "$HEAD_AUTHOR_NAME" = "stlc-bot" ]; then
+            echo "Head commit authored by stlc-bot — skipping reseal dispatch."
+            echo "dispatch=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          echo "dispatch=true" >> "$GITHUB_OUTPUT"
+
+      # Mint a short-lived token from the stlc GitHub App, scoped to the config
+      # repo (needs Contents:Write there — the permission GitHub requires to send
+      # a repository_dispatch). Replaces the CONFIG_DISPATCH_TOKEN PAT. Only
+      # minted when we actually dispatch, so the app is never invoked for the
+      # bot's own pushes filtered out above.
+      - name: Mint a token to dispatch to the config repo
+        if: steps.guard.outputs.dispatch == 'true'
+        id: config-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.STLC_APP_ID }}
+          private-key: ${{ secrets.STLC_APP_PRIVATE_KEY }}
+          owner: cartesia-ai
+          repositories: stainless
+
+      - name: Send reseal dispatch to the config repo
+        if: steps.guard.outputs.dispatch == 'true'
+        env:
+          DISPATCH_TOKEN: ${{ steps.config-token.outputs.token }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          [ -n "${DISPATCH_TOKEN:-}" ] || { echo "config-token was not minted" >&2; exit 1; }
+          payload=$(jq -n --arg sha "$SHA" --arg repo "$REPO" \
+            '{event_type:"seal-custom-code",client_payload:{target:"all",sha:$sha,repo:$repo}}')
+          code=$(curl -sS -o /tmp/dispatch.txt -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${CONFIG_REPO}/dispatches" \
+            -d "$payload")
+          if [ "$code" = "204" ]; then
+            echo "Reseal dispatched to ${CONFIG_REPO}."
+          else
+            echo "Dispatch failed (HTTP $code)" >&2; cat /tmp/dispatch.txt >&2; exit 1
+          fi
