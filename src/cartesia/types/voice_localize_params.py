@@ -13,7 +13,28 @@ class VoiceLocalizeParams(TypedDict, total=False):
     """The description of the new localized voice."""
 
     language: Required[
-        Literal["en", "de", "es", "fr", "ja", "pt", "zh", "hi", "it", "ko", "nl", "pl", "ru", "sv", "tr"]
+        Literal[
+            "en",
+            "de",
+            "es",
+            "fr",
+            "ja",
+            "pt",
+            "zh",
+            "hi",
+            "it",
+            "ko",
+            "nl",
+            "pl",
+            "ru",
+            "sv",
+            "tr",
+            "ar",
+            "he",
+            "ta",
+            "te",
+            "th",
+        ]
     ]
     """Target language to localize the voice to.
 
