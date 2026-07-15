@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3.1 (2026-07-15)
+
+Full Changelog: [v3.3.0...v3.3.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.3.0...v3.3.1)
+
+### Bug Fixes
+
+* **ci:** add environment to workflows ([f84e1da](https://github.com/cartesia-ai/cartesia-python/commit/f84e1da5591277c3184c1c65d612216bf24ebf24))
+* **internal:** resolve build failures ([8a67401](https://github.com/cartesia-ai/cartesia-python/commit/8a67401303069cd60ad10c148f56a9144a9167bb))
+
 ## 3.3.0 (2026-06-29)
 
 Full Changelog: [v3.2.0...v3.3.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.2.0...v3.3.0)
