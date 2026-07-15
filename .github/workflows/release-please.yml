@@ -1,0 +1,34 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  # release-please writes with the short-lived GitHub App token below.
+  contents: read
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    if: github.repository == 'cartesia-ai/cartesia-python'
+    environment: production
+    steps:
+      # Use the same environment-scoped App credentials as the promotion and
+      # back-sync workflows. Unlike GITHUB_TOKEN, events created by this token
+      # can trigger the publish and release back-sync workflows.
+      - name: Mint a token for release-please
+        id: release-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.STLC_APP_ID }}
+          private-key: ${{ secrets.STLC_APP_PRIVATE_KEY }}
+          owner: cartesia-ai
+          repositories: cartesia-python
+
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ steps.release-token.outputs.token }}
