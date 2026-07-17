@@ -41,7 +41,7 @@ jobs:
       # production main while everything else stays review-gated.
       - name: Mint a token to push to production
         id: prod-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.STLC_APP_ID }}
           private-key: ${{ secrets.STLC_APP_PRIVATE_KEY }}

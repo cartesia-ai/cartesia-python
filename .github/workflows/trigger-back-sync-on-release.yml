@@ -26,7 +26,7 @@ jobs:
       # it environment-scoped rather than a plain repo secret.
       - name: Mint a token to dispatch to staging
         id: staging-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.STLC_APP_ID }}
           private-key: ${{ secrets.STLC_APP_PRIVATE_KEY }}

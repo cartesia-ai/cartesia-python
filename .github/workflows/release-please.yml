@@ -20,7 +20,7 @@ jobs:
       # can trigger the publish and release back-sync workflows.
       - name: Mint a token for release-please
         id: release-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.STLC_APP_ID }}
           private-key: ${{ secrets.STLC_APP_PRIVATE_KEY }}
