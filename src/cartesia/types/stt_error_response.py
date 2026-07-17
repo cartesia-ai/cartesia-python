@@ -11,6 +11,15 @@ __all__ = ["STTErrorResponse"]
 class STTErrorResponse(BaseModel):
     """Error information for STT WebSocket connections."""
 
+    message: str
+    """Human-readable error message."""
+
+    status_code: int
+    """An HTTP response status code."""
+
+    title: str
+    """Human-readable error title."""
+
     type: Literal["error"]
     """Event type identifier."""
 
@@ -20,14 +29,5 @@ class STTErrorResponse(BaseModel):
     error_code: Optional[str] = None
     """Machine-readable error code."""
 
-    message: Optional[str] = None
-    """Human-readable error message."""
-
     request_id: Optional[str] = None
     """Unique identifier for this WebSocket connection."""
-
-    status_code: Optional[int] = None
-    """An HTTP response status code."""
-
-    title: Optional[str] = None
-    """Human-readable error title."""
