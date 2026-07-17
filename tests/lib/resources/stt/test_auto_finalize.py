@@ -11,7 +11,7 @@ from websockets.exceptions import ConnectionClosedError
 from cartesia import Cartesia, AsyncCartesia
 from cartesia._exceptions import CartesiaError, WebSocketConnectionClosedError
 from cartesia.types.websocket_reconnection import ReconnectingOverrides
-from cartesia.types.stt.stt_auto_finalize_websocket_request import STTAutoFinalizeWebsocketRequest
+from cartesia.types.stt.stt_auto_finalize_close_command import STTAutoFinalizeCloseCommand
 
 from ._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
@@ -122,7 +122,7 @@ def test_manager_send_queued_pre_enter_is_flushed_on_enter(client: Cartesia, mon
     captured = install_sync_connect(monkeypatch, FakeSyncWS)
     manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
     manager.send({"type": "close"})
-    manager.send(STTAutoFinalizeWebsocketRequest(type="close"))
+    manager.send(STTAutoFinalizeCloseCommand(type="close"))
     manager.enter()
     ws: FakeSyncWS = captured["last_ws"]
     assert len(ws.sent) == 2
@@ -234,12 +234,10 @@ def test_send_serializes_base_model_with_api_names(client: Cartesia, monkeypatch
     install_sync_connect(monkeypatch, FakeSyncWS)
     manager = client.stt.auto_finalize.websocket(encoding="pcm_s16le", model="ink-2", sample_rate=16_000)
     conn = manager.enter()
-    conn.send(STTAutoFinalizeWebsocketRequest(type="close"))
+    conn.send(STTAutoFinalizeCloseCommand(type="close"))
     ws: FakeSyncWS = conn._connection  # type: ignore[assignment]
     assert ws.sent == [
-        STTAutoFinalizeWebsocketRequest(type="close").to_json(
-            use_api_names=True, exclude_defaults=True, exclude_unset=True
-        )
+        STTAutoFinalizeCloseCommand(type="close").to_json(use_api_names=True, exclude_defaults=True, exclude_unset=True)
     ]
 
 
