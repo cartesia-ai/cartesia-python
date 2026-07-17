@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing_extensions import Literal, Required, TypedDict
 
+from ..._types import SequenceNotStr
 from ..stt_encoding import STTEncoding
 from .stt_manual_finalize_model import STTManualFinalizeModel
 
@@ -24,6 +25,16 @@ class ManualFinalizeWebsocketParams(TypedDict, total=False):
 
     sample_rate: Required[int]
     """Sample rate in Hz."""
+
+    keyterm: SequenceNotStr[str]
+    """Key terms to improve the recall of specific words and phrases.
+
+    Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
+    characters. To boost one multi-word phrase, join the words with a space.
+
+    See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
+    details.
+    """
 
     language: Literal["en"]
     """The language of the input audio in ISO-639-1 format.

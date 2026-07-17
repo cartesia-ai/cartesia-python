@@ -171,7 +171,7 @@ class VoicesResource(SyncAPIResource):
                 query=maybe_transform(
                     {
                         "ending_before": ending_before,
-                        "expand": expand,
+                        "expand[]": expand,
                         "gender": gender,
                         "is_owner": is_owner,
                         "limit": limit,
@@ -320,7 +320,7 @@ class VoicesResource(SyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=maybe_transform({"expand": expand}, voice_get_params.VoiceGetParams),
+                query=maybe_transform({"expand[]": expand}, voice_get_params.VoiceGetParams),
             ),
             cast_to=Voice,
         )
@@ -544,7 +544,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                 query=maybe_transform(
                     {
                         "ending_before": ending_before,
-                        "expand": expand,
+                        "expand[]": expand,
                         "gender": gender,
                         "is_owner": is_owner,
                         "limit": limit,
@@ -693,7 +693,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                 extra_query=extra_query,
                 extra_body=extra_body,
                 timeout=timeout,
-                query=await async_maybe_transform({"expand": expand}, voice_get_params.VoiceGetParams),
+                query=await async_maybe_transform({"expand[]": expand}, voice_get_params.VoiceGetParams),
             ),
             cast_to=Voice,
         )

@@ -186,6 +186,7 @@ Types:
 
 ```python
 from cartesia.types.stt import (
+    STTAutoFinalizeConfigCommand,
     STTAutoFinalizeConnected,
     STTAutoFinalizeModel,
     STTAutoFinalizeTurnEagerEnd,

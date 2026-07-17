@@ -14,7 +14,7 @@ import httpx
 from pydantic import BaseModel
 
 from ...types import STTEncoding
-from ..._types import Query, Headers
+from ..._types import Omit, Query, Headers, SequenceNotStr, omit
 from ..._utils import maybe_transform, async_maybe_transform
 from ..._models import construct_type_unchecked
 from ..._resource import SyncAPIResource, AsyncAPIResource
@@ -50,6 +50,11 @@ class AutoFinalizeResource(SyncAPIResource):
         encoding: STTEncoding,
         model: STTAutoFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
+        turn_eager_end_threshold: float | Omit = omit,
+        turn_end_threshold: float | Omit = omit,
+        turn_end_timeout_ms: float | Omit = omit,
+        turn_start_threshold: float | Omit = omit,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
@@ -94,6 +99,11 @@ class AutoFinalizeResource(SyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            keyterm=keyterm,
+            turn_eager_end_threshold=turn_eager_end_threshold,
+            turn_end_threshold=turn_end_threshold,
+            turn_end_timeout_ms=turn_end_timeout_ms,
+            turn_start_threshold=turn_start_threshold,
         )
 
 
@@ -104,6 +114,11 @@ class AsyncAutoFinalizeResource(AsyncAPIResource):
         encoding: STTEncoding,
         model: STTAutoFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
+        turn_eager_end_threshold: float | Omit = omit,
+        turn_end_threshold: float | Omit = omit,
+        turn_end_timeout_ms: float | Omit = omit,
+        turn_start_threshold: float | Omit = omit,
         extra_query: Query = {},
         extra_headers: Headers = {},
         websocket_connection_options: WebSocketConnectionOptions = {},
@@ -148,6 +163,11 @@ class AsyncAutoFinalizeResource(AsyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            keyterm=keyterm,
+            turn_eager_end_threshold=turn_eager_end_threshold,
+            turn_end_threshold=turn_end_threshold,
+            turn_end_timeout_ms=turn_end_timeout_ms,
+            turn_start_threshold=turn_start_threshold,
         )
 
 
@@ -456,6 +476,11 @@ class AsyncAutoFinalizeResourceConnectionManager:
         encoding: STTEncoding,
         model: STTAutoFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
+        turn_eager_end_threshold: float | Omit = omit,
+        turn_end_threshold: float | Omit = omit,
+        turn_end_timeout_ms: float | Omit = omit,
+        turn_start_threshold: float | Omit = omit,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
@@ -469,6 +494,11 @@ class AsyncAutoFinalizeResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
+        self.__keyterm = keyterm
+        self.__turn_eager_end_threshold = turn_eager_end_threshold
+        self.__turn_end_threshold = turn_end_threshold
+        self.__turn_end_timeout_ms = turn_end_timeout_ms
+        self.__turn_start_threshold = turn_start_threshold
         self.__connection: AsyncAutoFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
@@ -577,6 +607,11 @@ class AsyncAutoFinalizeResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "keyterm": self.__keyterm,
+                    "turn_eager_end_threshold": self.__turn_eager_end_threshold,
+                    "turn_end_threshold": self.__turn_end_threshold,
+                    "turn_end_timeout_ms": self.__turn_end_timeout_ms,
+                    "turn_start_threshold": self.__turn_start_threshold,
                     **extra_query,
                 },
             ),
@@ -909,6 +944,11 @@ class AutoFinalizeResourceConnectionManager:
         encoding: STTEncoding,
         model: STTAutoFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
+        turn_eager_end_threshold: float | Omit = omit,
+        turn_end_threshold: float | Omit = omit,
+        turn_end_timeout_ms: float | Omit = omit,
+        turn_start_threshold: float | Omit = omit,
         extra_query: Query,
         extra_headers: Headers,
         websocket_connection_options: WebSocketConnectionOptions,
@@ -922,6 +962,11 @@ class AutoFinalizeResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
+        self.__keyterm = keyterm
+        self.__turn_eager_end_threshold = turn_eager_end_threshold
+        self.__turn_end_threshold = turn_end_threshold
+        self.__turn_end_timeout_ms = turn_end_timeout_ms
+        self.__turn_start_threshold = turn_start_threshold
         self.__connection: AutoFinalizeResourceConnection | None = None
         self.__extra_query = extra_query
         self.__extra_headers = extra_headers
@@ -1030,6 +1075,11 @@ class AutoFinalizeResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "keyterm": self.__keyterm,
+                    "turn_eager_end_threshold": self.__turn_eager_end_threshold,
+                    "turn_end_threshold": self.__turn_end_threshold,
+                    "turn_end_timeout_ms": self.__turn_end_timeout_ms,
+                    "turn_start_threshold": self.__turn_start_threshold,
                     **extra_query,
                 },
             ),

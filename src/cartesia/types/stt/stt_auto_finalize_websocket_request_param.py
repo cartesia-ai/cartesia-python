@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union
+from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-__all__ = ["STTAutoFinalizeWebsocketRequestParam"]
+from .stt_auto_finalize_config_command_param import STTAutoFinalizeConfigCommandParam
+
+__all__ = ["STTAutoFinalizeWebsocketRequestParam", "STTAutoFinalizeCloseCommand"]
 
 
-class STTAutoFinalizeWebsocketRequestParam(TypedDict, total=False):
+class STTAutoFinalizeCloseCommand(TypedDict, total=False):
     """Sent as a JSON-encoded WebSocket text frame to close the session cleanly.
 
     All buffered audio will be processed by the model into events before the connection closes.
@@ -18,3 +21,6 @@ class STTAutoFinalizeWebsocketRequestParam(TypedDict, total=False):
 
     Send this as a JSON-encoded WebSocket text frame to close the session.
     """
+
+
+STTAutoFinalizeWebsocketRequestParam: TypeAlias = Union[STTAutoFinalizeCloseCommand, STTAutoFinalizeConfigCommandParam]

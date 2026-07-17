@@ -13,7 +13,7 @@ from typing_extensions import Literal, AsyncIterator
 import httpx
 
 from ...types import STTEncoding
-from ..._types import Omit, Query, Headers, omit
+from ..._types import Omit, Query, Headers, SequenceNotStr, omit
 from ..._models import construct_type_unchecked
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ...types.stt import STTManualFinalizeModel
@@ -47,6 +47,7 @@ class ManualFinalizeResource(SyncAPIResource):
         encoding: STTEncoding,
         model: STTManualFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
@@ -90,6 +91,7 @@ class ManualFinalizeResource(SyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            keyterm=keyterm,
             language=language,
             max_silence_duration_secs=max_silence_duration_secs,
             min_volume=min_volume,
@@ -103,6 +105,7 @@ class AsyncManualFinalizeResource(AsyncAPIResource):
         encoding: STTEncoding,
         model: STTManualFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
@@ -146,6 +149,7 @@ class AsyncManualFinalizeResource(AsyncAPIResource):
             encoding=encoding,
             model=model,
             sample_rate=sample_rate,
+            keyterm=keyterm,
             language=language,
             max_silence_duration_secs=max_silence_duration_secs,
             min_volume=min_volume,
@@ -453,6 +457,7 @@ class AsyncManualFinalizeResourceConnectionManager:
         encoding: STTEncoding,
         model: STTManualFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
@@ -469,6 +474,7 @@ class AsyncManualFinalizeResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
+        self.__keyterm = keyterm
         self.__language = language
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
@@ -576,6 +582,7 @@ class AsyncManualFinalizeResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "keyterm": self.__keyterm,
                     "language": self.__language,
                     "max_silence_duration_secs": self.__max_silence_duration_secs,
                     "min_volume": self.__min_volume,
@@ -907,6 +914,7 @@ class ManualFinalizeResourceConnectionManager:
         encoding: STTEncoding,
         model: STTManualFinalizeModel,
         sample_rate: int,
+        keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
@@ -923,6 +931,7 @@ class ManualFinalizeResourceConnectionManager:
         self.__encoding = encoding
         self.__model = model
         self.__sample_rate = sample_rate
+        self.__keyterm = keyterm
         self.__language = language
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
@@ -1030,6 +1039,7 @@ class ManualFinalizeResourceConnectionManager:
                     "encoding": self.__encoding,
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
+                    "keyterm": self.__keyterm,
                     "language": self.__language,
                     "max_silence_duration_secs": self.__max_silence_duration_secs,
                     "min_volume": self.__min_volume,
