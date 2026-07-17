@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+from typing import Any, cast
 
 import httpx
 import pytest
@@ -8,6 +9,7 @@ import pytest
 from cartesia import Cartesia, AsyncCartesia
 from cartesia._types import Omit
 from cartesia._models import FinalRequestOptions
+from cartesia.lib._tts import AsyncWebSocketContext, AsyncTTSResourceConnection
 from cartesia._base_client import make_request_options
 
 
@@ -138,6 +140,31 @@ def test_stt_auto_finalize_websocket_query_omits_values(client: Cartesia, monkey
         "sample_rate": "16000",
         "keep": "1",
     }
+
+
+async def test_async_receive_cleans_up_context_queue_on_timeout() -> None:
+    """AsyncWebSocketContext.receive() must drop its per-context queue on timeout.
+
+    Before Python 3.11 ``asyncio.wait_for`` raises ``asyncio.TimeoutError`` (a distinct
+    class from the builtin ``TimeoutError``), so an ``except TimeoutError`` handler would
+    miss it and skip the ``finally`` cleanup — leaking the queue on the connection. The
+    handler catches both, so cleanup runs on every supported Python version.
+    """
+    # The connection only needs a real ``_context_queues`` dict; the underlying socket is
+    # never touched because ``receive()`` reads from the queue, not the wire.
+    connection = AsyncTTSResourceConnection(cast(Any, object()))
+    context_id = "ctx-timeout"
+    # Queue is never fed, so the receive loop hits its timeout.
+    connection._context_queues[context_id] = asyncio.Queue()
+
+    context = AsyncWebSocketContext(connection, context_id, timeout=0.01)
+
+    with pytest.raises((TimeoutError, asyncio.TimeoutError)):
+        async for _ in context.receive():
+            pass
+
+    # The per-context queue must be removed so it does not leak on the connection.
+    assert context_id not in connection._context_queues
 
 
 async def test_async_stt_auto_finalize_websocket_query_omits_values(
