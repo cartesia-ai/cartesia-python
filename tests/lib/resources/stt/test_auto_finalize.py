@@ -11,7 +11,7 @@ from websockets.exceptions import ConnectionClosedError
 from cartesia import Cartesia, AsyncCartesia
 from cartesia._exceptions import CartesiaError, WebSocketConnectionClosedError
 from cartesia.types.websocket_reconnection import ReconnectingOverrides
-from cartesia.types.stt.stt_auto_finalize_close_command import STTAutoFinalizeCloseCommand
+from cartesia.types.stt.stt_auto_finalize_websocket_request import STTAutoFinalizeCloseCommand
 
 from ._fakes import FakeSyncWS, FakeAsyncWS, install_sync_connect, install_async_connect
 
