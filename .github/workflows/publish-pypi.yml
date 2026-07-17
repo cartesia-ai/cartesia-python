@@ -1,13 +1,20 @@
-# workflow for re-running publishing to PyPI in case it fails for some reason
-# you can run this workflow by navigating to https://www.github.com/cartesia-ai/cartesia-python/actions/workflows/publish-pypi.yml
+# This workflow publishes the package to PyPI.
+# It runs automatically when release-please publishes a GitHub Release, and can
+# also be run manually (e.g. to re-run a failed publish) by navigating to
+# https://www.github.com/cartesia-ai/cartesia-python/actions/workflows/publish-pypi.yml
 name: Publish PyPI
 on:
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
+    # Guard so this only runs on the production repo — the file also exists in
+    # the staging repo via promotion, and publishing must never happen there.
+    if: github.repository == 'cartesia-ai/cartesia-python'
     environment: stainless-pypi-release
     permissions:
       contents: read
