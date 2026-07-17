@@ -633,7 +633,7 @@ def stt_transcribe(client: Cartesia, *args: str) -> None:
             print("Usage: stt_transcribe <audio_file> <language_code>")
             print("Example: stt_transcribe my_audio.wav en")
             sys.exit(1)
-        file_path, language = args
+        file_path, language, *_ = args
     else:
         file_path, language = generate_sample_wav()
 
