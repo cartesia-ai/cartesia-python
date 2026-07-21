@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.4.0 (2026-07-21)
+
+Full Changelog: [v3.3.0...v3.4.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.3.0...v3.4.0)
+
+### Features
+
+* **stt:** add turn configs and key term prompting ([4bdcfa0](https://github.com/cartesia-ai/cartesia-python/commit/4bdcfa0268a918655db78231f46f52a069ff6b0e))
+* **stt:** register STTAutoFinalizeCloseCommand as a named model ([13cf03a](https://github.com/cartesia-ai/cartesia-python/commit/13cf03ac75dad84ea93a47f53f083a14da19d4ac))
+* **tts:** add sonic-latest model ([09fa0a7](https://github.com/cartesia-ai/cartesia-python/commit/09fa0a73511fb58baec28fb94b8ac8f8ae018b9a))
+* **voices:** add ar, he, ta, te, and th localization languages ([09fa0a7](https://github.com/cartesia-ai/cartesia-python/commit/09fa0a73511fb58baec28fb94b8ac8f8ae018b9a))
+
+### Bug Fixes
+
+* catch asyncio.TimeoutError in async WebSocket receive() ([#91](https://github.com/cartesia-ai/cartesia-python/issues/91)) ([d2f5564](https://github.com/cartesia-ai/cartesia-python/commit/d2f55644a6bf6e6c1930c0dfd12cb5c914e11a9a))
+* correct required properties for tts and stt ws errors ([988e6aa](https://github.com/cartesia-ai/cartesia-python/commit/988e6aafc4fb2c34b9129c1378e1c06019951be4))
+* stt transcribe examples crash when more than 2 arguments are supplied ([#92](https://github.com/cartesia-ai/cartesia-python/issues/92)) ([b43e8a0](https://github.com/cartesia-ai/cartesia-python/commit/b43e8a04ff93888c90a7f1404b803baf6ada2d00))
+
+### Refactors
+
+* **stt:** inline auto-finalize command models into request union ([2021517](https://github.com/cartesia-ai/cartesia-python/commit/2021517f74a346c5f33727e676f4c5cd89061d7e))
+
 ## [3.4.0-b1](https://github.com/cartesia-ai/cartesia-python/compare/v3.3.0...v3.4.0-b1) (2026-07-17)
 
 
