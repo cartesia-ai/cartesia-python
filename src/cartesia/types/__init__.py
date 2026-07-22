@@ -23,6 +23,10 @@ from .voice_list_params import VoiceListParams as VoiceListParams
 from .generation_request import GenerationRequest as GenerationRequest
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .stt_error_response import STTErrorResponse as STTErrorResponse
+from .emotion import Emotion as Emotion
+from .gender import Gender as Gender
+from .localize_dialect import LocalizeDialect as LocalizeDialect
+from .localize_target_language import LocalizeTargetLanguage as LocalizeTargetLanguage
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse

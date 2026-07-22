@@ -8,6 +8,9 @@ from typing_extensions import Literal
 import httpx
 
 from ..types import (
+    Gender,
+    LocalizeDialect,
+    LocalizeTargetLanguage,
     SupportedLanguage,
     GenderPresentation,
     voice_get_params,
@@ -31,6 +34,9 @@ from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.voice_metadata import VoiceMetadata
+from ..types.gender import Gender
+from ..types.localize_dialect import LocalizeDialect
+from ..types.localize_target_language import LocalizeTargetLanguage
 from ..types.supported_language import SupportedLanguage
 from ..types.gender_presentation import GenderPresentation
 
@@ -329,32 +335,11 @@ class VoicesResource(SyncAPIResource):
         self,
         *,
         description: str,
-        language: Literal[
-            "en",
-            "de",
-            "es",
-            "fr",
-            "ja",
-            "pt",
-            "zh",
-            "hi",
-            "it",
-            "ko",
-            "nl",
-            "pl",
-            "ru",
-            "sv",
-            "tr",
-            "ar",
-            "he",
-            "ta",
-            "te",
-            "th",
-        ],
+        language: LocalizeTargetLanguage,
         name: str,
-        original_speaker_gender: Literal["male", "female"],
+        original_speaker_gender: Gender,
         voice_id: str,
-        dialect: Optional[Literal["au", "in", "so", "uk", "us", "mx", "pe", "br", "eu", "ca"]] | Omit = omit,
+        dialect: Optional[LocalizeDialect] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -373,7 +358,8 @@ class VoicesResource(SyncAPIResource):
 
               Options: English (en), German (de), Spanish (es), French (fr), Japanese (ja),
               Portuguese (pt), Chinese (zh), Hindi (hi), Italian (it), Korean (ko), Dutch
-              (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+              (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar),
+              Hebrew (he), Tamil (ta), Telugu (te), Thai (th).
 
           name: The name of the new localized voice.
 
@@ -702,32 +688,11 @@ class AsyncVoicesResource(AsyncAPIResource):
         self,
         *,
         description: str,
-        language: Literal[
-            "en",
-            "de",
-            "es",
-            "fr",
-            "ja",
-            "pt",
-            "zh",
-            "hi",
-            "it",
-            "ko",
-            "nl",
-            "pl",
-            "ru",
-            "sv",
-            "tr",
-            "ar",
-            "he",
-            "ta",
-            "te",
-            "th",
-        ],
+        language: LocalizeTargetLanguage,
         name: str,
-        original_speaker_gender: Literal["male", "female"],
+        original_speaker_gender: Gender,
         voice_id: str,
-        dialect: Optional[Literal["au", "in", "so", "uk", "us", "mx", "pe", "br", "eu", "ca"]] | Omit = omit,
+        dialect: Optional[LocalizeDialect] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -746,7 +711,8 @@ class AsyncVoicesResource(AsyncAPIResource):
 
               Options: English (en), German (de), Spanish (es), French (fr), Japanese (ja),
               Portuguese (pt), Chinese (zh), Hindi (hi), Italian (it), Korean (ko), Dutch
-              (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr).
+              (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar),
+              Hebrew (he), Tamil (ta), Telugu (te), Thai (th).
 
           name: The name of the new localized voice.
 

@@ -1,9 +1,9 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 from typing import Optional
-from typing_extensions import Literal
 
 from .._models import BaseModel
+from .emotion import Emotion
 
 __all__ = ["GenerationConfig"]
 
@@ -16,68 +16,7 @@ class GenerationConfig(BaseModel):
     See [Volume, Speed, and Emotion in Sonic-3](/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
     """
 
-    emotion: Optional[
-        Literal[
-            "neutral",
-            "happy",
-            "excited",
-            "enthusiastic",
-            "elated",
-            "euphoric",
-            "triumphant",
-            "amazed",
-            "surprised",
-            "flirtatious",
-            "curious",
-            "content",
-            "peaceful",
-            "serene",
-            "calm",
-            "grateful",
-            "affectionate",
-            "trust",
-            "sympathetic",
-            "anticipation",
-            "mysterious",
-            "angry",
-            "mad",
-            "outraged",
-            "frustrated",
-            "agitated",
-            "threatened",
-            "disgusted",
-            "contempt",
-            "envious",
-            "sarcastic",
-            "ironic",
-            "sad",
-            "dejected",
-            "melancholic",
-            "disappointed",
-            "hurt",
-            "guilty",
-            "bored",
-            "tired",
-            "rejected",
-            "nostalgic",
-            "wistful",
-            "apologetic",
-            "hesitant",
-            "insecure",
-            "confused",
-            "resigned",
-            "anxious",
-            "panicked",
-            "alarmed",
-            "scared",
-            "proud",
-            "confident",
-            "distant",
-            "skeptical",
-            "contemplative",
-            "determined",
-        ]
-    ] = None
+    emotion: Optional[Emotion] = None
     """Guide the emotion of the generated speech."""
 
     speed: Optional[float] = None

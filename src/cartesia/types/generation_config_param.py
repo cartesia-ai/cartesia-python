@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Union
-from typing_extensions import Literal, TypedDict
+from typing_extensions import TypedDict
+
+from .emotion import Emotion
 
 __all__ = ["GenerationConfigParam"]
 
@@ -16,69 +17,7 @@ class GenerationConfigParam(TypedDict, total=False):
     See [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
     """
 
-    emotion: Union[
-        str,
-        Literal[
-            "neutral",
-            "happy",
-            "excited",
-            "enthusiastic",
-            "elated",
-            "euphoric",
-            "triumphant",
-            "amazed",
-            "surprised",
-            "flirtatious",
-            "curious",
-            "content",
-            "peaceful",
-            "serene",
-            "calm",
-            "grateful",
-            "affectionate",
-            "trust",
-            "sympathetic",
-            "anticipation",
-            "mysterious",
-            "angry",
-            "mad",
-            "outraged",
-            "frustrated",
-            "agitated",
-            "threatened",
-            "disgusted",
-            "contempt",
-            "envious",
-            "sarcastic",
-            "ironic",
-            "sad",
-            "dejected",
-            "melancholic",
-            "disappointed",
-            "hurt",
-            "guilty",
-            "bored",
-            "tired",
-            "rejected",
-            "nostalgic",
-            "wistful",
-            "apologetic",
-            "hesitant",
-            "insecure",
-            "confused",
-            "resigned",
-            "anxious",
-            "panicked",
-            "alarmed",
-            "scared",
-            "proud",
-            "confident",
-            "distant",
-            "skeptical",
-            "contemplative",
-            "determined",
-        ],
-    ]
+    emotion: Emotion
     """Guide the emotion of the generated speech."""
 
     speed: float
