@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from .voice import Voice as Voice
+from .gender import Gender as Gender
 from .shared import WordTimestamps as WordTimestamps, PhonemeTimestamps as PhonemeTimestamps
 from .dataset import Dataset as Dataset
+from .emotion import Emotion as Emotion
 from .fine_tune import FineTune as FineTune
 from .tts_model import TTSModel as TTSModel
 from .model_speed import ModelSpeed as ModelSpeed
@@ -15,6 +17,7 @@ from .agent_summary import AgentSummary as AgentSummary
 from .tts_sse_event import TTSSSEEvent as TTSSSEEvent
 from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .stt_batch_model import STTBatchModel as STTBatchModel
+from .localize_dialect import LocalizeDialect as LocalizeDialect
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .voice_get_params import VoiceGetParams as VoiceGetParams
 from .generation_config import GenerationConfig as GenerationConfig
@@ -64,6 +67,7 @@ from .tts_generate_sse_params import (
 )
 from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
 from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
+from .localize_target_language import LocalizeTargetLanguage as LocalizeTargetLanguage
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse

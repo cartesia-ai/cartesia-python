@@ -219,6 +219,7 @@ Types:
 
 ```python
 from cartesia.types import (
+    Emotion,
     GenerationConfig,
     GenerationRequest,
     InfillModel,
@@ -260,7 +261,15 @@ Methods:
 Types:
 
 ```python
-from cartesia.types import GenderPresentation, SupportedLanguage, Voice, VoiceMetadata
+from cartesia.types import (
+    Gender,
+    GenderPresentation,
+    LocalizeDialect,
+    LocalizeTargetLanguage,
+    SupportedLanguage,
+    Voice,
+    VoiceMetadata,
+)
 ```
 
 Methods:
