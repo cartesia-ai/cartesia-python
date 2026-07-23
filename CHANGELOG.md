@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.4.0...v3.5.0) (2026-07-23)
+
+
+### Features
+
+* export LocalizeTargetLanguage, Gender, LocalizeDialect, and Emotion ([8d7c021](https://github.com/cartesia-ai/cartesia-python/commit/8d7c0214aceccb1143a1b2b6d2aa07be918ed28e))
+
 ## 3.4.0 (2026-07-21)
 
 Full Changelog: [v3.3.0...v3.4.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.3.0...v3.4.0)
