@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.4.0...v3.4.1) (2026-07-23)
+
+
+### Chores
+
+* trigger release-please for 3.5.0 ([#101](https://github.com/cartesia-ai/cartesia-python/issues/101)) ([c0671b3](https://github.com/cartesia-ai/cartesia-python/commit/c0671b3a4448552ce6457b7ce01816b5601e0371))
+
 ## 3.4.0 (2026-07-21)
 
 Full Changelog: [v3.3.0...v3.4.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.3.0...v3.4.0)
