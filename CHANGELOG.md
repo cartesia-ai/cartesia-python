@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.5.0...v3.5.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* **ci:** seal tracking files even when a staging push is missed ([166335c](https://github.com/cartesia-ai/cartesia-python/commit/166335c95df33fb94fb17a8a85beb67d2dd47eb5))
+
 ## [3.5.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.4.0...v3.5.0) (2026-07-23)
 
 
