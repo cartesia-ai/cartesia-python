@@ -34,6 +34,7 @@ class TestVoices:
     def test_method_update_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.update(
             id="id",
+            accent="British English",
             description="description",
             gender="masculine",
             name="name",
@@ -175,6 +176,7 @@ class TestVoices:
             clip=b"Example data",
             language="en",
             name="name",
+            accent="British English",
             base_voice_id="base_voice_id",
             description="description",
         )
@@ -282,6 +284,7 @@ class TestVoices:
             name="name",
             original_speaker_gender="male",
             voice_id="voice_id",
+            accent="British English",
             dialect="au",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
@@ -339,6 +342,7 @@ class TestAsyncVoices:
     async def test_method_update_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.update(
             id="id",
+            accent="British English",
             description="description",
             gender="masculine",
             name="name",
@@ -480,6 +484,7 @@ class TestAsyncVoices:
             clip=b"Example data",
             language="en",
             name="name",
+            accent="British English",
             base_voice_id="base_voice_id",
             description="description",
         )
@@ -587,6 +592,7 @@ class TestAsyncVoices:
             name="name",
             original_speaker_gender="male",
             voice_id="voice_id",
+            accent="British English",
             dialect="au",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])

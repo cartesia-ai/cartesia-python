@@ -6,7 +6,13 @@ from typing import Optional
 
 import httpx
 
-from ..types import FineTuneBaseModel, fine_tune_list_params, fine_tune_create_params, fine_tune_list_voices_params
+from ..types import (
+    VoiceAccent,
+    FineTuneBaseModel,
+    fine_tune_list_params,
+    fine_tune_create_params,
+    fine_tune_list_voices_params,
+)
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from .._utils import path_template, maybe_transform, async_maybe_transform
 from .._compat import cached_property
@@ -21,6 +27,7 @@ from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.fine_tune import FineTune
+from ..types.voice_accent import VoiceAccent
 from ..types.fine_tune_base_model import FineTuneBaseModel
 
 __all__ = ["FineTunesResource", "AsyncFineTunesResource"]
@@ -54,6 +61,7 @@ class FineTunesResource(SyncAPIResource):
         language: str,
         model_id: FineTuneBaseModel,
         name: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -77,6 +85,9 @@ class FineTunesResource(SyncAPIResource):
 
           name: Name for the new fine-tune
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -94,6 +105,7 @@ class FineTunesResource(SyncAPIResource):
                     "language": language,
                     "model_id": model_id,
                     "name": name,
+                    "accent": accent,
                 },
                 fine_tune_create_params.FineTuneCreateParams,
             ),
@@ -316,6 +328,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
         language: str,
         model_id: FineTuneBaseModel,
         name: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -339,6 +352,9 @@ class AsyncFineTunesResource(AsyncAPIResource):
 
           name: Name for the new fine-tune
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -356,6 +372,7 @@ class AsyncFineTunesResource(AsyncAPIResource):
                     "language": language,
                     "model_id": model_id,
                     "name": name,
+                    "accent": accent,
                 },
                 fine_tune_create_params.FineTuneCreateParams,
             ),

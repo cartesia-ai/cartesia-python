@@ -9,6 +9,7 @@ import httpx
 
 from ..types import (
     Gender,
+    VoiceAccent,
     LocalizeDialect,
     SupportedLanguage,
     GenderPresentation,
@@ -34,6 +35,7 @@ from ..pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ..types.voice import Voice
 from .._base_client import AsyncPaginator, make_request_options
 from ..types.gender import Gender
+from ..types.voice_accent import VoiceAccent
 from ..types.voice_metadata import VoiceMetadata
 from ..types.localize_dialect import LocalizeDialect
 from ..types.supported_language import SupportedLanguage
@@ -67,6 +69,7 @@ class VoicesResource(SyncAPIResource):
         self,
         id: str,
         *,
+        accent: Optional[VoiceAccent] | Omit = omit,
         description: str | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
         name: str | Omit = omit,
@@ -77,14 +80,17 @@ class VoicesResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Voice:
-        """Update the name, description, and gender of a voice.
+        """Update the name, description, gender, and accent of a voice.
 
-        To set the gender back to
-        the default, set the gender to `null`. If gender is not specified, the gender
-        will not be updated.
+        To set the gender
+        back to the default, set the gender to `null`. If gender is not specified, the
+        gender will not be updated.
 
         Args:
           id: The ID of the voice.
+
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
 
           description: The description of the voice.
 
@@ -104,6 +110,7 @@ class VoicesResource(SyncAPIResource):
             path_template("/voices/{id}", id=id),
             body=maybe_transform(
                 {
+                    "accent": accent,
                     "description": description,
                     "gender": gender,
                     "name": name,
@@ -232,6 +239,7 @@ class VoicesResource(SyncAPIResource):
         clip: FileTypes,
         language: SupportedLanguage,
         name: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         base_voice_id: Optional[str] | Omit = omit,
         description: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -252,6 +260,9 @@ class VoicesResource(SyncAPIResource):
 
           name: The name of the voice.
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           base_voice_id: Optional base voice ID that the cloned voice is derived from.
 
           description: A description for the voice.
@@ -269,6 +280,7 @@ class VoicesResource(SyncAPIResource):
                 "clip": clip,
                 "language": language,
                 "name": name,
+                "accent": accent,
                 "base_voice_id": base_voice_id,
                 "description": description,
             },
@@ -339,6 +351,7 @@ class VoicesResource(SyncAPIResource):
         name: str,
         original_speaker_gender: Gender,
         voice_id: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         dialect: Optional[LocalizeDialect] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -365,6 +378,9 @@ class VoicesResource(SyncAPIResource):
 
           voice_id: The ID of the voice to localize.
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
               Portuguese (`pt`), and French (`fr`).
 
@@ -385,6 +401,7 @@ class VoicesResource(SyncAPIResource):
                     "name": name,
                     "original_speaker_gender": original_speaker_gender,
                     "voice_id": voice_id,
+                    "accent": accent,
                     "dialect": dialect,
                 },
                 voice_localize_params.VoiceLocalizeParams,
@@ -420,6 +437,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         self,
         id: str,
         *,
+        accent: Optional[VoiceAccent] | Omit = omit,
         description: str | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
         name: str | Omit = omit,
@@ -430,14 +448,17 @@ class AsyncVoicesResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> Voice:
-        """Update the name, description, and gender of a voice.
+        """Update the name, description, gender, and accent of a voice.
 
-        To set the gender back to
-        the default, set the gender to `null`. If gender is not specified, the gender
-        will not be updated.
+        To set the gender
+        back to the default, set the gender to `null`. If gender is not specified, the
+        gender will not be updated.
 
         Args:
           id: The ID of the voice.
+
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
 
           description: The description of the voice.
 
@@ -457,6 +478,7 @@ class AsyncVoicesResource(AsyncAPIResource):
             path_template("/voices/{id}", id=id),
             body=await async_maybe_transform(
                 {
+                    "accent": accent,
                     "description": description,
                     "gender": gender,
                     "name": name,
@@ -585,6 +607,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         clip: FileTypes,
         language: SupportedLanguage,
         name: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         base_voice_id: Optional[str] | Omit = omit,
         description: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
@@ -605,6 +628,9 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           name: The name of the voice.
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           base_voice_id: Optional base voice ID that the cloned voice is derived from.
 
           description: A description for the voice.
@@ -622,6 +648,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                 "clip": clip,
                 "language": language,
                 "name": name,
+                "accent": accent,
                 "base_voice_id": base_voice_id,
                 "description": description,
             },
@@ -692,6 +719,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         name: str,
         original_speaker_gender: Gender,
         voice_id: str,
+        accent: Optional[VoiceAccent] | Omit = omit,
         dialect: Optional[LocalizeDialect] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
@@ -718,6 +746,9 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           voice_id: The ID of the voice to localize.
 
+          accent: Canonical accent display name for the voice (for example `British English` or
+              `General American English`).
+
           dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
               Portuguese (`pt`), and French (`fr`).
 
@@ -738,6 +769,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                     "name": name,
                     "original_speaker_gender": original_speaker_gender,
                     "voice_id": voice_id,
+                    "accent": accent,
                     "dialect": dialect,
                 },
                 voice_localize_params.VoiceLocalizeParams,

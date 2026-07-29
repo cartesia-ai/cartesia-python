@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from typing import Optional
 from typing_extensions import Required, TypedDict
 
+from .voice_accent import VoiceAccent
 from .fine_tune_base_model import FineTuneBaseModel
 
 __all__ = ["FineTuneCreateParams"]
@@ -29,3 +31,9 @@ class FineTuneCreateParams(TypedDict, total=False):
 
     name: Required[str]
     """Name for the new fine-tune"""
+
+    accent: Optional[VoiceAccent]
+    """
+    Canonical accent display name for the voice (for example `British English` or
+    `General American English`).
+    """

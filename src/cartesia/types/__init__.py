@@ -13,6 +13,8 @@ from .model_speed import ModelSpeed as ModelSpeed
 from .infill_model import InfillModel as InfillModel
 from .raw_encoding import RawEncoding as RawEncoding
 from .stt_encoding import STTEncoding as STTEncoding
+from .voice_accent import VoiceAccent as VoiceAccent
+from .voice_locale import VoiceLocale as VoiceLocale
 from .agent_summary import AgentSummary as AgentSummary
 from .tts_sse_event import TTSSSEEvent as TTSSSEEvent
 from .voice_metadata import VoiceMetadata as VoiceMetadata

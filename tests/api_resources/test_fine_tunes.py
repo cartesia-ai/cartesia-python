@@ -35,6 +35,19 @@ class TestFineTunes:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    def test_method_create_with_all_params(self, client: Cartesia) -> None:
+        fine_tune = client.fine_tunes.create(
+            dataset="dataset",
+            description="description",
+            language="language",
+            model_id="sonic-3-2026-01-12",
+            name="name",
+            accent="British English",
+        )
+        assert_matches_type(FineTune, fine_tune, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     def test_raw_response_create(self, client: Cartesia) -> None:
         response = client.fine_tunes.with_raw_response.create(
             dataset="dataset",
@@ -257,6 +270,19 @@ class TestAsyncFineTunes:
             language="language",
             model_id="sonic-3-2026-01-12",
             name="name",
+        )
+        assert_matches_type(FineTune, fine_tune, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_create_with_all_params(self, async_client: AsyncCartesia) -> None:
+        fine_tune = await async_client.fine_tunes.create(
+            dataset="dataset",
+            description="description",
+            language="language",
+            model_id="sonic-3-2026-01-12",
+            name="name",
+            accent="British English",
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 

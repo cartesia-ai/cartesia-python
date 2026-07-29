@@ -1,10 +1,12 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing import Optional
 from typing_extensions import Literal
 
 from pydantic import Field as FieldInfo
 
 from .._models import BaseModel
+from .voice_accent import VoiceAccent
 
 __all__ = ["FineTune"]
 
@@ -32,3 +34,9 @@ class FineTune(BaseModel):
 
     status: Literal["created", "training", "completed", "failed"]
     """Current status of the fine-tune"""
+
+    accent: Optional[VoiceAccent] = None
+    """
+    Canonical accent display name for the voice (for example `British English` or
+    `General American English`).
+    """

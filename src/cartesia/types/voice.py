@@ -1,9 +1,11 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 
 from .._models import BaseModel
+from .voice_accent import VoiceAccent
+from .voice_locale import VoiceLocale
 from .supported_language import SupportedLanguage
 from .gender_presentation import GenderPresentation
 
@@ -33,8 +35,22 @@ class Voice(BaseModel):
     [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
     """
 
+    locales: List[VoiceLocale]
+    """Locales this voice can speak.
+
+    The native/source locale is first (`is_native: true`), followed by attached
+    cross-lingual locales. Locale codes are BCP-47 language-region tags (for example
+    `en-US`, `es-MX`).
+    """
+
     name: str
     """The name of the voice."""
+
+    accent: Optional[VoiceAccent] = None
+    """
+    Canonical accent display name for the voice (for example `British English` or
+    `General American English`).
+    """
 
     country: Optional[str] = None
     """

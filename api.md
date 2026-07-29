@@ -268,6 +268,8 @@ from cartesia.types import (
     LocalizeTargetLanguage,
     SupportedLanguage,
     Voice,
+    VoiceAccent,
+    VoiceLocale,
     VoiceMetadata,
 )
 ```

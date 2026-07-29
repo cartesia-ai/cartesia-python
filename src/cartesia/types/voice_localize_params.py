@@ -6,6 +6,7 @@ from typing import Optional
 from typing_extensions import Required, TypedDict
 
 from .gender import Gender
+from .voice_accent import VoiceAccent
 from .localize_dialect import LocalizeDialect
 from .localize_target_language import LocalizeTargetLanguage
 
@@ -32,6 +33,12 @@ class VoiceLocalizeParams(TypedDict, total=False):
 
     voice_id: Required[str]
     """The ID of the voice to localize."""
+
+    accent: Optional[VoiceAccent]
+    """
+    Canonical accent display name for the voice (for example `British English` or
+    `General American English`).
+    """
 
     dialect: Optional[LocalizeDialect]
     """The dialect to localize to.
