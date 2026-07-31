@@ -48,6 +48,8 @@ _SupportedLanguage = Literal[
     "ml",
     "mr",
     "pa",
+    "or",
+    "ur",
 ]
 
 SupportedLanguage: TypeAlias = Union[_SupportedLanguage, str]

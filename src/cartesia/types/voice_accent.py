@@ -36,6 +36,7 @@ VoiceAccent: TypeAlias = Literal[
     "High German",
     "Hindi",
     "Indian English",
+    "Indian Urdu",
     "Irish English",
     "Israeli Hebrew",
     "Istanbul Turkish",
@@ -58,6 +59,7 @@ VoiceAccent: TypeAlias = Literal[
     "New York English",
     "New Zealand English",
     "North Kerala Malayalam",
+    "Odia",
     "Oslo Norwegian",
     "Parisian French",
     "Parsi Gujarati",
@@ -78,5 +80,6 @@ VoiceAccent: TypeAlias = Literal[
     "Tbilisi Georgian",
     "Telangana Telugu",
     "Thessaloniki Greek",
+    "Urdu",
     "Zagreb Croatian",
 ]
