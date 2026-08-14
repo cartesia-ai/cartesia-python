@@ -1,5 +1,5 @@
 """
-Async Examples for Cartesia Python SDK v3.x
+Async Examples for Cartesia Python SDK v4.x
 
 Run an example:
     uv sync && CARTESIA_API_KEY=... uv run examples/async_examples.py <functionName>

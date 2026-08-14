@@ -1,5 +1,5 @@
 """
-Examples for Cartesia Python SDK v3.x
+Examples for Cartesia Python SDK v4.x
 
 Run an example:
     uv sync && CARTESIA_API_KEY=... uv run examples/examples.py <functionName>
@@ -78,7 +78,7 @@ def tts_sse_basic(client: Cartesia) -> None:
     with open(filename, "wb") as f:
         for event in stream:
             if event.type == "chunk":
-                # v3.x returns raw bytes in event.audio
+                # decoded bytes in event.audio
                 if event.audio:
                     f.write(event.audio)
             elif event.type == "done":
