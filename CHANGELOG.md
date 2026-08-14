@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.5.1...v4.0.0) (2026-08-14)
+
+
+### Features
+
+* generate SDKs for Cartesia-Version 2026-08-14 ([9c0d2d3](https://github.com/cartesia-ai/cartesia-python/commit/9c0d2d38e03b5a9d7487748d12b3cd10787448f1))
+* **openapi:** add Odia and Urdu languages and accents ([f6b4ea4](https://github.com/cartesia-ai/cartesia-python/commit/f6b4ea44f80e418aacc1c38a7c54f92c49f5fcc8))
+
+
+### Chores
+
+* set next release to 4.0.0 ([bb2a8df](https://github.com/cartesia-ai/cartesia-python/commit/bb2a8df5f06b27a96e5d62dabe01aa4fb5225e0b))
+* set next release to 4.0.0 ([6092dd0](https://github.com/cartesia-ai/cartesia-python/commit/6092dd056ca9c92f16c89d3304ef2e6f9d42ff70))
+
+
+### Documentation
+
+* add v3 to v4 migration notes ([#18](https://github.com/cartesia-ai/cartesia-python/issues/18)) ([74f1c50](https://github.com/cartesia-ai/cartesia-python/commit/74f1c50dff8d8f03878c6a8cb60599e79ba528c0))
+
 ## [3.5.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.5.0...v3.5.1) (2026-07-29)
 
 
