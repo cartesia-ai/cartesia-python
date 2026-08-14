@@ -22,9 +22,9 @@ class VoiceCloneParams(TypedDict, total=False):
     """The name of the voice."""
 
     accent: Optional[VoiceAccent]
-    """
-    Canonical accent display name for the voice (for example `British English` or
-    `General American English`).
+    """Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+
+    Display names are rejected on this API version.
     """
 
     base_voice_id: Optional[str]

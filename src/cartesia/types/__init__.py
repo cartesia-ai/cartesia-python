@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .voice import Voice as Voice
+from .accent import Accent as Accent
 from .gender import Gender as Gender
 from .shared import WordTimestamps as WordTimestamps, PhonemeTimestamps as PhonemeTimestamps
 from .dataset import Dataset as Dataset
@@ -42,6 +43,7 @@ from .fine_tune_base_model import FineTuneBaseModel as FineTuneBaseModel
 from .dataset_create_params import DatasetCreateParams as DatasetCreateParams
 from .dataset_update_params import DatasetUpdateParams as DatasetUpdateParams
 from .fine_tune_list_params import FineTuneListParams as FineTuneListParams
+from .list_accents_response import ListAccentsResponse as ListAccentsResponse
 from .stt_transcribe_params import (
     STTTranscribeParams as STTTranscribeParams,
     SttTranscribeParams as SttTranscribeParams,

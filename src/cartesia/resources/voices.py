@@ -40,6 +40,7 @@ from ..types.voice_metadata import VoiceMetadata
 from ..types.localize_dialect import LocalizeDialect
 from ..types.supported_language import SupportedLanguage
 from ..types.gender_presentation import GenderPresentation
+from ..types.list_accents_response import ListAccentsResponse
 from ..types.localize_target_language import LocalizeTargetLanguage
 
 __all__ = ["VoicesResource", "AsyncVoicesResource"]
@@ -89,8 +90,8 @@ class VoicesResource(SyncAPIResource):
         Args:
           id: The ID of the voice.
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           description: The description of the voice.
 
@@ -260,8 +261,8 @@ class VoicesResource(SyncAPIResource):
 
           name: The name of the voice.
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           base_voice_id: Optional base voice ID that the cloned voice is derived from.
 
@@ -343,16 +344,41 @@ class VoicesResource(SyncAPIResource):
             cast_to=Voice,
         )
 
+    def list_accents(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> ListAccentsResponse:
+        """Returns the official catalog of supported accents.
+
+        Use `id` as `Voice.accent`
+        and as `POST /voices/localize` `accent`. `name` is the human-readable display
+        name. `is_localizable` is true when localize can target the accent.
+        """
+        return self._get(
+            "/accents",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=ListAccentsResponse,
+        )
+
     def localize(
         self,
         *,
-        description: str,
-        language: LocalizeTargetLanguage,
+        accent: VoiceAccent,
         name: str,
-        original_speaker_gender: Gender,
         voice_id: str,
-        accent: Optional[VoiceAccent] | Omit = omit,
+        description: str | Omit = omit,
         dialect: Optional[LocalizeDialect] | Omit = omit,
+        language: LocalizeTargetLanguage | Omit = omit,
+        original_speaker_gender: Gender | Omit = omit,
+        tagline: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -365,7 +391,17 @@ class VoicesResource(SyncAPIResource):
         dialect.
 
         Args:
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
+
+          name: The name of the new localized voice.
+
+          voice_id: The ID of the voice to localize.
+
           description: The description of the new localized voice.
+
+          dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
+              Portuguese (`pt`), and French (`fr`).
 
           language: Target language to localize the voice to.
 
@@ -374,15 +410,7 @@ class VoicesResource(SyncAPIResource):
               (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar), Hebrew
               (he), Tamil (ta), Telugu (te), Thai (th).
 
-          name: The name of the new localized voice.
-
-          voice_id: The ID of the voice to localize.
-
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
-
-          dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
-              Portuguese (`pt`), and French (`fr`).
+          tagline: Optional short tagline for the localized voice.
 
           extra_headers: Send extra headers
 
@@ -396,13 +424,14 @@ class VoicesResource(SyncAPIResource):
             "/voices/localize",
             body=maybe_transform(
                 {
-                    "description": description,
-                    "language": language,
-                    "name": name,
-                    "original_speaker_gender": original_speaker_gender,
-                    "voice_id": voice_id,
                     "accent": accent,
+                    "name": name,
+                    "voice_id": voice_id,
+                    "description": description,
                     "dialect": dialect,
+                    "language": language,
+                    "original_speaker_gender": original_speaker_gender,
+                    "tagline": tagline,
                 },
                 voice_localize_params.VoiceLocalizeParams,
             ),
@@ -457,8 +486,8 @@ class AsyncVoicesResource(AsyncAPIResource):
         Args:
           id: The ID of the voice.
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           description: The description of the voice.
 
@@ -628,8 +657,8 @@ class AsyncVoicesResource(AsyncAPIResource):
 
           name: The name of the voice.
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           base_voice_id: Optional base voice ID that the cloned voice is derived from.
 
@@ -711,16 +740,41 @@ class AsyncVoicesResource(AsyncAPIResource):
             cast_to=Voice,
         )
 
+    async def list_accents(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> ListAccentsResponse:
+        """Returns the official catalog of supported accents.
+
+        Use `id` as `Voice.accent`
+        and as `POST /voices/localize` `accent`. `name` is the human-readable display
+        name. `is_localizable` is true when localize can target the accent.
+        """
+        return await self._get(
+            "/accents",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=ListAccentsResponse,
+        )
+
     async def localize(
         self,
         *,
-        description: str,
-        language: LocalizeTargetLanguage,
+        accent: VoiceAccent,
         name: str,
-        original_speaker_gender: Gender,
         voice_id: str,
-        accent: Optional[VoiceAccent] | Omit = omit,
+        description: str | Omit = omit,
         dialect: Optional[LocalizeDialect] | Omit = omit,
+        language: LocalizeTargetLanguage | Omit = omit,
+        original_speaker_gender: Gender | Omit = omit,
+        tagline: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -733,7 +787,17 @@ class AsyncVoicesResource(AsyncAPIResource):
         dialect.
 
         Args:
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
+
+          name: The name of the new localized voice.
+
+          voice_id: The ID of the voice to localize.
+
           description: The description of the new localized voice.
+
+          dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
+              Portuguese (`pt`), and French (`fr`).
 
           language: Target language to localize the voice to.
 
@@ -742,15 +806,7 @@ class AsyncVoicesResource(AsyncAPIResource):
               (nl), Polish (pl), Russian (ru), Swedish (sv), Turkish (tr), Arabic (ar), Hebrew
               (he), Tamil (ta), Telugu (te), Thai (th).
 
-          name: The name of the new localized voice.
-
-          voice_id: The ID of the voice to localize.
-
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
-
-          dialect: The dialect to localize to. Only supported for English (`en`), Spanish (`es`),
-              Portuguese (`pt`), and French (`fr`).
+          tagline: Optional short tagline for the localized voice.
 
           extra_headers: Send extra headers
 
@@ -764,13 +820,14 @@ class AsyncVoicesResource(AsyncAPIResource):
             "/voices/localize",
             body=await async_maybe_transform(
                 {
-                    "description": description,
-                    "language": language,
-                    "name": name,
-                    "original_speaker_gender": original_speaker_gender,
-                    "voice_id": voice_id,
                     "accent": accent,
+                    "name": name,
+                    "voice_id": voice_id,
+                    "description": description,
                     "dialect": dialect,
+                    "language": language,
+                    "original_speaker_gender": original_speaker_gender,
+                    "tagline": tagline,
                 },
                 voice_localize_params.VoiceLocalizeParams,
             ),
@@ -800,6 +857,9 @@ class VoicesResourceWithRawResponse:
         self.get = to_raw_response_wrapper(
             voices.get,
         )
+        self.list_accents = to_raw_response_wrapper(
+            voices.list_accents,
+        )
         self.localize = to_raw_response_wrapper(
             voices.localize,
         )
@@ -823,6 +883,9 @@ class AsyncVoicesResourceWithRawResponse:
         )
         self.get = async_to_raw_response_wrapper(
             voices.get,
+        )
+        self.list_accents = async_to_raw_response_wrapper(
+            voices.list_accents,
         )
         self.localize = async_to_raw_response_wrapper(
             voices.localize,
@@ -848,6 +911,9 @@ class VoicesResourceWithStreamingResponse:
         self.get = to_streamed_response_wrapper(
             voices.get,
         )
+        self.list_accents = to_streamed_response_wrapper(
+            voices.list_accents,
+        )
         self.localize = to_streamed_response_wrapper(
             voices.localize,
         )
@@ -871,6 +937,9 @@ class AsyncVoicesResourceWithStreamingResponse:
         )
         self.get = async_to_streamed_response_wrapper(
             voices.get,
+        )
+        self.list_accents = async_to_streamed_response_wrapper(
+            voices.list_accents,
         )
         self.localize = async_to_streamed_response_wrapper(
             voices.localize,

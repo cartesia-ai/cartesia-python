@@ -31,7 +31,7 @@ def tts_generate_to_file(client: Cartesia) -> None:
     response = client.tts.generate(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -45,7 +45,7 @@ def tts_bytes_to_file(client: Cartesia) -> None:
     response = client.tts.bytes(  # pyright: ignore[reportDeprecated]
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -66,7 +66,7 @@ def tts_sse_basic(client: Cartesia) -> None:
     stream = client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -95,7 +95,7 @@ def tts_sse_with_timestamps(client: Cartesia) -> None:
     stream = client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
         add_timestamps=True,
@@ -128,7 +128,7 @@ def tts_sse_with_phoneme_timestamps(client: Cartesia) -> None:
     stream = client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
         add_phoneme_timestamps=True,
@@ -161,7 +161,7 @@ def tts_sse_with_match(client: Cartesia) -> None:
     stream = client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -200,7 +200,7 @@ def tts_websocket_basic(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -230,7 +230,7 @@ def tts_websocket_continuations(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={
                 "container": "raw",
                 "encoding": "pcm_s16le",
@@ -270,7 +270,7 @@ def tts_websocket_flushing(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )  # Auto-generates context_id
@@ -330,7 +330,7 @@ def tts_websocket_emotion(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -364,7 +364,7 @@ def tts_websocket_speed(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -406,12 +406,12 @@ def tts_websocket_concurrent_receives(client: Cartesia) -> None:
     with client.tts.websocket_connect() as connection:
         ctx1 = connection.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format=output_format,
         )
         ctx2 = connection.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format=output_format,
         )
 
@@ -460,7 +460,7 @@ def tts_websocket_response_handling(client: Cartesia) -> None:
     with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -619,7 +619,7 @@ def stt_transcribe(client: Cartesia, *args: str) -> None:
         response = client.tts.generate(
             model_id="sonic-latest",
             transcript=transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 16000},
             language=language,
         )
@@ -699,7 +699,7 @@ def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
         audio = client.tts.generate(
             model_id="sonic-latest",
             transcript=generation_transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
             language="en",
         ).read()
@@ -781,7 +781,7 @@ def stt_manual_finalize_websocket(client: Cartesia, *args: str) -> None:
             audio = client.tts.generate(
                 model_id="sonic-latest",
                 transcript=utterance,
-                voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+                voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
                 output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
                 language="en",
             ).read()
@@ -830,7 +830,7 @@ def error_handling_example(client: Cartesia) -> None:
         client.tts.generate(
             model_id="sonic-latest",
             transcript="",  # empty transcript will cause a 400 bad request response
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )

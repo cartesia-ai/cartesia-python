@@ -42,7 +42,7 @@ class TestFineTunes:
             language="language",
             model_id="sonic-3-2026-01-12",
             name="name",
-            accent="British English",
+            accent="southern-us",
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 
@@ -282,7 +282,7 @@ class TestAsyncFineTunes:
             language="language",
             model_id="sonic-3-2026-01-12",
             name="name",
-            accent="British English",
+            accent="southern-us",
         )
         assert_matches_type(FineTune, fine_tune, path=["response"])
 

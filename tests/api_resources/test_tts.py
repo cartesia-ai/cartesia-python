@@ -35,10 +35,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
         assert tts.is_closed
         assert tts.json() == {"foo": "bar"}
@@ -57,16 +54,15 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
             generation_config={
                 "emotion": "neutral",
                 "speed": 0,
                 "volume": 0,
             },
             language="en",
+            locale="locale",
+            normalization="normalization",
             pronunciation_dict_id="pronunciation_dict_id",
             save=True,
             speed="slow",
@@ -89,10 +85,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
 
         assert tts.is_closed is True
@@ -112,10 +105,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         ) as tts:
             assert not tts.is_closed
             assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -137,10 +127,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
         tts_stream.response.close()
 
@@ -155,10 +142,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
@@ -168,6 +152,8 @@ class TestTTS:
                 "volume": 0,
             },
             language="en",
+            locale="locale",
+            normalization="normalization",
             pronunciation_dict_id="pronunciation_dict_id",
             speed="slow",
             use_normalized_timestamps=True,
@@ -185,10 +171,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -206,10 +189,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -295,10 +275,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
         assert tts.is_closed
         assert await tts.json() == {"foo": "bar"}
@@ -317,16 +294,15 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
             generation_config={
                 "emotion": "neutral",
                 "speed": 0,
                 "volume": 0,
             },
             language="en",
+            locale="locale",
+            normalization="normalization",
             pronunciation_dict_id="pronunciation_dict_id",
             save=True,
             speed="slow",
@@ -349,10 +325,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
 
         assert tts.is_closed is True
@@ -372,10 +345,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         ) as tts:
             assert not tts.is_closed
             assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -397,10 +367,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
         await tts_stream.response.aclose()
 
@@ -415,10 +382,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
@@ -428,6 +392,8 @@ class TestAsyncTTS:
                 "volume": 0,
             },
             language="en",
+            locale="locale",
+            normalization="normalization",
             pronunciation_dict_id="pronunciation_dict_id",
             speed="slow",
             use_normalized_timestamps=True,
@@ -445,10 +411,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -466,10 +429,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice={
-                "id": "id",
-                "mode": "id",
-            },
+            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

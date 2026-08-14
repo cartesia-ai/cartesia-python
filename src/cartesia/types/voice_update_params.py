@@ -13,9 +13,9 @@ __all__ = ["VoiceUpdateParams"]
 
 class VoiceUpdateParams(TypedDict, total=False):
     accent: Optional[VoiceAccent]
-    """
-    Canonical accent display name for the voice (for example `British English` or
-    `General American English`).
+    """Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+
+    Display names are rejected on this API version.
     """
 
     description: str

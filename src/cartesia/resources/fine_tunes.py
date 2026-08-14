@@ -85,8 +85,8 @@ class FineTunesResource(SyncAPIResource):
 
           name: Name for the new fine-tune
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           extra_headers: Send extra headers
 
@@ -352,8 +352,8 @@ class AsyncFineTunesResource(AsyncAPIResource):
 
           name: Name for the new fine-tune
 
-          accent: Canonical accent display name for the voice (for example `British English` or
-              `General American English`).
+          accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+              Display names are rejected on this API version.
 
           extra_headers: Send extra headers
 

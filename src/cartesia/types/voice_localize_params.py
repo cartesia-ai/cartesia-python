@@ -14,10 +14,29 @@ __all__ = ["VoiceLocalizeParams"]
 
 
 class VoiceLocalizeParams(TypedDict, total=False):
-    description: Required[str]
+    accent: Required[VoiceAccent]
+    """Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+
+    Display names are rejected on this API version.
+    """
+
+    name: Required[str]
+    """The name of the new localized voice."""
+
+    voice_id: Required[str]
+    """The ID of the voice to localize."""
+
+    description: str
     """The description of the new localized voice."""
 
-    language: Required[LocalizeTargetLanguage]
+    dialect: Optional[LocalizeDialect]
+    """The dialect to localize to.
+
+    Only supported for English (`en`), Spanish (`es`), Portuguese (`pt`), and French
+    (`fr`).
+    """
+
+    language: LocalizeTargetLanguage
     """Target language to localize the voice to.
 
     Options: English (en), German (de), Spanish (es), French (fr), Japanese (ja),
@@ -26,23 +45,7 @@ class VoiceLocalizeParams(TypedDict, total=False):
     (he), Tamil (ta), Telugu (te), Thai (th).
     """
 
-    name: Required[str]
-    """The name of the new localized voice."""
+    original_speaker_gender: Gender
 
-    original_speaker_gender: Required[Gender]
-
-    voice_id: Required[str]
-    """The ID of the voice to localize."""
-
-    accent: Optional[VoiceAccent]
-    """
-    Canonical accent display name for the voice (for example `British English` or
-    `General American English`).
-    """
-
-    dialect: Optional[LocalizeDialect]
-    """The dialect to localize to.
-
-    Only supported for English (`en`), Spanish (`es`), Portuguese (`pt`), and French
-    (`fr`).
-    """
+    tagline: str
+    """Optional short tagline for the localized voice."""

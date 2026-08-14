@@ -89,6 +89,8 @@ class TTSResource(SyncAPIResource):
         voice: VoiceSpecifierParam,
         generation_config: GenerationConfigParam | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
+        locale: Optional[str] | Omit = omit,
+        normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: ModelSpeed | Omit = omit,
@@ -113,6 +115,10 @@ class TTSResource(SyncAPIResource):
               [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
               all options.
 
+          voice: The voice to use for generation. Pass either a voice ID string or an object with
+              a required `id` (additional object fields may be added in future API versions).
+              Embeddings are not accepted in this API version.
+
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
 
@@ -120,8 +126,15 @@ class TTSResource(SyncAPIResource):
               [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+          language: The transcript's language. A request may set `language` or `locale`, never both.
+
+          locale: Language or locale for the generation (for example `en` or `en-GB`). Same
+              accepted values as `language`. A request may set `language` or `locale`, never
+              both.
+
+          normalization: Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+              skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+              independently of the generation language.
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -152,6 +165,8 @@ class TTSResource(SyncAPIResource):
                     "voice": voice,
                     "generation_config": generation_config,
                     "language": language,
+                    "locale": locale,
+                    "normalization": normalization,
                     "pronunciation_dict_id": pronunciation_dict_id,
                     "save": save,
                     "speed": speed,
@@ -175,7 +190,9 @@ class TTSResource(SyncAPIResource):
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: SupportedLanguage | Omit = omit,
+        language: Optional[SupportedLanguage] | Omit = omit,
+        locale: Optional[str] | Omit = omit,
+        normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         speed: ModelSpeed | Omit = omit,
         use_normalized_timestamps: Optional[bool] | Omit = omit,
@@ -204,6 +221,10 @@ class TTSResource(SyncAPIResource):
               [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
               all options.
 
+          voice: The voice to use for generation. Pass either a voice ID string or an object with
+              a required `id` (additional object fields may be added in future API versions).
+              Embeddings are not accepted in this API version.
+
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
               containing phoneme-level timing information.
@@ -221,8 +242,15 @@ class TTSResource(SyncAPIResource):
               [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+          language: The transcript's language. A request may set `language` or `locale`, never both.
+
+          locale: Language or locale for the generation (for example `en` or `en-GB`). Same
+              accepted values as `language`. A request may set `language` or `locale`, never
+              both.
+
+          normalization: Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+              skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+              independently of the generation language.
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -255,6 +283,8 @@ class TTSResource(SyncAPIResource):
                     "context_id": context_id,
                     "generation_config": generation_config,
                     "language": language,
+                    "locale": locale,
+                    "normalization": normalization,
                     "pronunciation_dict_id": pronunciation_dict_id,
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,
@@ -482,6 +512,8 @@ class AsyncTTSResource(AsyncAPIResource):
         voice: VoiceSpecifierParam,
         generation_config: GenerationConfigParam | Omit = omit,
         language: Optional[SupportedLanguage] | Omit = omit,
+        locale: Optional[str] | Omit = omit,
+        normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: ModelSpeed | Omit = omit,
@@ -506,6 +538,10 @@ class AsyncTTSResource(AsyncAPIResource):
               [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
               all options.
 
+          voice: The voice to use for generation. Pass either a voice ID string or an object with
+              a required `id` (additional object fields may be added in future API versions).
+              Embeddings are not accepted in this API version.
+
           generation_config: Configure the various attributes of the generated speech. These are only for
               `sonic-3` and have no effect on earlier models.
 
@@ -513,8 +549,15 @@ class AsyncTTSResource(AsyncAPIResource):
               [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+          language: The transcript's language. A request may set `language` or `locale`, never both.
+
+          locale: Language or locale for the generation (for example `en` or `en-GB`). Same
+              accepted values as `language`. A request may set `language` or `locale`, never
+              both.
+
+          normalization: Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+              skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+              independently of the generation language.
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -545,6 +588,8 @@ class AsyncTTSResource(AsyncAPIResource):
                     "voice": voice,
                     "generation_config": generation_config,
                     "language": language,
+                    "locale": locale,
+                    "normalization": normalization,
                     "pronunciation_dict_id": pronunciation_dict_id,
                     "save": save,
                     "speed": speed,
@@ -568,7 +613,9 @@ class AsyncTTSResource(AsyncAPIResource):
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: SupportedLanguage | Omit = omit,
+        language: Optional[SupportedLanguage] | Omit = omit,
+        locale: Optional[str] | Omit = omit,
+        normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         speed: ModelSpeed | Omit = omit,
         use_normalized_timestamps: Optional[bool] | Omit = omit,
@@ -597,6 +644,10 @@ class AsyncTTSResource(AsyncAPIResource):
               [the docs](https://docs.cartesia.ai/build-with-cartesia/tts-models/latest) for
               all options.
 
+          voice: The voice to use for generation. Pass either a voice ID string or an object with
+              a required `id` (additional object fields may be added in future API versions).
+              Embeddings are not accepted in this API version.
+
           add_phoneme_timestamps: Whether to return phoneme-level timestamps. If `false` (default), no phoneme
               timestamps will be produced. If `true`, the server will return timestamp events
               containing phoneme-level timing information.
@@ -614,8 +665,15 @@ class AsyncTTSResource(AsyncAPIResource):
               [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion)
               for a guide on this option.
 
-          language: The language that the given voice should speak the transcript in. For valid
-              options, see [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+          language: The transcript's language. A request may set `language` or `locale`, never both.
+
+          locale: Language or locale for the generation (for example `en` or `en-GB`). Same
+              accepted values as `language`. A request may set `language` or `locale`, never
+              both.
+
+          normalization: Text normalization. `auto` (default) runs the locale-aware normalizer, `off`
+              skips it, or pass a locale code (for example `en-IN`) to pin the normalizer
+              independently of the generation language.
 
           pronunciation_dict_id: The ID of a pronunciation dictionary to use for the generation. Pronunciation
               dictionaries are supported by `sonic-3` models and newer.
@@ -648,6 +706,8 @@ class AsyncTTSResource(AsyncAPIResource):
                     "context_id": context_id,
                     "generation_config": generation_config,
                     "language": language,
+                    "locale": locale,
+                    "normalization": normalization,
                     "pronunciation_dict_id": pronunciation_dict_id,
                     "speed": speed,
                     "use_normalized_timestamps": use_normalized_timestamps,

@@ -21,7 +21,7 @@ async def tts_generate_async(client: AsyncCartesia) -> None:
     response = await client.tts.generate(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -35,7 +35,7 @@ async def tts_bytes_async(client: AsyncCartesia) -> None:
     response = await client.tts.bytes(  # pyright: ignore[reportDeprecated]
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -61,7 +61,7 @@ async def tts_sse_basic_async(client: AsyncCartesia) -> None:
     stream = await client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
     )
@@ -89,7 +89,7 @@ async def tts_sse_with_timestamps_async(client: AsyncCartesia) -> None:
     stream = await client.tts.generate_sse(
         model_id="sonic-latest",
         transcript="Hello, world!",
-        voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+        voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
         output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         language="en",
         add_timestamps=True,
@@ -127,7 +127,7 @@ async def tts_websocket_basic_async(client: AsyncCartesia) -> None:
     async with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -156,7 +156,7 @@ async def tts_websocket_continuations_async(client: AsyncCartesia) -> None:
     async with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
         )
 
@@ -187,7 +187,7 @@ async def tts_websocket_flushing_async(client: AsyncCartesia) -> None:
     async with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -244,7 +244,7 @@ async def tts_websocket_emotion_async(client: AsyncCartesia) -> None:
     async with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -278,7 +278,7 @@ async def tts_websocket_speed_async(client: AsyncCartesia) -> None:
     async with client.tts.websocket_connect() as ws:
         ctx = ws.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "raw", "encoding": "pcm_s16le", "sample_rate": 44100},
             language="en",
         )
@@ -323,12 +323,12 @@ async def tts_websocket_concurrent_receives_async(client: AsyncCartesia) -> None
     async with client.tts.websocket_connect() as connection:
         ctx1 = connection.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format=output_format,
         )
         ctx2 = connection.context(
             model_id="sonic-latest",
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format=output_format,
         )
 
@@ -390,7 +390,7 @@ async def tts_async_concurrent_contexts(client: AsyncCartesia) -> None:
         contexts: list[AsyncWebSocketContext] = []
         for i in range(3):
             ctx = connection.context(
-                model_id="sonic-latest", voice={"mode": "id", "id": voice_id}, output_format=output_format
+                model_id="sonic-latest", voice=voice_id, output_format=output_format
             )
             contexts.append(ctx)
             print(f"Created context {i}: {ctx._context_id}")
@@ -463,7 +463,7 @@ async def stt_transcribe_async(client: AsyncCartesia, *args: str) -> None:
         response = await client.tts.generate(
             model_id="sonic-latest",
             transcript=transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format={"container": "wav", "encoding": "pcm_s16le", "sample_rate": 16000},
             language=language,
         )
@@ -551,7 +551,7 @@ async def stt_auto_finalize_websocket_async(client: AsyncCartesia, *args: str) -
         tts_response = await client.tts.generate(
             model_id="sonic-latest",
             transcript=transcript,
-            voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+            voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
             output_format=output_format,
             language="en",
         )
@@ -642,7 +642,7 @@ async def stt_manual_finalize_websocket_async(client: AsyncCartesia, *args: str)
             tts_response = await client.tts.generate(
                 model_id="sonic-latest",
                 transcript=utterance,
-                voice={"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"},
+                voice="6ccbfb76-1fc6-48f7-b71d-91ac6298247b",
                 output_format={"container": "raw", "encoding": encoding, "sample_rate": sample_rate},
                 language="en",
             )

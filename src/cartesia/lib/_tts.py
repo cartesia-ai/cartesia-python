@@ -725,7 +725,7 @@ class WebSocketContext:
             return  # Already completed, ignore
 
         voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
         )
 
         self.send(
@@ -972,7 +972,7 @@ class AsyncWebSocketContext:
             return  # Already completed, ignore
 
         voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, {"mode": "id", "id": "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"}
+            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
         )
 
         await self.send(

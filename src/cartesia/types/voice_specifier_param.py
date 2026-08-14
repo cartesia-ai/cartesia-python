@@ -2,13 +2,24 @@
 
 from __future__ import annotations
 
-from typing_extensions import Literal, Required, TypedDict
+from typing import Union
+from typing_extensions import Required, TypeAlias, TypedDict
 
-__all__ = ["VoiceSpecifierParam"]
+__all__ = ["VoiceSpecifierParam", "TTSRequestVoiceObject"]
 
 
-class VoiceSpecifierParam(TypedDict, total=False):
+class TTSRequestVoiceObject(  # type: ignore[call-arg]
+    TypedDict,
+    total=False,
+    extra_items=object,  # pyright: ignore[reportGeneralTypeIssues]
+):
+    """Voice object.
+
+    `id` is required; other fields may be added in future API versions.
+    """
+
     id: Required[str]
     """The ID of the voice."""
 
-    mode: Required[Literal["id"]]
+
+VoiceSpecifierParam: TypeAlias = Union[str, TTSRequestVoiceObject]

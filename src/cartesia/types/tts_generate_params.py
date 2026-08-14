@@ -36,6 +36,12 @@ class TTSGenerateParams(TypedDict, total=False):
     transcript: Required[str]
 
     voice: Required[VoiceSpecifierParam]
+    """The voice to use for generation.
+
+    Pass either a voice ID string or an object with a required `id` (additional
+    object fields may be added in future API versions). Embeddings are not accepted
+    in this API version.
+    """
 
     generation_config: GenerationConfigParam
     """Configure the various attributes of the generated speech.
@@ -48,10 +54,24 @@ class TTSGenerateParams(TypedDict, total=False):
     """
 
     language: Optional[SupportedLanguage]
-    """The language that the given voice should speak the transcript in.
+    """The transcript's language.
 
-    For valid options, see
-    [Models](https://docs.cartesia.ai/build-with-cartesia/tts-models).
+    A request may set `language` or `locale`, never both.
+    """
+
+    locale: Optional[str]
+    """Language or locale for the generation (for example `en` or `en-GB`).
+
+    Same accepted values as `language`. A request may set `language` or `locale`,
+    never both.
+    """
+
+    normalization: Optional[str]
+    """Text normalization.
+
+    `auto` (default) runs the locale-aware normalizer, `off` skips it, or pass a
+    locale code (for example `en-IN`) to pin the normalizer independently of the
+    generation language.
     """
 
     pronunciation_dict_id: Optional[str]

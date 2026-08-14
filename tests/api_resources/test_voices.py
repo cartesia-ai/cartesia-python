@@ -12,6 +12,7 @@ from tests.utils import assert_matches_type
 from cartesia.types import (
     Voice,
     VoiceMetadata,
+    ListAccentsResponse,
 )
 from cartesia.pagination import SyncCursorIDPage, AsyncCursorIDPage
 
@@ -34,7 +35,7 @@ class TestVoices:
     def test_method_update_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.update(
             id="id",
-            accent="British English",
+            accent="southern-us",
             description="description",
             gender="masculine",
             name="name",
@@ -176,7 +177,7 @@ class TestVoices:
             clip=b"Example data",
             language="en",
             name="name",
-            accent="British English",
+            accent="southern-us",
             base_voice_id="base_voice_id",
             description="description",
         )
@@ -265,12 +266,38 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    def test_method_list_accents(self, client: Cartesia) -> None:
+        voice = client.voices.list_accents()
+        assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_list_accents(self, client: Cartesia) -> None:
+        response = client.voices.with_raw_response.list_accents()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = response.parse()
+        assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_list_accents(self, client: Cartesia) -> None:
+        with client.voices.with_streaming_response.list_accents() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = response.parse()
+            assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     def test_method_localize(self, client: Cartesia) -> None:
         voice = client.voices.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
@@ -279,13 +306,14 @@ class TestVoices:
     @parametrize
     def test_method_localize_with_all_params(self, client: Cartesia) -> None:
         voice = client.voices.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
-            accent="British English",
+            description="description",
             dialect="au",
+            language="en",
+            original_speaker_gender="male",
+            tagline="tagline",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
@@ -293,10 +321,8 @@ class TestVoices:
     @parametrize
     def test_raw_response_localize(self, client: Cartesia) -> None:
         response = client.voices.with_raw_response.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         )
 
@@ -309,10 +335,8 @@ class TestVoices:
     @parametrize
     def test_streaming_response_localize(self, client: Cartesia) -> None:
         with client.voices.with_streaming_response.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         ) as response:
             assert not response.is_closed
@@ -342,7 +366,7 @@ class TestAsyncVoices:
     async def test_method_update_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.update(
             id="id",
-            accent="British English",
+            accent="southern-us",
             description="description",
             gender="masculine",
             name="name",
@@ -484,7 +508,7 @@ class TestAsyncVoices:
             clip=b"Example data",
             language="en",
             name="name",
-            accent="British English",
+            accent="southern-us",
             base_voice_id="base_voice_id",
             description="description",
         )
@@ -573,12 +597,38 @@ class TestAsyncVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    async def test_method_list_accents(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.list_accents()
+        assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_list_accents(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.voices.with_raw_response.list_accents()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = await response.parse()
+        assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_list_accents(self, async_client: AsyncCartesia) -> None:
+        async with async_client.voices.with_streaming_response.list_accents() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = await response.parse()
+            assert_matches_type(ListAccentsResponse, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     async def test_method_localize(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
@@ -587,13 +637,14 @@ class TestAsyncVoices:
     @parametrize
     async def test_method_localize_with_all_params(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
-            accent="British English",
+            description="description",
             dialect="au",
+            language="en",
+            original_speaker_gender="male",
+            tagline="tagline",
         )
         assert_matches_type(VoiceMetadata, voice, path=["response"])
 
@@ -601,10 +652,8 @@ class TestAsyncVoices:
     @parametrize
     async def test_raw_response_localize(self, async_client: AsyncCartesia) -> None:
         response = await async_client.voices.with_raw_response.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         )
 
@@ -617,10 +666,8 @@ class TestAsyncVoices:
     @parametrize
     async def test_streaming_response_localize(self, async_client: AsyncCartesia) -> None:
         async with async_client.voices.with_streaming_response.localize(
-            description="description",
-            language="en",
+            accent="southern-us",
             name="name",
-            original_speaker_gender="male",
             voice_id="voice_id",
         ) as response:
             assert not response.is_closed

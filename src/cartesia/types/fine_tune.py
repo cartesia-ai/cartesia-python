@@ -36,7 +36,7 @@ class FineTune(BaseModel):
     """Current status of the fine-tune"""
 
     accent: Optional[VoiceAccent] = None
-    """
-    Canonical accent display name for the voice (for example `British English` or
-    `General American English`).
+    """Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+
+    Display names are rejected on this API version.
     """

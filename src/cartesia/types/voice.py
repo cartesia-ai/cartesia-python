@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from datetime import datetime
+from typing_extensions import Literal
 
 from .._models import BaseModel
 from .voice_accent import VoiceAccent
@@ -16,6 +17,13 @@ class Voice(BaseModel):
     id: str
     """The ID of the voice."""
 
+    access: Literal["private", "public"]
+    """Who can use the resource.
+
+    `private` means only the owner can use the resource. `public` means everyone can
+    use the resource.
+    """
+
     created_at: datetime
     """The date and time the voice was created."""
 
@@ -24,9 +32,6 @@ class Voice(BaseModel):
 
     is_owner: bool
     """Whether your organization owns the voice."""
-
-    is_public: bool
-    """Whether the voice is publicly accessible."""
 
     language: SupportedLanguage
     """The language that the given voice should speak the transcript in.
@@ -44,17 +49,31 @@ class Voice(BaseModel):
     """
 
     name: str
-    """The name of the voice."""
+    """The display name of the voice. Does not include the tagline."""
+
+    tagline: str
+    """A short descriptor for the voice (at most 32 characters).
+
+    Empty string when unset.
+    """
+
+    visibility: Literal["owner", "all"]
+    """When the resource is returned by the list endpoint.
+
+    `owner` means the resource appears for the owner only. `all` means the resource
+    appears for all users.
+    """
 
     accent: Optional[VoiceAccent] = None
-    """
-    Canonical accent display name for the voice (for example `British English` or
-    `General American English`).
+    """Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
+
+    Display names are rejected on this API version.
     """
 
     country: Optional[str] = None
-    """
-    The country associated with the voice, as an ISO 3166-1 alpha-2 code when
+    """Deprecated.
+
+    Prefer `locales[].locale` (BCP-47). ISO 3166-1 alpha-2 country code when
     available (e.g. `US`, `GB`, `FR`).
     """
 
