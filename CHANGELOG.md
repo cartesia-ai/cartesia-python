@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/cartesia-ai/cartesia-python/compare/v4.0.0...v4.0.1) (2026-08-14)
+
+
+### Documentation
+
+* use a real voice UUID in README TTS examples ([#19](https://github.com/cartesia-ai/cartesia-python/issues/19)) ([a92f254](https://github.com/cartesia-ai/cartesia-python/commit/a92f254de9dbd9e46bdd9a27f866c9c6762ee7aa))
+
 ## [4.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v3.5.1...v4.0.0) (2026-08-14)
 
 
