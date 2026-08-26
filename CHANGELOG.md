@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.0.1...v4.1.0) (2026-08-26)
+
+
+### Features
+
+* add PATCH and DELETE /voices/{id}/accents ([#21](https://github.com/cartesia-ai/cartesia-python/issues/21)) ([a37907e](https://github.com/cartesia-ai/cartesia-python/commit/a37907e62beb4fa05cd92575318c20f891e752f3))
+
 ## [4.0.1](https://github.com/cartesia-ai/cartesia-python/compare/v4.0.0...v4.0.1) (2026-08-14)
 
 
