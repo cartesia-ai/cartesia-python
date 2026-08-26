@@ -35,7 +35,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
         assert tts.is_closed
         assert tts.json() == {"foo": "bar"}
@@ -54,7 +54,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
             generation_config={
                 "emotion": "neutral",
                 "speed": 0,
@@ -85,7 +85,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
 
         assert tts.is_closed is True
@@ -105,7 +105,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         ) as tts:
             assert not tts.is_closed
             assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -127,7 +127,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
         tts_stream.response.close()
 
@@ -142,7 +142,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
@@ -171,7 +171,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -189,7 +189,7 @@ class TestTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -275,7 +275,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
         assert tts.is_closed
         assert await tts.json() == {"foo": "bar"}
@@ -294,7 +294,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
             generation_config={
                 "emotion": "neutral",
                 "speed": 0,
@@ -325,7 +325,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
 
         assert tts.is_closed is True
@@ -345,7 +345,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         ) as tts:
             assert not tts.is_closed
             assert tts.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -367,7 +367,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
         await tts_stream.response.aclose()
 
@@ -382,7 +382,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
             add_phoneme_timestamps=True,
             add_timestamps=True,
             context_id="context_id",
@@ -411,7 +411,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         )
 
         assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -429,7 +429,7 @@ class TestAsyncTTS:
                 "sample_rate": 8000,
             },
             transcript="transcript",
-            voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+            voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

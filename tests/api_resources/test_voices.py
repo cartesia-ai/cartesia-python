@@ -162,6 +162,52 @@ class TestVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    def test_method_add_accents(self, client: Cartesia) -> None:
+        voice = client.voices.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_add_accents(self, client: Cartesia) -> None:
+        response = client.voices.with_raw_response.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_add_accents(self, client: Cartesia) -> None:
+        with client.voices.with_streaming_response.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_path_params_add_accents(self, client: Cartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            client.voices.with_raw_response.add_accents(
+                id="",
+                accents=["british", "parisian"],
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     def test_method_clone(self, client: Cartesia) -> None:
         voice = client.voices.clone(
             clip=b"Example data",
@@ -212,6 +258,58 @@ class TestVoices:
             assert_matches_type(VoiceMetadata, voice, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_delete_accent(self, client: Cartesia) -> None:
+        voice = client.voices.delete_accent(
+            accent_id="british",
+            id="id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_delete_accent(self, client: Cartesia) -> None:
+        response = client.voices.with_raw_response.delete_accent(
+            accent_id="british",
+            id="id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_delete_accent(self, client: Cartesia) -> None:
+        with client.voices.with_streaming_response.delete_accent(
+            accent_id="british",
+            id="id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_path_params_delete_accent(self, client: Cartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            client.voices.with_raw_response.delete_accent(
+                accent_id="british",
+                id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `accent_id` but received ''"):
+            client.voices.with_raw_response.delete_accent(
+                accent_id="",
+                id="id",
+            )
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
@@ -493,6 +591,52 @@ class TestAsyncVoices:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    async def test_method_add_accents(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_add_accents(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.voices.with_raw_response.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = await response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_add_accents(self, async_client: AsyncCartesia) -> None:
+        async with async_client.voices.with_streaming_response.add_accents(
+            id="id",
+            accents=["british", "parisian"],
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = await response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_path_params_add_accents(self, async_client: AsyncCartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            await async_client.voices.with_raw_response.add_accents(
+                id="",
+                accents=["british", "parisian"],
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     async def test_method_clone(self, async_client: AsyncCartesia) -> None:
         voice = await async_client.voices.clone(
             clip=b"Example data",
@@ -543,6 +687,58 @@ class TestAsyncVoices:
             assert_matches_type(VoiceMetadata, voice, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_delete_accent(self, async_client: AsyncCartesia) -> None:
+        voice = await async_client.voices.delete_accent(
+            accent_id="british",
+            id="id",
+        )
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_delete_accent(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.voices.with_raw_response.delete_accent(
+            accent_id="british",
+            id="id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        voice = await response.parse()
+        assert_matches_type(Voice, voice, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_delete_accent(self, async_client: AsyncCartesia) -> None:
+        async with async_client.voices.with_streaming_response.delete_accent(
+            accent_id="british",
+            id="id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            voice = await response.parse()
+            assert_matches_type(Voice, voice, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_path_params_delete_accent(self, async_client: AsyncCartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `id` but received ''"):
+            await async_client.voices.with_raw_response.delete_accent(
+                accent_id="british",
+                id="",
+            )
+
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `accent_id` but received ''"):
+            await async_client.voices.with_raw_response.delete_accent(
+                accent_id="",
+                id="id",
+            )
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize

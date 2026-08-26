@@ -263,6 +263,8 @@ Types:
 ```python
 from cartesia.types import (
     Accent,
+    AddVoiceAccentsRequest,
+    AttachVoiceAccent,
     Gender,
     GenderPresentation,
     ListAccentsResponse,
@@ -281,7 +283,9 @@ Methods:
 - <code title="patch /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">update</a>(id, \*\*<a href="src/cartesia/types/voice_update_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>
 - <code title="get /voices">client.voices.<a href="./src/cartesia/resources/voices.py">list</a>(\*\*<a href="src/cartesia/types/voice_list_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 - <code title="delete /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">delete</a>(id) -> None</code>
+- <code title="patch /voices/{id}/accents">client.voices.<a href="./src/cartesia/resources/voices.py">add_accents</a>(id, \*\*<a href="src/cartesia/types/voice_add_accents_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>
 - <code title="post /voices/clone">client.voices.<a href="./src/cartesia/resources/voices.py">clone</a>(\*\*<a href="src/cartesia/types/voice_clone_params.py">params</a>) -> <a href="./src/cartesia/types/voice_metadata.py">VoiceMetadata</a></code>
+- <code title="delete /voices/{id}/accents/{accent_id}">client.voices.<a href="./src/cartesia/resources/voices.py">delete_accent</a>(accent_id, \*, id) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>
 - <code title="get /voices/{id}">client.voices.<a href="./src/cartesia/resources/voices.py">get</a>(id, \*\*<a href="src/cartesia/types/voice_get_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">Voice</a></code>
 - <code title="get /accents">client.voices.<a href="./src/cartesia/resources/voices.py">list_accents</a>() -> <a href="./src/cartesia/types/list_accents_response.py">ListAccentsResponse</a></code>
 - <code title="post /voices/localize">client.voices.<a href="./src/cartesia/resources/voices.py">localize</a>(\*\*<a href="src/cartesia/types/voice_localize_params.py">params</a>) -> <a href="./src/cartesia/types/voice_metadata.py">VoiceMetadata</a></code>

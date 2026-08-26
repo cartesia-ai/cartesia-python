@@ -34,6 +34,7 @@ from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
 from .agent_list_response import AgentListResponse as AgentListResponse
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
+from .attach_voice_accent import AttachVoiceAccent as AttachVoiceAccent
 from .dataset_list_params import DatasetListParams as DatasetListParams
 from .gender_presentation import GenderPresentation as GenderPresentation
 from .get_status_response import GetStatusResponse as GetStatusResponse
@@ -73,6 +74,7 @@ from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEven
 from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .localize_target_language import LocalizeTargetLanguage as LocalizeTargetLanguage
+from .voice_add_accents_params import VoiceAddAccentsParams as VoiceAddAccentsParams
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams

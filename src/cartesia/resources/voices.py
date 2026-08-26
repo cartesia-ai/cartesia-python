@@ -19,6 +19,7 @@ from ..types import (
     voice_clone_params,
     voice_update_params,
     voice_localize_params,
+    voice_add_accents_params,
 )
 from .._files import deepcopy_with_paths
 from .._types import Body, Omit, Query, Headers, NoneType, NotGiven, FileTypes, omit, not_given
@@ -39,6 +40,7 @@ from ..types.voice_accent import VoiceAccent
 from ..types.voice_metadata import VoiceMetadata
 from ..types.localize_dialect import LocalizeDialect
 from ..types.supported_language import SupportedLanguage
+from ..types.attach_voice_accent import AttachVoiceAccent
 from ..types.gender_presentation import GenderPresentation
 from ..types.list_accents_response import ListAccentsResponse
 from ..types.localize_target_language import LocalizeTargetLanguage
@@ -234,6 +236,46 @@ class VoicesResource(SyncAPIResource):
             cast_to=NoneType,
         )
 
+    def add_accents(
+        self,
+        id: str,
+        *,
+        accents: List[AttachVoiceAccent],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Add accents to an instant voice clone you own so a single `voice_id` can speak
+        multiple accents natively.
+
+        Args:
+          id: The ID of the voice.
+
+          accents: Accents to add. A voice can support up to 10 accents in total, including native.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        return self._patch(
+            path_template("/voices/{id}/accents", id=id),
+            body=maybe_transform({"accents": accents}, voice_add_accents_params.VoiceAddAccentsParams),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
+        )
+
     def clone(
         self,
         *,
@@ -300,6 +342,44 @@ class VoicesResource(SyncAPIResource):
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=VoiceMetadata,
+        )
+
+    def delete_accent(
+        self,
+        accent_id: str,
+        *,
+        id: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Remove an accent your instant voice clone supports.
+
+        Args:
+          id: The ID of the voice.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        if not accent_id:
+            raise ValueError(f"Expected a non-empty value for `accent_id` but received {accent_id!r}")
+        return self._delete(
+            path_template("/voices/{id}/accents/{accent_id}", id=id, accent_id=accent_id),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
         )
 
     def get(
@@ -630,6 +710,46 @@ class AsyncVoicesResource(AsyncAPIResource):
             cast_to=NoneType,
         )
 
+    async def add_accents(
+        self,
+        id: str,
+        *,
+        accents: List[AttachVoiceAccent],
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Add accents to an instant voice clone you own so a single `voice_id` can speak
+        multiple accents natively.
+
+        Args:
+          id: The ID of the voice.
+
+          accents: Accents to add. A voice can support up to 10 accents in total, including native.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        return await self._patch(
+            path_template("/voices/{id}/accents", id=id),
+            body=await async_maybe_transform({"accents": accents}, voice_add_accents_params.VoiceAddAccentsParams),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
+        )
+
     async def clone(
         self,
         *,
@@ -696,6 +816,44 @@ class AsyncVoicesResource(AsyncAPIResource):
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=VoiceMetadata,
+        )
+
+    async def delete_accent(
+        self,
+        accent_id: str,
+        *,
+        id: str,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Voice:
+        """
+        Remove an accent your instant voice clone supports.
+
+        Args:
+          id: The ID of the voice.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not id:
+            raise ValueError(f"Expected a non-empty value for `id` but received {id!r}")
+        if not accent_id:
+            raise ValueError(f"Expected a non-empty value for `accent_id` but received {accent_id!r}")
+        return await self._delete(
+            path_template("/voices/{id}/accents/{accent_id}", id=id, accent_id=accent_id),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Voice,
         )
 
     async def get(
@@ -851,8 +1009,14 @@ class VoicesResourceWithRawResponse:
         self.delete = to_raw_response_wrapper(
             voices.delete,
         )
+        self.add_accents = to_raw_response_wrapper(
+            voices.add_accents,
+        )
         self.clone = to_raw_response_wrapper(
             voices.clone,
+        )
+        self.delete_accent = to_raw_response_wrapper(
+            voices.delete_accent,
         )
         self.get = to_raw_response_wrapper(
             voices.get,
@@ -878,8 +1042,14 @@ class AsyncVoicesResourceWithRawResponse:
         self.delete = async_to_raw_response_wrapper(
             voices.delete,
         )
+        self.add_accents = async_to_raw_response_wrapper(
+            voices.add_accents,
+        )
         self.clone = async_to_raw_response_wrapper(
             voices.clone,
+        )
+        self.delete_accent = async_to_raw_response_wrapper(
+            voices.delete_accent,
         )
         self.get = async_to_raw_response_wrapper(
             voices.get,
@@ -905,8 +1075,14 @@ class VoicesResourceWithStreamingResponse:
         self.delete = to_streamed_response_wrapper(
             voices.delete,
         )
+        self.add_accents = to_streamed_response_wrapper(
+            voices.add_accents,
+        )
         self.clone = to_streamed_response_wrapper(
             voices.clone,
+        )
+        self.delete_accent = to_streamed_response_wrapper(
+            voices.delete_accent,
         )
         self.get = to_streamed_response_wrapper(
             voices.get,
@@ -932,8 +1108,14 @@ class AsyncVoicesResourceWithStreamingResponse:
         self.delete = async_to_streamed_response_wrapper(
             voices.delete,
         )
+        self.add_accents = async_to_streamed_response_wrapper(
+            voices.add_accents,
+        )
         self.clone = async_to_streamed_response_wrapper(
             voices.clone,
+        )
+        self.delete_accent = async_to_streamed_response_wrapper(
+            voices.delete_accent,
         )
         self.get = async_to_streamed_response_wrapper(
             voices.get,

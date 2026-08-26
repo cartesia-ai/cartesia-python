@@ -305,7 +305,7 @@ response = client.tts.generate(
         "sample_rate": 8000,
     },
     transcript="transcript",
-    voice="db6b0ed5-d5d3-463d-ae85-518a07d3c2b4",
+    voice="e07c00bc-4134-4eae-9ea4-1a55fb45746b",
     generation_config={},
 )
 print(response.generation_config)
