@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.1.0...v4.2.0) (2026-09-02)
+
+
+### Features
+
+* add case_sensitive to pronunciation dict items ([#22](https://github.com/cartesia-ai/cartesia-python/issues/22)) ([29cf503](https://github.com/cartesia-ai/cartesia-python/commit/29cf5031800d359236803f2088ed4cccf8eeede6))
+
 ## [4.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.0.1...v4.1.0) (2026-08-26)
 
 
