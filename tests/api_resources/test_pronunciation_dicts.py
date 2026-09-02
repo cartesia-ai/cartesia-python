@@ -37,6 +37,7 @@ class TestPronunciationDicts:
                 {
                     "alias": "alias",
                     "text": "text",
+                    "case_sensitive": True,
                 }
             ],
         )
@@ -127,6 +128,7 @@ class TestPronunciationDicts:
                 {
                     "alias": "alias",
                     "text": "text",
+                    "case_sensitive": True,
                 }
             ],
             name="name",
@@ -270,6 +272,7 @@ class TestAsyncPronunciationDicts:
                 {
                     "alias": "alias",
                     "text": "text",
+                    "case_sensitive": True,
                 }
             ],
         )
@@ -360,6 +363,7 @@ class TestAsyncPronunciationDicts:
                 {
                     "alias": "alias",
                     "text": "text",
+                    "case_sensitive": True,
                 }
             ],
             name="name",

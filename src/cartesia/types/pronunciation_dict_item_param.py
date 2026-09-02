@@ -15,3 +15,10 @@ class PronunciationDictItemParam(TypedDict, total=False):
 
     text: Required[str]
     """The original text to be replaced"""
+
+    case_sensitive: bool
+    """When false (default), match every capitalization of `text` (Sonic 3.6).
+
+    When true, keep existing matching: lowercase keys also match sentence-start
+    capitalization.
+    """
