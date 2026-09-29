@@ -52,7 +52,7 @@ class AsyncTTSResourceConnection:
     ) -> None:
         self._connection = connection
         self._manager = manager
-        self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
+        self._context_queues: dict[str, asyncio.Queue[Union[WebsocketResponse, BaseException]]] = {}
         self._processing_task: Optional[asyncio.Task[None]] = None
         self._closing = False
         self._logger = logging.getLogger(__name__)
@@ -139,9 +139,13 @@ class AsyncTTSResourceConnection:
                     await self._context_queues[event_ctx].put(event)
                 else:
                     self._logger.debug("Received event for unregistered context %s", event_ctx)
-        except ConnectionClosed:
+        except ConnectionClosed as exc:
             if not self._closing:
                 self._logger.warning("WebSocket connection closed unexpectedly")
+            # Wake every context that is waiting for events; nothing else will
+            # ever put another item on their queues.
+            for context_queue in list(self._context_queues.values()):
+                context_queue.put_nowait(exc)
 
     async def _ensure_connected(self) -> None:
         import asyncio as _asyncio
@@ -997,6 +1001,8 @@ class AsyncWebSocketContext:
         """
         import asyncio as _asyncio
 
+        from websockets.exceptions import ConnectionClosedOK
+
         my_queue = self._connection._context_queues.get(self._context_id)
         if my_queue is None:
             return
@@ -1016,6 +1022,13 @@ class AsyncWebSocketContext:
                     # queue is always cleaned up on timeout.
                     done = True
                     raise
+
+                if isinstance(event, BaseException):
+                    # The connection closed while this context was waiting.
+                    done = True
+                    if isinstance(event, ConnectionClosedOK):
+                        return
+                    raise event
 
                 yield event
                 if event.type in ("done", "error"):
