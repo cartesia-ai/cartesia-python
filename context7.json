@@ -1,0 +1,22 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Cartesia Python SDK",
+  "description": "Official Python SDK for the Cartesia API: Sonic text to speech, Ink speech to text, voices and voice agents, with sync and async clients.",
+  "excludeFolders": [
+    "src",
+    "tests",
+    "scripts",
+    "bin"
+  ],
+  "excludeFiles": [
+    "CHANGELOG.md"
+  ],
+  "rules": [
+    "Use sonic-3.6 for text to speech. The pinned snapshot is sonic-3.6-2026-08-27.",
+    "Never use sonic-2, sonic-turbo, sonic-3-2025-10-27, sonic, sonic-english or sonic-multilingual: they are retired and return model_sunsetted. sonic-latest and sonic-3-latest are deprecated aliases.",
+    "Use ink-2 for streaming speech to text and ink-whisper for transcribing files.",
+    "Let the SDK set the Cartesia-Version header; do not override it.",
+    "Never put CARTESIA_API_KEY in browser code. Mint a short-lived access token on the server and use that in the client.",
+    "Check https://docs.cartesia.ai/llms.txt for current models and API shapes before writing code from memory."
+  ]
+}
