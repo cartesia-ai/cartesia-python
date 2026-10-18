@@ -400,7 +400,7 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
         raw_path = url.copy_with(query=None).raw_path
         if raw_path.endswith(b"/"):
             return url
-        return url.copy_with(raw_path=raw_path + b"/", query=url.query)
+        return url.copy_with(raw_path=raw_path + b"/").copy_with(query=url.query or None)
 
     def _make_status_error_from_response(
         self,

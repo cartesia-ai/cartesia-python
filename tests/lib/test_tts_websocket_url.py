@@ -9,7 +9,13 @@ from cartesia import Cartesia, AsyncCartesia
 
 
 @pytest.mark.parametrize(
-    "base_url", ["https://proxy.example", "https://proxy.example/api/v1/", "https://proxy.example/tenant%2Fname/"]
+    "base_url",
+    [
+        "https://proxy.example",
+        "https://proxy.example/api/v1/",
+        "https://proxy.example/api/v1",
+        "https://proxy.example/tenant%2Fname/",
+    ],
 )
 @pytest.mark.parametrize("query", ["", "?route=speech&tag=a%2Fb"])
 def test_tts_websocket_path_with_base_query(base_url: str, query: str, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -31,7 +37,13 @@ def test_tts_websocket_path_with_base_query(base_url: str, query: str, monkeypat
 
 
 @pytest.mark.parametrize(
-    "base_url", ["https://proxy.example", "https://proxy.example/api/v1/", "https://proxy.example/tenant%2Fname/"]
+    "base_url",
+    [
+        "https://proxy.example",
+        "https://proxy.example/api/v1/",
+        "https://proxy.example/api/v1",
+        "https://proxy.example/tenant%2Fname/",
+    ],
 )
 @pytest.mark.parametrize("query", ["", "?route=speech&tag=a%2Fb"])
 async def test_async_tts_websocket_path_with_base_query(
