@@ -63,6 +63,12 @@ jobs:
           shas=$(gh pr list --repo "$GITHUB_REPOSITORY" --base main --state open --json headRefOid --jq '.[].headRefOid')
           if [ -z "$shas" ]; then echo "no open PRs targeting main"; exit 0; fi
           for sha in $shas; do
+            current_state=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/status" \
+              --jq '[.statuses[] | select(.context == "trunk-synced")][0].state // ""')
+            if [ "$current_state" = "$state" ]; then
+              echo "trunk-synced already $state on $sha"
+              continue
+            fi
             gh api -X POST "repos/$GITHUB_REPOSITORY/statuses/$sha" \
               -f state="$state" -f context="trunk-synced" -f description="$desc" >/dev/null
             echo "posted trunk-synced=$state to $sha"
