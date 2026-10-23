@@ -706,8 +706,7 @@ def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
-    # Concatenate transcripts from all turn.end events to get the full transcript
-    # Do not strip or add whitespace!
+    # Join transcripts from all turn.end events with a space to get the full transcript.
     full_transcript = ""
 
     with client.stt.auto_finalize.websocket(
@@ -736,7 +735,7 @@ def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
                 print("turn.resume     |")
             elif event.type == "turn.end":
                 print(f"turn.end       | {event.transcript}")
-                full_transcript += event.transcript
+                full_transcript += (" " if full_transcript else "") + event.transcript
             elif event.type == "error":
                 print(f"error          | {event.message}")
 
