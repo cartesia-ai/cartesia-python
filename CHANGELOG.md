@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.2.1](https://github.com/cartesia-ai/cartesia-python/compare/v4.2.0...v4.2.1) (2026-10-23)
+
+
+### Chores
+
+* avoid duplicate trunk sync statuses ([#27](https://github.com/cartesia-ai/cartesia-python/issues/27)) ([774afef](https://github.com/cartesia-ai/cartesia-python/commit/774afefbeeccb27ea16db1d17c1110737b8f0471))
+
+
+### Documentation
+
+* space separate auto-finalize transcript turns ([#26](https://github.com/cartesia-ai/cartesia-python/issues/26)) ([2968b94](https://github.com/cartesia-ai/cartesia-python/commit/2968b948b5358c7458b39fbd71509f176f51e669))
+
+
+### Build System
+
+* **deps:** bump astral-sh/setup-uv from 8.3.2 to 10.3.0 ([#25](https://github.com/cartesia-ai/cartesia-python/issues/25)) ([3cb0419](https://github.com/cartesia-ai/cartesia-python/commit/3cb04193202178ea2e4160e3a3ad86df82ab4982))
+
 ## [4.2.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.1.0...v4.2.0) (2026-09-02)
 
 
