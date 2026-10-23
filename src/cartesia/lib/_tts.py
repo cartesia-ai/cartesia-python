@@ -597,6 +597,7 @@ class WebSocketContext:
         self._max_buffer_delay_ms = max_buffer_delay_ms
         self._pronunciation_dict_id = pronunciation_dict_id
         self._use_normalized_timestamps = use_normalized_timestamps
+        self._last_request: Optional[GenerationRequestParam] = None
 
     def send(
         self,
@@ -695,6 +696,7 @@ class WebSocketContext:
         request_params.update(cast(GenerationRequestParam, kwargs))
 
         self._connection.send(request_params)
+        self._last_request = request_params.copy()
 
     def push(
         self,
@@ -725,9 +727,16 @@ class WebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
-        )
+        if self._last_request is not None:
+            request = self._last_request.copy()
+            request["transcript"] = ""
+            request["continue"] = False
+            request.pop("flush", None)
+            self._connection.send(request)
+            self._completed = True
+            return
+
+        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b")
 
         self.send(
             transcript="",
@@ -843,6 +852,7 @@ class AsyncWebSocketContext:
         self._max_buffer_delay_ms = max_buffer_delay_ms
         self._pronunciation_dict_id = pronunciation_dict_id
         self._use_normalized_timestamps = use_normalized_timestamps
+        self._last_request: Optional[GenerationRequestParam] = None
 
     async def send(
         self,
@@ -941,6 +951,7 @@ class AsyncWebSocketContext:
         request_params.update(cast(GenerationRequestParam, kwargs))
 
         await self._connection.send(request_params)
+        self._last_request = request_params.copy()
         self._connection._dispatch_listener()
 
     async def push(
@@ -972,9 +983,16 @@ class AsyncWebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
-        )
+        if self._last_request is not None:
+            request = self._last_request.copy()
+            request["transcript"] = ""
+            request["continue"] = False
+            request.pop("flush", None)
+            await self._connection.send(request)
+            self._completed = True
+            return
+
+        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b")
 
         await self.send(
             transcript="",
