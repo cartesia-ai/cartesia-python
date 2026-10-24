@@ -321,7 +321,7 @@ class AsyncTTSResourceConnectionManager:
         else:
             base_url = self.__client._base_url.copy_with(scheme="wss")
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/tts/websocket"
+        merge_raw_path = base_url.copy_with(query=None).raw_path.rstrip(b"/") + b"/tts/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     async def __aexit__(
@@ -552,7 +552,7 @@ class TTSResourceConnectionManager:
         else:
             base_url = self.__client._base_url.copy_with(scheme="wss")
 
-        merge_raw_path = base_url.raw_path.rstrip(b"/") + b"/tts/websocket"
+        merge_raw_path = base_url.copy_with(query=None).raw_path.rstrip(b"/") + b"/tts/websocket"
         return base_url.copy_with(raw_path=merge_raw_path)
 
     def __exit__(
@@ -725,9 +725,7 @@ class WebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
-        )
+        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b")
 
         self.send(
             transcript="",
@@ -972,9 +970,7 @@ class AsyncWebSocketContext:
         if self._completed:
             return  # Already completed, ignore
 
-        voice: VoiceSpecifierParam = self._voice or cast(
-            VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b"
-        )
+        voice: VoiceSpecifierParam = self._voice or cast(VoiceSpecifierParam, "6ccbfb76-1fc6-48f7-b71d-91ac6298247b")
 
         await self.send(
             transcript="",

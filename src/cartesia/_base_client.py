@@ -397,9 +397,10 @@ class BaseClient(Generic[_HttpxClientT, _DefaultStreamT]):
             )
 
     def _enforce_trailing_slash(self, url: URL) -> URL:
-        if url.raw_path.endswith(b"/"):
+        raw_path = url.copy_with(query=None).raw_path
+        if raw_path.endswith(b"/"):
             return url
-        return url.copy_with(raw_path=url.raw_path + b"/")
+        return url.copy_with(raw_path=raw_path + b"/").copy_with(query=url.query or None)
 
     def _make_status_error_from_response(
         self,
