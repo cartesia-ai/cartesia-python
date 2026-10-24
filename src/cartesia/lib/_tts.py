@@ -42,6 +42,12 @@ if TYPE_CHECKING:
     from .._client import Cartesia, AsyncCartesia
 
 
+def _is_closed(connection: Any) -> bool:
+    from websockets.protocol import State
+
+    return bool(connection.state in (State.CLOSED, State.CLOSING))
+
+
 class AsyncTTSResourceConnection:
     """Represents a live WebSocket connection to the TTS API"""
 
@@ -159,7 +165,6 @@ class AsyncTTSResourceConnection:
                 self._processing_task = None
             new_conn = await self._manager.__aenter__()
             self._connection = new_conn._connection
-            self._context_queues.clear()
 
     def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
         """
@@ -280,7 +285,7 @@ class AsyncTTSResourceConnectionManager:
         ```
         """
         async with self.__lock:
-            if self.__connection is not None:
+            if self.__connection is not None and not _is_closed(self.__connection._connection):
                 return self.__connection
 
             try:
@@ -394,7 +399,6 @@ class TTSResourceConnection:
             self._logger.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
             new_conn = self._manager.__enter__()
             self._connection = new_conn._connection
-            self._context_queues.clear()
 
     def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
         """
@@ -511,7 +515,7 @@ class TTSResourceConnectionManager:
         connection.close()
         ```
         """
-        if self.__connection is not None:
+        if self.__connection is not None and not _is_closed(self.__connection._connection):
             return self.__connection
 
         try:
