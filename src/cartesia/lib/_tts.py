@@ -636,7 +636,7 @@ class WebSocketContext:
         elif self._model_id is not None:
             model_id = self._model_id
         else:
-            model_id = "sonic-latest"
+            model_id = "sonic-3.6"
 
         # Build request parameters, excluding omitted values
         request_params: GenerationRequestParam = {
@@ -882,7 +882,7 @@ class AsyncWebSocketContext:
         elif self._model_id is not None:
             model_id = self._model_id
         else:
-            model_id = "sonic-latest"
+            model_id = "sonic-3.6"
 
         # Build request parameters, excluding omitted values
         request_params: GenerationRequestParam = {
