@@ -36,6 +36,7 @@ from ..types.websocket_client_event_param import WebsocketClientEventParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
 if TYPE_CHECKING:
+    from websockets.exceptions import ConnectionClosed
     from websockets.sync.client import ClientConnection as WebsocketConnection
     from websockets.asyncio.client import ClientConnection as AsyncWebsocketConnection
 
@@ -52,9 +53,10 @@ class AsyncTTSResourceConnection:
     ) -> None:
         self._connection = connection
         self._manager = manager
-        self._context_queues: dict[str, asyncio.Queue[WebsocketResponse]] = {}
+        self._context_queues: dict[str, asyncio.Queue[Union[WebsocketResponse, ConnectionClosed]]] = {}
         self._processing_task: Optional[asyncio.Task[None]] = None
         self._closing = False
+        self._reconnect_lock = asyncio.Lock()
         self._logger = logging.getLogger(__name__)
 
     async def __aiter__(self) -> AsyncIterator[WebsocketResponse]:
@@ -139,27 +141,25 @@ class AsyncTTSResourceConnection:
                     await self._context_queues[event_ctx].put(event)
                 else:
                     self._logger.debug("Received event for unregistered context %s", event_ctx)
-        except ConnectionClosed:
+        except ConnectionClosed as exc:
             if not self._closing:
                 self._logger.warning("WebSocket connection closed unexpectedly")
+            # Contexts still waiting on this connection raise from it in `receive()`.
+            for context_queue in self._context_queues.values():
+                context_queue.put_nowait(exc)
 
     async def _ensure_connected(self) -> None:
-        import asyncio as _asyncio
-
         from websockets.protocol import State
 
-        if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
+        async with self._reconnect_lock:
+            if self._manager is None or self._connection.state not in (State.CLOSED, State.CLOSING):
+                return
             self._logger.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
-            if self._processing_task is not None:
-                self._processing_task.cancel()
-                try:
-                    await self._processing_task
-                except _asyncio.CancelledError:
-                    pass
-                self._processing_task = None
-            new_conn = await self._manager.__aenter__()
-            self._connection = new_conn._connection
-            self._context_queues.clear()
+            # The old listener is left to end on the closed connection, failing the contexts
+            # that sent on it, and the next send dispatches a new one. Context queues are
+            # kept, since the context calling this owns one.
+            self._processing_task = None
+            self._connection = await self._manager._connect()
 
     def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
         """
@@ -280,40 +280,38 @@ class AsyncTTSResourceConnectionManager:
         ```
         """
         async with self.__lock:
-            if self.__connection is not None:
-                return self.__connection
-
-            try:
-                from websockets.asyncio.client import connect
-            except ImportError as exc:
-                raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
-
-            url = self._prepare_url().copy_with(
-                params=_merge_mappings(self.__client.base_url.params, self.__extra_query),
-            )
-            self._logger.debug("Connecting to %s", url)
-            if self.__websocket_connection_options:
-                self._logger.debug("Connection options: %s", self.__websocket_connection_options)
-
-            self.__connection = AsyncTTSResourceConnection(
-                await connect(
-                    str(url),
-                    user_agent_header=self.__client.user_agent,
-                    additional_headers=_merge_mappings(
-                        {
-                            **self.__client.default_headers,
-                            **self.__client.auth_headers,
-                        },
-                        self.__extra_headers,
-                    ),
-                    **self.__websocket_connection_options,
-                ),
-                manager=self,
-            )
-
+            if self.__connection is None:
+                self.__connection = AsyncTTSResourceConnection(await self._connect(), manager=self)
             return self.__connection
 
     enter = __aenter__
+
+    async def _connect(self) -> AsyncWebsocketConnection:
+        """Open a new WebSocket, which `AsyncTTSResourceConnection` also uses to reconnect."""
+        try:
+            from websockets.asyncio.client import connect
+        except ImportError as exc:
+            raise CartesiaError("You need to install `cartesia[websockets]` to use this method") from exc
+
+        url = self._prepare_url().copy_with(
+            params=_merge_mappings(self.__client.base_url.params, self.__extra_query),
+        )
+        self._logger.debug("Connecting to %s", url)
+        if self.__websocket_connection_options:
+            self._logger.debug("Connection options: %s", self.__websocket_connection_options)
+
+        return await connect(
+            str(url),
+            user_agent_header=self.__client.user_agent,
+            additional_headers=_merge_mappings(
+                {
+                    **self.__client.default_headers,
+                    **self.__client.auth_headers,
+                },
+                self.__extra_headers,
+            ),
+            **self.__websocket_connection_options,
+        )
 
     def _prepare_url(self) -> httpx.URL:
         if self.__client.websocket_base_url is not None:
@@ -392,8 +390,7 @@ class TTSResourceConnection:
 
         if self._manager is not None and self._connection.state in (State.CLOSED, State.CLOSING):
             self._logger.debug("Connection is not open (state=%s), reconnecting...", self._connection.state)
-            new_conn = self._manager.__enter__()
-            self._connection = new_conn._connection
+            self._connection = self._manager._connect()
             self._context_queues.clear()
 
     def parse_event(self, data: Union[str, bytes]) -> WebsocketResponse:
@@ -511,9 +508,14 @@ class TTSResourceConnectionManager:
         connection.close()
         ```
         """
-        if self.__connection is not None:
-            return self.__connection
+        if self.__connection is None:
+            self.__connection = TTSResourceConnection(self._connect(), manager=self)
+        return self.__connection
 
+    enter = __enter__
+
+    def _connect(self) -> WebsocketConnection:
+        """Open a new WebSocket, which `TTSResourceConnection` also uses to reconnect."""
         try:
             from websockets.sync.client import connect
         except ImportError as exc:
@@ -526,25 +528,18 @@ class TTSResourceConnectionManager:
         if self.__websocket_connection_options:
             self._logger.debug("Connection options: %s", self.__websocket_connection_options)
 
-        self.__connection = TTSResourceConnection(
-            connect(
-                str(url),
-                user_agent_header=self.__client.user_agent,
-                additional_headers=_merge_mappings(
-                    {
-                        **self.__client.default_headers,
-                        **self.__client.auth_headers,
-                    },
-                    self.__extra_headers,
-                ),
-                **self.__websocket_connection_options,
+        return connect(
+            str(url),
+            user_agent_header=self.__client.user_agent,
+            additional_headers=_merge_mappings(
+                {
+                    **self.__client.default_headers,
+                    **self.__client.auth_headers,
+                },
+                self.__extra_headers,
             ),
-            manager=self,
+            **self.__websocket_connection_options,
         )
-
-        return self.__connection
-
-    enter = __enter__
 
     def _prepare_url(self) -> httpx.URL:
         if self.__client.websocket_base_url is not None:
@@ -997,6 +992,8 @@ class AsyncWebSocketContext:
         """
         import asyncio as _asyncio
 
+        from websockets.exceptions import ConnectionClosed
+
         my_queue = self._connection._context_queues.get(self._context_id)
         if my_queue is None:
             return
@@ -1016,6 +1013,9 @@ class AsyncWebSocketContext:
                     # queue is always cleaned up on timeout.
                     done = True
                     raise
+                if isinstance(event, ConnectionClosed):
+                    done = True
+                    raise CartesiaError("WebSocket connection closed before the context completed") from event
 
                 yield event
                 if event.type in ("done", "error"):
