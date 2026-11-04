@@ -66,7 +66,7 @@ pygments==2.19.2
     # via
     #   pytest
     #   rich
-pyright==1.1.399
+pyright==1.1.409
 pytest==8.4.2 ; python_full_version < '3.10'
     # via
     #   pytest-asyncio
@@ -106,5 +106,6 @@ typing-extensions==4.15.0
     #   typing-inspection
 typing-inspection==0.4.2
     # via pydantic
+websockets==15.0.1
 zipp==3.23.0
     # via importlib-metadata
