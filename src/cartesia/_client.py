@@ -50,6 +50,7 @@ if TYPE_CHECKING:
         stt,
         tts,
         agents,
+        models,
         voices,
         datasets,
         fine_tunes,
@@ -58,6 +59,7 @@ if TYPE_CHECKING:
         pronunciation_dicts,
     )
     from .resources.tts import TTSResource, AsyncTTSResource
+    from .resources.models import ModelsResource, AsyncModelsResource
     from .resources.voices import VoicesResource, AsyncVoicesResource
     from .resources.stt.stt import STTResource, AsyncSTTResource
     from .resources.fine_tunes import FineTunesResource, AsyncFineTunesResource
@@ -172,6 +174,12 @@ class Cartesia(SyncAPIClient):
         from .resources.fine_tunes import FineTunesResource
 
         return FineTunesResource(self)
+
+    @cached_property
+    def models(self) -> ModelsResource:
+        from .resources.models import ModelsResource
+
+        return ModelsResource(self)
 
     @cached_property
     def pronunciation_dicts(self) -> PronunciationDictsResource:
@@ -457,6 +465,12 @@ class AsyncCartesia(AsyncAPIClient):
         return AsyncFineTunesResource(self)
 
     @cached_property
+    def models(self) -> AsyncModelsResource:
+        from .resources.models import AsyncModelsResource
+
+        return AsyncModelsResource(self)
+
+    @cached_property
     def pronunciation_dicts(self) -> AsyncPronunciationDictsResource:
         from .resources.pronunciation_dicts import AsyncPronunciationDictsResource
 
@@ -680,6 +694,12 @@ class CartesiaWithRawResponse:
         return FineTunesResourceWithRawResponse(self._client.fine_tunes)
 
     @cached_property
+    def models(self) -> models.ModelsResourceWithRawResponse:
+        from .resources.models import ModelsResourceWithRawResponse
+
+        return ModelsResourceWithRawResponse(self._client.models)
+
+    @cached_property
     def pronunciation_dicts(self) -> pronunciation_dicts.PronunciationDictsResourceWithRawResponse:
         from .resources.pronunciation_dicts import PronunciationDictsResourceWithRawResponse
 
@@ -743,6 +763,12 @@ class AsyncCartesiaWithRawResponse:
         from .resources.fine_tunes import AsyncFineTunesResourceWithRawResponse
 
         return AsyncFineTunesResourceWithRawResponse(self._client.fine_tunes)
+
+    @cached_property
+    def models(self) -> models.AsyncModelsResourceWithRawResponse:
+        from .resources.models import AsyncModelsResourceWithRawResponse
+
+        return AsyncModelsResourceWithRawResponse(self._client.models)
 
     @cached_property
     def pronunciation_dicts(self) -> pronunciation_dicts.AsyncPronunciationDictsResourceWithRawResponse:
@@ -810,6 +836,12 @@ class CartesiaWithStreamedResponse:
         return FineTunesResourceWithStreamingResponse(self._client.fine_tunes)
 
     @cached_property
+    def models(self) -> models.ModelsResourceWithStreamingResponse:
+        from .resources.models import ModelsResourceWithStreamingResponse
+
+        return ModelsResourceWithStreamingResponse(self._client.models)
+
+    @cached_property
     def pronunciation_dicts(self) -> pronunciation_dicts.PronunciationDictsResourceWithStreamingResponse:
         from .resources.pronunciation_dicts import PronunciationDictsResourceWithStreamingResponse
 
@@ -873,6 +905,12 @@ class AsyncCartesiaWithStreamedResponse:
         from .resources.fine_tunes import AsyncFineTunesResourceWithStreamingResponse
 
         return AsyncFineTunesResourceWithStreamingResponse(self._client.fine_tunes)
+
+    @cached_property
+    def models(self) -> models.AsyncModelsResourceWithStreamingResponse:
+        from .resources.models import AsyncModelsResourceWithStreamingResponse
+
+        return AsyncModelsResourceWithStreamingResponse(self._client.models)
 
     @cached_property
     def pronunciation_dicts(self) -> pronunciation_dicts.AsyncPronunciationDictsResourceWithStreamingResponse:

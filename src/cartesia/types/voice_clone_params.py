@@ -28,7 +28,7 @@ class VoiceCloneParams(TypedDict, total=False):
     """
 
     base_voice_id: Optional[str]
-    """Optional base voice ID that the cloned voice is derived from."""
+    """Deprecated. The API ignores this field."""
 
     description: Optional[str]
     """A description for the voice."""

@@ -30,6 +30,14 @@ from .agents import (
     AgentsResourceWithStreamingResponse,
     AsyncAgentsResourceWithStreamingResponse,
 )
+from .models import (
+    ModelsResource,
+    AsyncModelsResource,
+    ModelsResourceWithRawResponse,
+    AsyncModelsResourceWithRawResponse,
+    ModelsResourceWithStreamingResponse,
+    AsyncModelsResourceWithStreamingResponse,
+)
 from .voices import (
     VoicesResource,
     AsyncVoicesResource,
@@ -104,6 +112,12 @@ __all__ = [
     "AsyncFineTunesResourceWithRawResponse",
     "FineTunesResourceWithStreamingResponse",
     "AsyncFineTunesResourceWithStreamingResponse",
+    "ModelsResource",
+    "AsyncModelsResource",
+    "ModelsResourceWithRawResponse",
+    "AsyncModelsResourceWithRawResponse",
+    "ModelsResourceWithStreamingResponse",
+    "AsyncModelsResourceWithStreamingResponse",
     "PronunciationDictsResource",
     "AsyncPronunciationDictsResource",
     "PronunciationDictsResourceWithRawResponse",

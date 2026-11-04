@@ -51,6 +51,13 @@ class Voice(BaseModel):
     name: str
     """The display name of the voice. Does not include the tagline."""
 
+    status: Literal["active", "archived"]
+    """Status of the voice.
+
+    Only active voices are returned in [List Voices](/api-reference/voices/list) by
+    default unless `include_archived=true`.
+    """
+
     tagline: str
     """A short descriptor for the voice (at most 32 characters).
 

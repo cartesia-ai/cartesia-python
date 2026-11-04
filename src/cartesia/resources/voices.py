@@ -132,6 +132,7 @@ class VoicesResource(SyncAPIResource):
         ending_before: Optional[str] | Omit = omit,
         expand: Optional[List[Literal["preview_file_url"]]] | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
+        include_archived: Optional[bool] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         q: Optional[str] | Omit = omit,
@@ -156,6 +157,8 @@ class VoicesResource(SyncAPIResource):
           expand: Additional fields to include in the response.
 
           gender: The gender presentation of the voices to return.
+
+          include_archived: Defaults to `false`. Set to `true` to include archived voices in the response.
 
           is_owner: Whether to only return voices owned your organization.
 
@@ -189,6 +192,7 @@ class VoicesResource(SyncAPIResource):
                         "ending_before": ending_before,
                         "expand[]": expand,
                         "gender": gender,
+                        "include_archived": include_archived,
                         "is_owner": is_owner,
                         "limit": limit,
                         "q": q,
@@ -306,7 +310,7 @@ class VoicesResource(SyncAPIResource):
           accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
               Display names are rejected on this API version.
 
-          base_voice_id: Optional base voice ID that the cloned voice is derived from.
+          base_voice_id: Deprecated. The API ignores this field.
 
           description: A description for the voice.
 
@@ -606,6 +610,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         ending_before: Optional[str] | Omit = omit,
         expand: Optional[List[Literal["preview_file_url"]]] | Omit = omit,
         gender: Optional[GenderPresentation] | Omit = omit,
+        include_archived: Optional[bool] | Omit = omit,
         is_owner: Optional[bool] | Omit = omit,
         limit: Optional[int] | Omit = omit,
         q: Optional[str] | Omit = omit,
@@ -630,6 +635,8 @@ class AsyncVoicesResource(AsyncAPIResource):
           expand: Additional fields to include in the response.
 
           gender: The gender presentation of the voices to return.
+
+          include_archived: Defaults to `false`. Set to `true` to include archived voices in the response.
 
           is_owner: Whether to only return voices owned your organization.
 
@@ -663,6 +670,7 @@ class AsyncVoicesResource(AsyncAPIResource):
                         "ending_before": ending_before,
                         "expand[]": expand,
                         "gender": gender,
+                        "include_archived": include_archived,
                         "is_owner": is_owner,
                         "limit": limit,
                         "q": q,
@@ -780,7 +788,7 @@ class AsyncVoicesResource(AsyncAPIResource):
           accent: Catalog accent id from GET /accents (for example `southern-us` or `parisian`).
               Display names are rejected on this API version.
 
-          base_voice_id: Optional base voice ID that the cloned voice is derived from.
+          base_voice_id: Deprecated. The API ignores this field.
 
           description: A description for the voice.
 

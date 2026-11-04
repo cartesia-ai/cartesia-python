@@ -1,5 +1,4 @@
 # FIXME: Delete this code and use Stainless to generate a WebSocket method for v4.
-# Package 4.0 defaults Cartesia-Version to 2026-08-14.
 #
 # See [v3.1.0-b3](https://github.com/cartesia-ai/cartesia-python/releases/tag/v3.1.0-b3)
 # for how we can simplify our interfaces

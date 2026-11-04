@@ -1,5 +1,5 @@
 """
-Examples for Cartesia Python SDK v4.x
+Examples for Cartesia Python SDK v3.x
 
 Run an example:
     uv sync && CARTESIA_API_KEY=... uv run examples/examples.py <functionName>
@@ -78,7 +78,7 @@ def tts_sse_basic(client: Cartesia) -> None:
     with open(filename, "wb") as f:
         for event in stream:
             if event.type == "chunk":
-                # decoded bytes in event.audio
+                # v3.x returns raw bytes in event.audio
                 if event.audio:
                     f.write(event.audio)
             elif event.type == "done":
@@ -706,7 +706,8 @@ def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
-    # Join transcripts from all turn.end events with a space to get the full transcript.
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
     full_transcript = ""
 
     with client.stt.auto_finalize.websocket(
@@ -735,7 +736,7 @@ def stt_auto_finalize_websocket(client: Cartesia, *args: str) -> None:
                 print("turn.resume     |")
             elif event.type == "turn.end":
                 print(f"turn.end       | {event.transcript}")
-                full_transcript += (" " if full_transcript else "") + event.transcript
+                full_transcript += event.transcript
             elif event.type == "error":
                 print(f"error          | {event.message}")
 

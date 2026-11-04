@@ -8,6 +8,7 @@ from .gender import Gender as Gender
 from .shared import WordTimestamps as WordTimestamps, PhonemeTimestamps as PhonemeTimestamps
 from .dataset import Dataset as Dataset
 from .emotion import Emotion as Emotion
+from .stt_mode import STTMode as STTMode
 from .fine_tune import FineTune as FineTune
 from .tts_model import TTSModel as TTSModel
 from .model_speed import ModelSpeed as ModelSpeed
@@ -22,7 +23,9 @@ from .voice_metadata import VoiceMetadata as VoiceMetadata
 from .stt_batch_model import STTBatchModel as STTBatchModel
 from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .localize_dialect import LocalizeDialect as LocalizeDialect
+from .model_capability import ModelCapability as ModelCapability
 from .voice_get_params import VoiceGetParams as VoiceGetParams
+from .model_list_params import ModelListParams as ModelListParams
 from .generation_config import GenerationConfig as GenerationConfig
 from .tts_infill_params import TTSInfillParams as TTSInfillParams
 from .voice_list_params import VoiceListParams as VoiceListParams
@@ -38,9 +41,11 @@ from .attach_voice_accent import AttachVoiceAccent as AttachVoiceAccent
 from .dataset_list_params import DatasetListParams as DatasetListParams
 from .gender_presentation import GenderPresentation as GenderPresentation
 from .get_status_response import GetStatusResponse as GetStatusResponse
+from .model_catalog_entry import ModelCatalogEntry as ModelCatalogEntry
 from .tts_generate_params import TTSGenerateParams as TTSGenerateParams
 from .voice_update_params import VoiceUpdateParams as VoiceUpdateParams
 from .fine_tune_base_model import FineTuneBaseModel as FineTuneBaseModel
+from .list_models_response import ListModelsResponse as ListModelsResponse
 from .dataset_create_params import DatasetCreateParams as DatasetCreateParams
 from .dataset_update_params import DatasetUpdateParams as DatasetUpdateParams
 from .fine_tune_list_params import FineTuneListParams as FineTuneListParams

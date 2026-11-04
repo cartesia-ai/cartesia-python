@@ -1,5 +1,5 @@
 """
-Async Examples for Cartesia Python SDK v4.x
+Async Examples for Cartesia Python SDK v3.x
 
 Run an example:
     uv sync && CARTESIA_API_KEY=... uv run examples/async_examples.py <functionName>
@@ -559,7 +559,8 @@ async def stt_auto_finalize_websocket_async(client: AsyncCartesia, *args: str) -
         chunk_bytes = (sample_rate * 2) // 10  # 100ms of pcm_s16le (2 bytes/sample)
         chunks = [audio[i : i + chunk_bytes] for i in range(0, len(audio), chunk_bytes)]
 
-    # Join transcripts from all turn.end events with a space to get the full transcript.
+    # Concatenate transcripts from all turn.end events to get the full transcript
+    # Do not strip or add whitespace!
     full_transcript = ""
 
     async with client.stt.auto_finalize.websocket(
@@ -592,7 +593,7 @@ async def stt_auto_finalize_websocket_async(client: AsyncCartesia, *args: str) -
                 elif event.type == "turn.end":
                     print(f"turn.end       | {event.transcript}")
                     nonlocal full_transcript
-                    full_transcript += (" " if full_transcript else "") + event.transcript
+                    full_transcript += event.transcript
                 elif event.type == "error":
                     print(f"error          | {event.message}")
 

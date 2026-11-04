@@ -26,6 +26,9 @@ class VoiceListParams(TypedDict, total=False):
     gender: Optional[GenderPresentation]
     """The gender presentation of the voices to return."""
 
+    include_archived: Optional[bool]
+    """Defaults to `false`. Set to `true` to include archived voices in the response."""
+
     is_owner: Optional[bool]
     """Whether to only return voices owned your organization."""
 

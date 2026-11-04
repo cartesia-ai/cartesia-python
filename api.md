@@ -152,6 +152,18 @@ Methods:
 - <code title="delete /fine-tunes/{id}">client.fine_tunes.<a href="./src/cartesia/resources/fine_tunes.py">delete</a>(id) -> None</code>
 - <code title="get /fine-tunes/{id}/voices">client.fine_tunes.<a href="./src/cartesia/resources/fine_tunes.py">list_voices</a>(id, \*\*<a href="src/cartesia/types/fine_tune_list_voices_params.py">params</a>) -> <a href="./src/cartesia/types/voice.py">SyncCursorIDPage[Voice]</a></code>
 
+# Models
+
+Types:
+
+```python
+from cartesia.types import ListModelsResponse, ModelCapability, ModelCatalogEntry, STTMode
+```
+
+Methods:
+
+- <code title="get /models">client.models.<a href="./src/cartesia/resources/models.py">list</a>(\*\*<a href="src/cartesia/types/model_list_params.py">params</a>) -> <a href="./src/cartesia/types/list_models_response.py">ListModelsResponse</a></code>
+
 # PronunciationDicts
 
 Types:
