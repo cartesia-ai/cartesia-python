@@ -20,7 +20,4 @@ class ModelCatalogEntry(BaseModel):
     """STT transport paths. Omitted on TTS rows."""
 
     supported_languages: Optional[List[str]] = None
-    """Sorted synthesis language codes supported by this TTS model.
-
-    Omitted on STT rows.
-    """
+    """Language codes supported by this TTS model. Omitted on STT rows."""
