@@ -6,7 +6,6 @@
 ### ⚠ BREAKING CHANGES
 
 * map client.agents to managed agents for SDK 5.0
-* map client.agents to managed agents for SDK 5.0
 
 ### Features
 
