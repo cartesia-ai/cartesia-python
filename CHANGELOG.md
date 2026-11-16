@@ -10,7 +10,6 @@
 ### Features
 
 * map client.agents to managed agents for SDK 5.0 ([b2bfb7a](https://github.com/cartesia-ai/cartesia-python/commit/b2bfb7ace046f616eeb7127b9222c0e0a22888eb))
-* map client.agents to managed agents for SDK 5.0 ([84de49c](https://github.com/cartesia-ai/cartesia-python/commit/84de49c9c450adbd37fee81206c2e1a91943b764))
 * **models:** expose supported synthesis languages ([ad27b84](https://github.com/cartesia-ai/cartesia-python/commit/ad27b84a0058d4ed28df58753e65f8b53073612c))
 * sync OpenAPI operations with docs and add AgentSummary.is_managed ([de041d7](https://github.com/cartesia-ai/cartesia-python/commit/de041d73da73d7d4cc74f48f6bac5407fd815858))
 
