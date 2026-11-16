@@ -44,6 +44,13 @@ class AgentSummary(BaseModel):
     has_text_to_agent_run: bool
     """Whether the agent has a text-to-agent run."""
 
+    is_managed: bool
+    """
+    Whether this is a managed agent, whose configuration is versioned and edited
+    through the `/v1/agents` endpoints. Managed agents have no deployments, Git
+    repository, or speech-recognition preset of their own.
+    """
+
     name: str
     """
     The unique name of the agent, which can be used to identify the agent in the
