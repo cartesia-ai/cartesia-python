@@ -6,17 +6,41 @@ from typing import Optional
 
 import httpx
 
-from .calls import (
-    CallsResource,
-    AsyncCallsResource,
-    CallsResourceWithRawResponse,
-    AsyncCallsResourceWithRawResponse,
-    CallsResourceWithStreamingResponse,
-    AsyncCallsResourceWithStreamingResponse,
+from .tools import (
+    ToolsResource,
+    AsyncToolsResource,
+    ToolsResourceWithRawResponse,
+    AsyncToolsResourceWithRawResponse,
+    ToolsResourceWithStreamingResponse,
+    AsyncToolsResourceWithStreamingResponse,
 )
-from ...types import agent_update_params
+from .models import (
+    ModelsResource,
+    AsyncModelsResource,
+    ModelsResourceWithRawResponse,
+    AsyncModelsResourceWithRawResponse,
+    ModelsResourceWithStreamingResponse,
+    AsyncModelsResourceWithStreamingResponse,
+)
+from ...types import agent_list_params, agent_create_params, agent_update_params
 from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from ..._utils import path_template, maybe_transform, async_maybe_transform
+from .versions import (
+    VersionsResource,
+    AsyncVersionsResource,
+    VersionsResourceWithRawResponse,
+    AsyncVersionsResourceWithRawResponse,
+    VersionsResourceWithStreamingResponse,
+    AsyncVersionsResourceWithStreamingResponse,
+)
+from .webhooks import (
+    WebhooksResource,
+    AsyncWebhooksResource,
+    WebhooksResourceWithRawResponse,
+    AsyncWebhooksResourceWithRawResponse,
+    WebhooksResourceWithStreamingResponse,
+    AsyncWebhooksResourceWithStreamingResponse,
+)
 from ..._compat import cached_property
 from ..._resource import SyncAPIResource, AsyncAPIResource
 from ..._response import (
@@ -25,15 +49,17 @@ from ..._response import (
     async_to_raw_response_wrapper,
     async_to_streamed_response_wrapper,
 )
-from .deployments import (
-    DeploymentsResource,
-    AsyncDeploymentsResource,
-    DeploymentsResourceWithRawResponse,
-    AsyncDeploymentsResourceWithRawResponse,
-    DeploymentsResourceWithStreamingResponse,
-    AsyncDeploymentsResourceWithStreamingResponse,
+from .calls.calls import (
+    CallsResource,
+    AsyncCallsResource,
+    CallsResourceWithRawResponse,
+    AsyncCallsResourceWithRawResponse,
+    CallsResourceWithStreamingResponse,
+    AsyncCallsResourceWithStreamingResponse,
 )
-from ..._base_client import make_request_options
+from ...pagination import SyncCursorIDPage, AsyncCursorIDPage
+from ...types.agent import Agent
+from ..._base_client import AsyncPaginator, make_request_options
 from .metrics.metrics import (
     MetricsResource,
     AsyncMetricsResource,
@@ -43,14 +69,39 @@ from .metrics.metrics import (
     AsyncMetricsResourceWithStreamingResponse,
 )
 from ...types.agent_summary import AgentSummary
-from ...types.agent_list_response import AgentListResponse
-from ...types.agent_list_templates_response import AgentListTemplatesResponse
-from ...types.agent_list_phone_numbers_response import AgentListPhoneNumbersResponse
+from .phone_numbers.phone_numbers import (
+    PhoneNumbersResource,
+    AsyncPhoneNumbersResource,
+    PhoneNumbersResourceWithRawResponse,
+    AsyncPhoneNumbersResourceWithRawResponse,
+    PhoneNumbersResourceWithStreamingResponse,
+    AsyncPhoneNumbersResourceWithStreamingResponse,
+)
+from .knowledge_base.knowledge_base import (
+    KnowledgeBaseResource,
+    AsyncKnowledgeBaseResource,
+    KnowledgeBaseResourceWithRawResponse,
+    AsyncKnowledgeBaseResourceWithRawResponse,
+    KnowledgeBaseResourceWithStreamingResponse,
+    AsyncKnowledgeBaseResourceWithStreamingResponse,
+)
 
 __all__ = ["AgentsResource", "AsyncAgentsResource"]
 
 
 class AgentsResource(SyncAPIResource):
+    @cached_property
+    def models(self) -> ModelsResource:
+        return ModelsResource(self._client)
+
+    @cached_property
+    def tools(self) -> ToolsResource:
+        return ToolsResource(self._client)
+
+    @cached_property
+    def versions(self) -> VersionsResource:
+        return VersionsResource(self._client)
+
     @cached_property
     def calls(self) -> CallsResource:
         return CallsResource(self._client)
@@ -60,8 +111,16 @@ class AgentsResource(SyncAPIResource):
         return MetricsResource(self._client)
 
     @cached_property
-    def deployments(self) -> DeploymentsResource:
-        return DeploymentsResource(self._client)
+    def webhooks(self) -> WebhooksResource:
+        return WebhooksResource(self._client)
+
+    @cached_property
+    def phone_numbers(self) -> PhoneNumbersResource:
+        return PhoneNumbersResource(self._client)
+
+    @cached_property
+    def knowledge_base(self) -> KnowledgeBaseResource:
+        return KnowledgeBaseResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> AgentsResourceWithRawResponse:
@@ -82,6 +141,51 @@ class AgentsResource(SyncAPIResource):
         """
         return AgentsResourceWithStreamingResponse(self)
 
+    def create(
+        self,
+        *,
+        config: agent_create_params.Config | Omit = omit,
+        description: Optional[str] | Omit = omit,
+        name: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Agent:
+        """
+        Creates an agent and its initial configuration version
+
+        Args:
+          description: Description of the agent.
+
+          name: Name shown for the agent. It does not need to be unique.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._post(
+            "/v1/agents",
+            body=maybe_transform(
+                {
+                    "config": config,
+                    "description": description,
+                    "name": name,
+                },
+                agent_create_params.AgentCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Agent,
+        )
+
     def retrieve(
         self,
         agent_id: str,
@@ -92,13 +196,13 @@ class AgentsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentSummary:
-        """Returns the details of a specific agent.
-
-        To create an agent, use the CLI or the
-        Playground for the best experience and integration with Github.
+    ) -> Agent:
+        """
+        Returns the published agent with its complete normalized configuration
 
         Args:
+          agent_id: Unique identifier for the agent.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -110,39 +214,42 @@ class AgentsResource(SyncAPIResource):
         if not agent_id:
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         return self._get(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AgentSummary,
+            cast_to=Agent,
         )
 
     def update(
         self,
         agent_id: str,
         *,
+        config: agent_update_params.Config | Omit = omit,
         description: Optional[str] | Omit = omit,
-        name: Optional[str] | Omit = omit,
-        tts_language: Optional[str] | Omit = omit,
-        tts_voice: Optional[str] | Omit = omit,
+        name: str | Omit = omit,
+        version_description: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentSummary:
-        """
-        Update Agent
+    ) -> Agent:
+        """Sparsely updates agent metadata or configuration.
+
+        Configuration changes create a
+        new immutable version.
 
         Args:
-          description: The description of the agent.
+          agent_id: Unique identifier for the agent.
 
-          name: The name of the agent.
+          description: Description of the agent.
 
-          tts_language: The language to use for text-to-speech.
+          name: Name shown for the agent. It does not need to be unique.
 
-          tts_voice: The voice to use for text-to-speech.
+          version_description: Description to attach to the new configuration version. Allowed only when this
+              request changes `config`.
 
           extra_headers: Send extra headers
 
@@ -155,39 +262,78 @@ class AgentsResource(SyncAPIResource):
         if not agent_id:
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         return self._patch(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             body=maybe_transform(
                 {
+                    "config": config,
                     "description": description,
                     "name": name,
-                    "tts_language": tts_language,
-                    "tts_voice": tts_voice,
+                    "version_description": version_description,
                 },
                 agent_update_params.AgentUpdateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AgentSummary,
+            cast_to=Agent,
         )
 
     def list(
         self,
         *,
+        ending_before: str | Omit = omit,
+        limit: int | Omit = omit,
+        q: str | Omit = omit,
+        starting_after: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListResponse:
-        """Lists all agents associated with your account."""
-        return self._get(
-            "/agents",
+    ) -> SyncCursorIDPage[AgentSummary]:
+        """Returns agent summaries for your account.
+
+        Full configurations are omitted.
+
+        Args:
+          ending_before: A cursor for pagination. Pass the ID of the first item from the previous page to
+              fetch the previous page.
+
+          limit: The maximum number of items to return, ranging between 1 and 100.
+
+          q: Search agents by name or description.
+
+          starting_after: A cursor for pagination. Pass the ID of the last item from the previous page to
+              fetch the next page.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/agents",
+            page=SyncCursorIDPage[AgentSummary],
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=maybe_transform(
+                    {
+                        "ending_before": ending_before,
+                        "limit": limit,
+                        "q": q,
+                        "starting_after": starting_after,
+                    },
+                    agent_list_params.AgentListParams,
+                ),
             ),
-            cast_to=AgentListResponse,
+            model=AgentSummary,
         )
 
     def delete(
@@ -201,10 +347,13 @@ class AgentsResource(SyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> None:
-        """
-        Delete Agent
+        """Deletes the agent.
+
+        Future reads and new calls fail.
 
         Args:
+          agent_id: Unique identifier for the agent.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -217,69 +366,27 @@ class AgentsResource(SyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return self._delete(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=NoneType,
         )
 
-    def list_phone_numbers(
-        self,
-        agent_id: str,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListPhoneNumbersResponse:
-        """List the phone numbers associated with an agent.
-
-        Currently, you can only have
-        one phone number per agent and these are provisioned by Cartesia.
-
-        Args:
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not agent_id:
-            raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
-        return self._get(
-            path_template("/agents/{agent_id}/phone-numbers", agent_id=agent_id),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AgentListPhoneNumbersResponse,
-        )
-
-    def list_templates(
-        self,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListTemplatesResponse:
-        """List of public, Cartesia-provided agent templates to help you get started."""
-        return self._get(
-            "/agents/templates",
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AgentListTemplatesResponse,
-        )
-
 
 class AsyncAgentsResource(AsyncAPIResource):
+    @cached_property
+    def models(self) -> AsyncModelsResource:
+        return AsyncModelsResource(self._client)
+
+    @cached_property
+    def tools(self) -> AsyncToolsResource:
+        return AsyncToolsResource(self._client)
+
+    @cached_property
+    def versions(self) -> AsyncVersionsResource:
+        return AsyncVersionsResource(self._client)
+
     @cached_property
     def calls(self) -> AsyncCallsResource:
         return AsyncCallsResource(self._client)
@@ -289,8 +396,16 @@ class AsyncAgentsResource(AsyncAPIResource):
         return AsyncMetricsResource(self._client)
 
     @cached_property
-    def deployments(self) -> AsyncDeploymentsResource:
-        return AsyncDeploymentsResource(self._client)
+    def webhooks(self) -> AsyncWebhooksResource:
+        return AsyncWebhooksResource(self._client)
+
+    @cached_property
+    def phone_numbers(self) -> AsyncPhoneNumbersResource:
+        return AsyncPhoneNumbersResource(self._client)
+
+    @cached_property
+    def knowledge_base(self) -> AsyncKnowledgeBaseResource:
+        return AsyncKnowledgeBaseResource(self._client)
 
     @cached_property
     def with_raw_response(self) -> AsyncAgentsResourceWithRawResponse:
@@ -311,6 +426,51 @@ class AsyncAgentsResource(AsyncAPIResource):
         """
         return AsyncAgentsResourceWithStreamingResponse(self)
 
+    async def create(
+        self,
+        *,
+        config: agent_create_params.Config | Omit = omit,
+        description: Optional[str] | Omit = omit,
+        name: str | Omit = omit,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> Agent:
+        """
+        Creates an agent and its initial configuration version
+
+        Args:
+          description: Description of the agent.
+
+          name: Name shown for the agent. It does not need to be unique.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return await self._post(
+            "/v1/agents",
+            body=await async_maybe_transform(
+                {
+                    "config": config,
+                    "description": description,
+                    "name": name,
+                },
+                agent_create_params.AgentCreateParams,
+            ),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=Agent,
+        )
+
     async def retrieve(
         self,
         agent_id: str,
@@ -321,13 +481,13 @@ class AsyncAgentsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentSummary:
-        """Returns the details of a specific agent.
-
-        To create an agent, use the CLI or the
-        Playground for the best experience and integration with Github.
+    ) -> Agent:
+        """
+        Returns the published agent with its complete normalized configuration
 
         Args:
+          agent_id: Unique identifier for the agent.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -339,39 +499,42 @@ class AsyncAgentsResource(AsyncAPIResource):
         if not agent_id:
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         return await self._get(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AgentSummary,
+            cast_to=Agent,
         )
 
     async def update(
         self,
         agent_id: str,
         *,
+        config: agent_update_params.Config | Omit = omit,
         description: Optional[str] | Omit = omit,
-        name: Optional[str] | Omit = omit,
-        tts_language: Optional[str] | Omit = omit,
-        tts_voice: Optional[str] | Omit = omit,
+        name: str | Omit = omit,
+        version_description: Optional[str] | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentSummary:
-        """
-        Update Agent
+    ) -> Agent:
+        """Sparsely updates agent metadata or configuration.
+
+        Configuration changes create a
+        new immutable version.
 
         Args:
-          description: The description of the agent.
+          agent_id: Unique identifier for the agent.
 
-          name: The name of the agent.
+          description: Description of the agent.
 
-          tts_language: The language to use for text-to-speech.
+          name: Name shown for the agent. It does not need to be unique.
 
-          tts_voice: The voice to use for text-to-speech.
+          version_description: Description to attach to the new configuration version. Allowed only when this
+              request changes `config`.
 
           extra_headers: Send extra headers
 
@@ -384,39 +547,78 @@ class AsyncAgentsResource(AsyncAPIResource):
         if not agent_id:
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         return await self._patch(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             body=await async_maybe_transform(
                 {
+                    "config": config,
                     "description": description,
                     "name": name,
-                    "tts_language": tts_language,
-                    "tts_voice": tts_voice,
+                    "version_description": version_description,
                 },
                 agent_update_params.AgentUpdateParams,
             ),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=AgentSummary,
+            cast_to=Agent,
         )
 
-    async def list(
+    def list(
         self,
         *,
+        ending_before: str | Omit = omit,
+        limit: int | Omit = omit,
+        q: str | Omit = omit,
+        starting_after: str | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListResponse:
-        """Lists all agents associated with your account."""
-        return await self._get(
-            "/agents",
+    ) -> AsyncPaginator[AgentSummary, AsyncCursorIDPage[AgentSummary]]:
+        """Returns agent summaries for your account.
+
+        Full configurations are omitted.
+
+        Args:
+          ending_before: A cursor for pagination. Pass the ID of the first item from the previous page to
+              fetch the previous page.
+
+          limit: The maximum number of items to return, ranging between 1 and 100.
+
+          q: Search agents by name or description.
+
+          starting_after: A cursor for pagination. Pass the ID of the last item from the previous page to
+              fetch the next page.
+
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        return self._get_api_list(
+            "/v1/agents",
+            page=AsyncCursorIDPage[AgentSummary],
             options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+                extra_headers=extra_headers,
+                extra_query=extra_query,
+                extra_body=extra_body,
+                timeout=timeout,
+                query=maybe_transform(
+                    {
+                        "ending_before": ending_before,
+                        "limit": limit,
+                        "q": q,
+                        "starting_after": starting_after,
+                    },
+                    agent_list_params.AgentListParams,
+                ),
             ),
-            cast_to=AgentListResponse,
+            model=AgentSummary,
         )
 
     async def delete(
@@ -430,10 +632,13 @@ class AsyncAgentsResource(AsyncAPIResource):
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
     ) -> None:
-        """
-        Delete Agent
+        """Deletes the agent.
+
+        Future reads and new calls fail.
 
         Args:
+          agent_id: Unique identifier for the agent.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -446,65 +651,11 @@ class AsyncAgentsResource(AsyncAPIResource):
             raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
         extra_headers = {"Accept": "*/*", **(extra_headers or {})}
         return await self._delete(
-            path_template("/agents/{agent_id}", agent_id=agent_id),
+            path_template("/v1/agents/{agent_id}", agent_id=agent_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
             cast_to=NoneType,
-        )
-
-    async def list_phone_numbers(
-        self,
-        agent_id: str,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListPhoneNumbersResponse:
-        """List the phone numbers associated with an agent.
-
-        Currently, you can only have
-        one phone number per agent and these are provisioned by Cartesia.
-
-        Args:
-          extra_headers: Send extra headers
-
-          extra_query: Add additional query parameters to the request
-
-          extra_body: Add additional JSON properties to the request
-
-          timeout: Override the client-level default timeout for this request, in seconds
-        """
-        if not agent_id:
-            raise ValueError(f"Expected a non-empty value for `agent_id` but received {agent_id!r}")
-        return await self._get(
-            path_template("/agents/{agent_id}/phone-numbers", agent_id=agent_id),
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AgentListPhoneNumbersResponse,
-        )
-
-    async def list_templates(
-        self,
-        *,
-        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
-        # The extra values given here take precedence over values defined on the client or passed to this method.
-        extra_headers: Headers | None = None,
-        extra_query: Query | None = None,
-        extra_body: Body | None = None,
-        timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> AgentListTemplatesResponse:
-        """List of public, Cartesia-provided agent templates to help you get started."""
-        return await self._get(
-            "/agents/templates",
-            options=make_request_options(
-                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
-            ),
-            cast_to=AgentListTemplatesResponse,
         )
 
 
@@ -512,6 +663,9 @@ class AgentsResourceWithRawResponse:
     def __init__(self, agents: AgentsResource) -> None:
         self._agents = agents
 
+        self.create = to_raw_response_wrapper(
+            agents.create,
+        )
         self.retrieve = to_raw_response_wrapper(
             agents.retrieve,
         )
@@ -524,12 +678,18 @@ class AgentsResourceWithRawResponse:
         self.delete = to_raw_response_wrapper(
             agents.delete,
         )
-        self.list_phone_numbers = to_raw_response_wrapper(
-            agents.list_phone_numbers,
-        )
-        self.list_templates = to_raw_response_wrapper(
-            agents.list_templates,
-        )
+
+    @cached_property
+    def models(self) -> ModelsResourceWithRawResponse:
+        return ModelsResourceWithRawResponse(self._agents.models)
+
+    @cached_property
+    def tools(self) -> ToolsResourceWithRawResponse:
+        return ToolsResourceWithRawResponse(self._agents.tools)
+
+    @cached_property
+    def versions(self) -> VersionsResourceWithRawResponse:
+        return VersionsResourceWithRawResponse(self._agents.versions)
 
     @cached_property
     def calls(self) -> CallsResourceWithRawResponse:
@@ -540,14 +700,25 @@ class AgentsResourceWithRawResponse:
         return MetricsResourceWithRawResponse(self._agents.metrics)
 
     @cached_property
-    def deployments(self) -> DeploymentsResourceWithRawResponse:
-        return DeploymentsResourceWithRawResponse(self._agents.deployments)
+    def webhooks(self) -> WebhooksResourceWithRawResponse:
+        return WebhooksResourceWithRawResponse(self._agents.webhooks)
+
+    @cached_property
+    def phone_numbers(self) -> PhoneNumbersResourceWithRawResponse:
+        return PhoneNumbersResourceWithRawResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def knowledge_base(self) -> KnowledgeBaseResourceWithRawResponse:
+        return KnowledgeBaseResourceWithRawResponse(self._agents.knowledge_base)
 
 
 class AsyncAgentsResourceWithRawResponse:
     def __init__(self, agents: AsyncAgentsResource) -> None:
         self._agents = agents
 
+        self.create = async_to_raw_response_wrapper(
+            agents.create,
+        )
         self.retrieve = async_to_raw_response_wrapper(
             agents.retrieve,
         )
@@ -560,12 +731,18 @@ class AsyncAgentsResourceWithRawResponse:
         self.delete = async_to_raw_response_wrapper(
             agents.delete,
         )
-        self.list_phone_numbers = async_to_raw_response_wrapper(
-            agents.list_phone_numbers,
-        )
-        self.list_templates = async_to_raw_response_wrapper(
-            agents.list_templates,
-        )
+
+    @cached_property
+    def models(self) -> AsyncModelsResourceWithRawResponse:
+        return AsyncModelsResourceWithRawResponse(self._agents.models)
+
+    @cached_property
+    def tools(self) -> AsyncToolsResourceWithRawResponse:
+        return AsyncToolsResourceWithRawResponse(self._agents.tools)
+
+    @cached_property
+    def versions(self) -> AsyncVersionsResourceWithRawResponse:
+        return AsyncVersionsResourceWithRawResponse(self._agents.versions)
 
     @cached_property
     def calls(self) -> AsyncCallsResourceWithRawResponse:
@@ -576,14 +753,25 @@ class AsyncAgentsResourceWithRawResponse:
         return AsyncMetricsResourceWithRawResponse(self._agents.metrics)
 
     @cached_property
-    def deployments(self) -> AsyncDeploymentsResourceWithRawResponse:
-        return AsyncDeploymentsResourceWithRawResponse(self._agents.deployments)
+    def webhooks(self) -> AsyncWebhooksResourceWithRawResponse:
+        return AsyncWebhooksResourceWithRawResponse(self._agents.webhooks)
+
+    @cached_property
+    def phone_numbers(self) -> AsyncPhoneNumbersResourceWithRawResponse:
+        return AsyncPhoneNumbersResourceWithRawResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def knowledge_base(self) -> AsyncKnowledgeBaseResourceWithRawResponse:
+        return AsyncKnowledgeBaseResourceWithRawResponse(self._agents.knowledge_base)
 
 
 class AgentsResourceWithStreamingResponse:
     def __init__(self, agents: AgentsResource) -> None:
         self._agents = agents
 
+        self.create = to_streamed_response_wrapper(
+            agents.create,
+        )
         self.retrieve = to_streamed_response_wrapper(
             agents.retrieve,
         )
@@ -596,12 +784,18 @@ class AgentsResourceWithStreamingResponse:
         self.delete = to_streamed_response_wrapper(
             agents.delete,
         )
-        self.list_phone_numbers = to_streamed_response_wrapper(
-            agents.list_phone_numbers,
-        )
-        self.list_templates = to_streamed_response_wrapper(
-            agents.list_templates,
-        )
+
+    @cached_property
+    def models(self) -> ModelsResourceWithStreamingResponse:
+        return ModelsResourceWithStreamingResponse(self._agents.models)
+
+    @cached_property
+    def tools(self) -> ToolsResourceWithStreamingResponse:
+        return ToolsResourceWithStreamingResponse(self._agents.tools)
+
+    @cached_property
+    def versions(self) -> VersionsResourceWithStreamingResponse:
+        return VersionsResourceWithStreamingResponse(self._agents.versions)
 
     @cached_property
     def calls(self) -> CallsResourceWithStreamingResponse:
@@ -612,14 +806,25 @@ class AgentsResourceWithStreamingResponse:
         return MetricsResourceWithStreamingResponse(self._agents.metrics)
 
     @cached_property
-    def deployments(self) -> DeploymentsResourceWithStreamingResponse:
-        return DeploymentsResourceWithStreamingResponse(self._agents.deployments)
+    def webhooks(self) -> WebhooksResourceWithStreamingResponse:
+        return WebhooksResourceWithStreamingResponse(self._agents.webhooks)
+
+    @cached_property
+    def phone_numbers(self) -> PhoneNumbersResourceWithStreamingResponse:
+        return PhoneNumbersResourceWithStreamingResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def knowledge_base(self) -> KnowledgeBaseResourceWithStreamingResponse:
+        return KnowledgeBaseResourceWithStreamingResponse(self._agents.knowledge_base)
 
 
 class AsyncAgentsResourceWithStreamingResponse:
     def __init__(self, agents: AsyncAgentsResource) -> None:
         self._agents = agents
 
+        self.create = async_to_streamed_response_wrapper(
+            agents.create,
+        )
         self.retrieve = async_to_streamed_response_wrapper(
             agents.retrieve,
         )
@@ -632,12 +837,18 @@ class AsyncAgentsResourceWithStreamingResponse:
         self.delete = async_to_streamed_response_wrapper(
             agents.delete,
         )
-        self.list_phone_numbers = async_to_streamed_response_wrapper(
-            agents.list_phone_numbers,
-        )
-        self.list_templates = async_to_streamed_response_wrapper(
-            agents.list_templates,
-        )
+
+    @cached_property
+    def models(self) -> AsyncModelsResourceWithStreamingResponse:
+        return AsyncModelsResourceWithStreamingResponse(self._agents.models)
+
+    @cached_property
+    def tools(self) -> AsyncToolsResourceWithStreamingResponse:
+        return AsyncToolsResourceWithStreamingResponse(self._agents.tools)
+
+    @cached_property
+    def versions(self) -> AsyncVersionsResourceWithStreamingResponse:
+        return AsyncVersionsResourceWithStreamingResponse(self._agents.versions)
 
     @cached_property
     def calls(self) -> AsyncCallsResourceWithStreamingResponse:
@@ -648,5 +859,13 @@ class AsyncAgentsResourceWithStreamingResponse:
         return AsyncMetricsResourceWithStreamingResponse(self._agents.metrics)
 
     @cached_property
-    def deployments(self) -> AsyncDeploymentsResourceWithStreamingResponse:
-        return AsyncDeploymentsResourceWithStreamingResponse(self._agents.deployments)
+    def webhooks(self) -> AsyncWebhooksResourceWithStreamingResponse:
+        return AsyncWebhooksResourceWithStreamingResponse(self._agents.webhooks)
+
+    @cached_property
+    def phone_numbers(self) -> AsyncPhoneNumbersResourceWithStreamingResponse:
+        return AsyncPhoneNumbersResourceWithStreamingResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def knowledge_base(self) -> AsyncKnowledgeBaseResourceWithStreamingResponse:
+        return AsyncKnowledgeBaseResourceWithStreamingResponse(self._agents.knowledge_base)

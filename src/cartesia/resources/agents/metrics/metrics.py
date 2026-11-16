@@ -187,6 +187,42 @@ class MetricsResource(SyncAPIResource):
             cast_to=MetricListResponse,
         )
 
+    def delete(
+        self,
+        metric_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> None:
+        """Delete a metric by its ID.
+
+        The metric is removed from all agents it is attached
+        to. Existing metric results are retained.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not metric_id:
+            raise ValueError(f"Expected a non-empty value for `metric_id` but received {metric_id!r}")
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        return self._delete(
+            path_template("/agents/metrics/{metric_id}", metric_id=metric_id),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=NoneType,
+        )
+
     def add_to_agent(
         self,
         metric_id: str,
@@ -422,6 +458,42 @@ class AsyncMetricsResource(AsyncAPIResource):
             cast_to=MetricListResponse,
         )
 
+    async def delete(
+        self,
+        metric_id: str,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> None:
+        """Delete a metric by its ID.
+
+        The metric is removed from all agents it is attached
+        to. Existing metric results are retained.
+
+        Args:
+          extra_headers: Send extra headers
+
+          extra_query: Add additional query parameters to the request
+
+          extra_body: Add additional JSON properties to the request
+
+          timeout: Override the client-level default timeout for this request, in seconds
+        """
+        if not metric_id:
+            raise ValueError(f"Expected a non-empty value for `metric_id` but received {metric_id!r}")
+        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        return await self._delete(
+            path_template("/agents/metrics/{metric_id}", metric_id=metric_id),
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=NoneType,
+        )
+
     async def add_to_agent(
         self,
         metric_id: str,
@@ -515,6 +587,9 @@ class MetricsResourceWithRawResponse:
         self.list = to_raw_response_wrapper(
             metrics.list,
         )
+        self.delete = to_raw_response_wrapper(
+            metrics.delete,
+        )
         self.add_to_agent = to_raw_response_wrapper(
             metrics.add_to_agent,
         )
@@ -539,6 +614,9 @@ class AsyncMetricsResourceWithRawResponse:
         )
         self.list = async_to_raw_response_wrapper(
             metrics.list,
+        )
+        self.delete = async_to_raw_response_wrapper(
+            metrics.delete,
         )
         self.add_to_agent = async_to_raw_response_wrapper(
             metrics.add_to_agent,
@@ -565,6 +643,9 @@ class MetricsResourceWithStreamingResponse:
         self.list = to_streamed_response_wrapper(
             metrics.list,
         )
+        self.delete = to_streamed_response_wrapper(
+            metrics.delete,
+        )
         self.add_to_agent = to_streamed_response_wrapper(
             metrics.add_to_agent,
         )
@@ -589,6 +670,9 @@ class AsyncMetricsResourceWithStreamingResponse:
         )
         self.list = async_to_streamed_response_wrapper(
             metrics.list,
+        )
+        self.delete = async_to_streamed_response_wrapper(
+            metrics.delete,
         )
         self.add_to_agent = async_to_streamed_response_wrapper(
             metrics.add_to_agent,

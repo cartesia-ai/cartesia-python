@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from . import agents
+from .. import _compat
+from .agent import Agent as Agent
 from .voice import Voice as Voice
 from .accent import Accent as Accent
 from .gender import Gender as Gender
@@ -25,6 +28,7 @@ from .voice_specifier import VoiceSpecifier as VoiceSpecifier
 from .localize_dialect import LocalizeDialect as LocalizeDialect
 from .model_capability import ModelCapability as ModelCapability
 from .voice_get_params import VoiceGetParams as VoiceGetParams
+from .agent_list_params import AgentListParams as AgentListParams
 from .model_list_params import ModelListParams as ModelListParams
 from .generation_config import GenerationConfig as GenerationConfig
 from .tts_infill_params import TTSInfillParams as TTSInfillParams
@@ -34,8 +38,8 @@ from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .stt_error_response import STTErrorResponse as STTErrorResponse
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
+from .agent_create_params import AgentCreateParams as AgentCreateParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
-from .agent_list_response import AgentListResponse as AgentListResponse
 from .agent_update_params import AgentUpdateParams as AgentUpdateParams
 from .attach_voice_accent import AttachVoiceAccent as AttachVoiceAccent
 from .dataset_list_params import DatasetListParams as DatasetListParams
@@ -75,11 +79,12 @@ from .tts_generate_sse_params import (
     TTSGenerateSSEParams as TTSGenerateSSEParams,
     TTSGenerateSseParams as TTSGenerateSseParams,
 )
-from .voice_changer_sse_event import VoiceChangerSSEEvent as VoiceChangerSSEEvent
+from .watermark_detect_params import WatermarkDetectParams as WatermarkDetectParams
 from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .localize_target_language import LocalizeTargetLanguage as LocalizeTargetLanguage
 from .voice_add_accents_params import VoiceAddAccentsParams as VoiceAddAccentsParams
+from .watermark_detect_response import WatermarkDetectResponse as WatermarkDetectResponse
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams
 from .access_token_create_response import AccessTokenCreateResponse as AccessTokenCreateResponse
 from .fine_tune_list_voices_params import FineTuneListVoicesParams as FineTuneListVoicesParams
@@ -88,17 +93,18 @@ from .websocket_connection_options import (
     WebSocketConnectionOptions as WebSocketConnectionOptions,
     WebsocketConnectionOptions as WebsocketConnectionOptions,
 )
-from .agent_list_templates_response import AgentListTemplatesResponse as AgentListTemplatesResponse
 from .pronunciation_dict_item_param import PronunciationDictItemParam as PronunciationDictItemParam
-from .voice_changer_generate_params import VoiceChangerGenerateParams as VoiceChangerGenerateParams
 from .pronunciation_dict_list_params import PronunciationDictListParams as PronunciationDictListParams
 from .pronunciation_dict_create_params import PronunciationDictCreateParams as PronunciationDictCreateParams
 from .pronunciation_dict_update_params import PronunciationDictUpdateParams as PronunciationDictUpdateParams
-from .agent_list_phone_numbers_response import AgentListPhoneNumbersResponse as AgentListPhoneNumbersResponse
-from .voice_changer_generate_sse_params import VoiceChangerGenerateSSEParams as VoiceChangerGenerateSSEParams
-from .voice_changer_change_voice_sse_params import (
-    VoiceChangerChangeVoiceSseParams as VoiceChangerChangeVoiceSseParams,
-)
-from .voice_changer_change_voice_bytes_params import (
-    VoiceChangerChangeVoiceBytesParams as VoiceChangerChangeVoiceBytesParams,
-)
+
+# Rebuild cyclical models only after all modules are imported.
+# This ensures that, when building the deferred (due to cyclical references) model schema,
+# Pydantic can resolve the necessary references.
+# See: https://github.com/pydantic/pydantic/issues/11250 for more context.
+if _compat.PYDANTIC_V1:
+    agents.webhook_body_param.WebhookBodyParam.update_forward_refs()  # type: ignore
+    agents.tool_list_response.ToolListResponse.update_forward_refs()  # type: ignore
+else:
+    agents.webhook_body_param.WebhookBodyParam.model_rebuild(_parent_namespace_depth=0)
+    agents.tool_list_response.ToolListResponse.model_rebuild(_parent_namespace_depth=0)

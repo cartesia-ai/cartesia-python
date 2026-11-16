@@ -145,6 +145,48 @@ class TestMetrics:
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
+    def test_method_delete(self, client: Cartesia) -> None:
+        metric = client.agents.metrics.delete(
+            "metric_id",
+        )
+        assert metric is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_delete(self, client: Cartesia) -> None:
+        response = client.agents.metrics.with_raw_response.delete(
+            "metric_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        metric = response.parse()
+        assert metric is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_delete(self, client: Cartesia) -> None:
+        with client.agents.metrics.with_streaming_response.delete(
+            "metric_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            metric = response.parse()
+            assert metric is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_path_params_delete(self, client: Cartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
+            client.agents.metrics.with_raw_response.delete(
+                "",
+            )
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
     def test_method_add_to_agent(self, client: Cartesia) -> None:
         metric = client.agents.metrics.add_to_agent(
             metric_id="metric_id",
@@ -378,6 +420,48 @@ class TestAsyncMetrics:
             assert_matches_type(MetricListResponse, metric, path=["response"])
 
         assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_delete(self, async_client: AsyncCartesia) -> None:
+        metric = await async_client.agents.metrics.delete(
+            "metric_id",
+        )
+        assert metric is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_delete(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.agents.metrics.with_raw_response.delete(
+            "metric_id",
+        )
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        metric = await response.parse()
+        assert metric is None
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_delete(self, async_client: AsyncCartesia) -> None:
+        async with async_client.agents.metrics.with_streaming_response.delete(
+            "metric_id",
+        ) as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            metric = await response.parse()
+            assert metric is None
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_path_params_delete(self, async_client: AsyncCartesia) -> None:
+        with pytest.raises(ValueError, match=r"Expected a non-empty value for `metric_id` but received ''"):
+            await async_client.agents.metrics.with_raw_response.delete(
+                "",
+            )
 
     @pytest.mark.skip(reason="Mock server tests are disabled")
     @parametrize
