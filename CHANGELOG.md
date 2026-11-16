@@ -1,5 +1,40 @@
 # Changelog
 
+## [5.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.2.0...v5.0.0) (2026-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* map client.agents to managed agents for SDK 5.0
+* map client.agents to managed agents for SDK 5.0
+
+### Features
+
+* map client.agents to managed agents for SDK 5.0 ([b2bfb7a](https://github.com/cartesia-ai/cartesia-python/commit/b2bfb7ace046f616eeb7127b9222c0e0a22888eb))
+* map client.agents to managed agents for SDK 5.0 ([84de49c](https://github.com/cartesia-ai/cartesia-python/commit/84de49c9c450adbd37fee81206c2e1a91943b764))
+* **models:** expose supported synthesis languages ([ad27b84](https://github.com/cartesia-ai/cartesia-python/commit/ad27b84a0058d4ed28df58753e65f8b53073612c))
+* sync OpenAPI operations with docs and add AgentSummary.is_managed ([de041d7](https://github.com/cartesia-ai/cartesia-python/commit/de041d73da73d7d4cc74f48f6bac5407fd815858))
+
+
+### Bug Fixes
+
+* sort types package imports ([#30](https://github.com/cartesia-ai/cartesia-python/issues/30)) ([5970f5f](https://github.com/cartesia-ai/cartesia-python/commit/5970f5fae682ac54ce0e33343e5e5bb68d338ab9))
+
+
+### Chores
+
+* avoid duplicate trunk sync statuses ([#27](https://github.com/cartesia-ai/cartesia-python/issues/27)) ([774afef](https://github.com/cartesia-ai/cartesia-python/commit/774afefbeeccb27ea16db1d17c1110737b8f0471))
+
+
+### Documentation
+
+* space separate auto-finalize transcript turns ([#26](https://github.com/cartesia-ai/cartesia-python/issues/26)) ([2968b94](https://github.com/cartesia-ai/cartesia-python/commit/2968b948b5358c7458b39fbd71509f176f51e669))
+
+
+### Build System
+
+* **deps:** bump astral-sh/setup-uv from 8.3.2 to 10.3.0 ([#25](https://github.com/cartesia-ai/cartesia-python/issues/25)) ([3cb0419](https://github.com/cartesia-ai/cartesia-python/commit/3cb04193202178ea2e4160e3a3ad86df82ab4982))
+
 ## [3.5.1](https://github.com/cartesia-ai/cartesia-python/compare/v3.5.0...v3.5.1) (2026-07-29)
 
 
