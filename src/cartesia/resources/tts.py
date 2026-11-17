@@ -11,7 +11,6 @@ from ..types import (
     TTSModel,
     ModelSpeed,
     InfillModel,
-    SupportedLanguage,
     tts_infill_params,
     tts_generate_params,
     tts_generate_sse_params,
@@ -52,9 +51,9 @@ from ..types.tts_model import TTSModel
 from ..types.model_speed import ModelSpeed
 from ..types.infill_model import InfillModel
 from ..types.tts_sse_event import TTSSSEEvent
-from ..types.supported_language import SupportedLanguage
 from ..types.voice_specifier_param import VoiceSpecifierParam
 from ..types.generation_config_param import GenerationConfigParam
+from ..types.supported_language_param import SupportedLanguageParam
 from ..types.websocket_connection_options import WebsocketConnectionOptions
 
 __all__ = ["TTSResource", "AsyncTTSResource"]
@@ -88,7 +87,7 @@ class TTSResource(SyncAPIResource):
         transcript: str,
         voice: VoiceSpecifierParam,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         locale: Optional[str] | Omit = omit,
         normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
@@ -190,7 +189,7 @@ class TTSResource(SyncAPIResource):
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         locale: Optional[str] | Omit = omit,
         normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
@@ -396,7 +395,7 @@ class TTSResource(SyncAPIResource):
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,  # noqa: ARG002
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: ModelSpeed | Omit = omit,
@@ -511,7 +510,7 @@ class AsyncTTSResource(AsyncAPIResource):
         transcript: str,
         voice: VoiceSpecifierParam,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         locale: Optional[str] | Omit = omit,
         normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
@@ -613,7 +612,7 @@ class AsyncTTSResource(AsyncAPIResource):
         add_timestamps: Optional[bool] | Omit = omit,
         context_id: Optional[str] | Omit = omit,
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         locale: Optional[str] | Omit = omit,
         normalization: Optional[str] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
@@ -819,7 +818,7 @@ class AsyncTTSResource(AsyncAPIResource):
         voice: VoiceSpecifierParam,
         duration: Optional[float] | Omit = omit,  # noqa: ARG002
         generation_config: GenerationConfigParam | Omit = omit,
-        language: Optional[SupportedLanguage] | Omit = omit,
+        language: Optional[SupportedLanguageParam] | Omit = omit,
         pronunciation_dict_id: Optional[str] | Omit = omit,
         save: Optional[bool] | Omit = omit,
         speed: ModelSpeed | Omit = omit,

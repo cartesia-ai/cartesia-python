@@ -11,7 +11,6 @@ from ..types import (
     Gender,
     VoiceAccent,
     LocalizeDialect,
-    SupportedLanguage,
     GenderPresentation,
     LocalizeTargetLanguage,
     voice_get_params,
@@ -39,11 +38,11 @@ from ..types.gender import Gender
 from ..types.voice_accent import VoiceAccent
 from ..types.voice_metadata import VoiceMetadata
 from ..types.localize_dialect import LocalizeDialect
-from ..types.supported_language import SupportedLanguage
 from ..types.attach_voice_accent import AttachVoiceAccent
 from ..types.gender_presentation import GenderPresentation
 from ..types.list_accents_response import ListAccentsResponse
 from ..types.localize_target_language import LocalizeTargetLanguage
+from ..types.supported_language_param import SupportedLanguageParam
 
 __all__ = ["VoicesResource", "AsyncVoicesResource"]
 
@@ -284,7 +283,7 @@ class VoicesResource(SyncAPIResource):
         self,
         *,
         clip: FileTypes,
-        language: SupportedLanguage,
+        language: SupportedLanguageParam,
         name: str,
         accent: Optional[VoiceAccent] | Omit = omit,
         base_voice_id: Optional[str] | Omit = omit,
@@ -762,7 +761,7 @@ class AsyncVoicesResource(AsyncAPIResource):
         self,
         *,
         clip: FileTypes,
-        language: SupportedLanguage,
+        language: SupportedLanguageParam,
         name: str,
         accent: Optional[VoiceAccent] | Omit = omit,
         base_voice_id: Optional[str] | Omit = omit,

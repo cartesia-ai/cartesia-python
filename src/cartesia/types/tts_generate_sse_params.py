@@ -8,9 +8,9 @@ from typing_extensions import Literal, Required, TypedDict
 from .tts_model import TTSModel
 from .model_speed import ModelSpeed
 from .raw_encoding import RawEncoding
-from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
+from .supported_language_param import SupportedLanguageParam
 
 __all__ = ["TTSGenerateSSEParams", "OutputFormat", "TTSGenerateSseParams"]
 
@@ -62,7 +62,7 @@ class TTSGenerateSSEParams(TypedDict, total=False):
     for a guide on this option.
     """
 
-    language: Optional[SupportedLanguage]
+    language: Optional[SupportedLanguageParam]
     """The transcript's language.
 
     A request may set `language` or `locale`, never both.

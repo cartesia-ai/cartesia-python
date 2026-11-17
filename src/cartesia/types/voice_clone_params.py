@@ -7,7 +7,7 @@ from typing_extensions import Required, TypedDict
 
 from .._types import FileTypes
 from .voice_accent import VoiceAccent
-from .supported_language import SupportedLanguage
+from .supported_language_param import SupportedLanguageParam
 
 __all__ = ["VoiceCloneParams"]
 
@@ -15,7 +15,7 @@ __all__ = ["VoiceCloneParams"]
 class VoiceCloneParams(TypedDict, total=False):
     clip: Required[FileTypes]
 
-    language: Required[SupportedLanguage]
+    language: Required[SupportedLanguageParam]
     """The language of the voice."""
 
     name: Required[str]

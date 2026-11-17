@@ -7,12 +7,12 @@ from typing_extensions import Required, TypeAlias, TypedDict
 
 from .tts_model import TTSModel
 from .model_speed import ModelSpeed
-from .supported_language import SupportedLanguage
 from .voice_specifier_param import VoiceSpecifierParam
 from .generation_config_param import GenerationConfigParam
 from .mp3_output_format_param import MP3OutputFormatParam
 from .raw_output_format_param import RawOutputFormatParam
 from .wav_output_format_param import WAVOutputFormatParam
+from .supported_language_param import SupportedLanguageParam
 
 __all__ = [
     "TTSGenerateParams",
@@ -53,7 +53,7 @@ class TTSGenerateParams(TypedDict, total=False):
     for a guide on this option.
     """
 
-    language: Optional[SupportedLanguage]
+    language: Optional[SupportedLanguageParam]
     """The transcript's language.
 
     A request may set `language` or `locale`, never both.

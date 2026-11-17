@@ -87,6 +87,7 @@ from .watermark_detect_params import WatermarkDetectParams as WatermarkDetectPar
 from .wav_output_format_param import WAVOutputFormatParam as WAVOutputFormatParam
 from .generation_request_param import GenerationRequestParam as GenerationRequestParam
 from .localize_target_language import LocalizeTargetLanguage as LocalizeTargetLanguage
+from .supported_language_param import SupportedLanguageParam as SupportedLanguageParam
 from .voice_add_accents_params import VoiceAddAccentsParams as VoiceAddAccentsParams
 from .watermark_detect_response import WatermarkDetectResponse as WatermarkDetectResponse
 from .access_token_create_params import AccessTokenCreateParams as AccessTokenCreateParams

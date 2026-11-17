@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Union
 from typing_extensions import TypedDict
 
 from .emotion import Emotion
@@ -18,7 +17,7 @@ class GenerationConfigParam(TypedDict, total=False):
     See [Volume, Speed, and Emotion in Sonic-3](https://docs.cartesia.ai/build-with-cartesia/sonic-3/volume-speed-emotion) for a guide on this option.
     """
 
-    emotion: Union[Emotion, str]
+    emotion: Emotion
     """Guide the emotion of the generated speech."""
 
     speed: float
