@@ -7,7 +7,7 @@ import time
 import random
 import logging
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Union, Callable, Iterator, Awaitable, cast
+from typing import TYPE_CHECKING, Any, List, Union, Callable, Iterator, Awaitable, cast
 from typing_extensions import AsyncIterator
 
 import httpx
@@ -25,6 +25,7 @@ from ..._base_client import _merge_mappings
 from ..._event_handler import EventHandlerRegistry
 from ...types.stt_encoding import STTEncoding
 from ...types.stt_error_response import STTErrorResponse
+from ...types.stt_language_param import STTLanguageParam
 from ...types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ...types.stt.stt_auto_finalize_model import STTAutoFinalizeModel
 from ...types.websocket_connection_options import WebSocketConnectionOptions
@@ -51,6 +52,7 @@ class AutoFinalizeResource(SyncAPIResource):
         model: STTAutoFinalizeModel,
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         turn_eager_end_threshold: float | Omit = omit,
         turn_end_threshold: float | Omit = omit,
         turn_end_timeout_ms: float | Omit = omit,
@@ -100,6 +102,7 @@ class AutoFinalizeResource(SyncAPIResource):
             model=model,
             sample_rate=sample_rate,
             keyterm=keyterm,
+            language_hint=language_hint,
             turn_eager_end_threshold=turn_eager_end_threshold,
             turn_end_threshold=turn_end_threshold,
             turn_end_timeout_ms=turn_end_timeout_ms,
@@ -115,6 +118,7 @@ class AsyncAutoFinalizeResource(AsyncAPIResource):
         model: STTAutoFinalizeModel,
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         turn_eager_end_threshold: float | Omit = omit,
         turn_end_threshold: float | Omit = omit,
         turn_end_timeout_ms: float | Omit = omit,
@@ -164,6 +168,7 @@ class AsyncAutoFinalizeResource(AsyncAPIResource):
             model=model,
             sample_rate=sample_rate,
             keyterm=keyterm,
+            language_hint=language_hint,
             turn_eager_end_threshold=turn_eager_end_threshold,
             turn_end_threshold=turn_end_threshold,
             turn_end_timeout_ms=turn_end_timeout_ms,
@@ -477,6 +482,7 @@ class AsyncAutoFinalizeResourceConnectionManager:
         model: STTAutoFinalizeModel,
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         turn_eager_end_threshold: float | Omit = omit,
         turn_end_threshold: float | Omit = omit,
         turn_end_timeout_ms: float | Omit = omit,
@@ -495,6 +501,7 @@ class AsyncAutoFinalizeResourceConnectionManager:
         self.__model = model
         self.__sample_rate = sample_rate
         self.__keyterm = keyterm
+        self.__language_hint = language_hint
         self.__turn_eager_end_threshold = turn_eager_end_threshold
         self.__turn_end_threshold = turn_end_threshold
         self.__turn_end_timeout_ms = turn_end_timeout_ms
@@ -608,6 +615,7 @@ class AsyncAutoFinalizeResourceConnectionManager:
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
                     "keyterm": self.__keyterm,
+                    "language_hint": self.__language_hint,
                     "turn_eager_end_threshold": self.__turn_eager_end_threshold,
                     "turn_end_threshold": self.__turn_end_threshold,
                     "turn_end_timeout_ms": self.__turn_end_timeout_ms,
@@ -945,6 +953,7 @@ class AutoFinalizeResourceConnectionManager:
         model: STTAutoFinalizeModel,
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         turn_eager_end_threshold: float | Omit = omit,
         turn_end_threshold: float | Omit = omit,
         turn_end_timeout_ms: float | Omit = omit,
@@ -963,6 +972,7 @@ class AutoFinalizeResourceConnectionManager:
         self.__model = model
         self.__sample_rate = sample_rate
         self.__keyterm = keyterm
+        self.__language_hint = language_hint
         self.__turn_eager_end_threshold = turn_eager_end_threshold
         self.__turn_end_threshold = turn_end_threshold
         self.__turn_end_timeout_ms = turn_end_timeout_ms
@@ -1076,6 +1086,7 @@ class AutoFinalizeResourceConnectionManager:
                     "model": self.__model,
                     "sample_rate": self.__sample_rate,
                     "keyterm": self.__keyterm,
+                    "language_hint": self.__language_hint,
                     "turn_eager_end_threshold": self.__turn_eager_end_threshold,
                     "turn_end_threshold": self.__turn_end_threshold,
                     "turn_end_timeout_ms": self.__turn_end_timeout_ms,

@@ -4,7 +4,7 @@ from typing import List, Optional
 from typing_extensions import Literal
 
 from ..._models import BaseModel
-from ..shared.word_timestamps import WordTimestamps
+from ..stt_word import STTWord
 
 __all__ = ["STTManualFinalizeTranscriptResponse"]
 
@@ -36,5 +36,8 @@ class STTManualFinalizeTranscriptResponse(BaseModel):
     language: Optional[str] = None
     """Detected language of the audio in ISO-639-1 format."""
 
-    words: Optional[List[WordTimestamps]] = None
-    """Word-level timing information for the transcript."""
+    words: Optional[List[STTWord]] = None
+    """Words completed since the previous transcript event, with timings.
+
+    A word can arrive in a later event than its text.
+    """

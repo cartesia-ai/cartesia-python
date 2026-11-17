@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import List
 from typing_extensions import Required, TypedDict
 
 from ..._types import SequenceNotStr
 from ..stt_encoding import STTEncoding
+from ..stt_language_param import STTLanguageParam
 from .stt_auto_finalize_model import STTAutoFinalizeModel
 
 __all__ = ["AutoFinalizeWebsocketParams"]
@@ -29,11 +31,23 @@ class AutoFinalizeWebsocketParams(TypedDict, total=False):
     keyterm: SequenceNotStr[str]
     """Key terms to improve the recall of specific words and phrases.
 
-    Pass multiple values to boost multiple terms, up to 100 keyterms totaling 1200
-    characters. To boost one multi-word phrase, join the words with a space.
+    Pass multiple values to boost multiple terms. To boost one multi-word phrase,
+    join the words with a space. Accepts up to 500 keyterms totaling 5000
+    characters.
+
+    Replace keyterms mid-session with a `config` message.
 
     See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
     details.
+    """
+
+    language_hint: List[STTLanguageParam]
+    """Languages expected in the audio, up to 6 at a time.
+
+    Transcription accuracy improves when language hints match the audio. Hinting
+    more languages reduces efficacy.
+
+    Replace language hints mid-session with a `config` message.
     """
 
     turn_eager_end_threshold: float

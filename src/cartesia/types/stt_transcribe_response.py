@@ -4,19 +4,11 @@ from typing import List, Optional
 from typing_extensions import Literal
 
 from .._models import BaseModel
+from .stt_word import STTWord
 
 __all__ = ["STTTranscribeResponse", "SttTranscribeResponse", "Word"]
 
-
-class Word(BaseModel):
-    end: float
-    """End time of the word in seconds."""
-
-    start: float
-    """Start time of the word in seconds."""
-
-    word: str
-    """The transcribed word."""
+Word = STTWord  # Alias for backward compatibility
 
 
 class STTTranscribeResponse(BaseModel):
@@ -38,7 +30,7 @@ class STTTranscribeResponse(BaseModel):
     request_id: Optional[str] = None
     """Unique identifier for this transcription request."""
 
-    words: Optional[List[Word]] = None
+    words: Optional[List[STTWord]] = None
     """Word-level timestamps showing the start and end time of each word.
 
     Only included when `[word]` is passed into `timestamp_granularities[]`.

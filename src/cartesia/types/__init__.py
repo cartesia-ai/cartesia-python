@@ -12,12 +12,14 @@ from .shared import WordTimestamps as WordTimestamps, PhonemeTimestamps as Phone
 from .dataset import Dataset as Dataset
 from .emotion import Emotion as Emotion
 from .stt_mode import STTMode as STTMode
+from .stt_word import STTWord as STTWord
 from .fine_tune import FineTune as FineTune
 from .tts_model import TTSModel as TTSModel
 from .model_speed import ModelSpeed as ModelSpeed
 from .infill_model import InfillModel as InfillModel
 from .raw_encoding import RawEncoding as RawEncoding
 from .stt_encoding import STTEncoding as STTEncoding
+from .stt_language import STTLanguage as STTLanguage
 from .voice_accent import VoiceAccent as VoiceAccent
 from .voice_locale import VoiceLocale as VoiceLocale
 from .agent_summary import AgentSummary as AgentSummary
@@ -36,6 +38,7 @@ from .voice_list_params import VoiceListParams as VoiceListParams
 from .generation_request import GenerationRequest as GenerationRequest
 from .pronunciation_dict import PronunciationDict as PronunciationDict
 from .stt_error_response import STTErrorResponse as STTErrorResponse
+from .stt_language_param import STTLanguageParam as STTLanguageParam
 from .supported_language import SupportedLanguage as SupportedLanguage
 from .voice_clone_params import VoiceCloneParams as VoiceCloneParams
 from .websocket_response import WebsocketResponse as WebsocketResponse
@@ -71,6 +74,7 @@ from .mp3_output_format_param import MP3OutputFormatParam as MP3OutputFormatPara
 from .output_format_container import OutputFormatContainer as OutputFormatContainer
 from .pronunciation_dict_item import PronunciationDictItem as PronunciationDictItem
 from .raw_output_format_param import RawOutputFormatParam as RawOutputFormatParam
+from .stt_language_confidence import STTLanguageConfidence as STTLanguageConfidence
 from .stt_transcribe_response import (
     STTTranscribeResponse as STTTranscribeResponse,
     SttTranscribeResponse as SttTranscribeResponse,

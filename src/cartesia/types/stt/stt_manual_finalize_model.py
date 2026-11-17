@@ -4,6 +4,6 @@ from typing_extensions import Union, Literal, TypeAlias
 
 __all__ = ["STTManualFinalizeModel"]
 
-_STTManualFinalizeModel = Literal["ink-2", "ink-whisper", "ink-whisper-2025-06-04"]
+_STTManualFinalizeModel = Literal["ink-2", "ink-preview", "ink-whisper", "ink-whisper-2025-06-04"]
 
 STTManualFinalizeModel: TypeAlias = Union[_STTManualFinalizeModel, str]

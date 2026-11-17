@@ -1,9 +1,10 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-from typing import Union, Optional
+from typing import List, Union, Optional
 from typing_extensions import Literal, TypeAlias
 
 from ..._models import BaseModel
+from ..stt_language import STTLanguage
 
 __all__ = [
     "STTAutoFinalizeWebsocketRequest",
@@ -79,6 +80,26 @@ class STTAutoFinalizeConfigCommand(BaseModel):
     """Command type.
 
     Send this as a JSON-encoded WebSocket text frame to update model settings.
+    """
+
+    keyterms: Optional[List[str]] = None
+    """Replaces the session's keyterms.
+
+    Pass an empty list to clear them; omit the field to keep them. Accepts up to 500
+    keyterms totaling 5000 characters.
+
+    See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
+    details.
+    """
+
+    language_hints: Optional[List[STTLanguage]] = None
+    """Replaces the session's language hints.
+
+    Pass an empty list to clear them; omit the field to keep them. Accepts up to 6
+    hints.
+
+    Transcription accuracy improves when language hints match the audio. Hinting
+    more languages reduces efficacy.
     """
 
     turn: Optional[STTAutoFinalizeConfigCommandTurn] = None

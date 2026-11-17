@@ -7,7 +7,7 @@ import time
 import random
 import logging
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Union, Callable, Iterator, Awaitable, cast
+from typing import TYPE_CHECKING, Any, List, Union, Callable, Iterator, Awaitable, cast
 from typing_extensions import Literal, AsyncIterator
 
 import httpx
@@ -23,6 +23,7 @@ from ..._base_client import _merge_mappings
 from ..._event_handler import EventHandlerRegistry
 from ...types.stt_encoding import STTEncoding
 from ...types.stt_error_response import STTErrorResponse
+from ...types.stt_language_param import STTLanguageParam
 from ...types.websocket_reconnection import ReconnectingEvent, ReconnectingOverrides, is_recoverable_close
 from ...types.websocket_connection_options import WebSocketConnectionOptions
 from ...types.stt.stt_manual_finalize_model import STTManualFinalizeModel
@@ -49,6 +50,7 @@ class ManualFinalizeResource(SyncAPIResource):
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
         extra_query: Query = {},
@@ -93,6 +95,7 @@ class ManualFinalizeResource(SyncAPIResource):
             sample_rate=sample_rate,
             keyterm=keyterm,
             language=language,
+            language_hint=language_hint,
             max_silence_duration_secs=max_silence_duration_secs,
             min_volume=min_volume,
         )
@@ -107,6 +110,7 @@ class AsyncManualFinalizeResource(AsyncAPIResource):
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
         extra_query: Query = {},
@@ -151,6 +155,7 @@ class AsyncManualFinalizeResource(AsyncAPIResource):
             sample_rate=sample_rate,
             keyterm=keyterm,
             language=language,
+            language_hint=language_hint,
             max_silence_duration_secs=max_silence_duration_secs,
             min_volume=min_volume,
         )
@@ -459,6 +464,7 @@ class AsyncManualFinalizeResourceConnectionManager:
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
         extra_query: Query,
@@ -476,6 +482,7 @@ class AsyncManualFinalizeResourceConnectionManager:
         self.__sample_rate = sample_rate
         self.__keyterm = keyterm
         self.__language = language
+        self.__language_hint = language_hint
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
         self.__connection: AsyncManualFinalizeResourceConnection | None = None
@@ -584,6 +591,7 @@ class AsyncManualFinalizeResourceConnectionManager:
                     "sample_rate": self.__sample_rate,
                     "keyterm": self.__keyterm,
                     "language": self.__language,
+                    "language_hint": self.__language_hint,
                     "max_silence_duration_secs": self.__max_silence_duration_secs,
                     "min_volume": self.__min_volume,
                     **extra_query,
@@ -916,6 +924,7 @@ class ManualFinalizeResourceConnectionManager:
         sample_rate: int,
         keyterm: SequenceNotStr[str] | Omit = omit,
         language: Literal["en"] | Omit = omit,
+        language_hint: List[STTLanguageParam] | Omit = omit,
         max_silence_duration_secs: float | Omit = omit,
         min_volume: float | Omit = omit,
         extra_query: Query,
@@ -933,6 +942,7 @@ class ManualFinalizeResourceConnectionManager:
         self.__sample_rate = sample_rate
         self.__keyterm = keyterm
         self.__language = language
+        self.__language_hint = language_hint
         self.__max_silence_duration_secs = max_silence_duration_secs
         self.__min_volume = min_volume
         self.__connection: ManualFinalizeResourceConnection | None = None
@@ -1041,6 +1051,7 @@ class ManualFinalizeResourceConnectionManager:
                     "sample_rate": self.__sample_rate,
                     "keyterm": self.__keyterm,
                     "language": self.__language,
+                    "language_hint": self.__language_hint,
                     "max_silence_duration_secs": self.__max_silence_duration_secs,
                     "min_volume": self.__min_volume,
                     **extra_query,

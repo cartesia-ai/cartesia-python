@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import List, Union
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
+
+from ..._types import SequenceNotStr
+from ..stt_language_param import STTLanguageParam
 
 __all__ = [
     "STTAutoFinalizeWebsocketRequestParam",
@@ -79,6 +82,26 @@ class STTAutoFinalizeConfigCommand(TypedDict, total=False):
     """Command type.
 
     Send this as a JSON-encoded WebSocket text frame to update model settings.
+    """
+
+    keyterms: SequenceNotStr[str]
+    """Replaces the session's keyterms.
+
+    Pass an empty list to clear them; omit the field to keep them. Accepts up to 500
+    keyterms totaling 5000 characters.
+
+    See [Keyterm prompting](https://docs.cartesia.ai/use-the-api/stt/keyterms) for
+    details.
+    """
+
+    language_hints: List[STTLanguageParam]
+    """Replaces the session's language hints.
+
+    Pass an empty list to clear them; omit the field to keep them. Accepts up to 6
+    hints.
+
+    Transcription accuracy improves when language hints match the audio. Hinting
+    more languages reduces efficacy.
     """
 
     turn: STTAutoFinalizeConfigCommandTurn

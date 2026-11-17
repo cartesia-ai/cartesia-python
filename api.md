@@ -326,7 +326,15 @@ Methods:
 Types:
 
 ```python
-from cartesia.types import STTBatchModel, STTEncoding, STTErrorResponse, STTTranscribeResponse
+from cartesia.types import (
+    STTBatchModel,
+    STTEncoding,
+    STTErrorResponse,
+    STTLanguage,
+    STTLanguageConfidence,
+    STTWord,
+    STTTranscribeResponse,
+)
 ```
 
 Methods:

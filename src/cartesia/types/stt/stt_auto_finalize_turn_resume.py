@@ -1,5 +1,6 @@
 # File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+from typing import Optional
 from typing_extensions import Literal
 
 from ..._models import BaseModel
@@ -15,3 +16,9 @@ class STTAutoFinalizeTurnResume(BaseModel):
 
     type: Literal["turn.resume"]
     """Event type identifier."""
+
+    turn_id: Optional[str] = None
+    """Identifies the turn this event belongs to.
+
+    Unique within this connection and the same on every event in the turn.
+    """

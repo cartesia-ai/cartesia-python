@@ -1,0 +1,58 @@
+# File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+
+from __future__ import annotations
+
+from typing import Union
+from typing_extensions import Literal, TypeAlias
+
+__all__ = ["STTLanguageParam"]
+
+STTLanguageParam: TypeAlias = Union[
+    Literal[
+        "ar",
+        "bg",
+        "bn",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "fi",
+        "fr",
+        "gu",
+        "he",
+        "hi",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "ka",
+        "kn",
+        "ko",
+        "ml",
+        "mr",
+        "ms",
+        "nl",
+        "no",
+        "or",
+        "pa",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sv",
+        "ta",
+        "te",
+        "th",
+        "tl",
+        "tr",
+        "uk",
+        "ur",
+        "vi",
+        "yue",
+        "zh",
+    ],
+    str,
+]
