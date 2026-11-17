@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from .resources import (
         stt,
         tts,
+        usage,
         agents,
         models,
         voices,
@@ -64,6 +65,7 @@ if TYPE_CHECKING:
     from .resources.stt.stt import STTResource, AsyncSTTResource
     from .resources.watermark import WatermarkResource, AsyncWatermarkResource
     from .resources.fine_tunes import FineTunesResource, AsyncFineTunesResource
+    from .resources.usage.usage import UsageResource, AsyncUsageResource
     from .resources.access_token import AccessTokenResource, AsyncAccessTokenResource
     from .resources.agents.agents import AgentsResource, AsyncAgentsResource
     from .resources.datasets.datasets import DatasetsResource, AsyncDatasetsResource
@@ -84,6 +86,7 @@ __all__ = [
 class Cartesia(SyncAPIClient):
     # client options
     api_key: str | None
+    admin_api_key: str | None
     token: str | None
 
     websocket_base_url: str | httpx.URL | None
@@ -98,6 +101,7 @@ class Cartesia(SyncAPIClient):
         self,
         *,
         api_key: str | None = None,
+        admin_api_key: str | None = None,
         token: str | None = None,
         base_url: str | httpx.URL | None = None,
         websocket_base_url: str | httpx.URL | None = None,
@@ -121,6 +125,8 @@ class Cartesia(SyncAPIClient):
     ) -> None:
         """Construct a new synchronous Cartesia client instance."""
         self.api_key = api_key
+
+        self.admin_api_key = admin_api_key
 
         self.token = token
 
@@ -156,6 +162,12 @@ class Cartesia(SyncAPIClient):
         from .resources.agents import AgentsResource
 
         return AgentsResource(self)
+
+    @cached_property
+    def usage(self) -> UsageResource:
+        from .resources.usage import UsageResource
+
+        return UsageResource(self)
 
     @cached_property
     def access_token(self) -> AccessTokenResource:
@@ -227,7 +239,7 @@ class Cartesia(SyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._token_auth, **self._api_key_auth}
+        return {**self._token_auth, **self._api_key_auth, **self._admin_api_key_auth}
 
     @property
     def _token_auth(self) -> dict[str, str]:
@@ -242,6 +254,13 @@ class Cartesia(SyncAPIClient):
         if api_key is None:
             return {}
         return {"Authorization": f"Bearer {api_key}"}
+
+    @property
+    def _admin_api_key_auth(self) -> dict[str, str]:
+        admin_api_key = self.admin_api_key
+        if admin_api_key is None:
+            return {}
+        return {"Authorization": f"Bearer {admin_api_key}"}
 
     @property
     @override
@@ -259,13 +278,14 @@ class Cartesia(SyncAPIClient):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected either token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of token, api_key or admin_api_key to be set. Or for one of the `Authorization`, `Authorization` or `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
         api_key: str | None = None,
+        admin_api_key: str | None = None,
         token: str | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
@@ -302,6 +322,7 @@ class Cartesia(SyncAPIClient):
         http_client = http_client or self._client
         return self.__class__(
             api_key=api_key or self.api_key,
+            admin_api_key=admin_api_key or self.admin_api_key,
             token=token or self.token,
             websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
@@ -373,6 +394,7 @@ class Cartesia(SyncAPIClient):
 class AsyncCartesia(AsyncAPIClient):
     # client options
     api_key: str | None
+    admin_api_key: str | None
     token: str | None
 
     websocket_base_url: str | httpx.URL | None
@@ -387,6 +409,7 @@ class AsyncCartesia(AsyncAPIClient):
         self,
         *,
         api_key: str | None = None,
+        admin_api_key: str | None = None,
         token: str | None = None,
         base_url: str | httpx.URL | None = None,
         websocket_base_url: str | httpx.URL | None = None,
@@ -410,6 +433,8 @@ class AsyncCartesia(AsyncAPIClient):
     ) -> None:
         """Construct a new async AsyncCartesia client instance."""
         self.api_key = api_key
+
+        self.admin_api_key = admin_api_key
 
         self.token = token
 
@@ -445,6 +470,12 @@ class AsyncCartesia(AsyncAPIClient):
         from .resources.agents import AsyncAgentsResource
 
         return AsyncAgentsResource(self)
+
+    @cached_property
+    def usage(self) -> AsyncUsageResource:
+        from .resources.usage import AsyncUsageResource
+
+        return AsyncUsageResource(self)
 
     @cached_property
     def access_token(self) -> AsyncAccessTokenResource:
@@ -516,7 +547,7 @@ class AsyncCartesia(AsyncAPIClient):
     @property
     @override
     def auth_headers(self) -> dict[str, str]:
-        return {**self._token_auth, **self._api_key_auth}
+        return {**self._token_auth, **self._api_key_auth, **self._admin_api_key_auth}
 
     @property
     def _token_auth(self) -> dict[str, str]:
@@ -531,6 +562,13 @@ class AsyncCartesia(AsyncAPIClient):
         if api_key is None:
             return {}
         return {"Authorization": f"Bearer {api_key}"}
+
+    @property
+    def _admin_api_key_auth(self) -> dict[str, str]:
+        admin_api_key = self.admin_api_key
+        if admin_api_key is None:
+            return {}
+        return {"Authorization": f"Bearer {admin_api_key}"}
 
     @property
     @override
@@ -548,13 +586,14 @@ class AsyncCartesia(AsyncAPIClient):
             return
 
         raise TypeError(
-            '"Could not resolve authentication method. Expected either token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted"'
+            '"Could not resolve authentication method. Expected one of token, api_key or admin_api_key to be set. Or for one of the `Authorization`, `Authorization` or `Authorization` headers to be explicitly omitted"'
         )
 
     def copy(
         self,
         *,
         api_key: str | None = None,
+        admin_api_key: str | None = None,
         token: str | None = None,
         websocket_base_url: str | httpx.URL | None = None,
         base_url: str | httpx.URL | None = None,
@@ -591,6 +630,7 @@ class AsyncCartesia(AsyncAPIClient):
         http_client = http_client or self._client
         return self.__class__(
             api_key=api_key or self.api_key,
+            admin_api_key=admin_api_key or self.admin_api_key,
             token=token or self.token,
             websocket_base_url=websocket_base_url or self.websocket_base_url,
             base_url=base_url or self.base_url,
@@ -676,6 +716,12 @@ class CartesiaWithRawResponse:
         return AgentsResourceWithRawResponse(self._client.agents)
 
     @cached_property
+    def usage(self) -> usage.UsageResourceWithRawResponse:
+        from .resources.usage import UsageResourceWithRawResponse
+
+        return UsageResourceWithRawResponse(self._client.usage)
+
+    @cached_property
     def access_token(self) -> access_token.AccessTokenResourceWithRawResponse:
         from .resources.access_token import AccessTokenResourceWithRawResponse
 
@@ -745,6 +791,12 @@ class AsyncCartesiaWithRawResponse:
         from .resources.agents import AsyncAgentsResourceWithRawResponse
 
         return AsyncAgentsResourceWithRawResponse(self._client.agents)
+
+    @cached_property
+    def usage(self) -> usage.AsyncUsageResourceWithRawResponse:
+        from .resources.usage import AsyncUsageResourceWithRawResponse
+
+        return AsyncUsageResourceWithRawResponse(self._client.usage)
 
     @cached_property
     def access_token(self) -> access_token.AsyncAccessTokenResourceWithRawResponse:
@@ -818,6 +870,12 @@ class CartesiaWithStreamedResponse:
         return AgentsResourceWithStreamingResponse(self._client.agents)
 
     @cached_property
+    def usage(self) -> usage.UsageResourceWithStreamingResponse:
+        from .resources.usage import UsageResourceWithStreamingResponse
+
+        return UsageResourceWithStreamingResponse(self._client.usage)
+
+    @cached_property
     def access_token(self) -> access_token.AccessTokenResourceWithStreamingResponse:
         from .resources.access_token import AccessTokenResourceWithStreamingResponse
 
@@ -887,6 +945,12 @@ class AsyncCartesiaWithStreamedResponse:
         from .resources.agents import AsyncAgentsResourceWithStreamingResponse
 
         return AsyncAgentsResourceWithStreamingResponse(self._client.agents)
+
+    @cached_property
+    def usage(self) -> usage.AsyncUsageResourceWithStreamingResponse:
+        from .resources.usage import AsyncUsageResourceWithStreamingResponse
+
+        return AsyncUsageResourceWithStreamingResponse(self._client.usage)
 
     @cached_property
     def access_token(self) -> access_token.AsyncAccessTokenResourceWithStreamingResponse:

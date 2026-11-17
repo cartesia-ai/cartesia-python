@@ -99,7 +99,10 @@ class ProvidersResource(SyncAPIResource):
     def create(
         self,
         *,
-        body: object,
+        label: str,
+        type: Literal["sip_trunk"],
+        inbound: provider_create_params.CreateSipProviderBodyInbound | Omit = omit,
+        outbound: provider_create_params.CreateSipProviderBodyOutbound | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -115,6 +118,14 @@ class ProvidersResource(SyncAPIResource):
         configuration.
 
         Args:
+          label: A human-readable label for the provider.
+
+          type: Must be `"sip_trunk"`.
+
+          inbound: Inbound SIP configuration for creating a trunk.
+
+          outbound: Outbound SIP configuration for creating a trunk.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -125,17 +136,18 @@ class ProvidersResource(SyncAPIResource):
         """
         ...
 
-    @required_args(["account_sid", "api_key_secret", "api_key_sid", "type"], ["body"])
+    @required_args(["account_sid", "api_key_secret", "api_key_sid", "type"], ["label", "type"])
     def create(
         self,
         *,
         account_sid: str | Omit = omit,
         api_key_secret: str | Omit = omit,
         api_key_sid: str | Omit = omit,
-        type: Literal["twilio"] | Omit = omit,
+        type: Literal["twilio"] | Literal["sip_trunk"],
         label: str | Omit = omit,
         region: Literal["us1", "ie1", "au1"] | Omit = omit,
-        body: object | Omit = omit,
+        inbound: provider_create_params.CreateSipProviderBodyInbound | Omit = omit,
+        outbound: provider_create_params.CreateSipProviderBodyOutbound | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -155,7 +167,8 @@ class ProvidersResource(SyncAPIResource):
                         "type": type,
                         "label": label,
                         "region": region,
-                        "body": body,
+                        "inbound": inbound,
+                        "outbound": outbound,
                     },
                     provider_create_params.ProviderCreateParams,
                 ),
@@ -499,7 +512,10 @@ class AsyncProvidersResource(AsyncAPIResource):
     async def create(
         self,
         *,
-        body: object,
+        label: str,
+        type: Literal["sip_trunk"],
+        inbound: provider_create_params.CreateSipProviderBodyInbound | Omit = omit,
+        outbound: provider_create_params.CreateSipProviderBodyOutbound | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -515,6 +531,14 @@ class AsyncProvidersResource(AsyncAPIResource):
         configuration.
 
         Args:
+          label: A human-readable label for the provider.
+
+          type: Must be `"sip_trunk"`.
+
+          inbound: Inbound SIP configuration for creating a trunk.
+
+          outbound: Outbound SIP configuration for creating a trunk.
+
           extra_headers: Send extra headers
 
           extra_query: Add additional query parameters to the request
@@ -525,17 +549,18 @@ class AsyncProvidersResource(AsyncAPIResource):
         """
         ...
 
-    @required_args(["account_sid", "api_key_secret", "api_key_sid", "type"], ["body"])
+    @required_args(["account_sid", "api_key_secret", "api_key_sid", "type"], ["label", "type"])
     async def create(
         self,
         *,
         account_sid: str | Omit = omit,
         api_key_secret: str | Omit = omit,
         api_key_sid: str | Omit = omit,
-        type: Literal["twilio"] | Omit = omit,
+        type: Literal["twilio"] | Literal["sip_trunk"],
         label: str | Omit = omit,
         region: Literal["us1", "ie1", "au1"] | Omit = omit,
-        body: object | Omit = omit,
+        inbound: provider_create_params.CreateSipProviderBodyInbound | Omit = omit,
+        outbound: provider_create_params.CreateSipProviderBodyOutbound | Omit = omit,
         # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
         # The extra values given here take precedence over values defined on the client or passed to this method.
         extra_headers: Headers | None = None,
@@ -555,7 +580,8 @@ class AsyncProvidersResource(AsyncAPIResource):
                         "type": type,
                         "label": label,
                         "region": region,
-                        "body": body,
+                        "inbound": inbound,
+                        "outbound": outbound,
                     },
                     provider_create_params.ProviderCreateParams,
                 ),

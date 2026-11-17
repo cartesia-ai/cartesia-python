@@ -82,7 +82,36 @@ class TestProviders:
     @parametrize
     def test_method_create_overload_2(self, client: Cartesia) -> None:
         provider = client.agents.phone_numbers.providers.create(
-            body={},
+            label="x",
+            type="sip_trunk",
+        )
+        assert_matches_type(ProviderCreateResponse, provider, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_create_with_all_params_overload_2(self, client: Cartesia) -> None:
+        provider = client.agents.phone_numbers.providers.create(
+            label="x",
+            type="sip_trunk",
+            inbound={
+                "allowed_addresses": ["string"],
+                "allowed_numbers": ["string"],
+                "credentials": {
+                    "password": "x",
+                    "username": "x",
+                },
+                "media_encryption": "disabled",
+            },
+            outbound={
+                "address": "x",
+                "transport": "tcp",
+                "credentials": {
+                    "password": "x",
+                    "username": "x",
+                },
+                "destination_country": "se",
+                "media_encryption": "disabled",
+            },
         )
         assert_matches_type(ProviderCreateResponse, provider, path=["response"])
 
@@ -90,7 +119,8 @@ class TestProviders:
     @parametrize
     def test_raw_response_create_overload_2(self, client: Cartesia) -> None:
         response = client.agents.phone_numbers.providers.with_raw_response.create(
-            body={},
+            label="x",
+            type="sip_trunk",
         )
 
         assert response.is_closed is True
@@ -102,7 +132,8 @@ class TestProviders:
     @parametrize
     def test_streaming_response_create_overload_2(self, client: Cartesia) -> None:
         with client.agents.phone_numbers.providers.with_streaming_response.create(
-            body={},
+            label="x",
+            type="sip_trunk",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"
@@ -440,7 +471,36 @@ class TestAsyncProviders:
     @parametrize
     async def test_method_create_overload_2(self, async_client: AsyncCartesia) -> None:
         provider = await async_client.agents.phone_numbers.providers.create(
-            body={},
+            label="x",
+            type="sip_trunk",
+        )
+        assert_matches_type(ProviderCreateResponse, provider, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_create_with_all_params_overload_2(self, async_client: AsyncCartesia) -> None:
+        provider = await async_client.agents.phone_numbers.providers.create(
+            label="x",
+            type="sip_trunk",
+            inbound={
+                "allowed_addresses": ["string"],
+                "allowed_numbers": ["string"],
+                "credentials": {
+                    "password": "x",
+                    "username": "x",
+                },
+                "media_encryption": "disabled",
+            },
+            outbound={
+                "address": "x",
+                "transport": "tcp",
+                "credentials": {
+                    "password": "x",
+                    "username": "x",
+                },
+                "destination_country": "se",
+                "media_encryption": "disabled",
+            },
         )
         assert_matches_type(ProviderCreateResponse, provider, path=["response"])
 
@@ -448,7 +508,8 @@ class TestAsyncProviders:
     @parametrize
     async def test_raw_response_create_overload_2(self, async_client: AsyncCartesia) -> None:
         response = await async_client.agents.phone_numbers.providers.with_raw_response.create(
-            body={},
+            label="x",
+            type="sip_trunk",
         )
 
         assert response.is_closed is True
@@ -460,7 +521,8 @@ class TestAsyncProviders:
     @parametrize
     async def test_streaming_response_create_overload_2(self, async_client: AsyncCartesia) -> None:
         async with async_client.agents.phone_numbers.providers.with_streaming_response.create(
-            body={},
+            label="x",
+            type="sip_trunk",
         ) as response:
             assert not response.is_closed
             assert response.http_request.headers.get("X-Stainless-Lang") == "python"

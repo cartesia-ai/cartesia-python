@@ -14,15 +14,23 @@ from .batches import (
     BatchesResourceWithStreamingResponse,
     AsyncBatchesResourceWithStreamingResponse,
 )
-from ...._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
+from ...._types import Body, Omit, Query, Headers, NotGiven, omit, not_given
 from ...._utils import path_template, maybe_transform, async_maybe_transform
 from ...._compat import cached_property
 from ...._resource import SyncAPIResource, AsyncAPIResource
 from ...._response import (
+    BinaryAPIResponse,
+    AsyncBinaryAPIResponse,
+    StreamedBinaryAPIResponse,
+    AsyncStreamedBinaryAPIResponse,
     to_raw_response_wrapper,
     to_streamed_response_wrapper,
     async_to_raw_response_wrapper,
+    to_custom_raw_response_wrapper,
     async_to_streamed_response_wrapper,
+    to_custom_streamed_response_wrapper,
+    async_to_custom_raw_response_wrapper,
+    async_to_custom_streamed_response_wrapper,
 )
 from ....pagination import SyncCursorIDPage, AsyncCursorIDPage
 from ...._base_client import AsyncPaginator, make_request_options
@@ -299,7 +307,7 @@ class CallsResource(SyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> BinaryAPIResponse:
         """The downloaded audio file is in .wav format.
 
         This endpoint streams the audio
@@ -316,13 +324,13 @@ class CallsResource(SyncAPIResource):
         """
         if not call_id:
             raise ValueError(f"Expected a non-empty value for `call_id` but received {call_id!r}")
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         return self._get(
             path_template("/agents/calls/{call_id}/audio", call_id=call_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=BinaryAPIResponse,
         )
 
     def logs(
@@ -623,7 +631,7 @@ class AsyncCallsResource(AsyncAPIResource):
         extra_query: Query | None = None,
         extra_body: Body | None = None,
         timeout: float | httpx.Timeout | None | NotGiven = not_given,
-    ) -> None:
+    ) -> AsyncBinaryAPIResponse:
         """The downloaded audio file is in .wav format.
 
         This endpoint streams the audio
@@ -640,13 +648,13 @@ class AsyncCallsResource(AsyncAPIResource):
         """
         if not call_id:
             raise ValueError(f"Expected a non-empty value for `call_id` but received {call_id!r}")
-        extra_headers = {"Accept": "*/*", **(extra_headers or {})}
+        extra_headers = {"Accept": "audio/wav", **(extra_headers or {})}
         return await self._get(
             path_template("/agents/calls/{call_id}/audio", call_id=call_id),
             options=make_request_options(
                 extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
             ),
-            cast_to=NoneType,
+            cast_to=AsyncBinaryAPIResponse,
         )
 
     async def logs(
@@ -702,8 +710,9 @@ class CallsResourceWithRawResponse:
         self.cancel = to_raw_response_wrapper(
             calls.cancel,
         )
-        self.download_audio = to_raw_response_wrapper(
+        self.download_audio = to_custom_raw_response_wrapper(
             calls.download_audio,
+            BinaryAPIResponse,
         )
         self.logs = to_raw_response_wrapper(
             calls.logs,
@@ -733,8 +742,9 @@ class AsyncCallsResourceWithRawResponse:
         self.cancel = async_to_raw_response_wrapper(
             calls.cancel,
         )
-        self.download_audio = async_to_raw_response_wrapper(
+        self.download_audio = async_to_custom_raw_response_wrapper(
             calls.download_audio,
+            AsyncBinaryAPIResponse,
         )
         self.logs = async_to_raw_response_wrapper(
             calls.logs,
@@ -764,8 +774,9 @@ class CallsResourceWithStreamingResponse:
         self.cancel = to_streamed_response_wrapper(
             calls.cancel,
         )
-        self.download_audio = to_streamed_response_wrapper(
+        self.download_audio = to_custom_streamed_response_wrapper(
             calls.download_audio,
+            StreamedBinaryAPIResponse,
         )
         self.logs = to_streamed_response_wrapper(
             calls.logs,
@@ -795,8 +806,9 @@ class AsyncCallsResourceWithStreamingResponse:
         self.cancel = async_to_streamed_response_wrapper(
             calls.cancel,
         )
-        self.download_audio = async_to_streamed_response_wrapper(
+        self.download_audio = async_to_custom_streamed_response_wrapper(
             calls.download_audio,
+            AsyncStreamedBinaryAPIResponse,
         )
         self.logs = async_to_streamed_response_wrapper(
             calls.logs,

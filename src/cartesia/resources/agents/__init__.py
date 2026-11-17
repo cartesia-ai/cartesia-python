@@ -40,6 +40,14 @@ from .metrics import (
     MetricsResourceWithStreamingResponse,
     AsyncMetricsResourceWithStreamingResponse,
 )
+from .sessions import (
+    SessionsResource,
+    AsyncSessionsResource,
+    SessionsResourceWithRawResponse,
+    AsyncSessionsResourceWithRawResponse,
+    SessionsResourceWithStreamingResponse,
+    AsyncSessionsResourceWithStreamingResponse,
+)
 from .versions import (
     VersionsResource,
     AsyncVersionsResource,
@@ -116,6 +124,12 @@ __all__ = [
     "AsyncPhoneNumbersResourceWithRawResponse",
     "PhoneNumbersResourceWithStreamingResponse",
     "AsyncPhoneNumbersResourceWithStreamingResponse",
+    "SessionsResource",
+    "AsyncSessionsResource",
+    "SessionsResourceWithRawResponse",
+    "AsyncSessionsResourceWithRawResponse",
+    "SessionsResourceWithStreamingResponse",
+    "AsyncSessionsResourceWithStreamingResponse",
     "KnowledgeBaseResource",
     "AsyncKnowledgeBaseResource",
     "KnowledgeBaseResourceWithRawResponse",

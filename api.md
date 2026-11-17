@@ -96,7 +96,7 @@ Methods:
 - <code title="get /agents/calls">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">list</a>(\*\*<a href="src/cartesia/types/agents/call_list_params.py">params</a>) -> <a href="./src/cartesia/types/agents/agent_call.py">SyncCursorIDPage[AgentCall]</a></code>
 - <code title="delete /agents/calls/{call_id}">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">delete</a>(call_id) -> <a href="./src/cartesia/types/agents/agent_call.py">AgentCall</a></code>
 - <code title="post /agents/calls/{call_id}/cancel">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">cancel</a>(call_id) -> <a href="./src/cartesia/types/agents/call_cancel_response.py">CallCancelResponse</a></code>
-- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">download_audio</a>(call_id) -> None</code>
+- <code title="get /agents/calls/{call_id}/audio">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">download_audio</a>(call_id) -> BinaryAPIResponse</code>
 - <code title="get /agents/calls/{call_id}/logs">client.agents.calls.<a href="./src/cartesia/resources/agents/calls/calls.py">logs</a>(call_id) -> <a href="./src/cartesia/types/agents/call_logs_response.py">CallLogsResponse</a></code>
 
 ### Batches
@@ -166,7 +166,12 @@ Methods:
 Types:
 
 ```python
-from cartesia.types.agents import PhoneNumber, PhoneNumberListResponse, PhoneNumberProvisionResponse
+from cartesia.types.agents import (
+    PhoneNumber,
+    PhoneNumberListResponse,
+    PhoneNumberProvisionResponse,
+    PhoneNumberProvisioningUsageResponse,
+)
 ```
 
 Methods:
@@ -177,6 +182,7 @@ Methods:
 - <code title="delete /agents/phone-numbers/{id}">client.agents.phone_numbers.<a href="./src/cartesia/resources/agents/phone_numbers/phone_numbers.py">delete</a>(id) -> None</code>
 - <code title="post /agents/phone-numbers">client.agents.phone*numbers.<a href="./src/cartesia/resources/agents/phone_numbers/phone_numbers.py">import*</a>(\*\*<a href="src/cartesia/types/agents/phone_number_import_params.py">params</a>) -> <a href="./src/cartesia/types/agents/phone_number.py">PhoneNumber</a></code>
 - <code title="post /agents/phone-numbers/provision">client.agents.phone_numbers.<a href="./src/cartesia/resources/agents/phone_numbers/phone_numbers.py">provision</a>(\*\*<a href="src/cartesia/types/agents/phone_number_provision_params.py">params</a>) -> <a href="./src/cartesia/types/agents/phone_number_provision_response.py">PhoneNumberProvisionResponse</a></code>
+- <code title="get /agents/phone-numbers/provision">client.agents.phone_numbers.<a href="./src/cartesia/resources/agents/phone_numbers/phone_numbers.py">provisioning_usage</a>() -> <a href="./src/cartesia/types/agents/phone_number_provisioning_usage_response.py">PhoneNumberProvisioningUsageResponse</a></code>
 
 ### Providers
 
@@ -198,6 +204,19 @@ Methods:
 - <code title="patch /agents/phone-numbers/providers/{id}">client.agents.phone_numbers.providers.<a href="./src/cartesia/resources/agents/phone_numbers/providers.py">update</a>(id, \*\*<a href="src/cartesia/types/agents/phone_numbers/provider_update_params.py">params</a>) -> <a href="./src/cartesia/types/agents/phone_numbers/provider_update_response.py">ProviderUpdateResponse</a></code>
 - <code title="get /agents/phone-numbers/providers">client.agents.phone_numbers.providers.<a href="./src/cartesia/resources/agents/phone_numbers/providers.py">list</a>(\*\*<a href="src/cartesia/types/agents/phone_numbers/provider_list_params.py">params</a>) -> <a href="./src/cartesia/types/agents/phone_numbers/provider_list_response.py">ProviderListResponse</a></code>
 - <code title="delete /agents/phone-numbers/providers/{id}">client.agents.phone_numbers.providers.<a href="./src/cartesia/resources/agents/phone_numbers/providers.py">delete</a>(id) -> None</code>
+
+## Sessions
+
+Types:
+
+```python
+from cartesia.types.agents import SessionCreateWebrtcResponse, SessionCreateWebsocketResponse
+```
+
+Methods:
+
+- <code title="post /v1/agents/webrtc/{agent_id}/sessions">client.agents.sessions.<a href="./src/cartesia/resources/agents/sessions.py">create_webrtc</a>(agent_id, \*\*<a href="src/cartesia/types/agents/session_create_webrtc_params.py">params</a>) -> <a href="./src/cartesia/types/agents/session_create_webrtc_response.py">SessionCreateWebrtcResponse</a></code>
+- <code title="post /v1/agents/websocket/{agent_id}/sessions">client.agents.sessions.<a href="./src/cartesia/resources/agents/sessions.py">create_websocket</a>(agent_id, \*\*<a href="src/cartesia/types/agents/session_create_websocket_params.py">params</a>) -> <a href="./src/cartesia/types/agents/session_create_websocket_response.py">SessionCreateWebsocketResponse</a></code>
 
 ## KnowledgeBase
 
@@ -234,6 +253,32 @@ Methods:
 - <code title="delete /agents/documents/{document_id}">client.agents.knowledge_base.documents.<a href="./src/cartesia/resources/agents/knowledge_base/documents.py">delete</a>(document_id, \*\*<a href="src/cartesia/types/agents/knowledge_base/document_delete_params.py">params</a>) -> None</code>
 - <code title="post /agents/documents/bulk">client.agents.knowledge_base.documents.<a href="./src/cartesia/resources/agents/knowledge_base/documents.py">create_bulk</a>(\*\*<a href="src/cartesia/types/agents/knowledge_base/document_create_bulk_params.py">params</a>) -> <a href="./src/cartesia/types/agents/knowledge_base/document_create_bulk_response.py">DocumentCreateBulkResponse</a></code>
 - <code title="post /agents/documents/{document_id}/retry">client.agents.knowledge_base.documents.<a href="./src/cartesia/resources/agents/knowledge_base/documents.py">retry</a>(document_id) -> <a href="./src/cartesia/types/agents/knowledge_base/document.py">Document</a></code>
+
+# Usage
+
+## Agents
+
+Types:
+
+```python
+from cartesia.types.usage import AgentRetrieveResponse
+```
+
+Methods:
+
+- <code title="get /usage/agents">client.usage.agents.<a href="./src/cartesia/resources/usage/agents.py">retrieve</a>(\*\*<a href="src/cartesia/types/usage/agent_retrieve_params.py">params</a>) -> <a href="./src/cartesia/types/usage/agent_retrieve_response.py">AgentRetrieveResponse</a></code>
+
+## Credits
+
+Types:
+
+```python
+from cartesia.types.usage import CreditRetrieveResponse
+```
+
+Methods:
+
+- <code title="get /usage/credits">client.usage.credits.<a href="./src/cartesia/resources/usage/credits.py">retrieve</a>(\*\*<a href="src/cartesia/types/usage/credit_retrieve_params.py">params</a>) -> <a href="./src/cartesia/types/usage/credit_retrieve_response.py">CreditRetrieveResponse</a></code>
 
 # AccessToken
 

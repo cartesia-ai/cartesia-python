@@ -35,6 +35,7 @@ from ....types.agents import (
 from ....types.agents.phone_number import PhoneNumber
 from ....types.agents.phone_number_list_response import PhoneNumberListResponse
 from ....types.agents.phone_number_provision_response import PhoneNumberProvisionResponse
+from ....types.agents.phone_number_provisioning_usage_response import PhoneNumberProvisioningUsageResponse
 
 __all__ = ["PhoneNumbersResource", "AsyncPhoneNumbersResource"]
 
@@ -356,6 +357,28 @@ class PhoneNumbersResource(SyncAPIResource):
             cast_to=PhoneNumberProvisionResponse,
         )
 
+    def provisioning_usage(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> PhoneNumberProvisioningUsageResponse:
+        """
+        Returns Cartesia-managed phone number provisioning usage for the current month.
+        Active numbers and numbers deleted during the current month count toward usage.
+        """
+        return self._get(
+            "/agents/phone-numbers/provision",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=PhoneNumberProvisioningUsageResponse,
+        )
+
 
 class AsyncPhoneNumbersResource(AsyncAPIResource):
     @cached_property
@@ -674,6 +697,28 @@ class AsyncPhoneNumbersResource(AsyncAPIResource):
             cast_to=PhoneNumberProvisionResponse,
         )
 
+    async def provisioning_usage(
+        self,
+        *,
+        # Use the following arguments if you need to pass additional parameters to the API that aren't available via kwargs.
+        # The extra values given here take precedence over values defined on the client or passed to this method.
+        extra_headers: Headers | None = None,
+        extra_query: Query | None = None,
+        extra_body: Body | None = None,
+        timeout: float | httpx.Timeout | None | NotGiven = not_given,
+    ) -> PhoneNumberProvisioningUsageResponse:
+        """
+        Returns Cartesia-managed phone number provisioning usage for the current month.
+        Active numbers and numbers deleted during the current month count toward usage.
+        """
+        return await self._get(
+            "/agents/phone-numbers/provision",
+            options=make_request_options(
+                extra_headers=extra_headers, extra_query=extra_query, extra_body=extra_body, timeout=timeout
+            ),
+            cast_to=PhoneNumberProvisioningUsageResponse,
+        )
+
 
 class PhoneNumbersResourceWithRawResponse:
     def __init__(self, phone_numbers: PhoneNumbersResource) -> None:
@@ -696,6 +741,9 @@ class PhoneNumbersResourceWithRawResponse:
         )
         self.provision = to_raw_response_wrapper(
             phone_numbers.provision,
+        )
+        self.provisioning_usage = to_raw_response_wrapper(
+            phone_numbers.provisioning_usage,
         )
 
     @cached_property
@@ -725,6 +773,9 @@ class AsyncPhoneNumbersResourceWithRawResponse:
         self.provision = async_to_raw_response_wrapper(
             phone_numbers.provision,
         )
+        self.provisioning_usage = async_to_raw_response_wrapper(
+            phone_numbers.provisioning_usage,
+        )
 
     @cached_property
     def providers(self) -> AsyncProvidersResourceWithRawResponse:
@@ -753,6 +804,9 @@ class PhoneNumbersResourceWithStreamingResponse:
         self.provision = to_streamed_response_wrapper(
             phone_numbers.provision,
         )
+        self.provisioning_usage = to_streamed_response_wrapper(
+            phone_numbers.provisioning_usage,
+        )
 
     @cached_property
     def providers(self) -> ProvidersResourceWithStreamingResponse:
@@ -780,6 +834,9 @@ class AsyncPhoneNumbersResourceWithStreamingResponse:
         )
         self.provision = async_to_streamed_response_wrapper(
             phone_numbers.provision,
+        )
+        self.provisioning_usage = async_to_streamed_response_wrapper(
+            phone_numbers.provisioning_usage,
         )
 
     @cached_property

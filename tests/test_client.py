@@ -389,7 +389,7 @@ class TestCartesia:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of token, api_key or admin_api_key to be set. Or for one of the `Authorization`, `Authorization` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 
@@ -1290,7 +1290,7 @@ class TestAsyncCartesia:
 
         with pytest.raises(
             TypeError,
-            match="Could not resolve authentication method. Expected either token or api_key to be set. Or for one of the `Authorization` or `Authorization` headers to be explicitly omitted",
+            match="Could not resolve authentication method. Expected one of token, api_key or admin_api_key to be set. Or for one of the `Authorization`, `Authorization` or `Authorization` headers to be explicitly omitted",
         ):
             client2._build_request(FinalRequestOptions(method="get", url="/foo"))
 

@@ -13,6 +13,7 @@ from cartesia.types.agents import (
     PhoneNumber,
     PhoneNumberListResponse,
     PhoneNumberProvisionResponse,
+    PhoneNumberProvisioningUsageResponse,
 )
 
 base_url = os.environ.get("TEST_API_BASE_URL", "http://127.0.0.1:4010")
@@ -294,6 +295,34 @@ class TestPhoneNumbers:
 
         assert cast(Any, response.is_closed) is True
 
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_method_provisioning_usage(self, client: Cartesia) -> None:
+        phone_number = client.agents.phone_numbers.provisioning_usage()
+        assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_raw_response_provisioning_usage(self, client: Cartesia) -> None:
+        response = client.agents.phone_numbers.with_raw_response.provisioning_usage()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        phone_number = response.parse()
+        assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    def test_streaming_response_provisioning_usage(self, client: Cartesia) -> None:
+        with client.agents.phone_numbers.with_streaming_response.provisioning_usage() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            phone_number = response.parse()
+            assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
 
 class TestAsyncPhoneNumbers:
     parametrize = pytest.mark.parametrize(
@@ -570,5 +599,33 @@ class TestAsyncPhoneNumbers:
 
             phone_number = await response.parse()
             assert_matches_type(PhoneNumberProvisionResponse, phone_number, path=["response"])
+
+        assert cast(Any, response.is_closed) is True
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_method_provisioning_usage(self, async_client: AsyncCartesia) -> None:
+        phone_number = await async_client.agents.phone_numbers.provisioning_usage()
+        assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_raw_response_provisioning_usage(self, async_client: AsyncCartesia) -> None:
+        response = await async_client.agents.phone_numbers.with_raw_response.provisioning_usage()
+
+        assert response.is_closed is True
+        assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+        phone_number = await response.parse()
+        assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
+
+    @pytest.mark.skip(reason="Mock server tests are disabled")
+    @parametrize
+    async def test_streaming_response_provisioning_usage(self, async_client: AsyncCartesia) -> None:
+        async with async_client.agents.phone_numbers.with_streaming_response.provisioning_usage() as response:
+            assert not response.is_closed
+            assert response.http_request.headers.get("X-Stainless-Lang") == "python"
+
+            phone_number = await response.parse()
+            assert_matches_type(PhoneNumberProvisioningUsageResponse, phone_number, path=["response"])
 
         assert cast(Any, response.is_closed) is True

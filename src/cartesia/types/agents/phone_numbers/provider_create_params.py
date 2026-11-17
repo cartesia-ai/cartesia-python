@@ -5,7 +5,17 @@ from __future__ import annotations
 from typing import Union
 from typing_extensions import Literal, Required, TypeAlias, TypedDict
 
-__all__ = ["ProviderCreateParams", "CreateTwilioProviderBody", "Variant1"]
+from ...._types import SequenceNotStr
+
+__all__ = [
+    "ProviderCreateParams",
+    "CreateTwilioProviderBody",
+    "CreateSipProviderBody",
+    "CreateSipProviderBodyInbound",
+    "CreateSipProviderBodyInboundCredentials",
+    "CreateSipProviderBodyOutbound",
+    "CreateSipProviderBodyOutboundCredentials",
+]
 
 
 class CreateTwilioProviderBody(TypedDict, total=False):
@@ -31,8 +41,86 @@ class CreateTwilioProviderBody(TypedDict, total=False):
     """
 
 
-class Variant1(TypedDict, total=False):
-    body: Required[object]
+class CreateSipProviderBody(TypedDict, total=False):
+    label: Required[str]
+    """A human-readable label for the provider."""
+
+    type: Required[Literal["sip_trunk"]]
+    """Must be `"sip_trunk"`."""
+
+    inbound: CreateSipProviderBodyInbound
+    """Inbound SIP configuration for creating a trunk."""
+
+    outbound: CreateSipProviderBodyOutbound
+    """Outbound SIP configuration for creating a trunk."""
 
 
-ProviderCreateParams: TypeAlias = Union[CreateTwilioProviderBody, Variant1]
+class CreateSipProviderBodyInboundCredentials(TypedDict, total=False):
+    """SIP digest authentication credentials."""
+
+    password: Required[str]
+
+    username: Required[str]
+
+
+class CreateSipProviderBodyInbound(TypedDict, total=False):
+    """Inbound SIP configuration for creating a trunk."""
+
+    allowed_addresses: SequenceNotStr[str]
+    """Source IP addresses or CIDR ranges allowed to send SIP traffic."""
+
+    allowed_numbers: SequenceNotStr[str]
+    """Caller numbers allowed on inbound calls."""
+
+    credentials: CreateSipProviderBodyInboundCredentials
+    """SIP digest authentication credentials."""
+
+    media_encryption: Literal["disabled", "allowed", "required"]
+    """SRTP policy for call audio.
+
+    `disabled` does not negotiate encryption, `allowed` uses encryption when
+    available, and `required` rejects calls that cannot use encryption.
+    """
+
+
+class CreateSipProviderBodyOutboundCredentials(TypedDict, total=False):
+    """SIP digest authentication credentials."""
+
+    password: Required[str]
+
+    username: Required[str]
+
+
+class CreateSipProviderBodyOutbound(TypedDict, total=False):
+    """Outbound SIP configuration for creating a trunk."""
+
+    address: Required[str]
+    """
+    Carrier host that receives Cartesia's SIP INVITE, as `host` or `host:port`,
+    without a `sip:` prefix. When the port is omitted, Cartesia uses 5060 for `tcp`
+    and 5061 for `tls`. Set `host:port` if your carrier listens elsewhere, for
+    example `sip.example.com:5067`.
+    """
+
+    transport: Required[Literal["tcp", "tls"]]
+    """Transport for outbound SIP signaling."""
+
+    credentials: CreateSipProviderBodyOutboundCredentials
+    """SIP digest authentication credentials."""
+
+    destination_country: str
+    """Two-letter country code for the country the call terminates in (e.g.
+
+    `US`, `GB`, `DE`). See
+    [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+    """
+
+    media_encryption: Literal["disabled", "allowed", "required"]
+    """SRTP policy for call audio.
+
+    `disabled` does not negotiate encryption, `allowed` uses encryption when
+    available, and `required` rejects calls that cannot use encryption.
+    """
+
+
+ProviderCreateParams: TypeAlias = Union[CreateTwilioProviderBody, CreateSipProviderBody]

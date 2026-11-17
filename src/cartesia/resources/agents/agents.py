@@ -25,6 +25,14 @@ from .models import (
 from ...types import agent_list_params, agent_create_params, agent_update_params
 from ..._types import Body, Omit, Query, Headers, NoneType, NotGiven, omit, not_given
 from ..._utils import path_template, maybe_transform, async_maybe_transform
+from .sessions import (
+    SessionsResource,
+    AsyncSessionsResource,
+    SessionsResourceWithRawResponse,
+    AsyncSessionsResourceWithRawResponse,
+    SessionsResourceWithStreamingResponse,
+    AsyncSessionsResourceWithStreamingResponse,
+)
 from .versions import (
     VersionsResource,
     AsyncVersionsResource,
@@ -117,6 +125,10 @@ class AgentsResource(SyncAPIResource):
     @cached_property
     def phone_numbers(self) -> PhoneNumbersResource:
         return PhoneNumbersResource(self._client)
+
+    @cached_property
+    def sessions(self) -> SessionsResource:
+        return SessionsResource(self._client)
 
     @cached_property
     def knowledge_base(self) -> KnowledgeBaseResource:
@@ -402,6 +414,10 @@ class AsyncAgentsResource(AsyncAPIResource):
     @cached_property
     def phone_numbers(self) -> AsyncPhoneNumbersResource:
         return AsyncPhoneNumbersResource(self._client)
+
+    @cached_property
+    def sessions(self) -> AsyncSessionsResource:
+        return AsyncSessionsResource(self._client)
 
     @cached_property
     def knowledge_base(self) -> AsyncKnowledgeBaseResource:
@@ -708,6 +724,10 @@ class AgentsResourceWithRawResponse:
         return PhoneNumbersResourceWithRawResponse(self._agents.phone_numbers)
 
     @cached_property
+    def sessions(self) -> SessionsResourceWithRawResponse:
+        return SessionsResourceWithRawResponse(self._agents.sessions)
+
+    @cached_property
     def knowledge_base(self) -> KnowledgeBaseResourceWithRawResponse:
         return KnowledgeBaseResourceWithRawResponse(self._agents.knowledge_base)
 
@@ -759,6 +779,10 @@ class AsyncAgentsResourceWithRawResponse:
     @cached_property
     def phone_numbers(self) -> AsyncPhoneNumbersResourceWithRawResponse:
         return AsyncPhoneNumbersResourceWithRawResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def sessions(self) -> AsyncSessionsResourceWithRawResponse:
+        return AsyncSessionsResourceWithRawResponse(self._agents.sessions)
 
     @cached_property
     def knowledge_base(self) -> AsyncKnowledgeBaseResourceWithRawResponse:
@@ -814,6 +838,10 @@ class AgentsResourceWithStreamingResponse:
         return PhoneNumbersResourceWithStreamingResponse(self._agents.phone_numbers)
 
     @cached_property
+    def sessions(self) -> SessionsResourceWithStreamingResponse:
+        return SessionsResourceWithStreamingResponse(self._agents.sessions)
+
+    @cached_property
     def knowledge_base(self) -> KnowledgeBaseResourceWithStreamingResponse:
         return KnowledgeBaseResourceWithStreamingResponse(self._agents.knowledge_base)
 
@@ -865,6 +893,10 @@ class AsyncAgentsResourceWithStreamingResponse:
     @cached_property
     def phone_numbers(self) -> AsyncPhoneNumbersResourceWithStreamingResponse:
         return AsyncPhoneNumbersResourceWithStreamingResponse(self._agents.phone_numbers)
+
+    @cached_property
+    def sessions(self) -> AsyncSessionsResourceWithStreamingResponse:
+        return AsyncSessionsResourceWithStreamingResponse(self._agents.sessions)
 
     @cached_property
     def knowledge_base(self) -> AsyncKnowledgeBaseResourceWithStreamingResponse:
