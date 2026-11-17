@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v5.0.0...v5.1.0) (2026-11-17)
+
+
+### Features
+
+* add agent sessions and usage, and fix SDK generation gaps ([ff63f12](https://github.com/cartesia-ai/cartesia-python/commit/ff63f12d2af2e96a5cd1c335e98044786149bcf5))
+
 ## [5.0.0](https://github.com/cartesia-ai/cartesia-python/compare/v4.2.0...v5.0.0) (2026-11-16)
 
 
