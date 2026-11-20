@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.2.0](https://github.com/cartesia-ai/cartesia-python/compare/v5.1.0...v5.2.0) (2026-11-18)
+
+
+### Features
+
+* accept unlisted values for model, language, and emotion enums ([63895e1](https://github.com/cartesia-ai/cartesia-python/commit/63895e1f1aa10438d5661b3e194bdbc1b0bc489d))
+* add agent sessions and usage, and fix SDK generation gaps ([1cdce87](https://github.com/cartesia-ai/cartesia-python/commit/1cdce87773c33554576578157e99802f36fb61ea))
+
+
+### Build System
+
+* **deps:** bump astral-sh/setup-uv from 10.3.0 to 10.3.3 ([#29](https://github.com/cartesia-ai/cartesia-python/issues/29)) ([8cdbba8](https://github.com/cartesia-ai/cartesia-python/commit/8cdbba815cd33a45518b68a4a075cd092e744229))
+
 ## [5.1.0](https://github.com/cartesia-ai/cartesia-python/compare/v5.0.0...v5.1.0) (2026-11-17)
 
 
