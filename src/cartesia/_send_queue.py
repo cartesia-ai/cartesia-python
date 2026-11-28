@@ -44,9 +44,8 @@ class SendQueue:
         with self._lock:
             pending = list(self._queue)
             self._queue.clear()
-            self._bytes = 0
 
-        for i, (data, _byte_length) in enumerate(pending):
+        for i, (data, byte_length) in enumerate(pending):
             try:
                 send(data)
             except Exception:
@@ -55,15 +54,16 @@ class SendQueue:
                     self._queue = remaining + self._queue
                     self._bytes = sum(bl for _, bl in self._queue)
                 raise
+            with self._lock:
+                self._bytes -= byte_length
 
     async def flush_async(self, send: typing.Callable[[str], typing.Awaitable[object]]) -> None:
         """Async variant of :meth:`flush_sync`."""
         with self._lock:
             pending = list(self._queue)
             self._queue.clear()
-            self._bytes = 0
 
-        for i, (data, _byte_length) in enumerate(pending):
+        for i, (data, byte_length) in enumerate(pending):
             try:
                 await send(data)
             except Exception:
@@ -72,6 +72,8 @@ class SendQueue:
                     self._queue = remaining + self._queue
                     self._bytes = sum(bl for _, bl in self._queue)
                 raise
+            with self._lock:
+                self._bytes -= byte_length
 
     def drain(self) -> list[str]:
         """Remove and return all queued messages."""

@@ -71,6 +71,24 @@ class TestSendQueue:
         remaining = q.drain()
         assert remaining == ["b", "c"]
 
+    def test_requeue_on_failure_stays_within_byte_limit(self) -> None:
+        q = SendQueue(max_bytes=10)
+        q.enqueue("12345")
+        q.enqueue("12345")
+
+        def failing_send(_data: str) -> None:
+            try:
+                q.enqueue("12345")
+            except WebSocketQueueFullError:
+                pass
+            raise RuntimeError("fail")
+
+        with pytest.raises(RuntimeError):
+            q.flush_sync(failing_send)
+
+        remaining = q.drain()
+        assert sum(len(item.encode("utf-8")) for item in remaining) <= 10
+
     @pytest.mark.asyncio
     async def test_flush_async(self) -> None:
         q = SendQueue()
@@ -126,3 +144,22 @@ class TestSendQueue:
         # "b" (failed) should come before "new" (added during flush)
         remaining = q.drain()
         assert remaining == ["b", "new"]
+
+    @pytest.mark.asyncio
+    async def test_async_requeue_on_failure_stays_within_byte_limit(self) -> None:
+        q = SendQueue(max_bytes=10)
+        q.enqueue("12345")
+        q.enqueue("12345")
+
+        async def failing_send(_data: str) -> None:
+            try:
+                q.enqueue("12345")
+            except WebSocketQueueFullError:
+                pass
+            raise RuntimeError("fail")
+
+        with pytest.raises(RuntimeError):
+            await q.flush_async(failing_send)
+
+        remaining = q.drain()
+        assert sum(len(item.encode("utf-8")) for item in remaining) <= 10
